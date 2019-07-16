@@ -1,6 +1,6 @@
       PROGRAM TESTBESJ
       COMPLEX Z, CY
-      DOUBLE PRECISION ZR, ZI, FNU, CYR, CYI, Y
+      real(8) ZR, ZI, FNU, CYR, CYI, Y
       INTEGER KODE, N, NZ, IERR
       parameter(N=1)
       dimension CYR(N), CYI(N), CY(N)

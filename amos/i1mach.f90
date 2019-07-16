@@ -3,7 +3,7 @@
       IMPLICIT NONE
       INTEGER :: I
       REAL :: X
-      DOUBLE PRECISION :: XX
+      real(8) :: XX
 !***BEGIN PROLOGUE  I1MACH
 !***PURPOSE  Return integer machine dependent constants.
 !***LIBRARY   SLATEC

@@ -30,9 +30,9 @@ module amos
      pure subroutine zbesj(re, im, order, scaling, length, zOut_r, zOut_i, &
           underflows, ierr)
        implicit none
-       double precision, intent(in) :: re, im, order
+       real(8), intent(in) :: re, im, order
        integer, intent(in) :: scaling, length
-       double precision, intent(out) :: zOut_r(length), zOut_i(length)
+       real(8), intent(out) :: zOut_r(length), zOut_i(length)
        integer, intent(out) :: underflows, ierr
      end subroutine zbesj
 
@@ -40,9 +40,9 @@ module amos
      pure subroutine zbesy(re, im, order, scaling, length, zOut_r, zOut_i, &
           underflows, workr, worki, ierr)
        implicit none
-       double precision, intent(in) :: re, im, order
+       real(8), intent(in) :: re, im, order
        integer, intent(in) :: scaling, length
-       double precision, intent(out) :: workr(length), worki(length), &
+       real(8), intent(out) :: workr(length), worki(length), &
             zOut_r(length), zOut_i(length)
        integer, intent(out) :: underflows, ierr
      end subroutine zbesy
@@ -51,9 +51,9 @@ module amos
      pure subroutine zbesi(re, im, order, scaling, length, zOut_r, zOut_i, &
           underflows, ierr)
        implicit none
-       double precision, intent(in) :: re, im, order
+       real(8), intent(in) :: re, im, order
        integer, intent(in) :: scaling, length
-       double precision, intent(out) :: zOut_r(length), zOut_i(length)
+       real(8), intent(out) :: zOut_r(length), zOut_i(length)
        integer, intent(out) :: underflows, ierr
      end subroutine zbesi
 
@@ -61,9 +61,9 @@ module amos
      pure subroutine zbesk(re, im, order, scaling, length, zOut_r, zOut_i, &
           underflows, ierr)
        implicit none
-       double precision, intent(in) :: re, im, order
+       real(8), intent(in) :: re, im, order
        integer, intent(in) :: scaling, length
-       double precision, intent(out) :: zOut_r(length), zOut_i(length)
+       real(8), intent(out) :: zOut_r(length), zOut_i(length)
        integer, intent(out) :: underflows, ierr
      end subroutine zbesk
 
@@ -71,27 +71,27 @@ module amos
      pure subroutine zbesh(re, im, order, scaling, hankelkind, length, zOut_r, &
           zOut_i, underflows, ierr)
        implicit none
-       double precision, intent(in) :: re, im, order
+       real(8), intent(in) :: re, im, order
        integer, intent(in) :: scaling, hankelkind, length
-       double precision, intent(out) :: zOut_r(length), zOut_i(length)
+       real(8), intent(out) :: zOut_r(length), zOut_i(length)
        integer, intent(out) :: underflows, ierr
      end subroutine zbesh
 
      ! Airy function Ai (or its derivative):
      pure subroutine zairy(re, im, deriv, scaling, zOut_r, zOut_i, underflow, ierr)
        implicit none
-       double precision, intent(in) :: re, im
+       real(8), intent(in) :: re, im
        integer, intent(in) :: deriv, scaling
-       double precision, intent(out) :: zOut_r, zOut_i
+       real(8), intent(out) :: zOut_r, zOut_i
        integer, intent(out) :: underflow, ierr
      end subroutine zairy
 
      ! Airy function Bi (or its derivative)
      pure subroutine zbiry(re, im, deriv, scaling, zOut_r, zOut_i, ierr)
        implicit none
-       double precision, intent(in) :: re, im
+       real(8), intent(in) :: re, im
        integer, intent(in) :: deriv, scaling
-       double precision, intent(out) :: zOut_r, zOut_i
+       real(8), intent(out) :: zOut_r, zOut_i
        integer, intent(out) :: ierr
      end subroutine zbiry
 

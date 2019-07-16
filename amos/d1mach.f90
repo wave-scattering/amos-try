@@ -1,8 +1,8 @@
 !DECK D1MACH
-      DOUBLE PRECISION FUNCTION D1MACH (I)
+      real(8) FUNCTION D1MACH (I)
       IMPLICIT NONE
       INTEGER :: I
-      DOUBLE PRECISION :: B, X
+      real(8) :: B, X
 !***BEGIN PROLOGUE  D1MACH
 !***PURPOSE  Return floating point machine dependent constants.
 !***LIBRARY   SLATEC
