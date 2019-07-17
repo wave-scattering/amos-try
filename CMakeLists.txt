@@ -3,13 +3,14 @@ cmake_minimum_required(VERSION 3.0.2)
 SET (PROJECTNAME "top-besj")
 PROJECT (${PROJECTNAME} Fortran)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+FIND_PACKAGE(LAPACK REQUIRED)
 
 # Make sure that CMAKE_BUILD_TYPE is either Debug or Release:
 if (NOT CMAKE_BUILD_TYPE)
-#    set(CMAKE_BUILD_TYPE Release
-#            CACHE STRING "Build type (Debug, Release)" FORCE)
-    set(CMAKE_BUILD_TYPE Debug
+    set(CMAKE_BUILD_TYPE Release
             CACHE STRING "Build type (Debug, Release)" FORCE)
+#    set(CMAKE_BUILD_TYPE Debug
+#            CACHE STRING "Build type (Debug, Release)" FORCE)
 endif ()
 if (NOT (CMAKE_BUILD_TYPE STREQUAL "Debug" OR
         CMAKE_BUILD_TYPE STREQUAL "Release"))
@@ -32,9 +33,9 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     #set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -fdefault-real-8")
 endif ()
 #set(common "-std=f95")# -Wall -Wextra -Wimplicit-interface -fPIC")# -fmax-errors=1")
-set(CMAKE_Fortran_FLAGS_DEBUG   "${common} -g -fbounds-check -fcheck-array-temporaries -fbacktrace")
+#set(CMAKE_Fortran_FLAGS_DEBUG   "${common} -g -fbounds-check -fcheck-array-temporaries -fbacktrace")
 #set(CMAKE_Fortran_FLAGS_DEBUG   "${common} -g -fcheck-array-temporaries -fbacktrace")
-#set(CMAKE_Fortran_FLAGS_RELEASE "${common} -O3 -march=native -ffast-math -funroll-loops")
+set(CMAKE_Fortran_FLAGS_RELEASE "${common} -O3 -march=native -ffast-math -funroll-loops -mtune=native -fopenmp" )
 
 add_subdirectory(amos)
 add_subdirectory(try-zbesj)

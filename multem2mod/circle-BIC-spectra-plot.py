@@ -53,8 +53,8 @@ def eval(i):
 
 if __name__ == "__main__":
     plt.figure(figsize=(11,6))
-    npts = 403
-    lmax=7
+    npts = 1404
+    lmax=10
     r_ratio = 0.47050000
     # from_k = 3.7128
     # to_k = 3.7129
@@ -92,7 +92,7 @@ if __name__ == "__main__":
         ak2 = np.sin(phi)*abs_k
         kpts = len(ak1)
         print(sign)
-        if os.path.isfile(sign+'.npz') and False:
+        if os.path.isfile(sign+'.npz'):# and False:
             data = np.load(sign+'.npz')
             C_all = data['C_all']
         else:
@@ -105,13 +105,13 @@ if __name__ == "__main__":
         for i in range(kpts):
             d = C_all[i,:,:]
             z = np.linspace(from_k, to_k, npts)
-            plt.title('Reflectance\n'+sign)
+            plt.title('Reflectance New\n'+sign)
             plt.plot(z#*plot_factor
                      , d[1], label='trans |k|=%g'%(abs_k[i]*2*np.pi), lw=0.4)
             plt.plot(z#*plot_factor
                      , d[2], label='refl |k|=%g'%(abs_k[i]*2*np.pi), lw=0.4)
             plt.plot(z#*plot_factor
-                     , (d[1]+d[2]-1)*100, label='(trans+refl-1)*100 '%(abs_k[i]*2*np.pi), lw=0.4)
+                     , (d[1]+d[2]-1)*1e5, label='(trans+refl-1)*1e5 '%(abs_k[i]*2*np.pi), lw=0.4)
             # plt.plot(z#*plot_factor
             #          , d, label='source angle=%g'%(abs_k[i]), lw=0.4)
             # plt.xlim(from_k#*plot_factor
@@ -120,7 +120,7 @@ if __name__ == "__main__":
             plt.ylim(-0.01,1.01)
             plt.legend()
         plt.tight_layout()
-        plt.show()
+        #plt.show()
         # plt.show()
         # plt.clf(); plt.close()
         # plt.figure(figsize=(16,9))
