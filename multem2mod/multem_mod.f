@@ -3089,11 +3089,8 @@ C     ------------------------------------------------------------------
       CALL SETUP(LMAX,XEVEN,XODD,TE,TH,XXMAT1,XXMAT2)
       vXXMAT1 = XXMAT1(1:lmtot, 1:lmtot)
       vXXMAT2 = XXMAT2(1:lmtot, 1:lmtot)
-      !call zgetrf_wrap ( vXXMAT1, vINT1 )
-      CALL ZGETRF( lmtot, lmtot, vXXMAT1, lmtot, vINT1, INFO )
-      CALL ZGETRF( lmtot, lmtot, vXXMAT2, lmtot, vINT2, INFO )
-!     CALL ZGE(XXMAT1,INT1,LMTOT,LMTD,EMACH)
-!     CALL ZGE(XXMAT2,INT2,LMTOT,LMTD,EMACH)
+      call zgetrf_wrap ( vXXMAT1, vINT1 )
+      call zgetrf_wrap ( vXXMAT2, vINT2 )
       ISIGN2=1
       SIGN2=3.D0-2.D0*ISIGN2
       IGK2=0

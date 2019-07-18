@@ -51,11 +51,13 @@ contains
         zr = real(arg); zi = aimag(arg)
         FNU = 0.5_dp;   KODE=1;   N=lmax1
         call ZBESJ(zr, zi, FNU, KODE, N, CYR, CYI, NZ, IERR)
+        if (IERR /= 0) stop 1
         ! Convert to spherical function
         cy = (cyr+ ci*cyi)*sqrt(pi/2.0_dp/arg)
         BJ = cy
         cwrkr=0.0_dp; cwrki=0.0_dp
         call ZBESY(zr, zi, FNU, KODE, N, CYR, CYI, NZ, cwrkr, cwrki, IERR)
+        if (IERR /= 0) stop 1
         cy = (cyr+ ci*cyi)*sqrt(pi/2.0_dp/arg)
         Y = cy
         H=BJ+ci*Y
