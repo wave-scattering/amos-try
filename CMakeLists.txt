@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.0.2)
 SET (PROJECTNAME "top-besj")
 PROJECT (${PROJECTNAME} Fortran)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+
+# apt install libblas-dev liblapack-dev
 FIND_PACKAGE(LAPACK REQUIRED)
 
 # Make sure that CMAKE_BUILD_TYPE is either Debug or Release:
@@ -39,7 +41,7 @@ set(CMAKE_Fortran_FLAGS_RELEASE "${common} -O3 -march=native -ffast-math -funrol
 
 add_subdirectory(amos)
 add_subdirectory(try-zbesj)
-add_subdirectory(cylinder)
+#add_subdirectory(cylinder)
 add_subdirectory(multem2mod)
 
 
