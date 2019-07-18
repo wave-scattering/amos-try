@@ -26,7 +26,10 @@ C=======================================================================
       implicit none
       integer, parameter:: dp=kind(0.d0)
       real(dp), parameter :: pi=4.0_dp*ATAN(1.0_dp)
-      complex(dp), parameter :: ci = (0.0_dp, 1.0_dp)
+      complex(dp), parameter :: czero = (0.0_dp, 0.0_dp)
+      complex(dp), parameter :: ci    = (0.0_dp, 1.0_dp)
+      complex(dp), parameter :: cone  = (1.0_dp, 0.0_dp)
+      complex(dp), parameter :: ctwo  = (2.0_dp, 0.0_dp)
       private
       public cerf, blm, ceven, codd, band, scat, pair, hoslab, pcslab,
      & reduce, lat2d, elmgen,bessel
@@ -132,7 +135,7 @@ C
 C
 C ..  DATA STATEMENTS ..
 C
-      DATA CZERO/(0.D0,0.D0)/
+C      DATA CZERO/(0.D0,0.D0)/
 C     ------------------------------------------------------------------
       DOWN=0.D0
       REFLE=0.D0
@@ -1035,14 +1038,14 @@ C
       C4=MUSPH-MUMED
       C5=MUMED*ARGM
       C6=-MUSPH*ARG
-      DO 1 L1=1,LMAX1
-      AN=C1*L1*JM(L1)*Y(L1)+C2*JM(L1+1)*Y(L1)+C3*JM(L1)*Y(L1+1)
-      AJ=C1*L1*JM(L1)*J(L1)+C2*JM(L1+1)*J(L1)+C3*JM(L1)*J(L1+1)
-      BN=C4*L1*JM(L1)*Y(L1)+C5*JM(L1+1)*Y(L1)+C6*JM(L1)*Y(L1+1)
-      BJ=C4*L1*JM(L1)*J(L1)+C5*JM(L1+1)*J(L1)+C6*JM(L1)*J(L1+1)
-      TE(L1)=-AJ/(AJ+CI*AN)
-      TH(L1)=-BJ/(BJ+CI*BN)
-    1 CONTINUE
+      DO  L1=1,LMAX1
+          AN=C1*L1*JM(L1)*Y(L1)+C2*JM(L1+1)*Y(L1)+C3*JM(L1)*Y(L1+1)
+          AJ=C1*L1*JM(L1)*J(L1)+C2*JM(L1+1)*J(L1)+C3*JM(L1)*J(L1+1)
+          BN=C4*L1*JM(L1)*Y(L1)+C5*JM(L1+1)*Y(L1)+C6*JM(L1)*Y(L1+1)
+          BJ=C4*L1*JM(L1)*J(L1)+C5*JM(L1+1)*J(L1)+C6*JM(L1)*J(L1+1)
+          TE(L1)=-AJ/(AJ+CI*AN)
+          TH(L1)=-BJ/(BJ+CI*BN)
+      end do
       RETURN
       END subroutine
 C=======================================================================
