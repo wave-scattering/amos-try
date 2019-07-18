@@ -44,7 +44,11 @@ def get_shared_array(length, width, depth):
 def eval(i):
     create_input(npts, ak1[i], ak2[i],zinf, zsup, polar,lmax, r_ratio)
     if os.path.isfile('multem2'):
-        subprocess.run(['./multem2'], stdout=subprocess.DEVNULL)
+        my_env = os.environ.copy()
+        my_env["OMP_NUM_THREADS"] = "1"
+        subprocess.run(['./multem2'],
+                       stdout=subprocess.DEVNULL,
+                       env=my_env)
     #FREQUENCY   TRANSMITTANCE  Reflectance   Absorbance
     d = np.loadtxt('fort.8').T
     C_all[i,:,:] = d
@@ -92,7 +96,7 @@ if __name__ == "__main__":
         ak2 = np.sin(phi)*abs_k
         kpts = len(ak1)
         print(sign)
-        if os.path.isfile(sign+'.npz'):# and False:
+        if os.path.isfile(sign+'.npz') and False:
             data = np.load(sign+'.npz')
             C_all = data['C_all']
         else:
