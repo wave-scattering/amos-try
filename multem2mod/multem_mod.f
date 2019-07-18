@@ -24,10 +24,79 @@ CCCCCCCCC-----------> HERE STARTS THE FORTRAN SOURCE CODE
 C=======================================================================
       module libmultem
       implicit none
+      integer, parameter:: dp=kind(0.d0)
       private
       public cerf, blm, ceven, codd, band, scat, pair, hoslab, pcslab,
-     & reduce, lat2d, elmgen
+     & reduce, lat2d, elmgen,bessel
       contains
+C=======================================================================
+      SUBROUTINE BESSEL(BJ,Y,H,ARG,LMX,lmax,LJ,LY,LH,LCALL)
+      IMPLICIT NONE
+      integer, parameter:: dp=kind(0.d0)
+!     ------------------------------------------------------------------
+!     THIS  SUBROUTINE COMPUTES THE  SPHERICAL BESSEL FUNCTIONS OF
+!     FIRST, SECOND  AND  THIRD  KIND  using Amos lib
+!
+!     2019.07.17 Change to use Amos lib
+!
+!     ON INPUT--->
+!     ARG    ARGUMENT OF THE BESSEL FUNCTIONS
+!     LMAX   MAX. ORDER OF THE BESSEL FUNCTIONS
+!            (LIMITED UP TO 25 IN THE VERSION)
+!     LJ     LOGICAL : IF LJ IS TRUE THE SPHERICAL BESSEL
+!            FUNCTIONS OF THE FIRST KIND ARE CALCULATED UP TO LMAX
+!     LY     LOGICAL : IF LY IS TRUE THE SPHERICAL BESSEL
+!            FUNCTIONS OF THE SECOND KIND ARE CALCULATED UP TO LMAX
+!     LH     LOGICAL : IF LH IS TRUE THE SPHERICAL BESSEL
+!            FUNCTIONS OF THE THIRD KIND ARE CALCULATED UP TO LMAX
+!     LCALL  LOGICAL : IF LCALL IS FALSE THE CHEBYCHEV
+!            COEFFICIENTS ARE CALCULATED -THIS PART HAS TO
+!            BE CALLED ONCE
+!
+!     ON OUTPUT--->
+!     BJ     AN ARRAY CONTAINING THE BESSEL FUNCTIONS OF
+!            THE FIRST KIND UP TO LMAX IF LJ IS TRUE.
+!            REMEMBER, THAT BJ(1) CONTAINS THE FUNCTION OF
+!            L=0 AND SO ON.
+!     Y      AN ARRAY CONTAINING THE BESSEL FUNCTIONS OF
+!            THE SECOND KIND UP TO LMAX IF LY IS TRUE.
+!            REMEMBER,THAT  Y(1) CONTAINS THE FUNCTION OF L=0 AND SO ON.
+!     H      AN ARRAY CONTAINING THE BESSEL FUNCTIONS OF
+!            THE THIRD KIND UP TO LMAX IF LH IS TRUE.
+!            REMEMBER,THAT H (1) CONTAINS THE FUNCTION OF L=0 AND SO ON.
+!
+!     THE BESSEL FUNCTIONS OF 3RD KIND ARE DEFINED AS: H(L)=BJ(L)+I*Y(L)
+!     ------------------------------------------------------------------
+      LOGICAL     :: LCALL,LH,LJ,LY
+      INTEGER     :: lmax,LMX
+      COMPLEX(dp) :: ARG
+      COMPLEX(dp), intent(out) :: BJ(:),H(:),Y(:)
+      COMPLEX(dp) :: Z, CY(lmx), i
+      real(dp)     :: pi, ZR, ZI, FNU, CYR(lmx), CYI(lmx),
+     & CWRKR(lmx), CWRKI(lmx)
+
+      INTEGER KODE, N, NMAXD, NZ, IERR
+      pi=4.0_dp*ATAN(1.0_dp)
+      i = (0.0_dp, 1.0_dp)
+      ZR = real(ARG)
+      ZI = aimag(ARG)
+      FNU = 0.5_dp
+      KODE=1
+      N=lmax+1
+!     call BESSEL_OLD(BJ,Y,H,ARG,LMX,LMAX,LJ,LY,LH,LCALL)
+      CALL ZBESJ(ZR, ZI, FNU, KODE, N, CYR, CYI, NZ, IERR)
+      ! Convert to spherical function
+      CY = (CYR+ i*CYI)*sqrt(pi/2.0_dp/arg)
+      BJ = CY
+      CWRKR=0.0_dp
+      CWRKI=0.0_dp
+      call ZBESY(ZR, ZI, FNU, KODE, N, CYR, CYI, NZ, CWRKR, CWRKI,
+     *                 IERR)
+      CY = (CYR+ i*CYI)*sqrt(pi/2.0_dp/arg)
+      Y = CY
+      H=BJ+i*Y
+      END subroutine
+
 C=======================================================================
       SUBROUTINE SCAT(IGMAX,ZVAL,AK,G,KAPIN,KAPOUT,EINCID,QI,QIII)
       IMPLICIT NONE
@@ -46,22 +115,22 @@ C
 C ..  SCALAR ARGUMENTS  ..
 C
       INTEGER    IGMAX
-      REAL*8     ZVAL,KAPIN,KAPOUT
+      REAL(dp)   ZVAL,KAPIN,KAPOUT
 C
 C ..  ARRAY ARGUMENTS ..
 C
-      REAL*8     AK(2),G(2,IGD)
-      COMPLEX*16 QI(IGKD,IGKD),QIII(IGKD,IGKD),EINCID(IGKD)
+      REAL(dp)   AK(2),G(2,IGD)
+      COMPLEX(dp) QI(IGKD,IGKD),QIII(IGKD,IGKD),EINCID(IGKD)
 C
 C ..  LOCAL SCALARS  ..
 C
       INTEGER    IGK1,IG1,K1,IGK2,IGKMAX
-      REAL*8     DOWN,REFLE,TRANS,ABSOR,GKZIN,GKZOUT,TES1
-      COMPLEX*16 CZERO
+      REAL(dp)   DOWN,REFLE,TRANS,ABSOR,GKZIN,GKZOUT,TES1
+      COMPLEX(dp) CZERO
 C
 C ..  LOCAL ARRAYS  ..
 C
-      COMPLEX*16 ETRANS(IGKD),EREFLE(IGKD)
+      COMPLEX(dp) ETRANS(IGKD),EREFLE(IGKD)
 C
 C ..  INTRINSIC FUNCTIONS ..
 C
@@ -81,8 +150,8 @@ C     ------------------------------------------------------------------
      &            G(2,IG1))
       GKZIN =0.D0
       GKZOUT=0.D0
-      IF(( KAPIN*KAPIN -TES1).GT.0.D0) GKZIN =SQRT( KAPIN*KAPIN -TES1)
-      IF((KAPOUT*KAPOUT-TES1).GT.0.D0) GKZOUT=SQRT(KAPOUT*KAPOUT-TES1)
+      IF(( KAPIN*KAPIN -TES1)>0.D0) GKZIN =SQRT( KAPIN*KAPIN -TES1)
+      IF((KAPOUT*KAPOUT-TES1)>0.D0) GKZOUT=SQRT(KAPOUT*KAPOUT-TES1)
       DO 1 K1=1,2
       IGK1=IGK1+1
       ETRANS(IGK1)=CZERO
@@ -104,7 +173,7 @@ C
       RETURN
 C
   101 FORMAT(5E14.6)
-      END
+      END subroutine
 C======================================================================
       SUBROUTINE HOSLAB(IGMAX,KAPPA1,KAPPA2,KAPPA3,AK,G,DL,DR,D,
      &                  QI,QII,QIII,QIV,EMACH)
@@ -124,26 +193,26 @@ C
 C  .. SCALAR ARGUMENTS ..
 C
       INTEGER    IGMAX
-      REAL*8     EMACH,D
-      COMPLEX*16 KAPPA1,KAPPA2,KAPPA3
+      REAL(dp)   EMACH,D
+      COMPLEX(dp) KAPPA1,KAPPA2,KAPPA3
 C
 C  .. ARRAY AGUMENTS ..
 C
-      REAL*8     AK(2),G(2,IGD),DL(3),DR(3)
-      COMPLEX*16 QI(IGKD,IGKD),QII(IGKD,IGKD),QIII(IGKD,IGKD)
-      COMPLEX*16 QIV(IGKD,IGKD)
+      REAL(dp)   AK(2),G(2,IGD),DL(3),DR(3)
+      COMPLEX(dp) QI(IGKD,IGKD),QII(IGKD,IGKD),QIII(IGKD,IGKD)
+      COMPLEX(dp) QIV(IGKD,IGKD)
 
 C
 C  .. LOCAL SCALARS ..
 C
       INTEGER    I,J,IA,IB,JA,IG1,IGKMAX
-      REAL*8     GKKPAR
-      COMPLEX*16 CZERO,CONE,CI,CTWO,GKKZ1,GKKZ2,GKKZ3,Z1,Z2,Z3,CQI,CQII
-      COMPLEX*16 CQIII,CQIV,DENOMA,DENOMB,GKKDUM
+      REAL(dp)   GKKPAR
+      COMPLEX(dp) CZERO,CONE,CI,CTWO,GKKZ1,GKKZ2,GKKZ3,Z1,Z2,Z3,CQI,CQII
+      COMPLEX(dp) CQIII,CQIV,DENOMA,DENOMB,GKKDUM
 C
 C  .. LOCAL ARRAYS ..
 C
-      COMPLEX*16 T(4,2),R(4,2),X(4),P(4,2)
+      COMPLEX(dp) T(4,2),R(4,2),X(4),P(4,2)
 C
 C  .. INTRINSIC FUNCTIONS ..
 C
@@ -176,7 +245,7 @@ C
       DO 9 J=1,2
       DENOMA=X(J)*X(J)*GKKZ2+GKKZ1
       DENOMB=     GKKZ2+GKKZ1
-      IF(ABS(DENOMA).LT.EMACH.OR.ABS(DENOMB).LT.EMACH) GO TO 20
+      IF(ABS(DENOMA)<EMACH.OR.ABS(DENOMB)<EMACH) GO TO 20
       R(J,1)=(GKKZ1-X(J)*X(J)*GKKZ2)/DENOMA
       R(J,2)=           (GKKZ1-GKKZ2)/DENOMB
       T(J,1)=CTWO*X(J)*GKKZ1/DENOMA
@@ -188,7 +257,7 @@ C
       DO 10 J=3,4
       DENOMA=X(J)*X(J)*GKKZ3+GKKZ2
       DENOMB=          GKKZ3+GKKZ2
-      IF(ABS(DENOMA).LT.EMACH.OR.ABS(DENOMB).LT.EMACH) GO TO 20
+      IF(ABS(DENOMA)<EMACH.OR.ABS(DENOMB)<EMACH) GO TO 20
       R(J,1)=(GKKZ2-X(J)*X(J)*GKKZ3)/DENOMA
       R(J,2)=           (GKKZ2-GKKZ3)/DENOMB
       T(J,1)=CTWO*X(J)*GKKZ2/DENOMA
@@ -208,12 +277,12 @@ C
     5 CONTINUE
       CQI  =EXP(CI*((AK(1)+G(1,IG1))*(DL(1)+DR(1))+
      &              (AK(2)+G(2,IG1))*(DL(2)+DR(2))+
-     &	             GKKZ1*DL(3)+GKKZ3*DR(3)))
+     &                 GKKZ1*DL(3)+GKKZ3*DR(3)))
       CQII =EXP(CTWO*CI*GKKZ3*DR(3))
       CQIII=EXP(CTWO*CI*GKKZ1*DL(3))
       CQIV =EXP(-CI*((AK(1)+G(1,IG1))*(DL(1)+DR(1))+
      &               (AK(2)+G(2,IG1))*(DL(2)+DR(2))-
-     &	             GKKZ1*DL(3)-GKKZ3*DR(3)))
+     &                 GKKZ1*DL(3)-GKKZ3*DR(3)))
       DO 7 JA=1,2
       IA=2*IG1-2+JA
       QI  (IA,IA)=CQI  *P(1,JA)
@@ -224,7 +293,7 @@ C
     3 CONTINUE
       RETURN
    20 STOP 'FATAL ERROR IN HOSLAB'
-      END
+      END subroutine
 C=======================================================================
       SUBROUTINE DLMKG(LMAX,A0,GK,SIGNUS,KAPPA,DLME,DLMH,EMACH)
       IMPLICIT NONE
@@ -241,27 +310,27 @@ C
 C ..  SCALAR ARGUMENTS  ..
 C
       INTEGER    LMAX
-      REAL*8     A0,SIGNUS,EMACH
-      COMPLEX*16 KAPPA
+      REAL(dp)   A0,SIGNUS,EMACH
+      COMPLEX(dp) KAPPA
 C
 C ..  ARRAY ARGUMENTS  ..
 C
-      COMPLEX*16 DLME(2,LM1SQD),DLMH(2,LM1SQD),GK(3)
+      COMPLEX(dp) DLME(2,LM1SQD),DLMH(2,LM1SQD),GK(3)
 C
 C  .. LOCAL SCALARS ..
 C
       INTEGER    K,II,L,M,I
-      REAL*8     AKPAR,PI,ALPHA,BETA,AKG1,AKG2
-      COMPLEX*16 CI,CZERO,CONE,C0,CC,COEF,Z1,Z2,Z3
-      COMPLEX*16 CT,ST,CF
+      REAL(dp)   AKPAR,PI,ALPHA,BETA,AKG1,AKG2
+      COMPLEX(dp) CI,CZERO,CONE,C0,CC,COEF,Z1,Z2,Z3
+      COMPLEX(dp) CT,ST,CF
 C
 C  .. LOCAL ARRAYS ..
 C
-      COMPLEX*16 YLM(LM1SQD)
+      COMPLEX(dp) YLM(LM1SQD)
 C
 C  .. INTRINSIC FUNCTIONS ..
 C
-      INTRINSIC ABS,DCMPLX,DFLOAT,SQRT,DREAL
+C      INTRINSIC ABS,DCMPLX,DFLOAT,SQRT,DREAL
 C
 C  .. EXTERNAL ROUTINES ..
 C
@@ -273,13 +342,13 @@ C
       DATA PI/3.14159265358979D0/
 C     ------------------------------------------------------------------
 C
-      IF(LMAX.GT.LMAXD)  GO TO 10
+      IF(LMAX>LMAXD)  GO TO 10
       AKG1=DREAL(GK(1))
       AKG2=DREAL(GK(2))
       DO 1 K=1,2
       DLME(K,1)=CZERO
     1 DLMH(K,1)=CZERO
-      IF(ABS(GK(3)).LT.EMACH)   THEN
+      IF(ABS(GK(3))<EMACH)   THEN
       WRITE(7,101)
       STOP
       ENDIF
@@ -288,7 +357,7 @@ C
       CT=GK(3)/KAPPA
       ST=AKPAR/KAPPA
       CF=CONE
-      IF(AKPAR.GT.1.D-8) CF=DCMPLX(AKG1/AKPAR,AKG2/AKPAR)
+      IF(AKPAR>1.D-8) CF=DCMPLX(AKG1/AKPAR,AKG2/AKPAR)
       CALL SPHRM4(YLM,CT,ST,CF,LMAX)
       II=1
       CC=CONE
@@ -299,18 +368,18 @@ C
       II=II+1
       ALPHA=SQRT(DFLOAT((L-M)*(L+M+1)))/2.D0
       BETA =SQRT(DFLOAT((L+M)*(L-M+1)))/2.D0
-      IF(ABS(M+1).LE.L)  T H E N
+      IF(ABS(M+1)<=L)  then
       I=L*L+L+M+2
       Z1=YLM(I)
-                         E L S E
+                         else
       Z1=CZERO
-                         E N D    I F
-      IF(ABS(M-1).LE.L)  T H E N
+                         end if
+      IF(ABS(M-1)<=L)  then
       I=L*L+L+M
       Z2=YLM(I)
-                         E L S E
+                         else
       Z2=CZERO
-                         E N D    I F
+                         end if
       I=L*L+L+M+1
       Z3=YLM(I)
       DLMH(1,II)=COEF*(BETA*CT*CF*Z2-DFLOAT(M)*ST*Z3
@@ -330,7 +399,7 @@ C
      & 'IN THE DATA STATEMENT OF THE MAIN PROGRAM.'
      & /3X,'THIS DEFINES A SMALL IMAGINARY PART'
      & /3X,'IN THE FREQUENCY OR WAVELENGTH VALUE.')
-      END
+      END subroutine
 C=======================================================================
 C=======================================================================
 C=======================================================================
@@ -350,17 +419,17 @@ C
 C
 C ..  ARRAY ARGUMENTS  ..
 C
-      REAL*8 ELM(NELMD)
+      REAL(dp) ELM(NELMD)
 C
 C ..  LOCAL SCALARS  ..
 C
       INTEGER K,II,LL,IL2,L2,M2,I2,IL3,L3,M3,I3,LA1,LB1,LA11,LB11,M1
       INTEGER L11,L1,L
-      REAL*8  PI,FOURPI
+      REAL(dp)PI,FOURPI
 C
 C ..   EXTERNAL FUNCTION  ..
 C
-C     REAL*8 BLM
+C     REAL(dp) BLM
 C     EXTERNAL BLM
 C
 C ..  INTRINSIC FUNCTIONS  ..
@@ -401,7 +470,7 @@ C
       GOTO 1
    8  CONTINUE
       RETURN
-      END
+      END subroutine
 C=======================================================================
       SUBROUTINE LAT2D(A,B,RMAX,IMAX,ID,NTA,NTB,VECMOD)
       IMPLICIT NONE
@@ -417,17 +486,17 @@ C
 C ..  SCALAR ARGUMENTS ..
 C
       INTEGER IMAX,ID
-      REAL*8  RMAX
+      REAL(dp)RMAX
 C
 C ..  ARRAY ARGUMENTS ..
 C
       INTEGER NTA(ID),NTB(ID)
-      REAL*8  A(2),B(2),VECMOD(ID)
+      REAL(dp)A(2),B(2),VECMOD(ID)
 C
 C ..  LOCAL SCALARS ..
 C
       INTEGER I,NA,NB,NA0,J,NMA,NMB,IORD
-      REAL*8  RMAX2,SP,AMOD2,BMOD2,DUM,VMOD2,VM
+      REAL(dp)RMAX2,SP,AMOD2,BMOD2,DUM,VMOD2,VM
 C
 C ..  INTRINSIC FUNCTIONS ..
 C
@@ -439,18 +508,18 @@ C
 C***  CHECK IF PRIMITIVE VECTORS HAVE POSITIVE SCALAR PRODUCT
 C
       SP=A(1)*B(1)+A(2)*B(2)
-      IF(SP.LT.-1.D-06)  T H E N
+      IF(SP<-1.D-06)  THEN
       B(1)=-B(1)
       B(2)=-B(2)
       SP=-SP
       WRITE(6,100) A(1),A(2),B(1),B(2)
-                        E N D     I F
+                        END     IF
 C
 C***  CHECK IF 'B' IS LONGER THAN 'A'
 C
       AMOD2=A(1)*A(1)+A(2)*A(2)
       BMOD2=B(1)*B(1)+B(2)*B(2)
-      IF(BMOD2.LT.AMOD2) T H E N
+      IF(BMOD2<AMOD2) THEN
       WRITE(6,101)
       DO 10 J=1,2
       DUM=A(J)
@@ -459,24 +528,24 @@ C
       DUM=AMOD2
       AMOD2=BMOD2
       BMOD2=DUM
-                        E N D     I F
+                      ENDIF
 C
       I=0
       NB=0
     9 CONTINUE
-      IF((NB*NB*BMOD2).GT.RMAX2)  GO TO 8
+      IF((NB*NB*BMOD2)>RMAX2)  GO TO 8
       NA=0
     7 CONTINUE
       VMOD2=NA*NA*AMOD2+NB*NB*BMOD2+2*NA*NB*SP
-      IF(VMOD2.GT.RMAX2)  GO TO 6
+      IF(VMOD2>RMAX2)  GO TO 6
       I=I+1
-      IF(I.GT.ID)  GO TO 13
+      IF(I>ID)  GO TO 13
       NTA(I)=NA
       NTB(I)=NB
       VECMOD(I)=SQRT(VMOD2)
-      IF(NA.EQ.0.AND.NB.EQ.0) GO TO 11
+      IF(NA.eq.0.AND.NB.eq.0) GO TO 11
       I=I+1
-      IF(I.GT.ID) GO TO 13
+      IF(I>ID) GO TO 13
       NTA(I)=-NA
       NTB(I)=-NB
       VECMOD(I)=SQRT(VMOD2)
@@ -490,18 +559,18 @@ C
       NA0=SP/AMOD2 + 1
       NB=1
     5 CONTINUE
-      IF((NB*NB*(BMOD2-SP*SP/AMOD2)).GT.RMAX2) GO TO 4
+      IF((NB*NB*(BMOD2-SP*SP/AMOD2))>RMAX2) GO TO 4
       NA=NA0
     3 CONTINUE
       VMOD2=NA*NA*AMOD2+NB*NB*BMOD2-2*NA*NB*SP
-      IF(VMOD2.GT.RMAX2) GO TO 2
+      IF(VMOD2>RMAX2) GO TO 2
       I=I+1
-      IF(I.GT.ID)  GO TO 13
+      IF(I>ID)  GO TO 13
       NTA(I)=NA
       NTB(I)=-NB
       VECMOD(I)=SQRT(VMOD2)
       I=I+1
-      IF(I.GT.ID)  GO TO 13
+      IF(I>ID)  GO TO 13
       NTA(I)=-NA
       NTB(I)=NB
       VECMOD(I)=SQRT(VMOD2)
@@ -511,14 +580,14 @@ C
       NA=NA0-1
     1 CONTINUE
       VMOD2=NA*NA*AMOD2+NB*NB*BMOD2-2*NA*NB*SP
-      IF(VMOD2.GT.RMAX2.OR.NA.LE.0)  GO TO 12
+      IF(VMOD2>RMAX2.OR.NA<=0)  GO TO 12
       I=I+1
-      IF(I.GT.ID)  GO TO 13
+      IF(I>ID)  GO TO 13
       NTA(I)=NA
       NTB(I)=-NB
       VECMOD(I)=SQRT(VMOD2)
       I=I+1
-      IF(I.GT.ID) GO TO 13
+      IF(I>ID) GO TO 13
       NTA(I)=-NA
       NTB(I)=NB
       VECMOD(I)=SQRT(VMOD2)
@@ -533,7 +602,7 @@ C
       DO 15 IORD=1,IMAX
       VM=VECMOD(IORD)
       DO 16 I=IMAX,IORD,-1
-      IF(VECMOD(I).GT.VM)  GO TO 16
+      IF(VECMOD(I)>VM)  GO TO 16
       VM=VECMOD(I)
       VECMOD(I)=VECMOD(IORD)
       VECMOD(IORD)=VM
@@ -562,7 +631,7 @@ C
      &'  EXCEEDED'//6X,'LATTICE POINTS FOUND (NON ORDERED)')
   103 FORMAT(I3,3X,I5,'*(',2E14.6,') +',I5,'*(',2E14.6,')',8X,E14.6)
 C
-      END
+      END subroutine
 C=======================================================================
       SUBROUTINE PLW(KAPPA,GK,LMAX,AE,AH)
       IMPLICIT NONE
@@ -581,25 +650,25 @@ C
 C ..  SCALAR ARGUMENTS  ..
 C
       INTEGER    LMAX
-      COMPLEX*16 KAPPA
+      COMPLEX(dp) KAPPA
 C
 C ..  ARRAY ARGUMENTS  ..
 C
-      COMPLEX*16 AE(2,LM1SQD),AH(2,LM1SQD),GK(3)
+      COMPLEX(dp) AE(2,LM1SQD),AH(2,LM1SQD),GK(3)
 C
 C ..  LOCAL SCALARS  ..
 C
       INTEGER    M,II,L,I,K
-      REAL*8     AKPAR,PI,FPI,A,SIGNUS,AKG1,AKG2
-      COMPLEX*16 CT,ST,CF,N1,N2,N3,CI,CZERO,CONE,CC,CC1,Z1,Z2,Z3
+      REAL(dp)   AKPAR,PI,FPI,A,SIGNUS,AKG1,AKG2
+      COMPLEX(dp) CT,ST,CF,N1,N2,N3,CI,CZERO,CONE,CC,CC1,Z1,Z2,Z3
 C
 C ..  LOCAL ARRAYS  ..
 C
-      COMPLEX*16 YLM(LM1SQD)
+      COMPLEX(dp) YLM(LM1SQD)
 C
 C ..  INTRINSIC FUNCTIONS  ..
 C
-      INTRINSIC ABS,DCMPLX,CSQRT,DFLOAT,SQRT,DREAL
+C      INTRINSIC ABS,DCMPLX,CSQRT,DFLOAT,SQRT,DREAL
 C
 C ..  EXTERNAL ROUTINES  ..
 C
@@ -611,7 +680,7 @@ C
       DATA PI/3.14159265358979D0/
 C-----------------------------------------------------------------------
 C
-      IF(LMAX.GT.LMAXD)  GO TO 10
+      IF(LMAX>LMAXD)  GO TO 10
       AKG1=DREAL(GK(1))
       AKG2=DREAL(GK(2))
       DO 3 K=1,2
@@ -622,7 +691,7 @@ C
       CT=GK(3)/KAPPA
       ST=AKPAR/KAPPA
       CF=CONE
-      IF(AKPAR.GT.1.D-8) CF=DCMPLX(AKG1/AKPAR,AKG2/AKPAR)
+      IF(AKPAR>1.D-8) CF=DCMPLX(AKG1/AKPAR,AKG2/AKPAR)
       N1=AKG1/KAPPA
       N2=AKG2/KAPPA
       N3=GK(3)/KAPPA
@@ -637,18 +706,18 @@ C
       DO 2 M=-L,L
       SIGNUS=-SIGNUS
       II=II+1
-      IF(ABS(M+1).LE.L)  T H E N
+      IF(ABS(M+1)<=L)  then
       I=L*L+L-M
       Z1=CC1*SQRT(DFLOAT((L-M)*(L+M+1)))*YLM(I)/2.D0
-                         E L S E
+                         else
       Z1=CZERO
-                         E N D    I F
-      IF(ABS(M-1).LE.L)  T H E N
+                         end if
+      IF(ABS(M-1)<=L)  then
       I=L*L+L-M+2
       Z2=CC1*SQRT(DFLOAT((L+M)*(L-M+1)))*YLM(I)/2.D0
-                         E L S E
+                         else
       Z2=CZERO
-                         E N D    I F
+                         end if
       I=L*L+L-M+1
       Z3=CC1*DFLOAT(M)*YLM(I)
       AE(1,II)= SIGNUS*CI*(CF*Z1-CONJG(CF)*Z2)
@@ -662,7 +731,7 @@ C
       STOP
   100 FORMAT(//13X,'FROM PLW:  LMAX=',I5,'  IS GREATER THAN DIMENSIONED
      * LMAXD=',I5)
-      END
+      END subroutine
 C=======================================================================
       SUBROUTINE SETUP(LMAX,XEVEN,XODD,TE,TH,XXMAT1,XXMAT2)
       IMPLICIT NONE
@@ -683,21 +752,21 @@ C
 C
 C ..  ARRAY ARGUMENTS ..
 C
-      COMPLEX*16 XEVEN(LMEVEN,LMEVEN),XODD(LMODD,LMODD)
-      COMPLEX*16 XXMAT2(LMTD,LMTD)
-      COMPLEX*16 TE(LMAX1D),TH(LMAX1D),XXMAT1(LMTD,LMTD)
+      COMPLEX(dp) XEVEN(LMEVEN,LMEVEN),XODD(LMODD,LMODD)
+      COMPLEX(dp) XXMAT2(LMTD,LMTD)
+      COMPLEX(dp) TE(LMAX1D),TH(LMAX1D),XXMAT1(LMTD,LMTD)
 C
 C ..  LOCAL SCALARS ..
 C
       INTEGER IA,LA,MA,LMTOT,LTT,LMAX1,IB,LB,MB,I,LMXOD,IAOD,IAEV,IBOD
       INTEGER IBEV
-      REAL*8    C0,SIGNUS,UP,C,B1,B2,B3,U1,U2,A,DOWN,PI
-      REAL*8    ALPHA1,ALPHA2,BETA1,BETA2
-      COMPLEX*16 OMEGA1,OMEGA2,Z1,Z2,Z3,CONE,CZERO
+      REAL(dp)  C0,SIGNUS,UP,C,B1,B2,B3,U1,U2,A,DOWN,PI
+      REAL(dp)  ALPHA1,ALPHA2,BETA1,BETA2
+      COMPLEX(dp) OMEGA1,OMEGA2,Z1,Z2,Z3,CONE,CZERO
 C
 C ..  EXTERNAL FUNCTIONS ..
 C
-C     REAL*8    BLM
+C     REAL(dp)    BLM
 C     COMPLEX*16 CODD,CEVEN
 C     EXTERNAL BLM,CODD,CEVEN
 C
@@ -707,7 +776,7 @@ C
       DATA PI/3.14159265358979D0/
 C     ------------------------------------------------------------------
 C
-      IF(LMAX.GT.LMAXD)   GO TO 10
+      IF(LMAX>LMAXD)   GO TO 10
       LMAX1=LMAX+1
       LMTOT=LMAX1*LMAX1-1
       LMXOD=(LMAX*LMAX1)/2
@@ -717,7 +786,7 @@ C
       IAEV=LMXOD
       DO 1 LA=1,LMAX
       DO 1 MA=-LA,LA
-      IF(MOD((LA+MA),2).EQ.0) THEN
+      IF(MOD((LA+MA),2).eq.0) THEN
       IAEV=IAEV+1
       IA=IAEV
                               ELSE
@@ -728,9 +797,9 @@ C
       SIGNUS=-SIGNUS
       C=SIGNUS*C0
       B1=0.D0
-      IF(ABS(MA+1).LE.(LA-1)) B1=BLM(LA-1,MA+1,1,-1,LA,-MA,LMAX)
+      IF(ABS(MA+1)<=(LA-1)) B1=BLM(LA-1,MA+1,1,-1,LA,-MA,LMAX)
       B2=0.D0
-      IF(ABS(MA-1).LE.(LA-1)) B2=BLM(LA-1,MA-1,1, 1,LA,-MA,LMAX)
+      IF(ABS(MA-1)<=(LA-1)) B2=BLM(LA-1,MA-1,1, 1,LA,-MA,LMAX)
       U1=DFLOAT((LA+MA)*(LA-MA))
       U2=DFLOAT((2*LA-1)*(2*LA+1))
       B3=SQRT(U1/U2)
@@ -740,7 +809,7 @@ C
       IBEV=LMXOD
       DO 2 LB=1,LMAX
       DO 2 MB=-LB,LB
-      IF(MOD((LB+MB),2).EQ.0) THEN
+      IF(MOD((LB+MB),2).eq.0) THEN
       IBEV=IBEV+1
       IB=IBEV
                               ELSE
@@ -752,8 +821,8 @@ C
       ALPHA2=SQRT(DFLOAT((LB-MB)*(LB+MB+1)))/2.D0
       BETA2 =SQRT(DFLOAT((LB+MB)*(LB-MB+1)))/2.D0
       LTT=LA+MA+LB+MB
-          IF(MOD(LTT,2).NE.0)           T  H  E  N
-             IF(MOD((LA+MA),2).EQ.0)       T H E N
+          IF(MOD(LTT,2)/=0)           then
+             IF(MOD((LA+MA),2).eq.0)       then
              Z1=CEVEN(LB,MB+1,LA-1,MA+1,LMEVEN,XEVEN)
              Z2=CEVEN(LB,MB-1,LA-1,MA-1,LMEVEN,XEVEN)
              Z3=CODD (LB,MB  ,LA-1,MA  ,LMODD ,XODD )
@@ -763,7 +832,7 @@ C
              OMEGA2=UP*(Z1+Z2+Z3)/DOWN
              XXMAT1(IA,IB)=-TH(LA+1)*OMEGA2
              XXMAT2(IA,IB)= TE(LA+1)*OMEGA2
-                                           E L S E
+                                           else
              Z1=CODD (LB,MB+1,LA-1,MA+1,LMODD ,XODD )
              Z2=CODD (LB,MB-1,LA-1,MA-1,LMODD ,XODD )
              Z3=CEVEN(LB,MB  ,LA-1,MA  ,LMEVEN,XEVEN)
@@ -773,9 +842,9 @@ C
              OMEGA2=UP*(Z1+Z2+Z3)/DOWN
              XXMAT1(IA,IB)= TE(LA+1)*OMEGA2
              XXMAT2(IA,IB)=-TH(LA+1)*OMEGA2
-                                           E N D     I F
-                                        E  L  S  E
-             IF(MOD((LA+MA),2).EQ.0)       T H E N
+                                           end if
+                                        else
+             IF(MOD((LA+MA),2).eq.0)       then
              Z1=CODD (LB,MB-1,LA,MA-1,LMODD ,XODD )
              Z2=CODD (LB,MB+1,LA,MA+1,LMODD ,XODD )
              Z3=CEVEN(LB,MB  ,LA,MA  ,LMEVEN,XEVEN)
@@ -785,7 +854,7 @@ C
              OMEGA1=(Z1+Z2+Z3)/DOWN
              XXMAT1(IA,IB)=-TH(LA+1)*OMEGA1
              XXMAT2(IA,IB)=-TE(LA+1)*OMEGA1
-                                           E L S E
+                                           else
              Z1=CEVEN(LB,MB-1,LA,MA-1,LMEVEN,XEVEN)
              Z2=CEVEN(LB,MB+1,LA,MA+1,LMEVEN,XEVEN)
              Z3=CODD (LB,MB  ,LA,MA  ,LMODD ,XODD )
@@ -795,8 +864,8 @@ C
              OMEGA1=(Z1+Z2+Z3)/DOWN
              XXMAT1(IA,IB)=-TE(LA+1)*OMEGA1
              XXMAT2(IA,IB)=-TH(LA+1)*OMEGA1
-                                           E N D    I F
-                                        E  N  D      I  F
+                                           end if
+                                        end if
     2 CONTINUE
     1 CONTINUE
       DO 3 I=1,LMTOT
@@ -807,7 +876,7 @@ C
       STOP
   100 FORMAT(//13X,'FROM SETUP: LMAX=',I5,
      *       ' IS GREATER THAN DIMENSIONED   LMAXD=',I5)
-      END
+      END subroutine
 C=======================================================================
       SUBROUTINE SPHRM4(YLM,CT,ST,CF,LMAX)
       IMPLICIT NONE
@@ -826,25 +895,25 @@ C
 C ..  SCALAR ARGUMENTS  ..
 C
       INTEGER    LMAX
-      COMPLEX*16 CT,ST,CF
+      COMPLEX(dp) CT,ST,CF
 C
 C ..  ARRAY ARGUMENTS  ..
 C
-      COMPLEX*16 YLM(LM1SQD)
+      COMPLEX(dp) YLM(LM1SQD)
 C
 C ..  LOCAL SCALARS  ..
 C
       INTEGER    L,LL,LM,LM2,LM3,LN,LO,LP,LQ,M
-      REAL*8     A,ASG,B,CL,CM,PI
-      COMPLEX*16 SF,SA
+      REAL(dp)   A,ASG,B,CL,CM,PI
+      COMPLEX(dp) SF,SA
 C
 C ..  LOCAL ARRAYS   ..
 C
-      REAL*8     FAC1(LMAX1D),FAC3(LMAX1D),FAC2(LM1SQD)
+      REAL(dp)   FAC1(LMAX1D),FAC3(LMAX1D),FAC2(LM1SQD)
 C
 C ..  INTRINSIC FUNCTIONS  ..
 C
-      INTRINSIC DCMPLX,SQRT
+C      INTRINSIC DCMPLX,SQRT
 C
 C ..  DATA STATEMENTS  ..
 C
@@ -908,7 +977,7 @@ C****** YL(M+1) IS CALCULATED                         ******
    4  CONTINUE
    5  LM=LM+L+L+1
       RETURN
-      END
+      END subroutine
 C=======================================================================
       SUBROUTINE TMTRX(LMAX,RAP,EPSSPH,EPSMED,MUMED,MUSPH,TE,TH)
       IMPLICIT NONE
@@ -946,8 +1015,9 @@ C
 C
 C ..  LOCAL ARRAYS  ..
 C
-      complex(dp) J(LMAX1D+1),Y(LMAX1D+1),H(LMAX1D+1)
-      complex(dp) JM(LMAX1D+1),YM(LMAX1D+1),HM(LMAX1D+1)
+      !complex(dp), dimension(:), allocatable:: J,Y,H
+      complex(dp) :: J(LMAX1D),Y(LMAX1D),H(LMAX1D)
+      complex(dp) JM(LMAX1D),YM(LMAX1D),HM(LMAX1D)
 C
 C ..  INTRINSIC FUNCTIONS  ..
 C
@@ -963,6 +1033,10 @@ C
 C-----------------------------------------------------------------------
 C
       lmax1 = size(TE)
+!     allocate(J(1:lmax1))
+!     allocate(Y(1:lmax1))
+!     allocate(H(1:lmax1))
+
       lmax = lmax1-1
       LCALL=.FALSE.
       XISQ =SQRT(EPSMED*MUMED)
@@ -970,10 +1044,10 @@ C
       AR=2.0_dp*PI*RAP
       ARG=XISQ*AR
       ARGM=XISQM*AR
-      IF(LMAX1.GT.LMAX1D)  GO  TO   10
-      CALL BESSEL(J,Y,H,ARG,LMAX1D+1,LMAX1+1,.TRUE.,.TRUE.,
+      IF(LMAX1>LMAX1D)  GO  TO   10
+      CALL BESSEL(J,Y,H,ARG,LMAX1D,LMAX1,.TRUE.,.TRUE.,
      *            .FALSE. ,LCALL)
-      CALL BESSEL(JM,YM,HM,ARGM,LMAX1D+1,LMAX1+1,.TRUE.,.FALSE.,
+      CALL BESSEL(JM,YM,HM,ARGM,LMAX1D,LMAX1,.TRUE.,.FALSE.,
      *            .FALSE.,LCALL)
       C1=EPSSPH-EPSMED
       C2=EPSMED*ARGM
@@ -994,7 +1068,7 @@ C
       STOP
   100 FORMAT(//10X,'FROM SUBROUTINE TMTRX :'/
      &         10X,'LMAX+1 =',I3,'  IS GREATER THAN DIMENSIONED:',I3)
-      END
+      END subroutine
 C=======================================================================
       SUBROUTINE XMAT(XODD,XEVEN,LMAX,KAPPA,AK,ELM,EMACH)
       IMPLICIT NONE
@@ -1019,40 +1093,40 @@ C
 C ..  SCALAR ARGUMENTS  ..
 C
       INTEGER    LMAX
-      REAL*8     EMACH
-      COMPLEX*16 KAPPA
+      REAL(dp)   EMACH
+      COMPLEX(dp) KAPPA
 C
 C ..  ARRAY ARGUMENTS  ..
 C
-      REAL*8     AK(2),ELM(NELMD)
-      COMPLEX*16 XODD(LMODD,LMODD),XEVEN(LMEVEN,LMEVEN)
+      REAL(dp)   AK(2),ELM(NELMD)
+      COMPLEX(dp) XODD(LMODD,LMODD),XEVEN(LMEVEN,LMEVEN)
 C
 C ..  LOCAL SCALARS  ..
 C
       INTEGER    L2MAX,LL2,II,I,NNDLM,K,KK,L,MM,NN,M,J1,J2,I1,I2,I3,N1
       INTEGER    NA,LLL,N,IL,NM,IN,L2,IL2,M2,IL3,L3,M3,LA1,LB1,LA11,LB11
       INTEGER    LL,J,L1
-      REAL*8     AB1,AB2,AC,ACSQ,AD,AL,AN,AN1,AN2,AP,AP1,AP2,AR,B
-      REAL*8     DNORM,RTPI,RTV,TEST,TEST1,TEST2,TV,PI
-      COMPLEX*16 ALPHA,RTA,RTAI,KAPSQ,KANT,KNSQ,XPK,XPA,CF,CI,CP,CX,CZ
-      COMPLEX*16 CZERO,Z,ZZ,W,WW,A,ACC,GPSQ,GP,BT,AA,AB,U,U1,U2,GAM
-      COMPLEX*16 GK,GKK,SD,ALM
+      REAL(dp)   AB1,AB2,AC,ACSQ,AD,AL,AN,AN1,AN2,AP,AP1,AP2,AR,B
+      REAL(dp)   DNORM,RTPI,RTV,TEST,TEST1,TEST2,TV,PI
+      COMPLEX(dp) ALPHA,RTA,RTAI,KAPSQ,KANT,KNSQ,XPK,XPA,CF,CI,CP,CX,CZ
+      COMPLEX(dp) CZERO,Z,ZZ,W,WW,A,ACC,GPSQ,GP,BT,AA,AB,U,U1,U2,GAM
+      COMPLEX(dp) GK,GKK,SD,ALM
 C
 C ..  LOCAL ARRAYS  ..
 C
-      REAL*8     DENOM(NDEND),R(2),B1(2),B2(2),AKPT(2),FAC(4*LMAXD+1)
-      COMPLEX*16 GKN(LMAX1D),AGK(2*LMAXD+1),XPM(2*LMAXD+1),PREF(LM1SQD)
-      COMPLEX*16 DLM(LMDLMD)
+      REAL(dp)   DENOM(NDEND),R(2),B1(2),B2(2),AKPT(2),FAC(4*LMAXD+1)
+      COMPLEX(dp) GKN(LMAX1D),AGK(2*LMAXD+1),XPM(2*LMAXD+1),PREF(LM1SQD)
+      COMPLEX(dp) DLM(LMDLMD)
 C
 C ..  ARRAYS IN COMMON  ..
 C
-      REAL*8    AR1(2),AR2(2)
+      REAL(dp)  AR1(2),AR2(2)
       COMMON/X1/AR1,AR2
 C
 C ..  INTRINSIC FUNCTIONS  ..
 C
-      INTRINSIC ABS,ALOG,DCMPLX,CSQRT,EXP,DFLOAT,IABS
-      INTRINSIC MAX0,MOD,SQRT
+C      INTRINSIC ABS,ALOG,DCMPLX,CSQRT,EXP,DFLOAT,IABS
+C      INTRINSIC MAX0,MOD,SQRT
 C
 C ..  EXTERNAL FUNCTIONS  ..
 C
@@ -1062,8 +1136,8 @@ C ..  DATA STATEMENTS  ..
 C
       DATA CZERO/(0.D0,0.D0)/,CI/(0.D0,1.D0)/,PI/3.14159265358979D0/
 C----------------------------------------------------------------------
-      IF(LMAX.GT.14.OR.LMAX.GT.LMAXD)
-     &   STOP 'FROM XMAT: LAMX.GT.MIN0(14,LMAXD)'
+      IF(LMAX>14.OR.LMAX>LMAXD)
+     &   STOP 'FROM XMAT: LAMX>MIN0(14,LMAXD)'
 C
 C     AK(1)  AND  AK(2)  ARE THE X  AND Y COMPONENTS OF THE
 C     MOMENTUM PARALLEL TO THE SURFACE, MODULO A RECIPROCAL
@@ -1178,7 +1252,7 @@ C     AC=MOD(AKPT). NOTE SPECIAL ACTION IF AC=0
 C
       ACSQ=AKPT(1)*AKPT(1)+AKPT(2)*AKPT(2)
       GPSQ=KAPSQ-ACSQ
-      IF(ABS(GPSQ).LT.EMACH*EMACH)   THEN
+      IF(ABS(GPSQ)<EMACH*EMACH)   THEN
       WRITE(7,100)
   100 FORMAT(13X,'FATAL ERROR FROM XMAT:'/3X,'GPSQ IS TOO SMALL.'
      & /3X,'GIVE A SMALL BUT NONZERO VALUE FOR "EPSILON"'/3X,
@@ -1455,7 +1529,7 @@ C
       GOTO 48
   58  CONTINUE
       RETURN
-      END
+      END subroutine
 C=======================================================================
       SUBROUTINE ZGE(A,INT,N,NC,EMACH)
       IMPLICIT NONE
@@ -1468,17 +1542,17 @@ C
 C ..  SCALAR ARGUMENTS  ..
 C
       INTEGER N,NC
-      REAL*8 EMACH
+      REAL(dp) EMACH
 C
 C ..  ARRAY ARGUMENTS  ..
 C
       INTEGER    INT(NC)
-      COMPLEX*16 A(NC,NC)
+      COMPLEX(dp) A(NC,NC)
 C
 C ..  LOCAL SCALARS  ..
 C
       INTEGER    I,II,IN,J,K
-      COMPLEX*16 YR,DUM
+      COMPLEX(dp) YR,DUM
 C
 C ..  INTRINSIC FUNCTIONS  ..
 C
@@ -1509,7 +1583,7 @@ C
    9  CONTINUE
   10  CONTINUE
       RETURN
-      END
+      END subroutine
 C=======================================================================
       SUBROUTINE ZSU(A,INT,X,N,NC,EMACH)
       IMPLICIT NONE
@@ -1522,17 +1596,17 @@ C
 C ..  SCALAR ARGUMENTS  ..
 C
       INTEGER N,NC
-      REAL*8 EMACH
+      REAL(dp) EMACH
 C
 C ..  ARRAY ARGUMENTS  ..
 C
       INTEGER    INT(NC)
-      COMPLEX*16 A(NC,NC),X(NC)
+      COMPLEX(dp) A(NC,NC),X(NC)
 C
 C ..  LOCAL SCALARS  ..
 C
       INTEGER    I,II,IN,J,IJ
-      COMPLEX*16 DUM
+      COMPLEX(dp) DUM
 C
 C ..  INTRINSIC FUNCTIONS  ..
 C
@@ -1561,7 +1635,7 @@ C
    9  A(I,I)=EMACH*1.0D-7*(1.D0,1.D0)
   10  X(I)=X(I)/A(I,I)
       RETURN
-      END
+      END subroutine
 C=======================================================================
       SUBROUTINE CBABK2(NM,N,LOW,IGH,SCALE,M,ZR,ZI)
       IMPLICIT NONE
@@ -1601,16 +1675,16 @@ C
 C
 C ..  ARRAY ARGUMENTS  ..
 C
-      REAL*8 SCALE(N),ZR(NM,M),ZI(NM,M)
+      REAL(dp) SCALE(N),ZR(NM,M),ZI(NM,M)
 C
 C ..  LOCAL SCALARS  ..
 C
       INTEGER I,J,K,II
-      REAL*8  S
+      REAL(dp)S
 C     ------------------------------------------------------------------
 C
-      IF (M .EQ. 0) GO TO 200
-      IF (IGH .EQ. LOW) GO TO 120
+      IF (M.eq.0) GO TO 200
+      IF (IGH.eq.LOW) GO TO 120
 C
       DO 110 I = LOW, IGH
          S = SCALE(I)
@@ -1627,10 +1701,10 @@ C     ********** FOR I=LOW-1 STEP -1 UNTIL 1,
 C                IGH+1 STEP 1 UNTIL N DO -- **********
   120 DO 140 II = 1, N
          I = II
-         IF (I .GE. LOW .AND. I .LE. IGH) GO TO 140
-         IF (I .LT. LOW) I = LOW - II
+         IF (I >= LOW .AND. I <= IGH) GO TO 140
+         IF (I < LOW) I = LOW - II
          K = SCALE(I)
-         IF (K .EQ. I) GO TO 140
+         IF (K .eq. I) GO TO 140
 C
          DO 130 J = 1, M
             S = ZR(I,J)
@@ -1644,7 +1718,7 @@ C
   140 CONTINUE
 C
   200 RETURN
-      END
+      END subroutine
 C=======================================================================
       SUBROUTINE CBAL(NM,N,AR,AI,LOW,IGH,SCALE)
       IMPLICIT NONE
@@ -1696,12 +1770,12 @@ C
 C
 C ..  ARRAY ARGUMENTS  ..
 C
-      REAL*8 AR(NM,N),AI(NM,N),SCALE(N)
+      REAL(dp) AR(NM,N),AI(NM,N),SCALE(N)
 C
 C ..  LOCAL SCALARS  ..
 C
       INTEGER I,J,K,L,M,JJ,IEXC
-      REAL*8  C,F,G,R,S,B2,RADIX
+      REAL(dp)C,F,G,R,S,B2,RADIX
       LOGICAL NOCONV
 C     ------------------------------------------------------------------
 C
@@ -1716,7 +1790,7 @@ C
       GO TO 100
 C     ******** IN-LINE PROCEDURE FOR ROW AND COLUMN EXCHANGE ********
    20 SCALE(M) = J
-      IF (J .EQ. M) GO TO 50
+      IF (J .eq. M) GO TO 50
 C
       DO 30 I = 1, L
          F = AR(I,J)
@@ -1739,15 +1813,15 @@ C
    50 GO TO (80,130), IEXC
 C     ********** SEARCH FOR ROWS ISOLATING AN EIGENVALUE
 C                AND PUSH THEM DOWN **********
-   80 IF (L .EQ. 1) GO TO 280
+   80 IF (L .eq. 1) GO TO 280
       L = L - 1
 C     ********** FOR J=L STEP -1 UNTIL 1 DO -- **********
   100 DO 120 JJ = 1, L
          J = L + 1 - JJ
 C
          DO 110 I = 1, L
-            IF (I .EQ. J) GO TO 110
-            IF (AR(J,I) .NE. 0.0D0.OR. AI(J,I) .NE.0.0D0) GO TO 120
+            IF (I .eq. J) GO TO 110
+            IF (AR(J,I) /= 0.0D0.OR. AI(J,I) /=0.0D0) GO TO 120
   110    CONTINUE
 C
          M = L
@@ -1763,8 +1837,8 @@ C
   140 DO 170 J = K, L
 C
          DO 150 I = K, L
-            IF (I .EQ. J) GO TO 150
-            IF (AR(I,J) .NE. 0.0D0 .OR. AI(I,J) .NE. 0.0D0) GO TO 170
+            IF (I .eq. J) GO TO 150
+            IF (AR(I,J) /= 0.0D0 .OR. AI(I,J) /= 0.0D0) GO TO 170
   150    CONTINUE
 C
          M = K
@@ -1782,26 +1856,26 @@ C
          R = 0.0D0
 C
          DO 200 J = K, L
-            IF (J .EQ. I) GO TO 200
+            IF (J .eq. I) GO TO 200
             C = C + ABS(AR(J,I)) + ABS(AI(J,I))
             R = R + ABS(AR(I,J)) + ABS(AI(I,J))
   200    CONTINUE
 C     ********** GUARD AGAINST ZERO C OR R DUE TO UNDERFLOW **********
-         IF (C .EQ. 0.0D0 .OR. R .EQ. 0.0D0) GO TO 270
+         IF (C .eq. 0.0D0 .OR. R .eq. 0.0D0) GO TO 270
          G = R / RADIX
          F = 1.0D0
          S = C + R
-  210    IF (C .GE. G) GO TO 220
+  210    IF (C >= G) GO TO 220
          F = F * RADIX
          C = C * B2
          GO TO 210
   220    G = R * RADIX
-  230    IF (C .LT. G) GO TO 240
+  230    IF (C < G) GO TO 240
          F = F / RADIX
          C = C / B2
          GO TO 230
 C     ********** NOW BALANCE **********
-  240    IF ((C + R) / F .GE. 0.95D0 * S) GO TO 270
+  240    IF ((C + R) / F >= 0.95D0 * S) GO TO 270
          G = 1.0D0 / F
          SCALE(I) = SCALE(I) * F
          NOCONV = .TRUE.
@@ -1823,7 +1897,7 @@ C
   280 LOW = K
       IGH = L
       RETURN
-      END
+      END subroutine
 C=======================================================================
       SUBROUTINE CNAA(NDIM,N,AR,AI,EVR,EVI,VECR,VECI,IERR)
       IMPLICIT NONE
@@ -1882,8 +1956,8 @@ C
 C
 C ..  ARRAY ARGUMENTS  ..
 C
-      REAL*8  AR(NDIM,N),AI(NDIM,N),EVR(N),EVI(N)
-      REAL*8  VECR(NDIM,N),VECI(NDIM,N)
+      REAL(dp)AR(NDIM,N),AI(NDIM,N),EVR(N),EVI(N)
+      REAL(dp)VECR(NDIM,N),VECI(NDIM,N)
 C
 C ..  LOCAL SCALARS  ..
 C
@@ -1892,18 +1966,18 @@ C
 C ..  LOCAL ARRAYS  ..
 C
       INTEGER INT(270)
-      REAL*8  SCALE(270)
+      REAL(dp)SCALE(270)
 C     ------------------------------------------------------------------
 C
-      IF(NDIM.LT.N .OR. N.LT.1) GO TO 10
-      IF(N*NDIM .GT. 72900) GO TO 10
+      IF(NDIM<N .OR. N<1) GO TO 10
+      IF(N*NDIM > 72900) GO TO 10
       CALL CBAL(NDIM,N,AR,AI,LOW,IGH,SCALE)
       CALL COMHES(NDIM,N,LOW,IGH,AR,AI,INT)
       CALL COMLR2(NDIM,N,LOW,IGH,INT,AR,AI,EVR,EVI,VECR,VECI,IERR)
-      IF(IERR.EQ.0) GO TO 2
+      IF(IERR.eq.0) GO TO 2
 !     CALL ERRCHK(54,54HIN CNAA  , SOME EIGENVALUE NOT FOUND IN 30 ITERA
 !    1TIONS.)
-      IF(IERR.EQ.N) GO TO 20
+      IF(IERR.eq.N) GO TO 20
       NMIERR = N - IERR
       DO 1 I=1,NMIERR
       IERRPI = IERR + I
@@ -1916,9 +1990,9 @@ C
 !CALL ERRCHK(58,58HIN CNAA  , INPUT DIMENSIONS IN ERROR OR MATRIX I
 !    1S TOO BIG.)
       IERR=-1
-20    IF(IERR .GT. 0) IERR = N-IERR+1
+20    IF(IERR > 0) IERR = N-IERR+1
       RETURN
-      END
+      END subroutine
 C=======================================================================
       SUBROUTINE COMHES(NM,N,LOW,IGH,AR,AI,INT)
       IMPLICIT NONE
@@ -1958,18 +2032,18 @@ C
 C ..  ARRAY ARGUMENTS  ..
 C
       INTEGER INT(IGH)
-      REAL*8  AR(NM,N),AI(NM,N)
+      REAL(dp)AR(NM,N),AI(NM,N)
 C
 C ..  LOCAL SCALARS  ..
 C
       INTEGER    I,J,M,LA,KP1,MM1,MP1
-      REAL*8     XR,XI,YR,YI
-      COMPLEX*16 Z3
+      REAL(dp)   XR,XI,YR,YI
+      COMPLEX(dp) Z3
 C     ------------------------------------------------------------------
 C
       LA = IGH - 1
       KP1 = LOW + 1
-      IF (LA .LT. KP1) GO TO 200
+      IF (LA < KP1) GO TO 200
 C
       DO 180 M = KP1, LA
          MM1 = M - 1
@@ -1979,14 +2053,14 @@ C
 C
          DO 100 J = M, IGH
             IF (ABS(AR(J,MM1)) + ABS(AI(J,MM1))
-     X         .LE. ABS(XR) + ABS(XI)) GO TO 100
+     X         <= ABS(XR) + ABS(XI)) GO TO 100
             XR = AR(J,MM1)
             XI = AI(J,MM1)
             I = J
   100    CONTINUE
 C
          INT(M) = I
-         IF (I .EQ. M) GO TO 130
+         IF (I .eq. M) GO TO 130
 C     ********** INTERCHANGE ROWS AND COLUMNS OF AR AND AI **********
          DO 110 J = MM1, N
             YR = AR(I,J)
@@ -2006,13 +2080,13 @@ C
             AI(J,M) = YI
   120    CONTINUE
 C     ********** END INTERCHANGE **********
-  130    IF (XR .EQ. 0.0D0 .AND. XI .EQ. 0.0D0) GO TO 180
+  130    IF (XR .eq. 0.0D0 .AND. XI .eq. 0.0D0) GO TO 180
          MP1 = M + 1
 C
          DO 160 I = MP1, IGH
             YR = AR(I,MM1)
             YI = AI(I,MM1)
-            IF (YR .EQ. 0.0D0 .AND. YI .EQ. 0.0D0) GO TO 160
+            IF (YR .eq. 0.0D0 .AND. YI .eq. 0.0D0) GO TO 160
             Z3 = DCMPLX(YR,YI) / DCMPLX(XR,XI)
             YR = DREAL(Z3)
             YI = DIMAG (Z3)
@@ -2034,7 +2108,7 @@ C
   180 CONTINUE
 C
   200 RETURN
-      END
+      END subroutine
 C=======================================================================
       SUBROUTINE COMLR2(NM,N,LOW,IGH,INT,HR,HI,WR,WI,ZR,ZI,IERR)
       IMPLICIT NONE
@@ -2092,13 +2166,13 @@ C
 C ..  ARRAY ARGUMENTS  ..
 C
       INTEGER INT(IGH)
-      REAL*8 HR(NM,N),HI(NM,N),WR(N),WI(N),ZR(NM,N),ZI(NM,N)
+      REAL(dp) HR(NM,N),HI(NM,N),WR(N),WI(N),ZR(NM,N),ZI(NM,N)
 C
 C ..  LOCAL SCALARS  ..
 C
       INTEGER    I,J,K,L,M,EN,II,JJ,LL,MM,NN,IM1,IP1,ITS,MP1,ENM1,IEND
-      REAL*8     SI,SR,TI,TR,XI,XR,YI,YR,ZZI,ZZR,NORM,MACHEP
-      COMPLEX*16 Z3
+      REAL(dp)   SI,SR,TI,TR,XI,XR,YI,YR,ZZI,ZZR,NORM,MACHEP
+      COMPLEX(dp) Z3
 C     ------------------------------------------------------------------
 C
 C     ********** MACHEP IS A MACHINE DEPENDENT PARAMETER SPECIFYING
@@ -2111,14 +2185,14 @@ C     ********** INITIALIZE EIGENVECTOR MATRIX **********
       DO 100 I = 1, N
 C
          DO 100 J = 1, N
-            ZR(I,J) = 0.0D0
-            ZI(I,J) = 0.0D0
-            IF (I .EQ. J) ZR(I,J) = 1.0D0
+            ZR(I,J) = 0.0_dp
+            ZI(I,J) = 0.0_dp
+            IF (I .eq. J) ZR(I,J) = 1.0_dp
   100 CONTINUE
 C     ********** FORM THE MATRIX OF ACCUMULATED TRANSFORMATIONS
 C                FROM THE INFORMATION LEFT BY COMHES **********
       IEND = IGH - LOW - 1
-      IF (IEND .LE. 0) GO TO 180
+      IF (IEND <= 0) GO TO 180
 C     ********** FOR I=IGH-1 STEP -1 UNTIL LOW+1 DO -- **********
       DO 160 II = 1, IEND
          I = IGH - II
@@ -2130,55 +2204,55 @@ C
   120    CONTINUE
 C
          J = INT(I)
-         IF (I .EQ. J) GO TO 160
+         IF (I .eq. J) GO TO 160
 C
          DO 140 K = I, IGH
             ZR(I,K) = ZR(J,K)
             ZI(I,K) = ZI(J,K)
-            ZR(J,K) = 0.0D0
-            ZI(J,K) = 0.0D0
+            ZR(J,K) = 0.0_dp
+            ZI(J,K) = 0.0_dp
   140    CONTINUE
 C
-         ZR(J,I) = 1.0D0
+         ZR(J,I) = 1.0_dp
   160 CONTINUE
 C     ********** STORE ROOTS ISOLATED BY CBAL **********
   180 DO 200 I = 1, N
-         IF (I .GE. LOW .AND. I .LE. IGH) GO TO 200
+         IF (I >= LOW .AND. I <= IGH) GO TO 200
          WR(I) = HR(I,I)
          WI(I) = HI(I,I)
   200 CONTINUE
 C
       EN = IGH
-      TR = 0.0D0
-      TI = 0.0D0
+      TR = 0.0_dp
+      TI = 0.0_dp
 C     ********** SEARCH FOR NEXT EIGENVALUE **********
-  220 IF (EN .LT. LOW) GO TO 680
+  220 IF (EN < LOW) GO TO 680
       ITS = 0
       ENM1 = EN - 1
 C     ********** LOOK FOR SINGLE SMALL SUB-DIAGONAL ELEMENT
 C                FOR L=EN STEP -1 UNTIL LOW DO -- **********
   240 DO 260 LL = LOW, EN
          L = EN + LOW - LL
-         IF (L .EQ. LOW) GO TO 300
-         IF (ABS(HR(L,L-1)) + ABS(HI(L,L-1)) .LE.
+         IF (L .eq. LOW) GO TO 300
+         IF (ABS(HR(L,L-1)) + ABS(HI(L,L-1)) <=
      X      MACHEP * (ABS(HR(L-1,L-1)) + ABS(HI(L-1,L-1))
      X             + ABS(HR(L,L)) + ABS(HI(L,L)))) GO TO 300
   260 CONTINUE
 C     ********** FORM SHIFT **********
-  300 IF (L .EQ. EN) GO TO 660
-      IF (ITS .EQ. 30) GO TO 1000
-      IF (ITS .EQ. 10 .OR. ITS .EQ. 20) GO TO 320
+  300 IF (L .eq. EN) GO TO 660
+      IF (ITS .eq. 30) GO TO 1000
+      IF (ITS .eq. 10 .OR. ITS .eq. 20) GO TO 320
       SR = HR(EN,EN)
       SI = HI(EN,EN)
       XR = HR(ENM1,EN) * HR(EN,ENM1) - HI(ENM1,EN) * HI(EN,ENM1)
       XI = HR(ENM1,EN) * HI(EN,ENM1) + HI(ENM1,EN) * HR(EN,ENM1)
-      IF (XR .EQ. 0.0D0 .AND. XI .EQ. 0.0D0) GO TO 340
-      YR = (HR(ENM1,ENM1) - SR) / 2.0D0
-      YI = (HI(ENM1,ENM1) - SI) / 2.0D0
-      Z3 = SQRT(DCMPLX(YR**2-YI**2+XR,2.0D0*YR*YI+XI))
+      IF (XR .eq. 0.0_dp .AND. XI .eq. 0.0_dp) GO TO 340
+      YR = (HR(ENM1,ENM1) - SR) / 2.0_dp
+      YI = (HI(ENM1,ENM1) - SI) / 2.0_dp
+      Z3 = SQRT(DCMPLX(YR**2-YI**2+XR,2.0_dp*YR*YI+XI))
       ZZR = DREAL(Z3)
       ZZI = DIMAG(Z3)
-      IF (YR * ZZR + YI * ZZI .GE. 0.0D0) GO TO 310
+      IF (YR * ZZR + YI * ZZI >= 0.0_dp) GO TO 310
       ZZR = -ZZR
       ZZI = -ZZI
   310 Z3 = DCMPLX(XR,XI) / DCMPLX(YR+ZZR,YI+ZZI)
@@ -2205,13 +2279,13 @@ C                SUB-DIAGONAL ELEMENTS **********
 C     ********** FOR M=EN-1 STEP -1 UNTIL L DO -- **********
       DO 380 MM = L, ENM1
          M = ENM1 + L - MM
-         IF (M .EQ. L) GO TO 420
+         IF (M .eq. L) GO TO 420
          YI = YR
          YR = ABS(HR(M,M-1)) + ABS(HI(M,M-1))
          XI = ZZR
          ZZR = XR
          XR = ABS(HR(M-1,M-1)) + ABS(HI(M-1,M-1))
-         IF (YR .LE. MACHEP * ZZR / YI * (ZZR + XR + XI)) GO TO 420
+         IF (YR <= MACHEP * ZZR / YI * (ZZR + XR + XI)) GO TO 420
   380 CONTINUE
 C     ********** TRIANGULAR DECOMPOSITION H=L*R **********
   420 MP1 = M + 1
@@ -2222,7 +2296,7 @@ C
          XI = HI(IM1,IM1)
          YR = HR(I,IM1)
          YI = HI(I,IM1)
-         IF (ABS(XR) + ABS(XI) .GE. ABS(YR) + ABS(YI)) GO TO 460
+         IF (ABS(XR) + ABS(XI) >= ABS(YR) + ABS(YI)) GO TO 460
 C     ********** INTERCHANGE ROWS OF HR AND HI **********
          DO 440 J = IM1, N
             ZZR = HR(IM1,J)
@@ -2234,10 +2308,10 @@ C     ********** INTERCHANGE ROWS OF HR AND HI **********
   440    CONTINUE
 C
          Z3 = DCMPLX(XR,XI) / DCMPLX(YR,YI)
-         WR(I) = 1.0D0
+         WR(I) = 1.0_dp
          GO TO 480
   460    Z3 = DCMPLX(YR,YI) / DCMPLX(XR,XI)
-         WR(I) = -1.0D0
+         WR(I) = -1.0_dp
   480    ZZR = DREAL(Z3)
          ZZI = DIMAG(Z3)
          HR(I,IM1) = ZZR
@@ -2257,7 +2331,7 @@ C     ********** COMPOSITION R*L=H **********
          HI(J,J-1) = 0.0D0
 C     ********** INTERCHANGE COLUMNS OF HR, HI, ZR, AND ZI,
 C                IF NECESSARY **********
-         IF (WR(J) .LE. 0.0D0) GO TO 580
+         IF (WR(J) <= 0.0D0) GO TO 580
 C
          DO 540 I = 1, J
             ZZR = HR(I,J-1)
@@ -2308,7 +2382,7 @@ C
   720 CONTINUE
 C
       HR(1,1) = NORM
-      IF (N .EQ. 1 .OR. NORM .EQ. 0.0D0) GO TO 1001
+      IF (N .eq. 1 .OR. NORM .eq. 0.0D0) GO TO 1001
 C     ********** FOR EN=N STEP -1 UNTIL 2 DO -- **********
       DO 800 NN = 2, N
          EN = N + 2 - NN
@@ -2320,7 +2394,7 @@ C     ********** FOR I=EN-1 STEP -1 UNTIL 1 DO -- **********
             I = EN - II
             ZZR = HR(I,EN)
             ZZI = HI(I,EN)
-            IF (I .EQ. ENM1) GO TO 760
+            IF (I .eq. ENM1) GO TO 760
             IP1 = I + 1
 C
             DO 740 J = IP1, ENM1
@@ -2330,7 +2404,7 @@ C
 C
   760       YR = XR - WR(I)
             YI = XI - WI(I)
-            IF (YR .EQ. 0.0D0 .AND. YI .EQ. 0.0D0) YR = MACHEP * NORM
+            IF (YR .eq. 0.0D0 .AND. YI .eq. 0.0D0) YR = MACHEP * NORM
             Z3 = DCMPLX(ZZR,ZZI) / DCMPLX(YR,YI)
             HR(I,EN) = DREAL(Z3)
             HI(I,EN) = DIMAG(Z3)
@@ -2341,7 +2415,7 @@ C     ********** END BACKSUBSTITUTION **********
       ENM1 = N - 1
 C     ********** VECTORS OF ISOLATED ROOTS **********
       DO 840 I = 1, ENM1
-         IF (I .GE. LOW .AND. I .LE. IGH) GO TO 840
+         IF (I >= LOW .AND. I <= IGH) GO TO 840
          IP1 = I + 1
 C
          DO 820 J = IP1, N
@@ -2375,7 +2449,7 @@ C     ********** SET ERROR -- NO CONVERGENCE TO AN
 C                EIGENVALUE AFTER 30 ITERATIONS **********
  1000 IERR = EN
  1001 RETURN
-      END
+      END subroutine
 C=======================================================================
       SUBROUTINE ERRCHK(NCHARS,NARRAY)
       IMPLICIT NONE
@@ -2421,28 +2495,28 @@ C     ------------------------------------------------------------------
 C
       CALL ERRGET(NF,NT)
 C     IF ERRCHK WAS CALLED WITH NEGATIVE CHARACTER COUNT, SET FATAL FLAG
-      IF (NCHARS.LT.0) NF = -1
+      IF (NCHARS<0) NF = -1
 C     IF MESSAGES ARE TO BE SUPPRESSED, RETURN
-      IF (NF.EQ.0) RETURN
+      IF (NF.eq.0) RETURN
 C     IF CHARACTER COUNT IS INVALID, STOP
-      IF (NCHARS.EQ.0) PRINT 5
+      IF (NCHARS.eq.0) PRINT 5
     5 FORMAT(/31H ERRCHK WAS CALLED INCORRECTLY.)
-      IF (NCHARS.EQ.0) STOP
+      IF (NCHARS.eq.0) STOP
 C     PRINT MESSAGE
       CALL ERRPRT(IABS(NCHARS),NARRAY)
 C     IF LAST MESSAGE, SAY SO
-      IF (NF.EQ.1) PRINT 10
+      IF (NF.eq.1) PRINT 10
    10 FORMAT (30H ERRCHK MESSAGE LIMIT REACHED.)
 C     PRINT TRACE-BACK IF ASKED TO
-C     IF ((NT.GT.0).OR.(NF.LT.0)) CALL SYSTEM ROUTINE FOR TRACEBACK
+C     IF ((NT>0).OR.(NF<0)) CALL SYSTEM ROUTINE FOR TRACEBACK
 C     DECREMENT MESSAGE COUNT
-      IF (NF.GT.0) NF = NF-1
+      IF (NF>0) NF = NF-1
       CALL ERXSET(NF,NT)
 C     IF ALL IS WELL, RETURN
-      IF (NF.GE.0) RETURN
+      IF (NF>=0) RETURN
 C     IF THIS MESSAGE IS SUPPRESSABLE BY AN ERXSET CALL,
 C     THEN EXPLAIN ERXSET USAGE.
-C     IF (NCHARS.GT.0) PRINT 15
+C     IF (NCHARS>0) PRINT 15
 C  15 FORMAT (/13H *** NOTE ***
 C    1/53H TO MAKE THE ERROR MESSAGE PRINTED ABOVE BE NONFATAL,
 C    2/39H OR TO SUPPRESS THE MESSAGE COMPLETELY,
@@ -2453,7 +2527,7 @@ C    6/27H          CALL ERXSET(10,0)    )
       PRINT 20
    20 FORMAT (/28H PROGRAM ABORT DUE TO ERROR.)
       STOP
-      END
+      END subroutine
 !=======================================================================
 !     SUBROUTINE ONECHK(NCHARS,NARRAY)
 !     IMPLICIT NONE
@@ -2487,16 +2561,16 @@ C    6/27H          CALL ERXSET(10,0)    )
 !     ------------------------------------------------------------------
 !
 !     DATA NFLAG/4H.$,*/
-!     IF (NARRAY(1).EQ.NFLAG) RETURN
+!     IF (NARRAY(1)=NFLAG) RETURN
 !     CALL ERRGET(NF,NT)
-!     IF ((NF.EQ.0).AND.(NCHARS.GT.0)) RETURN
+!     IF ((NF=0).AND.(NCHARS>0)) RETURN
 !     CALL ERRPRT (59,59HTHE FOLLOWING INFORMATIVE DIAGNOSTIC WILL APPEA
 !    1R ONLY ONCE.)
 !     CALL ERRPRT(IABS(NCHARS),NARRAY)
-!     IF (NF.GT.0) NF = NF-1
+!     IF (NF>0) NF = NF-1
 !     CALL ERXSET(NF,NT)
 !     NARRAY(1) = NFLAG
-!     END
+!     END subroutine
 C=======================================================================
       SUBROUTINE ERRPRT(NCHARS,NARRAY)
       IMPLICIT NONE
@@ -2531,7 +2605,7 @@ C   1 FORMAT (1X,7A10)
       NWORDS = (NCHARS+NCH-1)/NCH
       PRINT 1,(NARRAY(I),I=1,NWORDS)
       RETURN
-      END
+      END subroutine
 C=======================================================================
       SUBROUTINE ERXSET(NFATAL,NTRACE)
       IMPLICIT NONE
@@ -2551,9 +2625,9 @@ C                  A NONNEGATIVE VALUE IS THE MAXIMUM NUMBER OF NONFATAL
 C                  WARNING MESSAGES WHICH WILL  BE  PRINTED  BY  ERRCHK,
 C                  AFTER WHICH NONFATAL MESSAGES  WILL  NOT BE  PRINTED.
 C                  (DEFAULT VALUE IS -1.)
-C         NTRACE - .GE.1 WILL CAUSE A TRACE-BACK TO BE GIVEN,
+C         NTRACE - >=1 WILL CAUSE A TRACE-BACK TO BE GIVEN,
 C                        IF THIS FEATURE IS IMPLEMENTED ON THIS  SYSTEM.
-C                  .LE.0 WILL SUPPRESS ANY TRACE-BACK, EXCEPT FOR  CASES
+C                  <=0 WILL SUPPRESS ANY TRACE-BACK, EXCEPT FOR  CASES
 C                        WHEN EXECUTION IS TERMINATED (DEFAULT VALUE:0.)
 C
 C         *NOTE* -- SOME CALLS TO ERRCHK WILL CAUSE UNCONDITIONAL
@@ -2573,7 +2647,7 @@ C     ------------------------------------------------------------------
 C
       CALL ERSTGT(0,NFATAL,NTRACE)
       RETURN
-      END
+      END subroutine
 C=======================================================================
       SUBROUTINE ERRGET(NFATAL,NTRACE)
       IMPLICIT NONE
@@ -2597,7 +2671,7 @@ C     ------------------------------------------------------------------
 C
       CALL ERSTGT(1,NFATAL,NTRACE)
       RETURN
-      END
+      END subroutine
 C=======================================================================
       SUBROUTINE ERSTGT(K,NFATAL,NTRACE)
       IMPLICIT NONE
@@ -2621,14 +2695,14 @@ C
       DATA LNF/-1/,LNT/0/
 C     ------------------------------------------------------------------
 C
-      IF (K.LE.0) LNF = NFATAL
-      IF (K.LE.0) LNT = NTRACE
-      IF (K.GT.0) NFATAL = LNF
-      IF (K.GT.0) NTRACE = LNT
+      IF (K<=0) LNF = NFATAL
+      IF (K<=0) LNT = NTRACE
+      IF (K>0) NFATAL = LNF
+      IF (K>0) NTRACE = LNT
       RETURN
-      END
+      END subroutine
 C=======================================================================
-      complex*16 FUNCTION CERF(Z,EMACH)
+      COMPLEX(dp) FUNCTION CERF(Z,EMACH)
       IMPLICIT NONE
       integer, parameter:: dp=kind(0.d0)
 C     ------------------------------------------------------------------
@@ -2642,20 +2716,20 @@ C     ------------------------------------------------------------------
 C
 C ..  SCALAR ARGUMENTS  ..
 C
-      REAL*8, intent(in)::     EMACH
-      COMPLEX*16, intent(in):: Z
+      REAL(dp), intent(in)::     EMACH
+      COMPLEX(dp), intent(in):: Z
 C
 C ..  LOCAL SCALARS  ..
 C
       INTEGER    NN,N
-      REAL*8     ABSZ,ABTERM,API,EPS,FACT,FACTD,FACTN,PI
-      REAL*8     Q,RTPI,TEST,X,Y,YY
-      COMPLEX*16 ZZ,CONE,CI,CZERO,SUM,ZZS,XZZS,CER
-      COMPLEX*16 H1,H2,H3,U1,U2,U3,TERM1,TERM2
+      REAL(dp)   ABSZ,ABTERM,API,EPS,FACT,FACTD,FACTN,PI
+      REAL(dp)   Q,RTPI,TEST,X,Y,YY
+      COMPLEX(dp) ZZ,CONE,CI,CZERO,SUM,ZZS,XZZS,CER
+      COMPLEX(dp) H1,H2,H3,U1,U2,U3,TERM1,TERM2
 C
 C ..  INTRINSIC FUNCTIONS  ..
 C
-      INTRINSIC DCMPLX,EXP,CONJG
+C      INTRINSIC DCMPLX,EXP,CONJG
 C
 C ..  DATA STATEMENTS  ..
 C
@@ -2767,9 +2841,10 @@ C
       GOTO 29
   28  cerf=CER
   29  RETURN
-      END
+
+      END function
 C=======================================================================
-      REAL*8 FUNCTION BLM(L1,M1,L2,M2,L3,M3,LMAX)
+      REAL(dp) FUNCTION BLM(L1,M1,L2,M2,L3,M3,LMAX)
       IMPLICIT NONE
       integer, parameter:: dp=kind(0.d0)
 C-----------------------------------------------------------------------
@@ -2795,11 +2870,11 @@ C
       INTEGER I,IA1,IA2,IA3,IA4,IA5,IA6,IA7,IA8,IA9,IB1,IB2,IB3,IB4
       INTEGER IB5,IC,IC1,IC2,IC3,IC4,IC5,IC6,IS,IT,IT1,IT2,NL1,NL2
       INTEGER NL3,NM1,NM2,NM3,NTEMP,NN
-      REAL*8  PI,SIGN,A,AD,AN,B,BD,BN,C,CD,CN
+      REAL(dp)PI,SIGN,A,AD,AN,B,BD,BN,C,CD,CN
 C
 C ..  LOCAL ARRAYS  ..
 C
-      REAL*8  FAC(LMAX4D)
+      REAL(dp)FAC(LMAX4D)
 C
 C ..  DATA STATEMENTS  ..
 C
@@ -2909,9 +2984,9 @@ C
   19  WRITE(6,20)L1,L2,M2,L3,M3
   20  FORMAT(28H INVALID ARGUMENTS FOR BLM. ,5(I2,1H,))
       RETURN
-      END
+      END function
 C=======================================================================
-      COMPLEX*16 FUNCTION CODD(L,M,L1,M1,LMODD,XODD)
+      COMPLEX(dp) FUNCTION CODD(L,M,L1,M1,LMODD,XODD)
       IMPLICIT NONE
       integer, parameter:: dp=kind(0.d0)
 C     ------------------------------------------------------------------
@@ -2922,12 +2997,12 @@ C
 C
 C ..  ARRAY ARGUMENTS  ..
 C
-      COMPLEX*16 XODD(LMODD,LMODD)
+      COMPLEX(dp) XODD(LMODD,LMODD)
 C
 C ..  LOCAL SCALARS  ..
 C
       INTEGER I,J
-      COMPLEX*16 CZERO
+      COMPLEX(dp) CZERO
 C
 C ..  INTRINSIC FUNCTIONS
 C
@@ -2937,7 +3012,7 @@ C ..  DATA STATEMENTS  ..
 C
       DATA CZERO/(0.D0,0.D0)/
 C     ------------------------------------------------------------------
-      IF(ABS(M).LE.L.AND.ABS(M1).LE.L1) THEN
+      IF(ABS(M)<=L.AND.ABS(M1)<=L1) THEN
       I=(L*L+M+1)/2
       J=(L1*L1+M1+1)/2
       CODD=XODD(I,J)
@@ -2945,9 +3020,9 @@ C     ------------------------------------------------------------------
       CODD=CZERO
                                         END IF
       RETURN
-      END
+      END function
 C=======================================================================
-      COMPLEX*16 FUNCTION CEVEN(L,M,L1,M1,LMEVEN,XEVEN)
+      COMPLEX(dp) FUNCTION CEVEN(L,M,L1,M1,LMEVEN,XEVEN)
       IMPLICIT NONE
       integer, parameter:: dp=kind(0.d0)
 C     ------------------------------------------------------------------
@@ -2958,12 +3033,12 @@ C
 C
 C ..  ARRAY ARGUMENTS  ..
 C
-      COMPLEX*16 XEVEN(LMEVEN,LMEVEN)
+      COMPLEX(dp) XEVEN(LMEVEN,LMEVEN)
 C
 C ..  LOCAL SCALARS  ..
 C
       INTEGER I,J
-      COMPLEX*16 CZERO
+      COMPLEX(dp) CZERO
 C
 C ..  INTRINSIC FUNCTIONS
 C
@@ -2973,7 +3048,7 @@ C ..  DATA STATEMENTS  ..
 C
       DATA CZERO/(0.D0,0.D0)/
 C     ------------------------------------------------------------------
-      IF(ABS(M).LE.L.AND.ABS(M1).LE.L1) THEN
+      IF(ABS(M)<=L.AND.ABS(M1)<=L1) THEN
       I=(L*L+2*L+M+2)/2
       J=(L1*L1+2*L1+M1+2)/2
       CEVEN=XEVEN(I,J)
@@ -2981,7 +3056,7 @@ C     ------------------------------------------------------------------
       CEVEN=CZERO
                                         END IF
       RETURN
-      END
+      END function
 C=======================================================================
       SUBROUTINE PAIR(IGKMAX,QIL,QIIL,QIIIL,QIVL,QIR,QIIR,QIIIR,QIVR)
       IMPLICIT NONE
@@ -3003,22 +3078,22 @@ C
 C
 C ..  ARRAY ARGUMENTS  ..
 C
-      COMPLEX*16 QIL (IGKD,IGKD),QIIL(IGKD,IGKD),QIIIL(IGKD,IGKD)
-      COMPLEX*16 QIVL(IGKD,IGKD)
-      COMPLEX*16 QIR (IGKD,IGKD),QIIR(IGKD,IGKD),QIIIR(IGKD,IGKD)
-      COMPLEX*16 QIVR(IGKD,IGKD)
+      COMPLEX(dp) QIL (IGKD,IGKD),QIIL(IGKD,IGKD),QIIIL(IGKD,IGKD)
+      COMPLEX(dp) QIVL(IGKD,IGKD)
+      COMPLEX(dp) QIR (IGKD,IGKD),QIIR(IGKD,IGKD),QIIIR(IGKD,IGKD)
+      COMPLEX(dp) QIVR(IGKD,IGKD)
 C
 C ..  LOCAL SCALARS  ..
 C
       INTEGER    IGK1,IGK2,IGK3
-      REAL*8     EMACH
-      COMPLEX*16 CZERO,CONE
+      REAL(dp)   EMACH
+      COMPLEX(dp) CZERO,CONE
 C
 C ..  LOCAL ARRAYS  ..
 C
       INTEGER    INT(IGKD),JNT(IGKD)
-      COMPLEX*16 QINV1(IGKD,IGKD),QINV2(IGKD,IGKD),W1(IGKD,IGKD)
-      COMPLEX*16 W2(IGKD,IGKD),W3(IGKD,IGKD),W4(IGKD,IGKD)
+      COMPLEX(dp) QINV1(IGKD,IGKD),QINV2(IGKD,IGKD),W1(IGKD,IGKD)
+      COMPLEX(dp) W2(IGKD,IGKD),W3(IGKD,IGKD),W4(IGKD,IGKD)
 C
 C ..  EXTERNAL ROUTINES  ..
 C
@@ -3082,7 +3157,7 @@ C
       QIVL (IGK1,IGK2)=W4   (IGK1,IGK2)
    9  CONTINUE
       RETURN
-      END
+      END subroutine
 C=======================================================================
       SUBROUTINE PCSLAB(LMAX,IGMAX,RAP,EPSMED,EPSSPH,MUMED,MUSPH,KAPPA,
      &                  AK,DL,DR,G,ELM,A0,EMACH,QI,QII,QIII,QIV)
@@ -3162,7 +3237,7 @@ C
       allocate(TE(1:(lmax+1)))
       allocate(TH(1:(lmax+1)))
       IGKMAX=2*IGMAX
-      call zgetrf_wrap ( vXXMAT1, vINT1 )
+      !call zgetrf_wrap ( vXXMAT1, vINT1 )
       LMAX1=LMAX+1
       LMTOT=LMAX1*LMAX1-1
       LMXOD=(LMAX*LMAX1)/2
@@ -3177,7 +3252,7 @@ C
       CALL SETUP(LMAX,XEVEN,XODD,TE,TH,XXMAT1,XXMAT2)
       vXXMAT1 = XXMAT1(1:lmtot, 1:lmtot)
       vXXMAT2 = XXMAT2(1:lmtot, 1:lmtot)
-      call zgetrf_wrap ( vXXMAT1, vINT1 )
+      !call zgetrf_wrap ( vXXMAT1, vINT1 )
       CALL ZGETRF( lmtot, lmtot, vXXMAT1, lmtot, vINT1, INFO )
       CALL ZGETRF( lmtot, lmtot, vXXMAT2, lmtot, vINT2, INFO )
 !     CALL ZGE(XXMAT1,INT1,LMTOT,LMTD,EMACH)
@@ -3198,7 +3273,7 @@ C
       DO 2 L=1,LMAX
       DO 2 M=-L,L
       II=II+1
-      IF(MOD((L+M),2).EQ.0)  THEN
+      IF(MOD((L+M),2).eq.0)  THEN
       IEV=IEV+1
       BMEL1(IEV)=TH(L+1)*AH(K2,II+1)
       BMEL2(IEV)=TE(L+1)*AE(K2,II+1)
@@ -3239,7 +3314,7 @@ C
       DO 6 L=1,LMAX
       DO 6 M=-L,L
       II=II+1
-      IF(MOD((L+M),2).EQ.0)  THEN
+      IF(MOD((L+M),2).eq.0)  THEN
       IEV=IEV+1
       LAME(K1)=LAME(K1)+DLME(K1,II+1)*BMEL2(IEV)
       LAMH(K1)=LAMH(K1)+DLMH(K1,II+1)*BMEL1(IEV)
@@ -3252,8 +3327,8 @@ C
     5 CONTINUE
       DO 7 K1=1,2
       IGK1=IGK1+1
-      IF(ISIGN1.EQ.1) QI  (IGK1,IGK2)=LAMH(K1)+LAME(K1)
-      IF(ISIGN1.EQ.2) QIII(IGK1,IGK2)=LAMH(K1)+LAME(K1)
+      IF(ISIGN1.eq.1) QI  (IGK1,IGK2)=LAMH(K1)+LAME(K1)
+      IF(ISIGN1.eq.2) QIII(IGK1,IGK2)=LAMH(K1)+LAME(K1)
     7 CONTINUE
     9 CONTINUE
     4 CONTINUE
@@ -3268,7 +3343,7 @@ C
                       DO 11 K1=1,2
                       IGK1=IGK1+1
                       SIGNUS=1.D0
-                      IF(K2.NE.K1) SIGNUS=-1.D0
+                      IF(K2/=K1) SIGNUS=-1.D0
                       QII(IGK1,IGK2)=SIGNUS*QIII(IGK1,IGK2)
                       QIV(IGK1,IGK2)=SIGNUS*QI  (IGK1,IGK2)
    11                 CONTINUE
@@ -3299,7 +3374,7 @@ C
    13 CONTINUE
    14 CONTINUE
       RETURN
-      END
+      END subroutine
 C=======================================================================
       SUBROUTINE BAND(IGMAX,ZVAL,EMACH,AK,G,AL,KAPL,KAPR,
      &                QI,QII,QIII,QIV)
@@ -3320,35 +3395,35 @@ C
 C ..  SCALAR ARGUMENTS  ..
 C
       INTEGER    IGMAX
-      REAL*8     ZVAL,EMACH
-      COMPLEX*16 KAPL,KAPR
+      REAL(dp)   ZVAL,EMACH
+      COMPLEX(dp) KAPL,KAPR
 C
 C ..  ARRAY ARGUMENTS ..
 C
-      REAL*8     AK(2),G(2,IGD),AL(3)
-      COMPLEX*16 QI(IGKD,IGKD),QII(IGKD,IGKD)
-      COMPLEX*16 QIII(IGKD,IGKD),QIV(IGKD,IGKD)
+      REAL(dp)   AK(2),G(2,IGD),AL(3)
+      COMPLEX(dp) QI(IGKD,IGKD),QII(IGKD,IGKD)
+      COMPLEX(dp) QIII(IGKD,IGKD),QIV(IGKD,IGKD)
 C
 C ..  SCALAR VARIABLES ..
 C
       INTEGER    II,I,IGK1,IGK2,IGKMAX,J
       INTEGER    KD,LIB1,LIB2,LU,LP,LN,IFAIL,IGK3,IGK2M
-      REAL*8     PI,AKA,BKZRE,BKZIM
-      COMPLEX*16 CONE,CI,CZERO,EAKA
+      REAL(dp)   PI,AKA,BKZRE,BKZIM
+      COMPLEX(dp) CONE,CI,CZERO,EAKA
 C
 C ..  ARRAY VARIABLES ..
 C
       INTEGER    INT(IGKD)
-      REAL*8     AR(IGK2D,IGK2D),AI(IGK2D,IGK2D)
-      REAL*8     RR(IGK2D),RI(IGK2D),VR(IGK2D,IGK2D),VI(IGK2D,IGK2D)
-      REAL*8     AKZAP(IGK2D),AKZIP(IGK2D)
-      REAL*8     AKZREP(IGK2D),AKZIMP(IGK2D),AKZREN(IGK2D),AKZIMN(IGK2D)
-      COMPLEX*16 QH1(IGKD,IGKD),QH2(IGKD,IGKD),AKZ(IGK2D)
-      COMPLEX*16 COMVEC(IGK2D,IGK2D)
+      REAL(dp)   AR(IGK2D,IGK2D),AI(IGK2D,IGK2D)
+      REAL(dp)   RR(IGK2D),RI(IGK2D),VR(IGK2D,IGK2D),VI(IGK2D,IGK2D)
+      REAL(dp)   AKZAP(IGK2D),AKZIP(IGK2D)
+      REAL(dp)   AKZREP(IGK2D),AKZIMP(IGK2D),AKZREN(IGK2D),AKZIMN(IGK2D)
+      COMPLEX(dp) QH1(IGKD,IGKD),QH2(IGKD,IGKD),AKZ(IGK2D)
+      COMPLEX(dp) COMVEC(IGK2D,IGK2D)
 C
 C ..  INTRINSIC FUNCTIONS ..
 C
-      INTRINSIC ABS,DCMPLX,SQRT,DIMAG,DREAL,EXP,LOG
+C      INTRINSIC ABS,DCMPLX,SQRT,DIMAG,DREAL,EXP,LOG
 C
 C ..  EXTERNAL ROUTINES ..
 C
@@ -3393,14 +3468,14 @@ C
       AI(IGKMAX+IGK1,IGKMAX+IGK2)=DIMAG(QH2(IGK1,IGK2))
     9 CONTINUE
       CALL CNAA(IGK2D,IGK2M,AR,AI,RR,RI,VR,VI,IFAIL)
-      IF(IFAIL.NE.0) THEN
+      IF(IFAIL/=0) THEN
       WRITE(6,102) IFAIL
                          STOP
                      ENDIF
       DO 8 II=1,IGK2M
 C*****THE IF-STRUCTURE  WHICH FOLLOWS  CAN BE  OMITTED  IF THE ACCURACY
 C*****'MACHEP' OF THE SUBROUTINE COMLR2 IS CHOSEN GREATER THAN 2**(-47)
-      IF((RR(II).EQ.0.D0).AND.(RI(II).EQ.0.D0)) THEN
+      IF((RR(II).eq.0.D0).AND.(RI(II).eq.0.D0)) THEN
       RR(II)=1.D-20
       RI(II)=1.D-20
       ENDIF
@@ -3416,7 +3491,7 @@ C*****'MACHEP' OF THE SUBROUTINE COMLR2 IS CHOSEN GREATER THAN 2**(-47)
       DO 10 KD=1,IGK2M
 C*****WARNING!! THE APPROPRIATE LIMITS FOR DIMAG(AKZ(KD))
 C*****DEPEND STRONGLY ON IGMAX.
-      IF(DIMAG(AKZ(KD)).GT.0.D0) THEN
+      IF(DIMAG(AKZ(KD))>0.D0) THEN
       AKZREP(LP)=DREAL(AKZ(KD))
       AKZIMP(LP)=DIMAG(AKZ(KD))
       LP=LP+1
@@ -3425,17 +3500,17 @@ C*****DEPEND STRONGLY ON IGMAX.
       AKZIMN(LN)=DIMAG(AKZ(KD))
       LN=LN+1
       ENDIF
-      IF(ABS(DIMAG(AKZ(KD))).GT.1.0D-2) GO TO 10
+      IF(ABS(DIMAG(AKZ(KD)))>1.0D-2) GO TO 10
       AKZAP(LU)=DREAL(AKZ(KD))
       AKZIP(LU)=DIMAG(AKZ(KD))
       LU=LU+1
    10 CONTINUE
-      IF (LU.LT.1.1D0) THEN
+      IF (LU<1.1D0) THEN
       DO 13 J=2,LP-1
       BKZIM=AKZIMP(J)
       BKZRE=AKZREP(J)
       DO 14 I=J-1,1,-1
-      IF(AKZIMP(I).LE.BKZIM) GO TO 15
+      IF(AKZIMP(I)<=BKZIM) GO TO 15
       AKZIMP(I+1)=AKZIMP(I)
       AKZREP(I+1)=AKZREP(I)
    14 CONTINUE
@@ -3447,7 +3522,7 @@ C*****DEPEND STRONGLY ON IGMAX.
       BKZIM=AKZIMN(J)
       BKZRE=AKZREN(J)
       DO 17 I=J-1,1,-1
-      IF(AKZIMN(I).LE.BKZIM) GO TO 18
+      IF(AKZIMN(I)<=BKZIM) GO TO 18
       AKZIMN(I+1)=AKZIMN(I)
       AKZREN(I+1)=AKZREN(I)
    17 CONTINUE
@@ -3467,7 +3542,7 @@ C*****DEPEND STRONGLY ON IGMAX.
   101 FORMAT(E10.4,3X,10(E10.4,1X))
   102 FORMAT(//13X,'ERROR IN CNAA   IFAIL = ',I2)
   103 FORMAT(13X,10(E10.4,1X))
-      END
+      END subroutine
 C======================================================================
       SUBROUTINE REDUCE(AR1,AR2,AK,IGMAX,G,IG0,EMACH)
       IMPLICIT NONE
@@ -3487,166 +3562,166 @@ C
 C ..  SCALAR ARGUMENTS  ..
 C
       INTEGER IGMAX,IG0
-      REAL*8 EMACH
+      REAL(dp) EMACH
 C
 C ..  ARRAY ARGUMENTS  ..
 C
-      REAL*8 AR1(2),AR2(2),AK(2),G(2,IGD)
+      REAL(dp) AR1(2),AR2(2),AK(2),G(2,IGD)
 C
 C ..  LOCAL SCALARS  ..
 C
       INTEGER I,J,N,I1,I2
-      REAL*8 D,B,P,AFI,AX,AY,AKX,AKY,FI0,AM,BM,PI,ALPHA,RA
+      REAL(dp) D,B,P,AFI,AX,AY,AKX,AKY,FI0,AM,BM,PI,ALPHA,RA
 C
 C ..  LOCAL ARRAYS ..
 C
-      REAL*8 VX(6),VY(6),FI(6),X(6),Y(6)
-C  
-C ..  INTRINSIC FUNCTIONS  ..  
-C       
-C     INTRINSIC DSQRT,DABS,DATAN2  
-C  
-C ..  DATA STATEMENTS ..  
-C  
-      DATA PI/3.14159265358979D0/  
-C----------------------------------------------------------------------  
-      ALPHA=AR1(1)  
-      RA=2.D0*PI/ALPHA  
-      D=AR2(1)  
-      B=AR2(2)  
-      IF( (DABS(D)-0.5D0).GT.EMACH) STOP 'IMPROPER LATTICE VECTORS'  
-      IF((DABS(DABS(D)-0.5D0).LT.EMACH).AND.(DABS(DABS(B)-  
-     &    DSQRT(3.D0)/2.D0).GT.EMACH)) THEN  
-      B=2.D0*B           ! CENTRED RECTANGULAR LATTICE 
-        IF((DABS(B)-1.D0).LT.0.D0) THEN   
-      VX(1)= 1.D0  
-      VY(1)=0.5D0*(1.D0/B - B)  
-      VX(2)= 0.D0  
-      VY(2)=0.5D0*(1.D0/B + B)  
-      VX(3)=-1.D0  
-      VY(3)= VY(1)  
-      VX(4)=-1.D0  
-      VY(4)=-VY(1)  
-      VX(5)= 0.D0   
-      VY(5)=-VY(2)  
-      VX(6)= 1.D0  
-      VY(6)=-VY(1)  
-        ELSE  
-      VX(1)=0.5D0+0.5D0/B/B  
-      VY(1)=0.D0   
-      VX(2)=0.5D0-0.5D0/B/B  
-      VY(2)=1.D0/B  
-      VX(3)=-VX(2)  
-      VY(3)=VY(2)  
-      VX(4)=-VX(1)  
-      VY(4)=0.D0  
-      VX(5)=-VX(2)  
-      VY(5)=-VY(2)  
-      VX(6)=VX(2)  
-      VY(6)=-VY(2)  
-        ENDIF  
-      ELSE             !OBLIQUE OR HEXAGONAL LATTICE 
-        IF(D.GT.0.D0) THEN   
-      P     =0.5D0*D*(D-1)/B/B  
-      VX(1)=0.5D0-P  
-      VY(1)=0.5D0*(1.D0-2.D0*D)/B  
-      VX(2)=0.5D0+P  
-      VY(2)=0.5D0/B  
-        ELSE   
-      P     = 0.5D0*D*(D+1)/B/B  
-      VX(1)= 0.5D0-P  
-      VY(1)=-0.5D0*(1.D0+2.D0*D)/B  
-      VX(2)= 0.5D0+P  
-      VY(2)=-0.5D0/B  
-        ENDIF  
-      VX(3)=-VX(2)  
-      VY(3)= VY(2)  
-      VX(4)=-VX(1)  
-      VY(4)=-VY(1)  
-      VX(5)=-VX(2)  
-      VY(5)=-VY(2)  
-      VX(6)= VX(2)  
-      VY(6)=-VY(2)  
-      ENDIF  
-      N=6  
-      DO 1 I=1,N  
-      X(I)=VX(I)*RA  
-      Y(I)=VY(I)*RA  
-  1   CONTINUE  
-      IF(DABS(D).LT.EMACH) THEN  
-      N=4              !RECTANGULAR OR SQUARE LATTICE  
-      IF(  B.GT.0.D0) THEN  
-      X(1)=VX(6)*RA  
-      Y(1)=VY(6)*RA  
-      X(2)=VX(4)*RA  
-      Y(2)=VY(4)*RA  
-      X(4)=VX(1)*RA  
-      Y(4)=VY(1)*RA  
-      ELSE  
-      X(2)=VX(3)*RA  
-      Y(2)=VY(3)*RA  
-      X(3)=VX(4)*RA  
-      Y(3)=VY(4)*RA  
-      X(4)=VX(6)*RA  
-      Y(4)=VY(6)*RA  
-      ENDIF  
-      ENDIF  
-C*****VERTICES ARE ARRANGED IN ASCENDING ORDER OF THE POLAR ANGLE FI  
-      DO 2 I=1,N  
-      FI(I)=DATAN2(Y(I),X(I))  
-      IF(FI(I).LT.0.D0) FI(I)=FI(I) + 2.D0*PI  
-   2  CONTINUE  
-      DO 3  J=2,N  
-      AFI=FI(J)  
-      AX = X(J)  
-      AY = Y(J)  
-      DO 4  I=J-1,1,-1  
-      IF(FI(I).LE.AFI) GOTO 5   
-      FI(I+1) =FI(I)  
-       X(I+1) =X(I)  
-       Y(I+1) =Y(I)  
-   4  CONTINUE  
-      I=0  
-   5  FI(I+1)=AFI  
-       X(I+1)=AX  
-       Y(I+1)=AY  
-   3  CONTINUE  
-C*****"AK" IS REDUCED WITHIN THE SBZ  
-      IG0=1  
-   6  CONTINUE  
-      AKX=AK(1)-G(1,IG0)  
-      AKY=AK(2)-G(2,IG0) 
-      IF((ABS(AKX).LT.EMACH).AND.(ABS(AKY).LT.EMACH)) RETURN 
-      FI0=DATAN2(AKY,AKX)   ! FIND POLAR ANGLES OF THE WAVEVECTOR  
-      IF(FI0.LT.0.D0) FI0=FI0+2.D0*PI  
-	    I1=N  
-	    I=1  
-    7       CONTINUE  
-	    I2=I  
-	    IF(FI0.LT.FI(I))  GO TO 8   
-	    I=I+1  
-	    I1=I2  
-	    IF(I.LE.N) GO TO 7   
-	    I1=N  
-	    I2=1  
-    8       CONTINUE  
-      AM=ABS(Y(I2)*X(I1)-X(I2)*Y(I1))  
-      BM=ABS((X(I1)-X(I2))*AKY+(Y(I2)-Y(I1))*AKX)  
-      IF(AM.GE.BM) THEN  
-      AK(1)=AKX 
-      AK(2)=AKY 
-      RETURN 
-      ENDIF 
-      IG0=IG0+1  
-      IF(IG0.GT.IGMAX) STOP   'ERROR FROM REDUCE:  INSUFFICIENT NR. OF  
-     &RECIPROCAL LATTICE VECTORS '  
-      GOTO 6 
-      END  
+      REAL(dp) VX(6),VY(6),FI(6),X(6),Y(6)
+C
+C ..  INTRINSIC FUNCTIONS  ..
+C
+C     INTRINSIC DSQRT,DABS,DATAN2
+C
+C ..  DATA STATEMENTS ..
+C
+      DATA PI/3.14159265358979D0/
+C----------------------------------------------------------------------
+      ALPHA=AR1(1)
+      RA=2.D0*PI/ALPHA
+      D=AR2(1)
+      B=AR2(2)
+      IF( (DABS(D)-0.5D0)>EMACH) STOP 'IMPROPER LATTICE VECTORS'
+      IF((DABS(DABS(D)-0.5D0)<EMACH).AND.(DABS(DABS(B)-
+     &    DSQRT(3.D0)/2.D0)>EMACH)) THEN
+      B=2.D0*B           ! CENTRED RECTANGULAR LATTICE
+        IF((DABS(B)-1.D0)<0.D0) THEN
+      VX(1)= 1.D0
+      VY(1)=0.5D0*(1.D0/B - B)
+      VX(2)= 0.D0
+      VY(2)=0.5D0*(1.D0/B + B)
+      VX(3)=-1.D0
+      VY(3)= VY(1)
+      VX(4)=-1.D0
+      VY(4)=-VY(1)
+      VX(5)= 0.D0
+      VY(5)=-VY(2)
+      VX(6)= 1.D0
+      VY(6)=-VY(1)
+        ELSE
+      VX(1)=0.5D0+0.5D0/B/B
+      VY(1)=0.D0
+      VX(2)=0.5D0-0.5D0/B/B
+      VY(2)=1.D0/B
+      VX(3)=-VX(2)
+      VY(3)=VY(2)
+      VX(4)=-VX(1)
+      VY(4)=0.D0
+      VX(5)=-VX(2)
+      VY(5)=-VY(2)
+      VX(6)=VX(2)
+      VY(6)=-VY(2)
+        ENDIF
+      ELSE             !OBLIQUE OR HEXAGONAL LATTICE
+        IF(D>0.D0) THEN
+      P     =0.5D0*D*(D-1)/B/B
+      VX(1)=0.5D0-P
+      VY(1)=0.5D0*(1.D0-2.D0*D)/B
+      VX(2)=0.5D0+P
+      VY(2)=0.5D0/B
+        ELSE
+      P     = 0.5D0*D*(D+1)/B/B
+      VX(1)= 0.5D0-P
+      VY(1)=-0.5D0*(1.D0+2.D0*D)/B
+      VX(2)= 0.5D0+P
+      VY(2)=-0.5D0/B
+        ENDIF
+      VX(3)=-VX(2)
+      VY(3)= VY(2)
+      VX(4)=-VX(1)
+      VY(4)=-VY(1)
+      VX(5)=-VX(2)
+      VY(5)=-VY(2)
+      VX(6)= VX(2)
+      VY(6)=-VY(2)
+      ENDIF
+      N=6
+      DO 1 I=1,N
+      X(I)=VX(I)*RA
+      Y(I)=VY(I)*RA
+  1   CONTINUE
+      IF(DABS(D)<EMACH) THEN
+      N=4              !RECTANGULAR OR SQUARE LATTICE
+      IF(  B>0.D0) THEN
+      X(1)=VX(6)*RA
+      Y(1)=VY(6)*RA
+      X(2)=VX(4)*RA
+      Y(2)=VY(4)*RA
+      X(4)=VX(1)*RA
+      Y(4)=VY(1)*RA
+      ELSE
+      X(2)=VX(3)*RA
+      Y(2)=VY(3)*RA
+      X(3)=VX(4)*RA
+      Y(3)=VY(4)*RA
+      X(4)=VX(6)*RA
+      Y(4)=VY(6)*RA
+      ENDIF
+      ENDIF
+C*****VERTICES ARE ARRANGED IN ASCENDING ORDER OF THE POLAR ANGLE FI
+      DO 2 I=1,N
+      FI(I)=DATAN2(Y(I),X(I))
+      IF(FI(I)<0.D0) FI(I)=FI(I) + 2.D0*PI
+   2  CONTINUE
+      DO 3  J=2,N
+      AFI=FI(J)
+      AX = X(J)
+      AY = Y(J)
+      DO 4  I=J-1,1,-1
+      IF(FI(I)<=AFI) GOTO 5
+      FI(I+1) =FI(I)
+       X(I+1) =X(I)
+       Y(I+1) =Y(I)
+   4  CONTINUE
+      I=0
+   5  FI(I+1)=AFI
+       X(I+1)=AX
+       Y(I+1)=AY
+   3  CONTINUE
+C*****"AK" IS REDUCED WITHIN THE SBZ
+      IG0=1
+   6  CONTINUE
+      AKX=AK(1)-G(1,IG0)
+      AKY=AK(2)-G(2,IG0)
+      IF((ABS(AKX)<EMACH).AND.(ABS(AKY)<EMACH)) RETURN
+      FI0=DATAN2(AKY,AKX)   ! FIND POLAR ANGLES OF THE WAVEVECTOR
+      IF(FI0<0.D0) FI0=FI0+2.D0*PI
+        I1=N
+        I=1
+    7       CONTINUE
+        I2=I
+        IF(FI0<FI(I))  GO TO 8
+        I=I+1
+        I1=I2
+        IF(I<=N) GO TO 7
+        I1=N
+        I2=1
+    8       CONTINUE
+      AM=ABS(Y(I2)*X(I1)-X(I2)*Y(I1))
+      BM=ABS((X(I1)-X(I2))*AKY+(Y(I2)-Y(I1))*AKX)
+      IF(AM>=BM) THEN
+      AK(1)=AKX
+      AK(2)=AKY
+      RETURN
+      ENDIF
+      IG0=IG0+1
+      IF(IG0>IGMAX) STOP   'ERROR FROM REDUCE:  INSUFFICIENT NR. OF
+     &RECIPROCAL LATTICE VECTORS '
+      GOTO 6
+      END subroutine
 CCCCCCCCC-----------> HERE ENDS THE FORTRAN SOURCE CODE
 CCCCCCCCC-----------> HERE STARTS THE FIRST INPUT DATA FILE
 !                  ********************************************
-!         	   ********INPUT FILE FOR TRANSMISSION*********
-!	   ********************************************
+!                ********INPUT FILE FOR TRANSMISSION*********
+!       ********************************************
 !  KTYPE = 2   KSCAN = 1   KEMB  = 1    LMAX = 4   NCOMP = 4   NUNIT = 6
 !ALPHA =    1.000000  BETA =    1.000000   FAB =   90.000000  RMAX =   16.000000
 ! NP =  17  ZINF =   1.00000000  ZSUP =   2.000000000
@@ -3686,8 +3761,8 @@ CCCCCCCCC-----------> HERE STARTS THE FIRST INPUT DATA FILE
 !CCCCCCCC-----------> HERE ENDS   THE FIRST  INPUT DATA FILE
 !CCCCCCCC-----------> HERE STARTS THE SECOND INPUT DATA FILE
 !                  ********************************************
-!         	   *******INPUT FILE FOR BAND STRUCTURE********
-!	   ********************************************
+!                *******INPUT FILE FOR BAND STRUCTURE********
+!       ********************************************
 !  KTYPE = 3   KSCAN = 1   KEMB  = 1    LMAX = 4   NCOMP = 4   NUNIT = 6
 !ALPHA =    1.000000  BETA =    1.000000   FAB =   90.000000  RMAX =   16.000000
 ! NP =  17  ZINF =   1.00000000  ZSUP =   2.000000000
@@ -3954,13 +4029,13 @@ C ..  SCALAR VARIABLES ..
 C
       INTEGER      LMAX,I,IGKMAX,IGK1,IGK2,IGMAX,KTYPE,KSCAN,NCOMP,IG1
       INTEGER      N,NP,IG0,NUNIT,ICOMP,KEMB,IU,IPL,ILAYER
-      REAL*8       ALPHA,EMACH,PI,EPSILON
-      REAL*8       A0,RA0,RMAX,AKXY
-      REAL*8       ZVAL,ZSTEP,ZINF,ZSUP,FAB,ALPHAP,THETA,FI,FEIN
-      COMPLEX*16   KAPPA,KAPPA0,CZERO,CONE,AKZIN,MUEMBL,EPSEMBL
-      COMPLEX*16   MUEMBR,EPSEMBR,D2,KAPOUT
-      COMPLEX*16   KAPPAL,KAPPAR,KAPPASL,D1,KAPIN,KAPL,KAPR
-      COMPLEX*16   MLAST,ELAST,MFIRST,EFIRST,RAP
+      REAL(dp)     ALPHA,EMACH,PI,EPSILON
+      REAL(dp)     A0,RA0,RMAX,AKXY
+      REAL(dp)     ZVAL,ZSTEP,ZINF,ZSUP,FAB,ALPHAP,THETA,FI,FEIN
+      COMPLEX(dp)   KAPPA,KAPPA0,CZERO,CONE,AKZIN,MUEMBL,EPSEMBL
+      COMPLEX(dp)   MUEMBR,EPSEMBR,D2,KAPOUT
+      COMPLEX(dp)   KAPPAL,KAPPAR,KAPPASL,D1,KAPIN,KAPL,KAPR
+      COMPLEX(dp)   MLAST,ELAST,MFIRST,EFIRST,RAP
       CHARACTER*2  POLAR
       CHARACTER*17 TEXT1(2)
       CHARACTER*5  DUMMY
@@ -3969,20 +4044,20 @@ C ..  ARRAY VARIABLES ..
 C
       INTEGER    NT1(IGD),NT2(IGD),IT(NCOMPD)
       INTEGER    NLAYER(NCOMPD),NPLAN(NCOMPD)
-      REAL*8     ELM(NELMD),AK(2),VECMOD(IGD),DL(3,NCOMPD,NPLAND)
-      REAL*8     DR(3,NCOMPD,NPLAND),G(2,IGD),B1(2),B2(2)
-      REAL*8     S(NCOMPD,NPLAND),AL(3),D(NCOMPD),VEC0(3),AQ(2)
-      COMPLEX*16 QIL  (IGKD,IGKD),QIIL(IGKD,IGKD),QIIIL(IGKD,IGKD)
-      COMPLEX*16 QIVL (IGKD,IGKD),QIR (IGKD,IGKD),QIIR (IGKD,IGKD)
-      COMPLEX*16 QIIIR(IGKD,IGKD),QIVR(IGKD,IGKD),WIVL (IGKD,IGKD)
-      COMPLEX*16 WIL  (IGKD,IGKD),WIIL(IGKD,IGKD),WIIIL(IGKD,IGKD)
-      COMPLEX*16 EINCID(IGKD),EIN(2),EPS2(NCOMPD),EPS3(NCOMPD)
-      COMPLEX*16 MU1(NCOMPD),MU2(NCOMPD),MU3(NCOMPD),EPS1(NCOMPD)
-      COMPLEX*16 MUSPH(NCOMPD,NPLAND), EPSSPH(NCOMPD,NPLAND)
+      REAL(dp)   ELM(NELMD),AK(2),VECMOD(IGD),DL(3,NCOMPD,NPLAND)
+      REAL(dp)   DR(3,NCOMPD,NPLAND),G(2,IGD),B1(2),B2(2)
+      REAL(dp)   S(NCOMPD,NPLAND),AL(3),D(NCOMPD),VEC0(3),AQ(2)
+      COMPLEX(dp) QIL  (IGKD,IGKD),QIIL(IGKD,IGKD),QIIIL(IGKD,IGKD)
+      COMPLEX(dp) QIVL (IGKD,IGKD),QIR (IGKD,IGKD),QIIR (IGKD,IGKD)
+      COMPLEX(dp) QIIIR(IGKD,IGKD),QIVR(IGKD,IGKD),WIVL (IGKD,IGKD)
+      COMPLEX(dp) WIL  (IGKD,IGKD),WIIL(IGKD,IGKD),WIIIL(IGKD,IGKD)
+      COMPLEX(dp) EINCID(IGKD),EIN(2),EPS2(NCOMPD),EPS3(NCOMPD)
+      COMPLEX(dp) MU1(NCOMPD),MU2(NCOMPD),MU3(NCOMPD),EPS1(NCOMPD)
+      COMPLEX(dp) MUSPH(NCOMPD,NPLAND), EPSSPH(NCOMPD,NPLAND)
 C
 C ..  COMMON BLOCKS ..
 C
-      REAL*8     AR1(2),AR2(2)
+      REAL(dp)   AR1(2),AR2(2)
       COMMON/X1/AR1,AR2
 C
 C ..  INTRINSIC FUNCTIONS ..
@@ -4002,30 +4077,30 @@ C
 C     ------------------------------------------------------------------
 C
       READ(10,200) KTYPE,KSCAN,KEMB,LMAX,NCOMP,NUNIT
-      IF(KTYPE.LE.0.OR.KTYPE.GE.4) STOP 'ILLEGAL INPUT VALUE OF KTYPE'
-      IF(KSCAN.LE.0.OR.KSCAN.GE.3) STOP 'ILLEGAL INPUT VALUE OF KSCAN'
-      IF(KEMB.LT.0.OR.KEMB.GE.2)   STOP 'ILLEGAL INPUT VALUE OF KEMB '
-      IF(LMAX.LE.0.OR.LMAX.GT.LMAXD.OR.LMAX.GT.14)
-     &          STOP 'LMAX.LE.0.OR.LMAX.GT.MIN0(14,LMAXD)'
-      IF(NCOMP.LE.0.OR.NCOMP.GT.NCOMPD)
-     &				   STOP 'ILLEGAL INPUT VALUE OF NCOMP'
-      IF(NUNIT.LE.0)    	   STOP 'ILLEGAL INPUT VALUE OF NUNIT'
+      IF(KTYPE<=0.OR.KTYPE>=4) STOP 'ILLEGAL INPUT VALUE OF KTYPE'
+      IF(KSCAN<=0.OR.KSCAN>=3) STOP 'ILLEGAL INPUT VALUE OF KSCAN'
+      IF(KEMB<0.OR.KEMB>=2)   STOP 'ILLEGAL INPUT VALUE OF KEMB '
+      IF(LMAX<=0.OR.LMAX>LMAXD.OR.LMAX>14)
+     &          STOP 'LMAX<=0.OR.LMAX>MIN0(14,LMAXD)'
+      IF(NCOMP<=0.OR.NCOMP>NCOMPD)
+     &                   STOP 'ILLEGAL INPUT VALUE OF NCOMP'
+      IF(NUNIT<=0)           STOP 'ILLEGAL INPUT VALUE OF NUNIT'
       READ(10,202) ALPHA,ALPHAP,FAB,RMAX
       FAB=FAB*PI/180.D0
       READ(10,203) NP,ZINF,ZSUP
-      IF(NP.LE.1)                  STOP 'ILLEGAL INPUT VALUE OF  NP '
-              IF(KTYPE.GE.2) THEN
+      IF(NP<=1)                  STOP 'ILLEGAL INPUT VALUE OF  NP '
+              IF(KTYPE>=2) THEN
       READ(10,204) AQ(1),AQ(2),POLAR,FEIN
       FEIN=FEIN*PI/180.D0
       AQ(1)=2.D0*PI*AQ(1)
       AQ(2)=2.D0*PI*AQ(2)
-      IF(KTYPE.LT.3) THEN
+      IF(KTYPE<3) THEN
       WRITE(6,222)
       ELSE
       WRITE(6,223)
       ENDIF
-      IF(KTYPE.EQ.2) WRITE(6,207) AQ(1),AQ(2),POLAR
-      IF(KTYPE.EQ.3) WRITE(6,225) AQ(1),AQ(2)
+      IF(KTYPE.eq.2) WRITE(6,207) AQ(1),AQ(2),POLAR
+      IF(KTYPE.eq.3) WRITE(6,225) AQ(1),AQ(2)
                              ELSE
       READ(10,204) THETA,FI,POLAR,FEIN
       WRITE(6,208) THETA,FI,POLAR
@@ -4035,10 +4110,10 @@ C
                              ENDIF
       DO 3 ICOMP=1,NCOMP
       READ(10,201) IT(ICOMP)
-      IF(IT(ICOMP).LE.0.OR.IT(ICOMP).GT.2)
-     &				    STOP 'ILLEGAL COMPONENT TYPE'
+      IF(IT(ICOMP)<=0.OR.IT(ICOMP)>2)
+     &                    STOP 'ILLEGAL COMPONENT TYPE'
       WRITE(6,209) ICOMP,TEXT1(IT(ICOMP))
-      IF(IT(ICOMP).EQ.1) THEN
+      IF(IT(ICOMP).eq.1) THEN
       READ(10,204) D(ICOMP)
       READ(10,205) MU1(ICOMP),EPS1(ICOMP),MU2(ICOMP),EPS2(ICOMP),
      &             MU3(ICOMP),EPS3(ICOMP)
@@ -4048,7 +4123,7 @@ C
       READ(10,*) DUMMY,(DR(I,ICOMP,1),I=1,3)
                       ELSE
       READ(10,205) MU1(ICOMP),EPS1(ICOMP)
-      IF(DREAL(MU1(ICOMP)).LE.0.D0.OR.DREAL(EPS1(ICOMP)).LE.0.D0)
+      IF(DREAL(MU1(ICOMP))<=0.D0.OR.DREAL(EPS1(ICOMP))<=0.D0)
      &THEN
       WRITE(6,226)
       STOP
@@ -4063,38 +4138,38 @@ C
       WRITE(6,220) EPS1(ICOMP),(EPSSPH(ICOMP,IPL),IPL=1,NPLAN(ICOMP))
       WRITE(6,224) (S(ICOMP,IPL),IPL=1,NPLAN(ICOMP))
       WRITE(6,212) 2**(NLAYER(ICOMP)-1)
-		      ENDIF
+              ENDIF
     3 CONTINUE
                          D1=SQRT(MU1(1)    *EPS1(1))
                          D2=SQRT(MU1(NCOMP)*EPS1(NCOMP))
-      IF(IT(NCOMP).EQ.1) D2=SQRT(MU3(NCOMP)*EPS3(NCOMP))
-      IF(DIMAG(D1).NE.0.D0) THEN
+      IF(IT(NCOMP).eq.1) D2=SQRT(MU3(NCOMP)*EPS3(NCOMP))
+      IF(DIMAG(D1)/=0.D0) THEN
       WRITE(6,227)
       STOP
       ENDIF
-      IF(DIMAG(D2).NE.0.D0) THEN
+      IF(DIMAG(D2)/=0.D0) THEN
       WRITE(6,228)
       STOP
       ENDIF
-      IF(KTYPE.NE.3) THEN
+      IF(KTYPE/=3) THEN
       WRITE(6,221) 2**(NUNIT-1)
-      IF(KEMB.EQ.1) THEN
+      IF(KEMB.eq.1) THEN
       READ(10,205) MUEMBL,EPSEMBL
       READ(10,205) MUEMBR,EPSEMBR
       D1=SQRT(MUEMBL*EPSEMBL)
       D2=SQRT(MUEMBR*EPSEMBR)
-      IF(DIMAG(D1).NE.0.D0) THEN
+      IF(DIMAG(D1)/=0.D0) THEN
       WRITE(6,227)
       STOP
       ENDIF
-      IF(DIMAG(D2).NE.0.D0) THEN
+      IF(DIMAG(D2)/=0.D0) THEN
       WRITE(6,228)
       STOP
       ENDIF
-		    ENDIF
-		     ELSE
+            ENDIF
+             ELSE
       READ(10,*) DUMMY,(AL(I),I=1,3)
-		     ENDIF
+             ENDIF
       CALL ELMGEN(ELM,NELMD,LMAX)
 C
 C****** DEFINE THE 2D DIRECT AND RECIPROCAL-LATTICE VECTORS ******
@@ -4120,15 +4195,15 @@ C
     5 CONTINUE
       ZSTEP=(ZSUP-ZINF)/DFLOAT(NP-1)
       ZVAL=ZINF-ZSTEP
-      IF(KTYPE.LT.3) THEN
-      IF(KSCAN.EQ.1) WRITE(6,216)
-      IF(KSCAN.EQ.2) WRITE(6,217)
-      IF(POLAR.NE.'S '.AND.POLAR.NE.'P ') STOP 'ILLEGAL POLARIZATION'
+      IF(KTYPE<3) THEN
+      IF(KSCAN.eq.1) WRITE(6,216)
+      IF(KSCAN.eq.2) WRITE(6,217)
+      IF(POLAR/='S '.AND.POLAR/='P ') STOP 'ILLEGAL POLARIZATION'
                      ELSE
-      IF(KSCAN.EQ.1) WRITE(6,218)
-      IF(KSCAN.EQ.2) WRITE(6,219)
+      IF(KSCAN.eq.1) WRITE(6,218)
+      IF(KSCAN.eq.2) WRITE(6,219)
                      ENDIF
-      IF(POLAR.EQ.'P ') THEN
+      IF(POLAR.eq.'P ') THEN
       EIN(1)=CONE
       EIN(2)=CZERO
                         ELSE
@@ -4137,26 +4212,26 @@ C
                         END IF
       DO 1 N=1,NP   !****** SCANNING OVER FREQUENCIES/WAVELENGTHS ******
       ZVAL=ZVAL+ZSTEP
-      IF(KSCAN.EQ.1) KAPPA0=DCMPLX(ZVAL,EPSILON)
-      IF(KSCAN.EQ.2) KAPPA0=DCMPLX(2.D0*PI/ZVAL,EPSILON)
+      IF(KSCAN.eq.1) KAPPA0=DCMPLX(ZVAL,EPSILON)
+      IF(KSCAN.eq.2) KAPPA0=DCMPLX(2.D0*PI/ZVAL,EPSILON)
       KAPIN =KAPPA0*D1
       KAPOUT=KAPPA0*D2
-                                             IF(KTYPE.EQ.1) THEN
+                                             IF(KTYPE.eq.1) THEN
                            AK(1)=DREAL(KAPIN)*SIN(THETA)*COS(FI)
                            AK(2)=DREAL(KAPIN)*SIN(THETA)*SIN(FI)
-			   DO 50 I=1,IGKMAX
-			   EINCID(I)=CZERO
+               DO 50 I=1,IGKMAX
+               EINCID(I)=CZERO
   50                       CONTINUE
-							    ELSE
+                                ELSE
                            AK(1)=AQ(1)
-			   AK(2)=AQ(2)
+               AK(2)=AQ(2)
                                                            ENDIF
-      IF(KTYPE.NE.3) THEN !DEFINE THE POLARIZATION VECTOR FROM "AK"*****
+      IF(KTYPE/=3) THEN !DEFINE THE POLARIZATION VECTOR FROM "AK"*****
       AKXY=AK(1)*AK(1)+AK(2)*AK(2)
       AKZIN=SQRT(KAPIN*KAPIN-AKXY)
-      IF(DREAL(AKZIN).LT.EMACH)      STOP 'IMPROPER INCIDENT WAVE'
+      IF(DREAL(AKZIN)<EMACH)      STOP 'IMPROPER INCIDENT WAVE'
       AKXY=SQRT(AKXY)
-      IF(AKXY.LT.EMACH) THEN
+      IF(AKXY<EMACH) THEN
       EIN(1)=DCMPLX(COS(FEIN),0.D0)
       EIN(2)=DCMPLX(SIN(FEIN),0.D0)
                         END IF
@@ -4166,11 +4241,11 @@ C
     2 CONTINUE
                      ELSE
       CALL REDUCE(AR1,AR2,AK,IGMAX,G,IG0,EMACH)   !"AK" IN SBZ*******
-		     ENDIF
+             ENDIF
 C
 C****** CONSTRUCT THE TRANSFER MATRIX OF THE UNIT SLICE ******
 C
-      IF(IT(1).EQ.1) THEN
+      IF(IT(1).eq.1) THEN
       KAPPAL =SQRT(MU1(1)*EPS1(1))*KAPPA0
       KAPPASL=SQRT(MU2(1)*EPS2(1))*KAPPA0
       KAPPAR =SQRT(MU3(1)*EPS3(1))*KAPPA0
@@ -4193,8 +4268,8 @@ C
       RAP=S(1,1)*KAPPA0/2.D0/PI
       CALL PCSLAB(LMAX,IGMAX,RAP,EPS1(1),EPSSPH(1,1),MU1(1),MUSPH(1,1),
      &           KAPPA,AK,DL(1,1,1),DR(1,1,1),G,ELM,A0,EMACH,
-     &		 QIL,QIIL,QIIIL,QIVL)
-      IF(NPLAN(1).GE.2) THEN
+     &         QIL,QIIL,QIIIL,QIVL)
+      IF(NPLAN(1)>=2) THEN
       DO 13 IPL=2,NPLAN(1)
       RAP=S(1,IPL)*KAPPA0/2.D0/PI
       CALL PCSLAB(LMAX,IGMAX,RAP,EPS1(1),EPSSPH(1,IPL),MU1(1),
@@ -4202,21 +4277,21 @@ C
      &           G,ELM,A0,EMACH, QIR,QIIR,QIIIR,QIVR)
       CALL PAIR(IGKMAX,QIL,QIIL,QIIIL,QIVL,QIR,QIIR,QIIIR,QIVR)
    13 CONTINUE
-			ENDIF
-      IF(NLAYER(1).GE.2) THEN
+            ENDIF
+      IF(NLAYER(1)>=2) THEN
       DO 14 ILAYER=1,NLAYER(1)-1
       CALL PAIR(IGKMAX,QIL,QIIL,QIIIL,QIVL,QIL,QIIL,QIIIL,QIVL)
    14 CONTINUE
-			 ENDIF
+             ENDIF
                       ENDIF
-                                                    IF(NCOMP.GE.2) THEN
+                                                    IF(NCOMP>=2) THEN
       DO 4 ICOMP=2,NCOMP
-      IF(IT(ICOMP).EQ.1) THEN
+      IF(IT(ICOMP).eq.1) THEN
       KAPPAL =SQRT(MU1(ICOMP)*EPS1(ICOMP))*KAPPA0
       KAPPASL=SQRT(MU2(ICOMP)*EPS2(ICOMP))*KAPPA0
       KAPPAR =SQRT(MU3(ICOMP)*EPS3(ICOMP))*KAPPA0
       KAPR=KAPPAR
-      IF(ABS(MU1(ICOMP)-MLAST).NE.0.D0.OR.ABS(EPS1(ICOMP)-ELAST).NE.
+      IF(ABS(MU1(ICOMP)-MLAST)/=0.D0.OR.ABS(EPS1(ICOMP)-ELAST)/=
      &        0.D0) STOP 'IMPROPER MATCHING OF SUCCESSIVE HOST MEDIA'
       MLAST=MU3(ICOMP)
       ELAST=EPS3(ICOMP)
@@ -4225,7 +4300,7 @@ C
                       ELSE
       KAPPA=SQRT(MU1(ICOMP)*EPS1(ICOMP))*KAPPA0
       KAPR=KAPPA
-      IF(ABS(MU1(ICOMP)-MLAST).NE.0.D0.OR.ABS(EPS1(ICOMP)-ELAST).NE.
+      IF(ABS(MU1(ICOMP)-MLAST)/=0.D0.OR.ABS(EPS1(ICOMP)-ELAST)/=
      &        0.D0) STOP 'IMPROPER MATCHING OF SUCCESSIVE HOST MEDIA'
       MLAST=MU1(ICOMP)
       ELAST=EPS1(ICOMP)
@@ -4233,13 +4308,13 @@ C
       CALL PCSLAB(LMAX,IGMAX,RAP,EPS1(ICOMP),EPSSPH(ICOMP,1),MU1(ICOMP)
      &           ,MUSPH(ICOMP,1),KAPPA,AK,DL(1,ICOMP,1),
      &           DR(1,ICOMP,1),G,ELM,A0,EMACH,QIR,QIIR,QIIIR,QIVR)
-      IF(NPLAN(ICOMP).GE.2) THEN
-	     DO 17 IGK1=1,IGKMAX
-	     DO 17 IGK2=1,IGKMAX
-	     WIL  (IGK1,IGK2)=QIR  (IGK1,IGK2)
-	     WIIL (IGK1,IGK2)=QIIR (IGK1,IGK2)
-	     WIIIL(IGK1,IGK2)=QIIIR(IGK1,IGK2)
-	     WIVL (IGK1,IGK2)=QIVR (IGK1,IGK2)
+      IF(NPLAN(ICOMP)>=2) THEN
+         DO 17 IGK1=1,IGKMAX
+         DO 17 IGK2=1,IGKMAX
+         WIL  (IGK1,IGK2)=QIR  (IGK1,IGK2)
+         WIIL (IGK1,IGK2)=QIIR (IGK1,IGK2)
+         WIIIL(IGK1,IGK2)=QIIIR(IGK1,IGK2)
+         WIVL (IGK1,IGK2)=QIVR (IGK1,IGK2)
    17        CONTINUE
       DO 15 IPL=2,NPLAN(ICOMP)
       RAP=S(ICOMP,IPL)*KAPPA0/2.D0/PI
@@ -4249,58 +4324,58 @@ C
      &           QIR,QIIR,QIIIR,QIVR)
       CALL PAIR(IGKMAX,WIL,WIIL,WIIIL,WIVL,QIR,QIIR,QIIIR,QIVR)
    15 CONTINUE
-	     DO 18 IGK1=1,IGKMAX
-	     DO 18 IGK2=1,IGKMAX
-	     QIR  (IGK1,IGK2)=WIL  (IGK1,IGK2)
-	     QIIR (IGK1,IGK2)=WIIL (IGK1,IGK2)
-	     QIIIR(IGK1,IGK2)=WIIIL(IGK1,IGK2)
-	     QIVR (IGK1,IGK2)=WIVL (IGK1,IGK2)
+         DO 18 IGK1=1,IGKMAX
+         DO 18 IGK2=1,IGKMAX
+         QIR  (IGK1,IGK2)=WIL  (IGK1,IGK2)
+         QIIR (IGK1,IGK2)=WIIL (IGK1,IGK2)
+         QIIIR(IGK1,IGK2)=WIIIL(IGK1,IGK2)
+         QIVR (IGK1,IGK2)=WIVL (IGK1,IGK2)
    18        CONTINUE
-			ENDIF
-      IF(NLAYER(ICOMP).GE.2) THEN
+            ENDIF
+      IF(NLAYER(ICOMP)>=2) THEN
       DO 16 ILAYER=1,NLAYER(ICOMP)-1
       CALL PAIR(IGKMAX,QIR,QIIR,QIIIR,QIVR,QIR,QIIR,QIIIR,QIVR)
    16 CONTINUE
-			 ENDIF
+             ENDIF
                       ENDIF
       CALL PAIR(IGKMAX,QIL,QIIL,QIIIL,QIVL,QIR,QIIR,QIIIR,QIVR)
     4 CONTINUE
                                                                    ENDIF
-      IF(KTYPE.LT.3) THEN
+      IF(KTYPE<3) THEN
 C
 C****** THE UNIT SLICE IS DEFINED. THIS CAN BE REPEATED BY THE ******
 C****** DOUBLING-LAYER  TECHNIQUE, INTERFACES CAN BE ADDED AND ******
 C****** REFLECTIVITY/TRANSMITTANCE/ABSORBANCE ARE CALCULATED.  ******
 C
-             IF(NUNIT.EQ.1) GO TO 30
-	     IF(ABS(MLAST-MFIRST).NE.0.D0.OR.ABS(ELAST-EFIRST).NE.0.D0)
+             IF(NUNIT.eq.1) GO TO 30
+         IF(ABS(MLAST-MFIRST)/=0.D0.OR.ABS(ELAST-EFIRST)/=0.D0)
      &       STOP 'IMPROPER MATCHING OF SUCCESSIVE HOST MEDIA'
-	     DO 9 IU=1,NUNIT-1
+         DO 9 IU=1,NUNIT-1
              CALL PAIR(IGKMAX,QIL,QIIL,QIIIL,QIVL,QIL,QIIL,QIIIL,QIVL)
     9        CONTINUE
    30        CONTINUE
-             IF(KEMB.EQ.1) THEN
+             IF(KEMB.eq.1) THEN
              CALL HOSLAB(IGMAX,KAPR,(KAPR+KAPOUT)/2.D0,KAPOUT,AK,G,VEC0,
      &                   VEC0,0.D0,QIR,QIIR,QIIIR,QIVR,EMACH)
-	     CALL PAIR(IGKMAX,QIL,QIIL,QIIIL,QIVL,QIR,QIIR,QIIIR,QIVR)
-	     DO 11 IGK1=1,IGKMAX
-	     DO 11 IGK2=1,IGKMAX
-	     QIR  (IGK1,IGK2)=QIL  (IGK1,IGK2)
-	     QIIR (IGK1,IGK2)=QIIL (IGK1,IGK2)
-	     QIIIR(IGK1,IGK2)=QIIIL(IGK1,IGK2)
-	     QIVR (IGK1,IGK2)=QIVL (IGK1,IGK2)
+         CALL PAIR(IGKMAX,QIL,QIIL,QIIIL,QIVL,QIR,QIIR,QIIIR,QIVR)
+         DO 11 IGK1=1,IGKMAX
+         DO 11 IGK2=1,IGKMAX
+         QIR  (IGK1,IGK2)=QIL  (IGK1,IGK2)
+         QIIR (IGK1,IGK2)=QIIL (IGK1,IGK2)
+         QIIIR(IGK1,IGK2)=QIIIL(IGK1,IGK2)
+         QIVR (IGK1,IGK2)=QIVL (IGK1,IGK2)
    11        CONTINUE
              CALL HOSLAB(IGMAX,KAPIN,(KAPL+KAPIN)/2.D0,KAPL,AK,G,VEC0,
      &                   VEC0,0.D0,QIL,QIIL,QIIIL,QIVL,EMACH)
-	     CALL PAIR(IGKMAX,QIL,QIIL,QIIIL,QIVL,QIR,QIIR,QIIIR,QIVR)
-					  ENDIF
+         CALL PAIR(IGKMAX,QIL,QIIL,QIIIL,QIVL,QIR,QIIR,QIIIR,QIVR)
+                      ENDIF
              CALL SCAT(IGMAX,ZVAL,AK,G,DREAL(KAPIN),DREAL(KAPOUT),
      &                 EINCID,QIL,QIIIL)
                      ELSE
 C
 C****** ALTERNATIVELY, CALCULATE COMPLEX PHOTONIC BAND STRUCTURE ******
 C
-      IF(ABS(MLAST-MFIRST).NE.0.D0.OR.ABS(ELAST-EFIRST).NE.0.D0)
+      IF(ABS(MLAST-MFIRST)/=0.D0.OR.ABS(ELAST-EFIRST)/=0.D0)
      &    STOP 'IMPROPER MATCHING OF SUCCESSIVE HOST MEDIA'
       CALL BAND(IGMAX,ZVAL,EMACH,AK,G,AL,KAPL,KAPR,QIL,QIIL,QIIIL,QIVL)
                      ENDIF

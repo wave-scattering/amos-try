@@ -16,7 +16,6 @@ SET (PROJECTNAME "multem2")
 #SET (CMAKE_Fortran_FLAGS "-O3 -cpp -mtune=native -fopenmp")
 
 ADD_EXECUTABLE(${PROJECTNAME} "multem_mod.f"
-        "bessel_switch.f"
         )
 
 
