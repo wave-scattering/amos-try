@@ -25,13 +25,15 @@ C=======================================================================
       module libmultem
       implicit none
       integer, parameter:: dp=kind(0.d0)
+      real(dp), parameter :: pi=4.0_dp*ATAN(1.0_dp)
+      complex(dp), parameter :: ci = (0.0_dp, 1.0_dp)
       private
       public cerf, blm, ceven, codd, band, scat, pair, hoslab, pcslab,
      & reduce, lat2d, elmgen,bessel
       contains
 C=======================================================================
-      SUBROUTINE BESSEL(BJ,Y,H,ARG)
-      IMPLICIT NONE
+      subroutine bessel(bj,y,h,arg)
+      implicit none
       integer, parameter:: dp=kind(0.d0)
 !     ------------------------------------------------------------------
 !     THIS  SUBROUTINE COMPUTES THE  SPHERICAL BESSEL FUNCTIONS OF
@@ -55,40 +57,38 @@ C=======================================================================
 !
 !     THE BESSEL FUNCTIONS OF 3RD KIND ARE DEFINED AS: H(L)=BJ(L)+I*Y(L)
 !     ------------------------------------------------------------------
-      INTEGER     :: lmax1
-      COMPLEX(dp), intent(in) :: ARG
-      COMPLEX(dp), intent(out) :: BJ(:),H(:),Y(:)
-      COMPLEX(dp) :: Z, i
-      complex(dp),dimension(:),allocatable :: CY
-      real(dp)     :: pi, ZR, ZI, FNU
-      real(dp),dimension(:),allocatable :: CYR, CYI,
-     & CWRKR, CWRKI
+      integer     :: lmax1
+      complex(dp), intent(in) :: arg
+      complex(dp), intent(out) :: BJ(:),H(:),Y(:)
+      complex(dp) :: z
+      complex(dp),dimension(:),allocatable :: cy
+      real(dp)     :: zr, zi, FNU
+      real(dp),dimension(:),allocatable :: cyr, cyi,
+     & cwrkr, cwrki
 
-      INTEGER KODE, N, NMAXD, NZ, IERR
+      INTEGER KODE, N, NZ, IERR
       lmax1 = size(BJ) ! to store from l=0 to l=lmax
-      allocate(CY(1:lmax1))
-      allocate(CYR(1:lmax1))
-      allocate(CYI(1:lmax1))
-      allocate(CWRKI(1:lmax1))
-      allocate(CWRKR(1:lmax1))
-      pi=4.0_dp*ATAN(1.0_dp)
-      i = (0.0_dp, 1.0_dp)
-      ZR = real(ARG)
-      ZI = aimag(ARG)
+      allocate(cy(1:lmax1))
+      allocate(cyr(1:lmax1))
+      allocate(cyi(1:lmax1))
+      allocate(cwrki(1:lmax1))
+      allocate(cwrkr(1:lmax1))
+      zr = real(arg)
+      zi = aimag(arg)
       FNU = 0.5_dp
       KODE=1
       N=lmax1
-      CALL ZBESJ(ZR, ZI, FNU, KODE, N, CYR, CYI, NZ, IERR)
+      call ZBESJ(zr, zi, FNU, KODE, N, CYR, CYI, NZ, IERR)
       ! Convert to spherical function
-      CY = (CYR+ i*CYI)*sqrt(pi/2.0_dp/arg)
-      BJ = CY
-      CWRKR=0.0_dp
-      CWRKI=0.0_dp
-      call ZBESY(ZR, ZI, FNU, KODE, N, CYR, CYI, NZ, CWRKR, CWRKI,
+      cy = (cyr+ ci*cyi)*sqrt(pi/2.0_dp/arg)
+      BJ = cy
+      cwrkr=0.0_dp
+      cwrki=0.0_dp
+      call ZBESY(zr, zi, FNU, KODE, N, CYR, CYI, NZ, cwrkr, cwrki,
      *                 IERR)
-      CY = (CYR+ i*CYI)*sqrt(pi/2.0_dp/arg)
-      Y = CY
-      H=BJ+i*Y
+      cy = (cyr+ ci*cyi)*sqrt(pi/2.0_dp/arg)
+      Y = cy
+      H=BJ+ci*Y
       END subroutine
 
 C=======================================================================
@@ -973,7 +973,7 @@ C****** YL(M+1) IS CALCULATED                         ******
       RETURN
       END subroutine
 C=======================================================================
-      SUBROUTINE TMTRX(LMAX,RAP,EPSSPH,EPSMED,MUMED,MUSPH,TE,TH)
+      SUBROUTINE TMTRX(RAP,EPSSPH,EPSMED,MUMED,MUSPH,TE,TH)
       IMPLICIT NONE
       integer, parameter:: dp=kind(0.d0)
 C     ------------------------------------------------------------------
@@ -982,13 +982,9 @@ C     OF ELECTROMAGNETIC  FIELD  OF  WAVE-LENGHT LAMDA  BY A SINGLE
 C     SPHERE OF RADIUS S.  (RAP=S/LAMDA).
 C     EPSSPH : COMPLEX RELATIVE DIELECTRIC CONSTANT OF THE SPHERE.
 C     EPSMED : COMPLEX RELATIVE DIELECTRIC CONSTANT OF THE MEDIUM.
-C     LMAX   : MAXIMUM ANGULAR MOMENTUM
+C     LMAX   : MAXIMUM ANGULAR MOMENTUM from TE(0..LMAX) and TH
 C     ------------------------------------------------------------------
 C
-C ..  PARAMETER STATEMENTS  ..
-C
-      INTEGER LMAXD,LMAX1D
-      PARAMETER (LMAXD=14,LMAX1D=LMAXD+1)
 C
 C ..  SCALAR ARGUMENTS  ..
 C
@@ -1005,22 +1001,11 @@ C
       real(dp)     PI
       complex(dp) CI,C1,C2,C3,C4,C5,C6,AN,AJ,BN,BJ,ARG,ARGM,XISQ,XISQM
       complex(dp) AR
-      LOGICAL    LCALL
 C
 C ..  LOCAL ARRAYS  ..
 C
       complex(dp), dimension(:), allocatable:: J,Y,H
       complex(dp), dimension(:), allocatable:: JM,YM,HM
-      !complex(dp) :: J(LMAX1D),Y(LMAX1D),H(LMAX1D)
-      !complex(dp) JM(LMAX1D),YM(LMAX1D),HM(LMAX1D)
-C
-C ..  INTRINSIC FUNCTIONS  ..
-C
-      INTRINSIC SQRT
-C
-C ..  EXTERNAL ROUTINES  ..
-C
-C     EXTERNAL BESSEL
 C
 C ..  DATA STATEMENTS  ..
 C
@@ -1028,6 +1013,7 @@ C
 C-----------------------------------------------------------------------
 C
       lmax1 = size(TE)
+      ! to evaluate TE(0..lmax) we need one more oder in Bessel functions
       b_size = lmax1+1
       allocate(J(1:b_size))
       allocate(Y(1:b_size))
@@ -1035,19 +1021,14 @@ C
       allocate(JM(1:b_size))
       allocate(YM(1:b_size))
       allocate(HM(1:b_size))
-
       lmax = lmax1-1
-      LCALL=.FALSE.
       XISQ =SQRT(EPSMED*MUMED)
       XISQM=SQRT(EPSSPH*MUSPH)
       AR=2.0_dp*PI*RAP
       ARG=XISQ*AR
       ARGM=XISQM*AR
-      IF(LMAX1>LMAX1D)  GO  TO   10
-      CALL BESSEL(J,Y,H,ARG)!,LMAX1D,LMAX1,.TRUE.,.TRUE.,
-      !*            .FALSE. ,LCALL)
-      CALL BESSEL(JM,YM,HM,ARGM)!,LMAX1D,LMAX1,.TRUE.,.FALSE.,
-!     *            .FALSE.,LCALL)
+      CALL BESSEL(J,Y,H,ARG)
+      CALL BESSEL(JM,YM,HM,ARGM)
       C1=EPSSPH-EPSMED
       C2=EPSMED*ARGM
       C3=-EPSSPH*ARG
@@ -1063,10 +1044,6 @@ C
       TH(L1)=-BJ/(BJ+CI*BN)
     1 CONTINUE
       RETURN
-   10 WRITE(6,100) LMAX1,LMAX1D
-      STOP
-  100 FORMAT(//10X,'FROM SUBROUTINE TMTRX :'/
-     &         10X,'LMAX+1 =',I3,'  IS GREATER THAN DIMENSIONED:',I3)
       END subroutine
 C=======================================================================
       SUBROUTINE XMAT(XODD,XEVEN,LMAX,KAPPA,AK,ELM,EMACH)
@@ -3246,7 +3223,7 @@ C
       GKK(3,IG1)=SQRT(KAPPA*KAPPA-GKK(1,IG1)*GKK(1,IG1)-
      &                            GKK(2,IG1)*GKK(2,IG1))
     1 CONTINUE
-      CALL TMTRX(LMAX,RAP,EPSSPH,EPSMED,MUMED,MUSPH,TE,TH)
+      CALL TMTRX(RAP,EPSSPH,EPSMED,MUMED,MUSPH,TE,TH)
       CALL XMAT(XODD,XEVEN,LMAX,KAPPA,AK,ELM,EMACH)
       CALL SETUP(LMAX,XEVEN,XODD,TE,TH,XXMAT1,XXMAT2)
       vXXMAT1 = XXMAT1(1:lmtot, 1:lmtot)
