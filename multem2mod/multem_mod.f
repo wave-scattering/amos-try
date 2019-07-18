@@ -3623,6 +3623,12 @@ C
       CALL TMTRX(LMAX,RAP,EPSSPH,EPSMED,MUMED,MUSPH,TE,TH) 
       CALL XMAT(XODD,XEVEN,LMAX,KAPPA,AK,ELM,EMACH) 
       CALL SETUP(LMAX,XEVEN,XODD,TE,TH,XXMAT1,XXMAT2)
+      vXXMAT1 = XXMAT1(1:lmtot, 1:lmtot)
+      vXXMAT2 = XXMAT2(1:lmtot, 1:lmtot)
+      CALL ZGETRF( lmtot, lmtot, vXXMAT1, lmtot, vINT1, INFO )
+      CALL ZGETRF( lmtot, lmtot, vXXMAT2, lmtot, vINT2, INFO )
+!     CALL ZGE(XXMAT1,INT1,LMTOT,LMTD,EMACH)
+!     CALL ZGE(XXMAT2,INT2,LMTOT,LMTD,EMACH)
       ISIGN2=1
       SIGN2=3.D0-2.D0*ISIGN2  
       IGK2=0  
@@ -3649,12 +3655,18 @@ C
       BMEL2(IOD)=TH(L+1)*AH(K2,II+1)  
                              END IF  
     2 CONTINUE
-      vXXMAT1 = XXMAT1(1:lmtot, 1:lmtot)
-      vXXMAT2 = XXMAT2(1:lmtot, 1:lmtot)
+
+!     CALL ZSU(XXMAT1,INT1,BMEL1,LMTOT,LMTD,EMACH)
+!     CALL ZSU(XXMAT2,INT2,BMEL2,LMTOT,LMTD,EMACH)
+
       vBMEL1 = BMEL1(1:LMTOT)
       vBMEL2 = BMEL2(1:LMTOT)
-      call zgesv(lmtot, 1, vXXMAT1, lmtot, vINT1, vBMEL1,lmtot,info)
-      call zgesv(lmtot, 1, vXXMAT2, lmtot, vINT2, vBMEL2,lmtot,info)
+      CALL ZGETRS( 'No transpose', lmtot, 1, vXXMAT1, lmtot, vINT1,
+     $  vBMEL1, lmtot, INFO )
+      CALL ZGETRS( 'No transpose', lmtot, 1, vXXMAT2, lmtot, vINT2,
+     $  vBMEL2, lmtot, INFO )
+!      call zgesv(lmtot, 1, vXXMAT1, lmtot, vINT1, vBMEL1,lmtot,info)
+!      call zgesv(lmtot, 1, vXXMAT2, lmtot, vINT2, vBMEL2,lmtot,info)
       BMEL1(1:LMTOT) = vBMEL1
       BMEL2(1:LMTOT) = vBMEL2
       DO 4 ISIGN1=1,2
