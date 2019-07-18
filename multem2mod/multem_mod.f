@@ -30,7 +30,7 @@ C=======================================================================
      & reduce, lat2d, elmgen,bessel
       contains
 C=======================================================================
-      SUBROUTINE BESSEL(BJ,Y,H,ARG,LMX,lmax,LJ,LY,LH,LCALL)
+      SUBROUTINE BESSEL(BJ,Y,H,ARG)
       IMPLICIT NONE
       integer, parameter:: dp=kind(0.d0)
 !     ------------------------------------------------------------------
@@ -41,49 +41,43 @@ C=======================================================================
 !
 !     ON INPUT--->
 !     ARG    ARGUMENT OF THE BESSEL FUNCTIONS
-!     LMAX   MAX. ORDER OF THE BESSEL FUNCTIONS
-!            (LIMITED UP TO 25 IN THE VERSION)
-!     LJ     LOGICAL : IF LJ IS TRUE THE SPHERICAL BESSEL
-!            FUNCTIONS OF THE FIRST KIND ARE CALCULATED UP TO LMAX
-!     LY     LOGICAL : IF LY IS TRUE THE SPHERICAL BESSEL
-!            FUNCTIONS OF THE SECOND KIND ARE CALCULATED UP TO LMAX
-!     LH     LOGICAL : IF LH IS TRUE THE SPHERICAL BESSEL
-!            FUNCTIONS OF THE THIRD KIND ARE CALCULATED UP TO LMAX
-!     LCALL  LOGICAL : IF LCALL IS FALSE THE CHEBYCHEV
-!            COEFFICIENTS ARE CALCULATED -THIS PART HAS TO
-!            BE CALLED ONCE
-!
 !     ON OUTPUT--->
 !     BJ     AN ARRAY CONTAINING THE BESSEL FUNCTIONS OF
-!            THE FIRST KIND UP TO LMAX IF LJ IS TRUE.
+!            THE FIRST KIND UP TO LMAX1 IF LJ IS TRUE.
 !            REMEMBER, THAT BJ(1) CONTAINS THE FUNCTION OF
 !            L=0 AND SO ON.
 !     Y      AN ARRAY CONTAINING THE BESSEL FUNCTIONS OF
-!            THE SECOND KIND UP TO LMAX IF LY IS TRUE.
+!            THE SECOND KIND UP TO LMAX1 IF LY IS TRUE.
 !            REMEMBER,THAT  Y(1) CONTAINS THE FUNCTION OF L=0 AND SO ON.
 !     H      AN ARRAY CONTAINING THE BESSEL FUNCTIONS OF
-!            THE THIRD KIND UP TO LMAX IF LH IS TRUE.
+!            THE THIRD KIND UP TO LMAX1 IF LH IS TRUE.
 !            REMEMBER,THAT H (1) CONTAINS THE FUNCTION OF L=0 AND SO ON.
 !
 !     THE BESSEL FUNCTIONS OF 3RD KIND ARE DEFINED AS: H(L)=BJ(L)+I*Y(L)
 !     ------------------------------------------------------------------
-      LOGICAL     :: LCALL,LH,LJ,LY
-      INTEGER     :: lmax,LMX
-      COMPLEX(dp) :: ARG
+      INTEGER     :: lmax1
+      COMPLEX(dp), intent(in) :: ARG
       COMPLEX(dp), intent(out) :: BJ(:),H(:),Y(:)
-      COMPLEX(dp) :: Z, CY(lmx), i
-      real(dp)     :: pi, ZR, ZI, FNU, CYR(lmx), CYI(lmx),
-     & CWRKR(lmx), CWRKI(lmx)
+      COMPLEX(dp) :: Z, i
+      complex(dp),dimension(:),allocatable :: CY
+      real(dp)     :: pi, ZR, ZI, FNU
+      real(dp),dimension(:),allocatable :: CYR, CYI,
+     & CWRKR, CWRKI
 
       INTEGER KODE, N, NMAXD, NZ, IERR
+      lmax1 = size(BJ) ! to store from l=0 to l=lmax
+      allocate(CY(1:lmax1))
+      allocate(CYR(1:lmax1))
+      allocate(CYI(1:lmax1))
+      allocate(CWRKI(1:lmax1))
+      allocate(CWRKR(1:lmax1))
       pi=4.0_dp*ATAN(1.0_dp)
       i = (0.0_dp, 1.0_dp)
       ZR = real(ARG)
       ZI = aimag(ARG)
       FNU = 0.5_dp
       KODE=1
-      N=lmax+1
-!     call BESSEL_OLD(BJ,Y,H,ARG,LMX,LMAX,LJ,LY,LH,LCALL)
+      N=lmax1
       CALL ZBESJ(ZR, ZI, FNU, KODE, N, CYR, CYI, NZ, IERR)
       ! Convert to spherical function
       CY = (CYR+ i*CYI)*sqrt(pi/2.0_dp/arg)
@@ -1007,7 +1001,7 @@ C
 C
 C ..  LOCAL SCALARS  ..
 C
-      INTEGER    L1,LMAX1
+      INTEGER    L1,LMAX1, b_size
       real(dp)     PI
       complex(dp) CI,C1,C2,C3,C4,C5,C6,AN,AJ,BN,BJ,ARG,ARGM,XISQ,XISQM
       complex(dp) AR
@@ -1015,9 +1009,10 @@ C
 C
 C ..  LOCAL ARRAYS  ..
 C
-      !complex(dp), dimension(:), allocatable:: J,Y,H
-      complex(dp) :: J(LMAX1D),Y(LMAX1D),H(LMAX1D)
-      complex(dp) JM(LMAX1D),YM(LMAX1D),HM(LMAX1D)
+      complex(dp), dimension(:), allocatable:: J,Y,H
+      complex(dp), dimension(:), allocatable:: JM,YM,HM
+      !complex(dp) :: J(LMAX1D),Y(LMAX1D),H(LMAX1D)
+      !complex(dp) JM(LMAX1D),YM(LMAX1D),HM(LMAX1D)
 C
 C ..  INTRINSIC FUNCTIONS  ..
 C
@@ -1033,9 +1028,13 @@ C
 C-----------------------------------------------------------------------
 C
       lmax1 = size(TE)
-!     allocate(J(1:lmax1))
-!     allocate(Y(1:lmax1))
-!     allocate(H(1:lmax1))
+      b_size = lmax1+1
+      allocate(J(1:b_size))
+      allocate(Y(1:b_size))
+      allocate(H(1:b_size))
+      allocate(JM(1:b_size))
+      allocate(YM(1:b_size))
+      allocate(HM(1:b_size))
 
       lmax = lmax1-1
       LCALL=.FALSE.
@@ -1045,10 +1044,10 @@ C
       ARG=XISQ*AR
       ARGM=XISQM*AR
       IF(LMAX1>LMAX1D)  GO  TO   10
-      CALL BESSEL(J,Y,H,ARG,LMAX1D,LMAX1,.TRUE.,.TRUE.,
-     *            .FALSE. ,LCALL)
-      CALL BESSEL(JM,YM,HM,ARGM,LMAX1D,LMAX1,.TRUE.,.FALSE.,
-     *            .FALSE.,LCALL)
+      CALL BESSEL(J,Y,H,ARG)!,LMAX1D,LMAX1,.TRUE.,.TRUE.,
+      !*            .FALSE. ,LCALL)
+      CALL BESSEL(JM,YM,HM,ARGM)!,LMAX1D,LMAX1,.TRUE.,.FALSE.,
+!     *            .FALSE.,LCALL)
       C1=EPSSPH-EPSMED
       C2=EPSMED*ARGM
       C3=-EPSSPH*ARG
