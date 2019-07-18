@@ -3071,24 +3071,10 @@ C ..  COMMON BLOCKS ..
 C
       real(dp)     AR1(2),AR2(2)
       COMMON/X1/AR1,AR2
-C
-C ..  INTRINSIC FUNCTIONS ..
-C
-C      INTRINSIC DCMPLX,MOD,SQRT
-C
-C ..  EXTERNAL ROUTINES ..
-C
-C      EXTERNAL TMTRX,XMAT,ZGE,ZSU,PLW,SETUP,DLMKG
-C
-C ..  DATA STATEMENTS ..
-C
-C      DATA CONE/(1.D0,0.D0)/,CI/(0.D0,1.D0)/,CZERO/(0.D0,0.D0)/
 C     ------------------------------------------------------------------
-C
       allocate(TE(1:(lmax+1)))
       allocate(TH(1:(lmax+1)))
       IGKMAX=2*IGMAX
-      !call zgetrf_wrap ( vXXMAT1, vINT1 )
       LMAX1=LMAX+1
       LMTOT=LMAX1*LMAX1-1
       LMXOD=(LMAX*LMAX1)/2
