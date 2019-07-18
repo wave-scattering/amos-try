@@ -1,5 +1,6 @@
       SUBROUTINE BESSEL(BJ,Y,H,ARG,LMX,lmax,LJ,LY,LH,LCALL)
       IMPLICIT NONE
+      integer, parameter:: dp=kind(0.d0)
 !     ------------------------------------------------------------------
 !     THIS  SUBROUTINE COMPUTES THE  SPHERICAL BESSEL FUNCTIONS OF
 !     FIRST, SECOND  AND  THIRD  KIND  using Amos lib
@@ -34,32 +35,32 @@
 !
 !     THE BESSEL FUNCTIONS OF 3RD KIND ARE DEFINED AS: H(L)=BJ(L)+I*Y(L)
 !     ------------------------------------------------------------------
-      LOGICAL    LCALL,LH,LJ,LY
-      INTEGER    lmax,LMX
-      COMPLEX*16 ARG
-      COMPLEX*16 BJ(LMX),H(LMX),Y(LMX)
-      COMPLEX*16 Z, CY(lmx), i
-      real(8) pi, ZR, ZI, FNU, CYR(lmx), CYI(lmx),
+      LOGICAL     :: LCALL,LH,LJ,LY
+      INTEGER     :: lmax,LMX
+      COMPLEX(dp) :: ARG
+      COMPLEX(dp) :: BJ(LMX),H(LMX),Y(LMX)
+      COMPLEX(dp) :: Z, CY(lmx), i
+      real(dp)     :: pi, ZR, ZI, FNU, CYR(lmx), CYI(lmx),
      & CWRKR(lmx), CWRKI(lmx)
 
       INTEGER KODE, N, NMAXD, NZ, IERR
-      pi=4.D0*ATAN(1.D0)
-      i = (0.0d0, 1.0d0)
+      pi=4.0_dp*ATAN(1.0_dp)
+      i = (0.0_dp, 1.0_dp)
       ZR = real(ARG)
       ZI = aimag(ARG)
-      FNU = 0.5D0
+      FNU = 0.5_dp
       KODE=1
       N=lmax+1
 !     call BESSEL_OLD(BJ,Y,H,ARG,LMX,LMAX,LJ,LY,LH,LCALL)
       CALL ZBESJ(ZR, ZI, FNU, KODE, N, CYR, CYI, NZ, IERR)
       ! Convert to spherical function
-      CY = (CYR+ i*CYI)*sqrt(pi/2.0d0/arg)
+      CY = (CYR+ i*CYI)*sqrt(pi/2.0_dp/arg)
       BJ = CY
-      CWRKR=0.0d0
-      CWRKI=0.0d0
+      CWRKR=0.0_dp
+      CWRKI=0.0_dp
       call ZBESY(ZR, ZI, FNU, KODE, N, CYR, CYI, NZ, CWRKR, CWRKI,
      *                 IERR)
-      CY = (CYR+ i*CYI)*sqrt(pi/2.0d0/arg)
+      CY = (CYR+ i*CYI)*sqrt(pi/2.0_dp/arg)
       Y = CY
       H=BJ+i*Y
       END

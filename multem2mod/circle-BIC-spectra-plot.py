@@ -57,8 +57,8 @@ def eval(i):
 
 if __name__ == "__main__":
     plt.figure(figsize=(11,6))
-    npts = 1404
-    lmax=10
+    npts = 204
+    lmax=4
     r_ratio = 0.47050000
     # from_k = 3.7128
     # to_k = 3.7129
@@ -124,7 +124,7 @@ if __name__ == "__main__":
             plt.ylim(-0.01,1.01)
             plt.legend()
         plt.tight_layout()
-        #plt.show()
+        plt.show()
         # plt.show()
         # plt.clf(); plt.close()
         # plt.figure(figsize=(16,9))
