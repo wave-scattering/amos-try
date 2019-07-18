@@ -22,7 +22,9 @@ CCCCCCCCC-----------> END OF README
 CCCCCCCCC-----------> THIS IS THE FIRST LINE OF THE FILE
 CCCCCCCCC-----------> HERE STARTS THE FORTRAN SOURCE CODE
 C=======================================================================
-      module libmultem
+      module libmultem2a
+      use dense_solve
+      use libmultem2b
       implicit none
       integer, parameter:: dp=kind(0.d0)
       real(dp), parameter :: pi=4.0_dp*ATAN(1.0_dp)
@@ -32,67 +34,9 @@ C=======================================================================
       complex(dp), parameter :: ctwo  = (2.0_dp, 0.0_dp)
       private
       public cerf, blm, ceven, codd, band, scat, pair, hoslab, pcslab,
-     & reduce, lat2d, elmgen,bessel
+     & reduce, lat2d, elmgen
       contains
 C=======================================================================
-      subroutine bessel(bj,y,h,arg)
-      implicit none
-      integer, parameter:: dp=kind(0.d0)
-!     ------------------------------------------------------------------
-!     THIS  SUBROUTINE COMPUTES THE  SPHERICAL BESSEL FUNCTIONS OF
-!     FIRST, SECOND  AND  THIRD  KIND  using Amos lib
-!
-!     2019.07.17 Change to use Amos lib
-!
-!     ON INPUT--->
-!     ARG    ARGUMENT OF THE BESSEL FUNCTIONS
-!     ON OUTPUT--->
-!     BJ     AN ARRAY CONTAINING THE BESSEL FUNCTIONS OF
-!            THE FIRST KIND UP TO LMAX1 IF LJ IS TRUE.
-!            REMEMBER, THAT BJ(1) CONTAINS THE FUNCTION OF
-!            L=0 AND SO ON.
-!     Y      AN ARRAY CONTAINING THE BESSEL FUNCTIONS OF
-!            THE SECOND KIND UP TO LMAX1 IF LY IS TRUE.
-!            REMEMBER,THAT  Y(1) CONTAINS THE FUNCTION OF L=0 AND SO ON.
-!     H      AN ARRAY CONTAINING THE BESSEL FUNCTIONS OF
-!            THE THIRD KIND UP TO LMAX1 IF LH IS TRUE.
-!            REMEMBER,THAT H (1) CONTAINS THE FUNCTION OF L=0 AND SO ON.
-!
-!     THE BESSEL FUNCTIONS OF 3RD KIND ARE DEFINED AS: H(L)=BJ(L)+I*Y(L)
-!     ------------------------------------------------------------------
-      integer     :: lmax1
-      complex(dp), intent(in) :: arg
-      complex(dp), intent(out) :: BJ(:),H(:),Y(:)
-      complex(dp) :: z
-      complex(dp),dimension(:),allocatable :: cy
-      real(dp)     :: zr, zi, FNU
-      real(dp),dimension(:),allocatable :: cyr, cyi,
-     & cwrkr, cwrki
-
-      INTEGER KODE, N, NZ, IERR
-      lmax1 = size(BJ) ! to store from l=0 to l=lmax
-      allocate(cy(1:lmax1))
-      allocate(cyr(1:lmax1))
-      allocate(cyi(1:lmax1))
-      allocate(cwrki(1:lmax1))
-      allocate(cwrkr(1:lmax1))
-      zr = real(arg)
-      zi = aimag(arg)
-      FNU = 0.5_dp
-      KODE=1
-      N=lmax1
-      call ZBESJ(zr, zi, FNU, KODE, N, CYR, CYI, NZ, IERR)
-      ! Convert to spherical function
-      cy = (cyr+ ci*cyi)*sqrt(pi/2.0_dp/arg)
-      BJ = cy
-      cwrkr=0.0_dp
-      cwrki=0.0_dp
-      call ZBESY(zr, zi, FNU, KODE, N, CYR, CYI, NZ, cwrkr, cwrki,
-     *                 IERR)
-      cy = (cyr+ ci*cyi)*sqrt(pi/2.0_dp/arg)
-      Y = cy
-      H=BJ+ci*Y
-      END subroutine
 
 C=======================================================================
       SUBROUTINE SCAT(IGMAX,ZVAL,AK,G,KAPIN,KAPOUT,EINCID,QI,QIII)
@@ -976,78 +920,6 @@ C****** YL(M+1) IS CALCULATED                         ******
       RETURN
       END subroutine
 C=======================================================================
-      SUBROUTINE TMTRX(RAP,EPSSPH,EPSMED,MUMED,MUSPH,TE,TH)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
-C     ------------------------------------------------------------------
-C     THIS SUBROUTINE  CALCULATES  THE  T-MATRIX FOR THE SCATTERING
-C     OF ELECTROMAGNETIC  FIELD  OF  WAVE-LENGHT LAMDA  BY A SINGLE
-C     SPHERE OF RADIUS S.  (RAP=S/LAMDA).
-C     EPSSPH : COMPLEX RELATIVE DIELECTRIC CONSTANT OF THE SPHERE.
-C     EPSMED : COMPLEX RELATIVE DIELECTRIC CONSTANT OF THE MEDIUM.
-C     LMAX   : MAXIMUM ANGULAR MOMENTUM from TE(0..LMAX) and TH
-C     ------------------------------------------------------------------
-C
-C
-C ..  SCALAR ARGUMENTS  ..
-C
-      INTEGER    LMAX
-      complex(dp) EPSSPH,EPSMED,MUSPH,MUMED,RAP
-C
-C ..  ARRAY ARGUMENTS  ..
-C
-      complex(dp), dimension(:), intent(out) :: TE(:),TH(:)
-C
-C ..  LOCAL SCALARS  ..
-C
-      INTEGER    L1,LMAX1, b_size
-      real(dp)     PI
-      complex(dp) CI,C1,C2,C3,C4,C5,C6,AN,AJ,BN,BJ,ARG,ARGM,XISQ,XISQM
-      complex(dp) AR
-C
-C ..  LOCAL ARRAYS  ..
-C
-      complex(dp), dimension(:), allocatable:: J,Y,H
-      complex(dp), dimension(:), allocatable:: JM,YM,HM
-C
-C ..  DATA STATEMENTS  ..
-C
-      DATA CI/(0.0_dp,1.0_dp)/,PI/3.14159265358979_dp/
-C-----------------------------------------------------------------------
-C
-      lmax1 = size(TE)
-      ! to evaluate TE(0..lmax) we need one more oder in Bessel functions
-      b_size = lmax1+1
-      allocate(J(1:b_size))
-      allocate(Y(1:b_size))
-      allocate(H(1:b_size))
-      allocate(JM(1:b_size))
-      allocate(YM(1:b_size))
-      allocate(HM(1:b_size))
-      lmax = lmax1-1
-      XISQ =SQRT(EPSMED*MUMED)
-      XISQM=SQRT(EPSSPH*MUSPH)
-      AR=2.0_dp*PI*RAP
-      ARG=XISQ*AR
-      ARGM=XISQM*AR
-      CALL BESSEL(J,Y,H,ARG)
-      CALL BESSEL(JM,YM,HM,ARGM)
-      C1=EPSSPH-EPSMED
-      C2=EPSMED*ARGM
-      C3=-EPSSPH*ARG
-      C4=MUSPH-MUMED
-      C5=MUMED*ARGM
-      C6=-MUSPH*ARG
-      DO  L1=1,LMAX1
-          AN=C1*L1*JM(L1)*Y(L1)+C2*JM(L1+1)*Y(L1)+C3*JM(L1)*Y(L1+1)
-          AJ=C1*L1*JM(L1)*J(L1)+C2*JM(L1+1)*J(L1)+C3*JM(L1)*J(L1+1)
-          BN=C4*L1*JM(L1)*Y(L1)+C5*JM(L1+1)*Y(L1)+C6*JM(L1)*Y(L1+1)
-          BJ=C4*L1*JM(L1)*J(L1)+C5*JM(L1+1)*J(L1)+C6*JM(L1)*J(L1+1)
-          TE(L1)=-AJ/(AJ+CI*AN)
-          TH(L1)=-BJ/(BJ+CI*BN)
-      end do
-      RETURN
-      END subroutine
 C=======================================================================
       SUBROUTINE XMAT(XODD,XEVEN,LMAX,KAPPA,AK,ELM,EMACH)
       IMPLICIT NONE
@@ -3175,7 +3047,7 @@ C
       INTEGER    LMXOD,IEV,IOD
       integer info
       real(dp)     SIGN1,SIGN2,SIGNUS
-      complex(dp) CONE,CI,CZERO,CQI,CQII,CQIII,CQIV
+      complex(dp) CQI,CQII,CQIII,CQIV
 C
 C ..  LOCAL ARRAYS  ..
 C
@@ -3210,7 +3082,7 @@ C      EXTERNAL TMTRX,XMAT,ZGE,ZSU,PLW,SETUP,DLMKG
 C
 C ..  DATA STATEMENTS ..
 C
-      DATA CONE/(1.D0,0.D0)/,CI/(0.D0,1.D0)/,CZERO/(0.D0,0.D0)/
+C      DATA CONE/(1.D0,0.D0)/,CI/(0.D0,1.D0)/,CZERO/(0.D0,0.D0)/
 C     ------------------------------------------------------------------
 C
       allocate(TE(1:(lmax+1)))
@@ -3925,7 +3797,8 @@ CCCCCCCCC-----------> HERE STARTS THE FIRST INPUT DATA FILE
       END module
 
       PROGRAM MULTEM
-      use libmultem
+      use libmultem2a
+      use libmultem2b
       IMPLICIT NONE
       integer, parameter:: dp=kind(0.d0)
 C     ------------------------------------------------------------------

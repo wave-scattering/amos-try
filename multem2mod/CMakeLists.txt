@@ -15,13 +15,17 @@ SET (PROJECTNAME "multem2")
 
 #SET (CMAKE_Fortran_FLAGS "-O3 -cpp -mtune=native -fopenmp")
 
+include_directories(${CMAKE_BINARY_DIR}/amos
+        ${CMAKE_BINARY_DIR}/lapack_wrapper
+        )
+add_library(libmultem2b libmultem2b.f90)
+target_link_libraries(libmultem2b amos)
+
 ADD_EXECUTABLE(${PROJECTNAME} "multem_mod.f"
         )
-
-
-
-target_link_libraries(${PROJECTNAME} amos ${BLAS_LIBRARIES}
-        lapack_wrapper ${LAPACK_LIBRARIES} #${HDF5_Fortran_LIBRARIES}
+target_link_libraries(${PROJECTNAME} ${BLAS_LIBRARIES}
+        dense_solve libmultem2b
+        ${LAPACK_LIBRARIES} #${HDF5_Fortran_LIBRARIES}
         )
 
 
