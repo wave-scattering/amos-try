@@ -38,8 +38,9 @@ endif ()
 set(CMAKE_Fortran_FLAGS_RELEASE "${common} -O3 -march=native -ffast-math -funroll-loops -mtune=native -fopenmp" )
 
 add_subdirectory(amos)
+add_subdirectory(lapack_wrapper)
 add_subdirectory(try-zbesj)
-add_subdirectory(cylinder)
+#add_subdirectory(cylinder)
 add_subdirectory(multem2mod)
 
 

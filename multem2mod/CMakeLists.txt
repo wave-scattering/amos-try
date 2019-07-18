@@ -22,7 +22,7 @@ ADD_EXECUTABLE(${PROJECTNAME} "multem_mod.f"
 
 
 target_link_libraries(${PROJECTNAME} amos ${BLAS_LIBRARIES}
-        ${LAPACK_LIBRARIES} #${HDF5_Fortran_LIBRARIES}
+        lapack_wrapper ${LAPACK_LIBRARIES} #${HDF5_Fortran_LIBRARIES}
         )
 
 
