@@ -4,11 +4,11 @@ module libmultem2b
     implicit none
     private
     integer, parameter:: dp=kind(0.d0)
-    real(dp), parameter :: pi=4.0_dp*ATAN(1.0_dp)
     complex(dp), parameter :: czero = (0.0_dp, 0.0_dp)
     complex(dp), parameter :: ci    = (0.0_dp, 1.0_dp)
     complex(dp), parameter :: cone  = (1.0_dp, 0.0_dp)
     complex(dp), parameter :: ctwo  = (2.0_dp, 0.0_dp)
+    real(dp), parameter :: pi=4.0_dp*ATAN(1.0_dp)
     public bessel, tmtrx
 contains
     !=======================================================================

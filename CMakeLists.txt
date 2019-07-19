@@ -37,7 +37,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     # the Debug build):
     #set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -fdefault-real-8")
 endif ()
-#set(common "-std=f95")# -Wall -Wextra -Wimplicit-interface -fPIC")# -fmax-errors=1")
+#set(common "-std=f2003")# -Wall -Wextra -Wimplicit-interface -fPIC")# -fmax-errors=1")
 set(CMAKE_Fortran_FLAGS_DEBUG   "${common} -g -fbounds-check -fcheck-array-temporaries -fbacktrace")
 #set(CMAKE_Fortran_FLAGS_DEBUG   "${common} -g -fcheck-array-temporaries -fbacktrace")
 #set(CMAKE_Fortran_FLAGS_RELEASE "${common} -O3 -march=native -ffast-math -funroll-loops -mtune=native -fopenmp" )
