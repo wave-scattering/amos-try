@@ -41,34 +41,24 @@ C=======================================================================
 
 C=======================================================================
       SUBROUTINE SCAT(IGMAX,ZVAL,AK,G,KAPIN,KAPOUT,EINCID,QI,QIII)
-
 C     ------------------------------------------------------------------
 C     THIS SUBROUTINE CALCULATES THE REFLECTIVITY, TRANSMITTANCE AND
 C     ABSORBANCE OF A FINITE SLAB, CHARACTERIZED BY TRANSMISSION AND
 C     REFLECTION MATRICES QI AND QIII, RESPECTIVELY.
 C     ------------------------------------------------------------------
-C
-C ..  PARAMETER STATEMENTS ..
-C
-      INTEGER   IGD,IGKD
-      PARAMETER (IGD=21,IGKD=2*IGD)
-C
-C ..  SCALAR ARGUMENTS  ..
-C
+C ..  ARGUMENTS  ..
       INTEGER    IGMAX
       REAL(dp)   ZVAL,KAPIN,KAPOUT
-C
-C ..  ARRAY ARGUMENTS ..
-C
-      REAL(dp)   AK(2),G(2,IGD)
-      COMPLEX(dp) QI(IGKD,IGKD),QIII(IGKD,IGKD),EINCID(IGKD)
-C
-C ..  LOCAL SCALARS  ..
-C
+      REAL(dp)   AK(:),G(:,:)
+      COMPLEX(dp) QI(:,:),QIII(:,:),EINCID(:)
+C ..  LOCAL 
+      INTEGER   IGKD
       INTEGER    IGK1,IG1,K1,IGK2,IGKMAX
       REAL(dp)   DOWN,REFLE,TRANS,ABSOR,GKZIN,GKZOUT,TES1
-      COMPLEX(dp) ETRANS(IGKD),EREFLE(IGKD)
+      COMPLEX(dp), allocatable :: ETRANS(:),EREFLE(:)
 C     ------------------------------------------------------------------
+      igkd = size(eincid)
+      allocate(etrans(1:igkd)); allocate(erefle(1:igkd))
       DOWN=0.D0
       REFLE=0.D0
       TRANS=0.D0
@@ -106,40 +96,23 @@ C
 C======================================================================
       SUBROUTINE HOSLAB(IGMAX,KAPPA1,KAPPA2,KAPPA3,AK,G,DL,DR,D,
      &                  QI,QII,QIII,QIV,EMACH)
-
 C-----------------------------------------------------------------------
 C     THIS SUBROUTINE CALCULATES THE  Q-MATRICES FOR A HOMOGENEOUS
 C     PLATE  '2' OF THICKNESS 'D', HAVING THE SEMI-INFINITE MEDIUM
 C     '1' ON ITS LEFT AND THE SEMI-INFINITE MEDIUM '3' ON ITS RIGHT
 C     ------------------------------------------------------------------
-C
-C  .. PARAMETER STATEMENTS ..
-C
-      INTEGER IGD,IGKD
-      PARAMETER (IGD=21,IGKD=2*IGD)
-C
-C  .. SCALAR ARGUMENTS ..
-C
+C  .. ARGUMENTS ..
       INTEGER    IGMAX
       REAL(dp)   EMACH,D
       COMPLEX(dp) KAPPA1,KAPPA2,KAPPA3
-C
-C  .. ARRAY AGUMENTS ..
-C
-      REAL(dp)   AK(2),G(2,IGD),DL(3),DR(3)
-      COMPLEX(dp) QI(IGKD,IGKD),QII(IGKD,IGKD),QIII(IGKD,IGKD)
-      COMPLEX(dp) QIV(IGKD,IGKD)
-
-C
-C  .. LOCAL SCALARS ..
-C
+      REAL(dp)   AK(:),G(:,:),DL(3),DR(3)
+      COMPLEX(dp) QI(:,:),QII(:,:),QIII(:,:)
+      COMPLEX(dp) QIV(:,:)
+C  .. LOCAL
       INTEGER    I,J,IA,IB,JA,IG1,IGKMAX
       REAL(dp)   GKKPAR
       COMPLEX(dp) GKKZ1,GKKZ2,GKKZ3,Z1,Z2,Z3,CQI,CQII
       COMPLEX(dp) CQIII,CQIV,DENOMA,DENOMB,GKKDUM
-C
-C  .. LOCAL ARRAYS ..
-C
       COMPLEX(dp) T(4,2),R(4,2),X(4),P(4,2)
 C     -----------------------------------------------------------------
       IGKMAX=2*IGMAX
@@ -217,14 +190,12 @@ C=======================================================================
 C     ------------------------------------------------------------------
 C     THIS SUBROUTINE CALCULATES THE COEFFICIENTS DLM(KG)
 C     ------------------------------------------------------------------
-C ..  PARAMETER STATEMENTS  ..
-      INTEGER LMAXD,LMAX1D,LM1SQD
-      PARAMETER(LMAXD=14,LMAX1D=LMAXD+1,LM1SQD=LMAX1D*LMAX1D)
+
 C ..  ARGUMENTS  ..
       INTEGER    LMAX
       REAL(dp)   A0,SIGNUS,EMACH
       COMPLEX(dp) KAPPA
-      COMPLEX(dp) DLME(2,LM1SQD),DLMH(2,LM1SQD),GK(3)
+      COMPLEX(dp) DLME(2,(lmax+1)**2),DLMH(2,(lmax+1)**2),GK(3)
 C  .. LOCAL
       INTEGER    K,II,L,M,I
       REAL(dp)   AKPAR,ALPHA,BETA,AKG1,AKG2
@@ -232,7 +203,6 @@ C  .. LOCAL
       COMPLEX(dp) CT,ST,CF
       COMPLEX(dp) YLM((lmax+1)**2)
 C     ------------------------------------------------------------------
-      IF(LMAX>LMAXD)  GO TO 10
       AKG1=DREAL(GK(1))
       AKG2=DREAL(GK(2))
       DO K=1,2
@@ -282,10 +252,6 @@ C     ------------------------------------------------------------------
         end do
       end do
       RETURN
-   10 WRITE(6,100) LMAX,LMAXD
-      STOP
-  100 FORMAT(//13X,'FROM DLMKG  :LMAX=',I5,' IS GREATER THAN DIMENSIONED
-     * LMAXD=',I5)
   101 FORMAT(13X,'FATAL ERROR FROM DLMKG:'/3X,'GK(3) IS TOO SMALL.'
      & /3X,'GIVE A SMALL BUT NONZERO VALUE FOR "EPSILON"'/3X,
      & 'IN THE DATA STATEMENT OF THE MAIN PROGRAM.'
@@ -516,12 +482,6 @@ C     THIS ROUTINE CALCULATES THE EXPANSION COEFFICIENTS 'AE,AH' OF AN
 C     INCIDENT PLANE ELECTROMAGNETIC WAVE OF WAVE VECTOR  'KAPPA' WITH
 C     COMPONENTS PARALLEL TO THE SURFACE EQUAL TO   '(GK(1),GK(2))'.
 C     ------------------------------------------------------------------
-C
-C ..  PARAMETER STATEMENTS  ..
-C
-      INTEGER LMAXD,LMAX1D,LM1SQD
-      PARAMETER(LMAXD=14,LMAX1D=LMAXD+1,LM1SQD=LMAX1D*LMAX1D)
-C
 C ..  SCALAR ARGUMENTS  ..
 C
       INTEGER    LMAX
@@ -529,7 +489,7 @@ C
 C
 C ..  ARRAY ARGUMENTS  ..
 C
-      COMPLEX(dp) AE(2,LM1SQD),AH(2,LM1SQD),GK(3)
+      COMPLEX(dp) AE(:,:),AH(:,:),GK(:)
 C
 C ..  LOCAL SCALARS  ..
 C
@@ -542,7 +502,6 @@ C
       COMPLEX(dp) YLM((lmax+1)**2)
 C-----------------------------------------------------------------------
 C
-      IF(LMAX>LMAXD)  GO TO 10
       AKG1=DREAL(GK(1))
       AKG2=DREAL(GK(2))
       DO 3 K=1,2
@@ -589,10 +548,6 @@ C
     2 CONTINUE
     1 CONTINUE
       RETURN
-   10 WRITE(6,100) LMAX,LMAXD
-      STOP
-  100 FORMAT(//13X,'FROM PLW:  LMAX=',I5,'  IS GREATER THAN DIMENSIONED
-     * LMAXD=',I5)
       END subroutine
 C=======================================================================
       SUBROUTINE SETUP(LMAX,XEVEN,XODD,TE,TH,XXMAT1,XXMAT2)
@@ -2221,12 +2176,6 @@ C     TOGETHER AS  FACTOR 'C'; AND   THE INTEGRAL OF THE THREE LEGENDRE
 C     FUNCTIONS FOLLOWS GAUNT SUMMATION SCHEME SET OUT BY SLATER(ATOMIC
 C     STRUCTURE, VOL1, 309,310
 C-----------------------------------------------------------------------
-C
-C ..  PARAMETER STATEMENTS  ..
-C
-      INTEGER LMAXD,LMAX4D
-      PARAMETER (LMAXD=14,LMAX4D=4*LMAXD+2)
-C
 C ..  SCALAR ARGUMENTS  ..
 C
       INTEGER L1,M1,L2,M2,L3,M3,LMAX
@@ -2240,7 +2189,7 @@ C
 C
 C ..  LOCAL ARRAYS  ..
 C
-      REAL(dp)FAC(LMAX4D)
+      REAL(dp)FAC(4*LMAX+2)
 C-----------------------------------------------------------------------
       FAC(1)=1.0_dp
       NN=4*LMAX+1
@@ -2471,9 +2420,8 @@ C     ------------------------------------------------------------------
 C
 C ..  PARAMETER STATEMENTS ..
 C
-      INTEGER   LMAXD,LMAX1D,LM1SQD,IGD,IGKD,NELMD
-      PARAMETER (LMAXD=14,LMAX1D=LMAXD+1)
-      PARAMETER (LM1SQD=LMAX1D*LMAX1D,IGD=21,IGKD=2*IGD,NELMD=165152)
+      INTEGER   IGD,NELMD
+      PARAMETER (IGD=21,NELMD=165152)
 C
 C ..  SCALAR ARGUMENTS ..
 C
@@ -2485,8 +2433,8 @@ C
 C ..  ARRAY ARGUMENTS ..
 C
       real(dp)     AK(2),DL(3),DR(3),G(2,IGD),ELM(NELMD)
-      complex(dp) QI(IGKD,IGKD),QII(IGKD,IGKD),QIII(IGKD,IGKD)
-      complex(dp) QIV(IGKD,IGKD)
+      complex(dp) QI(:,:),QII(:,:),QIII(:,:)
+      complex(dp) QIV(:,:)
 C
 C ..  LOCAL SCALARS  ..
 C
@@ -2500,7 +2448,7 @@ C
 C ..  LOCAL ARRAYS  ..
 C
       integer     :: int1((lmax+1)**2-1), int2((lmax+1)**2-1)
-      complex(dp) AE(2,LM1SQD),AH(2,LM1SQD),GKK(3,IGD)
+      complex(dp) AE(2,(lmax+1)**2),AH(2,(lmax+1)**2),GKK(3,IGD)
       complex(dp) GK(3),LAME(2),LAMH(2)
       complex(dp) XEVEN(((lmax+1)*(lmax+2))/2,((lmax+1)*(lmax+2))/2),
      & XODD((lmax*(lmax+1))/2,(lmax*(lmax+1))/2)
@@ -2508,7 +2456,7 @@ C
       complex(dp) BMEL1((LMAX+1)**2-1),BMEL2((LMAX+1)**2-1)
       complex(dp) XXMAT1((LMAX+1)**2-1,(LMAX+1)**2-1),
      & XXMAT2((LMAX+1)**2-1,(LMAX+1)**2-1)
-      complex(dp) DLME(2,LM1SQD),DLMH(2,LM1SQD)
+      complex(dp) DLME(2,(lmax+1)**2),DLMH(2,(lmax+1)**2)
 C
 C ..  COMMON BLOCKS ..
 C
@@ -2812,12 +2760,6 @@ C     ALPHA), THIS  SUBROUTINE  REDUCES A WAVECTOR "AK" (IN  UNITS  OF
 C     2*PI/ALPHA) WITHIN THE SBZ BY ADDING AN APPROPRIATE  RECIPROCAL-
 C     LATTICE VECTOR G(IG0)
 C----------------------------------------------------------------------
-C
-C ..  PARAMETER STATEMENTS  ..
-C
-      INTEGER IGD
-      PARAMETER (IGD=21)
-C
 C ..  SCALAR ARGUMENTS  ..
 C
       INTEGER IGMAX,IG0
@@ -2825,7 +2767,7 @@ C
 C
 C ..  ARRAY ARGUMENTS  ..
 C
-      REAL(dp) AR1(2),AR2(2),AK(2),G(2,IGD)
+      REAL(dp) AR1(2),AR2(2),AK(2),G(:,:)
 C
 C ..  LOCAL SCALARS  ..
 C
