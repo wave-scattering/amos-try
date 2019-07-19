@@ -362,7 +362,7 @@ C
       DATA PI/3.14159265358979D0/
 C     ------------------------------------------------------------------
 C
-      FOURPI=4.D0*PI
+      FOURPI=4.0_dp*PI
       K=1
       II=0
    1  LL=LMAX+II
@@ -382,7 +382,7 @@ C
       DO 3 L11=LA11,LB11,2
       L1=L11-1
       L=(L2-L3-L1)/2+M2
-      ELM(K)=((-1.0D0)**L)*FOURPI*BLM(L1,M1,L3,M3,L2,-M2,LMAX)
+      ELM(K)=((-1.0_dp)**L)*FOURPI*BLM(L1,M1,L3,M3,L2,-M2,LMAX)
    3  K=K+1
    5  M3=M3+2
    6  M2=M2+2
@@ -605,7 +605,7 @@ C
       DO 3 K=1,2
       AE(K,1)=CZERO
     3 AH(K,1)=CZERO
-      FPI=4.D0*PI
+      FPI=4.0_dp*PI
       AKPAR=SQRT(AKG1*AKG1+AKG2*AKG2)
       CT=GK(3)/KAPPA
       ST=AKPAR/KAPPA
@@ -616,8 +616,8 @@ C
       N3=GK(3)/KAPPA
       CALL SPHRM4(YLM,CT,ST,CF,LMAX)
       II=1
-      CC=DCMPLX(FPI,0.D0)
-      SIGNUS=-1.D0
+      CC=DCMPLX(FPI,0.0_dp)
+      SIGNUS=-1.0_dp
       DO 1 L=1,LMAX
       CC=CC*CI
       A=DFLOAT(L*(L+1))
@@ -627,13 +627,13 @@ C
       II=II+1
       IF(ABS(M+1)<=L)  then
       I=L*L+L-M
-      Z1=CC1*SQRT(DFLOAT((L-M)*(L+M+1)))*YLM(I)/2.D0
+      Z1=CC1*SQRT(DFLOAT((L-M)*(L+M+1)))*YLM(I)/2.0_dp
                          else
       Z1=CZERO
                          end if
       IF(ABS(M-1)<=L)  then
       I=L*L+L-M+2
-      Z2=CC1*SQRT(DFLOAT((L+M)*(L-M+1)))*YLM(I)/2.D0
+      Z2=CC1*SQRT(DFLOAT((L+M)*(L-M+1)))*YLM(I)/2.0_dp
                          else
       Z2=CZERO
                          end if
@@ -698,8 +698,8 @@ C
       LMAX1=LMAX+1
       LMTOT=LMAX1*LMAX1-1
       LMXOD=(LMAX*LMAX1)/2
-      C0=SQRT(8.D0*PI/3.D0)
-      SIGNUS=1.D0
+      C0=SQRT(8.0_dp*PI/3.0_dp)
+      SIGNUS=1.0_dp
       IAOD=0
       IAEV=LMXOD
       DO 1 LA=1,LMAX
@@ -714,15 +714,15 @@ C
       UP=DFLOAT(2*LA+1)
       SIGNUS=-SIGNUS
       C=SIGNUS*C0
-      B1=0.D0
+      B1=0.0_dp
       IF(ABS(MA+1)<=(LA-1)) B1=BLM(LA-1,MA+1,1,-1,LA,-MA,LMAX)
-      B2=0.D0
+      B2=0.0_dp
       IF(ABS(MA-1)<=(LA-1)) B2=BLM(LA-1,MA-1,1, 1,LA,-MA,LMAX)
       U1=DFLOAT((LA+MA)*(LA-MA))
       U2=DFLOAT((2*LA-1)*(2*LA+1))
       B3=SQRT(U1/U2)
-      ALPHA1=SQRT(DFLOAT((LA-MA)*(LA+MA+1)))/2.D0
-      BETA1 =SQRT(DFLOAT((LA+MA)*(LA-MA+1)))/2.D0
+      ALPHA1=SQRT(DFLOAT((LA-MA)*(LA+MA+1)))/2.0_dp
+      BETA1 =SQRT(DFLOAT((LA+MA)*(LA-MA+1)))/2.0_dp
       IBOD=0
       IBEV=LMXOD
       DO 2 LB=1,LMAX
@@ -736,8 +736,8 @@ C
                               END IF
       A=DFLOAT(LB*(LB+1)*LA*(LA+1))
       DOWN=SQRT(A)
-      ALPHA2=SQRT(DFLOAT((LB-MB)*(LB+MB+1)))/2.D0
-      BETA2 =SQRT(DFLOAT((LB+MB)*(LB-MB+1)))/2.D0
+      ALPHA2=SQRT(DFLOAT((LB-MB)*(LB+MB+1)))/2.0_dp
+      BETA2 =SQRT(DFLOAT((LB+MB)*(LB-MB+1)))/2.0_dp
       LTT=LA+MA+LB+MB
           IF(MOD(LTT,2)/=0)           then
              IF(MOD((LA+MA),2)==0)       then
@@ -766,8 +766,8 @@ C
              Z1=CODD (LB,MB-1,LA,MA-1,LMODD ,XODD )
              Z2=CODD (LB,MB+1,LA,MA+1,LMODD ,XODD )
              Z3=CEVEN(LB,MB  ,LA,MA  ,LMEVEN,XEVEN)
-             Z1=2.D0*BETA1 *BETA2 *Z1
-             Z2=2.D0*ALPHA1*ALPHA2*Z2
+             Z1=2.0_dp*BETA1 *BETA2 *Z1
+             Z2=2.0_dp*ALPHA1*ALPHA2*Z2
              Z3=DFLOAT(MA)*DFLOAT(MB)*Z3
              OMEGA1=(Z1+Z2+Z3)/DOWN
              XXMAT1(IA,IB)=-TH(LA+1)*OMEGA1
@@ -776,8 +776,8 @@ C
              Z1=CEVEN(LB,MB-1,LA,MA-1,LMEVEN,XEVEN)
              Z2=CEVEN(LB,MB+1,LA,MA+1,LMEVEN,XEVEN)
              Z3=CODD (LB,MB  ,LA,MA  ,LMODD ,XODD )
-             Z1=2.D0*BETA1 *BETA2 *Z1
-             Z2=2.D0*ALPHA1*ALPHA2*Z2
+             Z1=2.0_dp*BETA1 *BETA2 *Z1
+             Z2=2.0_dp*ALPHA1*ALPHA2*Z2
              Z3=DFLOAT(MA)*DFLOAT(MB)*Z3
              OMEGA1=(Z1+Z2+Z3)/DOWN
              XXMAT1(IA,IB)=-TE(LA+1)*OMEGA1
@@ -838,35 +838,35 @@ C
 C-----------------------------------------------------------------------
 C
       LM=0
-      CL=0.D0
-      A=1.D0
-      B=1.D0
-      ASG=1.D0
+      CL=0.0_dp
+      A=1.0_dp
+      B=1.0_dp
+      ASG=1.0_dp
       LL=LMAX+1
 C****** MULTIPLICATIVE FACTORS REQUIRED ******
       DO 2 L=1,LL
-      FAC1(L)=ASG*SQRT((2.D0*CL+1.D0)*A/(4.D0*PI*B*B))
-      FAC3(L)=SQRT(2.D0*CL)
+      FAC1(L)=ASG*SQRT((2.0_dp*CL+1.0_dp)*A/(4.0_dp*PI*B*B))
+      FAC3(L)=SQRT(2.0_dp*CL)
       CM=-CL
       LN=L+L-1
       DO 1 M=1,LN
       LO=LM+M
-      FAC2(LO)=SQRT((CL+1.D0+CM)*(CL+1.D0-CM)
-     1/((2.D0*CL+3.D0)*(2.D0*CL+1.D0)))
-   1  CM=CM+1.D0
-      CL=CL+1.D0
-      A=A*2.D0*CL*(2.D0*CL-1.D0)/4.D0
+      FAC2(LO)=SQRT((CL+1.0_dp+CM)*(CL+1.0_dp-CM)
+     1/((2.0_dp*CL+3.0_dp)*(2.0_dp*CL+1.0_dp)))
+   1  CM=CM+1.0_dp
+      CL=CL+1.0_dp
+      A=A*2.0_dp*CL*(2.0_dp*CL-1.0_dp)/4.0_dp
       B=B*CL
       ASG=-ASG
    2  LM=LM+LN
 C****** FIRST ALL THE YLM FOR M=+-L AND M=+-(L-1) ARE ******
 C****** CALCULATED BY EXPLICIT FORMULAE               ******
       LM=1
-      CL=1.D0
-      ASG=-1.D0
+      CL=1.0_dp
+      ASG=-1.0_dp
       SF=CF
-      SA=DCMPLX(1.D0,0.D0)
-      YLM(1)=DCMPLX(FAC1(1),0.D0)
+      SA=DCMPLX(1.0_dp,0.0_dp)
+      YLM(1)=DCMPLX(FAC1(1),0.0_dp)
       DO 3 L=1,LMAX
       LN=LM+L+L+1
       YLM(LN)=FAC1(L+1)*SA*SF*ST
@@ -875,7 +875,7 @@ C****** CALCULATED BY EXPLICIT FORMULAE               ******
       YLM(LM+2)=ASG*FAC3(L+1)*FAC1(L+1)*SA*CT*CF/SF
       SA=ST*SA
       SF=SF*CF
-      CL=CL+1.D0
+      CL=CL+1.0_dp
       ASG=-ASG
    3  LM=LN
 C****** USING YLM AND YL(M-1) IN A RECURENCE RELATION ******
@@ -978,7 +978,7 @@ C     BY KAMBE.DLM=DLM1+DLM2+DLM3.WITH LM=(00),(1-1),(11),(2-2)...
 C
       L2MAX=LMAX+LMAX
       LL2=L2MAX+1
-      FAC(1)=1.0D0
+      FAC(1)=1.0_dp
       II=L2MAX+L2MAX
       DO 2 I=1,II
    2  FAC(I+1)=DFLOAT(I)*FAC(I)
@@ -991,11 +991,11 @@ C     USED,SUBJECT TO A RESTRICTION WHICH IS IMPOSED TO CONTROL
 C     LATER ROUNDING ERRORS
 C
       TV=ABS(AR1(1)*AR2(2)-AR1(2)*AR2(1))
-      ALPHA=TV/(4.0D0*PI)*KAPSQ
+      ALPHA=TV/(4.0_dp*PI)*KAPSQ
       AL=ABS(ALPHA)
       IF(EXP(AL)*EMACH-5.0D-5)5,5,4
    4  AL=LOG(5.0D-5/EMACH)
-   5  ALPHA=DCMPLX(AL,0.0D0)
+   5  ALPHA=DCMPLX(AL,0.0_dp)
       RTA=SQRT(ALPHA)
 C
 C     DLM1 , THE  SUM  OVER  RECIPROCAL   LATTICE  VECTORS  , IS
@@ -1006,12 +1006,12 @@ C     DENOM,FOR ALL VALUES OF N=0,(L-|M|)/2
 C
       K=1
       KK=1
-      AP1=-2.0D0/TV
-      AP2=-1.0D0
+      AP1=-2.0_dp/TV
+      AP2=-1.0_dp
       CF=CI/KAPPA
       DO 8 L=1,LL2
-      AP1=AP1/2.0D0
-      AP2=AP2+2.0D0
+      AP1=AP1/2.0_dp
+      AP2=AP2+2.0_dp
       CP=CF
       MM=1
       IF(MOD  (L,2))7,6,7
@@ -1030,7 +1030,7 @@ C
       I1=I
       I2=NN-I+1
       I3=NN+M-I
-      DENOM(K)=1.0D0/(FAC(I1)*FAC(I2)*FAC(I3))
+      DENOM(K)=1.0_dp/(FAC(I1)*FAC(I2)*FAC(I3))
    8  K=K+1
 C
 C     THE  RECIPROCAL  LATTICE IS  DEFINED BY  B1,B2 . THE  SUMMATION
@@ -1040,7 +1040,7 @@ C     PARALLELOGRAM OF LATTICE POINTS ABOUT THE ORIGIN,OF SIDE 2*N1+1
 C     EACH STEP BEGINS AT LABEL 9.
 C     AKPT=THE CURRENT LATTICE VECTOR IN THE SUM
 C
-      RTV=2.0D0*PI/TV
+      RTV=2.0_dp*PI/TV
       B1(1)=-AR1(2)*RTV
       B1(2)=AR1(1)*RTV
       B2(1)=-AR2(2)*RTV
@@ -1051,9 +1051,9 @@ C
    9  N1=N1+1
       NA=N1+N1+II
       AN1=DFLOAT(N1)
-      AN2=-AN1-1.0D0
+      AN2=-AN1-1.0_dp
       DO 22 I1=1,NA
-      AN2=AN2+1.0D0
+      AN2=AN2+1.0_dp
       DO 21 I2=1,4
 C     WRITE(16,307) I1,I2
 C 307 FORMAT(33X,'I1=',I2,' , I2=',I2/33X,12('='))
@@ -1091,13 +1091,13 @@ C
       GP=SQRT(GPSQ)
       XPK=CZERO
       GK=CZERO
-      GKK=DCMPLX(1.0D0,0.0D0)
+      GKK=DCMPLX(1.0_dp,0.0_dp)
       IF(AC-EMACH)11,11,10
   10  XPK=DCMPLX(AKPT(1)/AC,AKPT(2)/AC)
       GK=AC/KAPPA
       GKK=GPSQ/KAPSQ
-  11  XPM(1)=DCMPLX(1.0D0,0.0D0)
-      AGK(1)=DCMPLX(1.0D0,0.0D0)
+  11  XPM(1)=DCMPLX(1.0_dp,0.0_dp)
+      AGK(1)=DCMPLX(1.0_dp,0.0_dp)
       DO 12 I=2,LL2
       XPM(I)=XPM(I-1)*XPK
   12  AGK(I)=AGK(I-1)*GK
@@ -1109,11 +1109,11 @@ C
       GAM=RTPI*CERF(CZ,EMACH)
       GKN(1)=CF*CX*GAM
       BT=Z
-      B=0.5D0
+      B=0.5_dp
       LLL=L2MAX/2+1
       DO 13 I=2,LLL
       BT=BT/ZZ
-      B=B-1.0D0
+      B=B-1.0_dp
       GAM=(GAM-BT)/B
       CF=CF*GKK
   13  GKN(I)=CF*CX*GAM
@@ -1153,7 +1153,7 @@ C
 C     AFTER EACH STEP OF THE SUMMATION A TEST ON THE
 C     CONVERGENCE  OF THE  ELEMENTS OF  DLM IS  MADE
 C
-      TEST2=0.0D0
+      TEST2=0.0_dp
       DO 23 I=1,NNDLM
       DNORM=ABS(DLM(I))
   23  TEST2=TEST2+DNORM*DNORM
@@ -1174,7 +1174,7 @@ C     THE ADJUSTMENT OF THE ARRAY PREF, TO CONTAIN VALUES OF THE
 C     PREFACTOR  'P2' FOR LM=(00),(11),(20),(22),...
 C
  285  KK=1
-      AP1=TV/(4.0D0*PI)
+      AP1=TV/(4.0_dp*PI)
       CF=KAPSQ/CI
       DO 31 L=1,LL2
       CP=CF
@@ -1185,7 +1185,7 @@ C
   30  J1=(L-MM)/2+1
       J2=J1+MM-1
       IN=J1+L-2
-      AP2=((-1.0D0)**IN)*AP1
+      AP2=((-1.0_dp)**IN)*AP1
       DO 31 M=MM,L,2
       AP=AP2/(FAC(J1)*FAC(J2))
       PREF(KK)=AP*CP*PREF(KK)
@@ -1204,9 +1204,9 @@ C
   32  N1=N1+1
       NA=N1+N1
       AN1=DFLOAT(N1)
-      AN2=-AN1-1.0D0
+      AN2=-AN1-1.0_dp
       DO 40 I1=1,NA
-      AN2=AN2+1.0D0
+      AN2=AN2+1.0_dp
       DO 40 I2=1,4
       AN=AN1
       AN1=-AN2
@@ -1215,7 +1215,7 @@ C
       R(2)=AN1*AR1(2)+AN2*AR2(2)
       AR=SQRT(R(1)*R(1)+R(2)*R(2))
       XPK=DCMPLX(R(1)/AR,R(2)/AR)
-      XPM(1)=DCMPLX(1.0D0,0.0D0)
+      XPM(1)=DCMPLX(1.0_dp,0.0_dp)
       DO 33 I=2,LL2
   33  XPM(I)=XPM(I-1)*XPK
       AD=AK(1)*R(1)+AK(2)*R(2)
@@ -1227,15 +1227,15 @@ C     U1 AND U2 ARE THE  INITIAL TERMS OF THIS RECURRENCE,
 C     FOR L#-1 AND L=0, AND THEY ARE EVALUATED IN TERMS OF
 C     THE COMPLEX ERROR FUNCTION CERF
 C
-      KANT=0.5D0*AR*KAPPA
+      KANT=0.5_dp*AR*KAPPA
       KNSQ=KANT*KANT
       Z=CI*KANT/RTA
       ZZ=RTA-Z
       Z=RTA+Z
       WW=CERF(-ZZ,EMACH)
       W=CERF(Z,EMACH)
-      AA=0.5D0*RTPI*(W-WW)/CI
-      AB=0.5D0*RTPI*(W+WW)
+      AA=0.5_dp*RTPI*(W-WW)/CI
+      AB=0.5_dp*RTPI*(W+WW)
       A=ALPHA-KNSQ/ALPHA
       XPA=EXP(A)
       U1=AA*XPA
@@ -1247,9 +1247,9 @@ C     THIS PROCEDURE INCLUDES THE TERM (KANT**L) AND THE
 C     RECURRENCE FOR THE INTEGRAL 'U'
 C
       KK=1
-      AL=-0.5D0
+      AL=-0.5_dp
       CP=RTA
-      CF=DCMPLX(1.0D0,0.0D0)
+      CF=DCMPLX(1.0_dp,0.0_dp)
       DO 39 L=1,LL2
       MM=1
       IF(MOD  (L,2))35,34,35
@@ -1263,7 +1263,7 @@ C
       DLM(NM)=DLM(NM)+ACC*XPM(M)
   37  KK=KK+1
   38  N=N+1
-      AL=AL+1.0D0
+      AL=AL+1.0_dp
       CP=CP/ALPHA
       U=(AL*U2-U1+CP*XPA)/KNSQ
       U1=U2
@@ -1274,7 +1274,7 @@ C
 C     AFTER EACH STEP OF THE SUMMATION A TEST ON THE
 C     CONVERGENCE OF THE ELEMENTS OF DLM IS MADE
 C
-      TEST2=0.0D0
+      TEST2=0.0_dp
       DO 41 I=1,NNDLM
       DNORM=ABS(DLM(I))
   41  TEST2=TEST2+DNORM*DNORM
@@ -1293,13 +1293,13 @@ C     WHEN L=M=0.IT IS EVALUATED HERE IN TERMS OF THE
 C     COMPLEX ERROR FUNCTION CERF
 C
  465  XPA=EXP(-ALPHA)
-      RTAI=1.0D0/(RTPI*RTA)
+      RTAI=1.0_dp/(RTPI*RTA)
       ACC=KAPPA*(CI*(XPA-CERF(RTA,EMACH))-RTAI)/XPA
-      AP=-0.5D0/RTPI
+      AP=-0.5_dp/RTPI
       DLM(1)=DLM(1)+AP*ACC
 C
 C     FINALLY THE ELEMENTS OF DLM ARE MULTIPLIED BY THE
-C     FACTOR (-1.0D0)**((M+|M|)/2)
+C     FACTOR (-1.0_dp)**((M+|M|)/2)
 C
       DO 47 L=2,LL2,2
       N=L*L/2+1
@@ -1456,7 +1456,7 @@ C
    6  DO 7 J=IJ,N
    7  X(I)=X(I)-A(I,J)*X(J)
    8  IF(ABS(A(I,I))-EMACH*1.0D-7)9,10,10
-   9  A(I,I)=EMACH*1.0D-7*(1.D0,1.D0)
+   9  A(I,I)=EMACH*1.0D-7*(1.0_dp,1.0_dp)
   10  X(I)=X(I)/A(I,I)
       RETURN
       END subroutine
@@ -1604,7 +1604,7 @@ C
 C     ********** RADIX IS A MACHINE DEPENDENT PARAMETER SPECIFYING
 C                THE BASE OF THE MACHINE FLOATING POINT REPRESENTATION.
 C
-      RADIX = 2.D0
+      RADIX = 2.0_dp
 C
       B2 = RADIX * RADIX
       K = 1
@@ -1643,7 +1643,7 @@ C     ********** FOR J=L STEP -1 UNTIL 1 DO -- **********
 C
          DO 110 I = 1, L
             IF (I == J) GO TO 110
-            IF (AR(J,I) /= 0.0D0.OR. AI(J,I) /=0.0D0) GO TO 120
+            IF (AR(J,I) /= 0.0_dp.OR. AI(J,I) /=0.0_dp) GO TO 120
   110    CONTINUE
 C
          M = L
@@ -1660,7 +1660,7 @@ C
 C
          DO 150 I = K, L
             IF (I == J) GO TO 150
-            IF (AR(I,J) /= 0.0D0 .OR. AI(I,J) /= 0.0D0) GO TO 170
+            IF (AR(I,J) /= 0.0_dp .OR. AI(I,J) /= 0.0_dp) GO TO 170
   150    CONTINUE
 C
          M = K
@@ -1669,13 +1669,13 @@ C
   170 CONTINUE
 C     ********** NOW BALANCE THE SUBMATRIX IN ROWS K TO L **********
       DO 180 I = K, L
-  180 SCALE(I) = 1.0D0
+  180 SCALE(I) = 1.0_dp
 C     ********** ITERATIVE LOOP FOR NORM REDUCTION **********
   190 NOCONV = .FALSE.
 C
       DO 270 I = K, L
-         C = 0.0D0
-         R = 0.0D0
+         C = 0.0_dp
+         R = 0.0_dp
 C
          DO 200 J = K, L
             IF (J == I) GO TO 200
@@ -1683,9 +1683,9 @@ C
             R = R + ABS(AR(I,J)) + ABS(AI(I,J))
   200    CONTINUE
 C     ********** GUARD AGAINST ZERO C OR R DUE TO UNDERFLOW **********
-         IF (C == 0.0D0 .OR. R == 0.0D0) GO TO 270
+         IF (C == 0.0_dp .OR. R == 0.0_dp) GO TO 270
          G = R / RADIX
-         F = 1.0D0
+         F = 1.0_dp
          S = C + R
   210    IF (C >= G) GO TO 220
          F = F * RADIX
@@ -1698,7 +1698,7 @@ C     ********** GUARD AGAINST ZERO C OR R DUE TO UNDERFLOW **********
          GO TO 230
 C     ********** NOW BALANCE **********
   240    IF ((C + R) / F >= 0.95D0 * S) GO TO 270
-         G = 1.0D0 / F
+         G = 1.0_dp / F
          SCALE(I) = SCALE(I) * F
          NOCONV = .TRUE.
 C
@@ -1867,8 +1867,8 @@ C
 C
       DO 180 M = KP1, LA
          MM1 = M - 1
-         XR = 0.0D0
-         XI = 0.0D0
+         XR = 0.0_dp
+         XI = 0.0_dp
          I = M
 C
          DO 100 J = M, IGH
@@ -1900,13 +1900,13 @@ C
             AI(J,M) = YI
   120    CONTINUE
 C     ********** END INTERCHANGE **********
-  130    IF (XR == 0.0D0 .AND. XI == 0.0D0) GO TO 180
+  130    IF (XR == 0.0_dp .AND. XI == 0.0_dp) GO TO 180
          MP1 = M + 1
 C
          DO 160 I = MP1, IGH
             YR = AR(I,MM1)
             YI = AI(I,MM1)
-            IF (YR == 0.0D0 .AND. YI == 0.0D0) GO TO 160
+            IF (YR == 0.0_dp .AND. YI == 0.0_dp) GO TO 160
             Z3 = DCMPLX(YR,YI) / DCMPLX(XR,XI)
             YR = DREAL(Z3)
             YI = DIMAG (Z3)
@@ -1997,7 +1997,7 @@ C
 C     ********** MACHEP IS A MACHINE DEPENDENT PARAMETER SPECIFYING
 C                THE RELATIVE PRECISION OF FLOATING POINT ARITHMETIC.
 C
-      MACHEP = 2.D0**(-47)
+      MACHEP = 2.0_dp**(-47)
 C
       IERR = 0
 C     ********** INITIALIZE EIGENVECTOR MATRIX **********
@@ -2146,11 +2146,11 @@ C     ********** COMPOSITION R*L=H **********
       DO 640 J = MP1, EN
          XR = HR(J,J-1)
          XI = HI(J,J-1)
-         HR(J,J-1) = 0.0D0
-         HI(J,J-1) = 0.0D0
+         HR(J,J-1) = 0.0_dp
+         HI(J,J-1) = 0.0_dp
 C     ********** INTERCHANGE COLUMNS OF HR, HI, ZR, AND ZI,
 C                IF NECESSARY **********
-         IF (WR(J) <= 0.0D0) GO TO 580
+         IF (WR(J) <= 0.0_dp) GO TO 580
 C
          DO 540 I = 1, J
             ZZR = HR(I,J-1)
@@ -2192,7 +2192,7 @@ C     ********** A ROOT FOUND **********
       GO TO 220
 C     ********** ALL ROOTS FOUND.  BACKSUBSTITUTE TO FIND
 C                VECTORS OF UPPER TRIANGULAR FORM **********
-  680 NORM = 0.0D0
+  680 NORM = 0.0_dp
 C
       DO 720 I = 1, N
 C
@@ -2201,7 +2201,7 @@ C
   720 CONTINUE
 C
       HR(1,1) = NORM
-      IF (N == 1 .OR. NORM == 0.0D0) GO TO 1001
+      IF (N == 1 .OR. NORM == 0.0_dp) GO TO 1001
 C     ********** FOR EN=N STEP -1 UNTIL 2 DO -- **********
       DO 800 NN = 2, N
          EN = N + 2 - NN
@@ -2223,7 +2223,7 @@ C
 C
   760       YR = XR - WR(I)
             YI = XI - WI(I)
-            IF (YR == 0.0D0 .AND. YI == 0.0D0) YR = MACHEP * NORM
+            IF (YR == 0.0_dp .AND. YI == 0.0_dp) YR = MACHEP * NORM
             Z3 = DCMPLX(ZZR,ZZI) / DCMPLX(YR,YI)
             HR(I,EN) = DREAL(Z3)
             HI(I,EN) = DIMAG(Z3)
@@ -2550,8 +2550,8 @@ C
       DATA CONE/(1.D0,0.D0)/,CI/(0.D0,1.D0)/,CZERO/(0.D0,0.D0)/
 C     ------------------------------------------------------------------
 C
-      EPS=5.0D0*EMACH
-      API=1.0D0/PI
+      EPS=5.0_dp*EMACH
+      API=1.0_dp/PI
       IF(ABS(Z))2,1,2
    1  cerf=CONE
       GOTO 29
@@ -2581,30 +2581,30 @@ C
    9  ZZS=ZZ*ZZ
       XZZS=EXP(-ZZS)
       ABSZ=ABS(ZZ)
-      IF(ABSZ-10.0D0)10,10,23
-  10  IF(YY-1.0D0)11,12,12
-  11  IF(ABSZ-4.0D0)13,18,18
-  12  IF(ABSZ-1.0D0)13,18,18
+      IF(ABSZ-10.0_dp)10,10,23
+  10  IF(YY-1.0_dp)11,12,12
+  11  IF(ABSZ-4.0_dp)13,18,18
+  12  IF(ABSZ-1.0_dp)13,18,18
 C
 C     POWER SERIES(SEE ABRAMOWITZ AND STEGUN HANDBOOK OF
 C     MATHEMATICAL FUNCTIONS, P297)
 C
-  13  Q=1.0D0
-      FACTN=-1.0D0
-      FACTD=1.0D0
+  13  Q=1.0_dp
+      FACTN=-1.0_dp
+      FACTD=1.0_dp
       TERM1=ZZ
       SUM=ZZ
   14  DO 15 N=1,5
-      FACTN=FACTN+2.0D0
-      FACTD=FACTD+2.0D0
+      FACTN=FACTN+2.0_dp
+      FACTD=FACTD+2.0_dp
       FACT=FACTN/(Q*FACTD)
       TERM1=FACT*ZZS*TERM1
       SUM=SUM+TERM1
-  15  Q=Q+1.0D0
+  15  Q=Q+1.0_dp
       ABTERM=ABS(TERM1)
       IF(ABTERM-EPS)17,16,16
-  16  IF(Q-100.0D0)14,17,17
-  17  FACT=2.0D0*SQRT(API)
+  16  IF(Q-100.0_dp)14,17,17
+  17  FACT=2.0_dp*SQRT(API)
       SUM=FACT*CI*SUM
       CER=XZZS+XZZS*SUM
       GOTO 24
@@ -2615,26 +2615,26 @@ C     RECURRENCE RELATION IN N. SEE FADDEEVA AND TERENTIEV
 C     (TABLES OF VALUES OF W(Z) FOR COMPLEX ARGUMENTS,PERGAMON
 C       N.Y. 1961)
 C
-  18  TERM2=DCMPLX(1.D6,0.0D0)
-      Q=1.0D0
+  18  TERM2=DCMPLX(1.D6,0.0_dp)
+      Q=1.0_dp
       H1=CONE
-      H2=2.0D0*ZZ
+      H2=2.0_dp*ZZ
       U1=CZERO
-      RTPI=2.0D0*SQRT(PI)
-      U2=DCMPLX(RTPI,0.0D0)
+      RTPI=2.0_dp*SQRT(PI)
+      U2=DCMPLX(RTPI,0.0_dp)
   19  TERM1=TERM2
       DO 20 N=1,5
       H3=H2*ZZ-Q*H1
       U3=U2*ZZ-Q*U1
       H1=H2
-      H2=2.0D0*H3
+      H2=2.0_dp*H3
       U1=U2
-      U2=2.0D0*U3
-  20  Q=Q+1.0D0
+      U2=2.0_dp*U3
+  20  Q=Q+1.0_dp
       TERM2=U3/H3
       TEST=ABS((TERM2-TERM1)/TERM1)
       IF(TEST-EPS)22,21,21
-  21  IF(Q-60.0D0)19,19,13
+  21  IF(Q-60.0_dp)19,19,13
   22  CER=API*CI*TERM2
       GOTO 24
 C
@@ -2647,10 +2647,10 @@ C     SYMMETRY RELATIONS ARE NOW USED TO TRANSFORM THE FUNCTION
 C     BACK TO QUADRANT NN
 C
   24  GOTO(28,26,27,25),NN
-  25  CER=2.0D0*XZZS-CER
+  25  CER=2.0_dp*XZZS-CER
   26  cerf=CONJG(CER)
       GOTO 29
-  27  cerf=2.0D0*XZZS-CER
+  27  cerf=2.0_dp*XZZS-CER
       GOTO 29
   28  cerf=CER
   29  RETURN
@@ -2692,7 +2692,7 @@ C ..  DATA STATEMENTS  ..
 C
       DATA PI/3.14159265358979D0/
 C-----------------------------------------------------------------------
-      FAC(1)=1.0D0
+      FAC(1)=1.0_dp
       NN=4*LMAX+1
       DO 1 I=1,NN
    1  FAC(I+1)=DFLOAT(I)*FAC(I)
@@ -2704,7 +2704,7 @@ C-----------------------------------------------------------------------
    5  IF(L2-IABS(M2))19,6,6
    6  IF(L3-IABS(M3))19,7,7
    7  IF(MOD  (L1+L2+L3,2))8,9,8
-   8  BLM=0.0D0
+   8  BLM=0.0_dp
       RETURN
    9  NL1=L1
       NL2=L2
@@ -2732,7 +2732,7 @@ C-----------------------------------------------------------------------
       NM2=NM3
       NM3=NTEMP
   15  IF(NL3-IABS(NL2-NL1))16,17,17
-  16  BLM=0.0D0
+  16  BLM=0.0_dp
       RETURN
 C
 C     CALCULATION OF FACTOR  'A'.
@@ -2747,7 +2747,7 @@ C
       IA7=IS-NL2
       IA8=IS-NL3
       IA9=NL1+NL2+NL3+1
-      AN=((-1.0D0)**IA1)*FAC(IA2+1)*FAC(IA4+1)*FAC(IA5+1)*FAC(IS+1)
+      AN=((-1.0_dp)**IA1)*FAC(IA2+1)*FAC(IA4+1)*FAC(IA5+1)*FAC(IS+1)
       AD=FAC(IA3+1)*FAC(IA6+1)*FAC(IA7+1)*FAC(IA8+1)*FAC(IA9+1)
       A=AN/AD
 C
@@ -2760,8 +2760,8 @@ C
       IB5=NL3-NM3
       IT1=MAX0(0,-IB4)+1
       IT2=MIN0(IB2,IB3,IB5)+1
-      B=0.0D0
-      SIGN=(-1.0D0)**(IT1)
+      B=0.0_dp
+      SIGN=(-1.0_dp)**(IT1)
       IB1=IB1+IT1-2
       IB2=IB2-IT1+2
       IB3=IB3-IT1+2
@@ -2790,8 +2790,8 @@ C
      1FAC(IC5+1)
       CD=FAC(IC2+1)*FAC(IC4+1)*FAC(IC6+1)
       C=CN/(PI*CD)
-      C=(SQRT(C))/2.D0
-      BLM=((-1.0D0)**IC)*A*B*C
+      C=(SQRT(C))/2.0_dp
+      BLM=((-1.0_dp)**IC)*A*B*C
       RETURN
   19  WRITE(6,20)L1,L2,M2,L3,M3
   20  FORMAT(28H INVALID ARGUMENTS FOR BLM. ,5(I2,1H,))
@@ -3031,8 +3031,8 @@ C     ------------------------------------------------------------------
       LMTOT=LMAX1*LMAX1-1
       LMXOD=(LMAX*LMAX1)/2
       DO IG1=1,IGMAX
-        GKK(1,IG1)=cmplx((AK(1)+G(1,IG1)),0.D0, kind=dp)
-        GKK(2,IG1)=cmplx((AK(2)+G(2,IG1)),0.D0, kind=dp)
+        GKK(1,IG1)=cmplx((AK(1)+G(1,IG1)),0.0_dp, kind=dp)
+        GKK(2,IG1)=cmplx((AK(2)+G(2,IG1)),0.0_dp, kind=dp)
         GKK(3,IG1)=SQRT(KAPPA*KAPPA-GKK(1,IG1)*GKK(1,IG1)-
      &                            GKK(2,IG1)*GKK(2,IG1))
       end do
@@ -3042,7 +3042,7 @@ C     ------------------------------------------------------------------
       call zgetrf_wrap ( XXMAT1, int1 )
       call zgetrf_wrap ( XXMAT2, int2 )
       ISIGN2=1
-      SIGN2=3.D0-2.D0*ISIGN2
+      SIGN2=3.0_dp-2.0_dp*ISIGN2
       IGK2=0
       DO IG2=1,IGMAX
         GK(1)=      GKK(1,IG2)
@@ -3072,7 +3072,7 @@ C     ------------------------------------------------------------------
           call zgetrs_wrap(XXMAT1, BMEL1, INT1)
           call zgetrs_wrap(XXMAT2, BMEL2, INT2)
           DO ISIGN1=1,2
-            SIGN1=3.D0-2.D0*ISIGN1
+            SIGN1=3.0_dp-2.0_dp*ISIGN1
             IGK1=0
             do IG1=1,IGMAX
               GK(1)=      GKK(1,IG1)
@@ -3116,8 +3116,8 @@ C     ------------------------------------------------------------------
           DO IG1=1,IGMAX
             DO K1=1,2
               IGK1=IGK1+1
-              SIGNUS=1.D0
-              IF(K2/=K1) SIGNUS=-1.D0
+              SIGNUS=1.0_dp
+              IF(K2/=K1) SIGNUS=-1.0_dp
               QII(IGK1,IGK2)=SIGNUS*QIII(IGK1,IGK2)
               QIV(IGK1,IGK2)=SIGNUS*QI  (IGK1,IGK2)
             end do
@@ -3240,7 +3240,7 @@ C     ------------------------------------------------------------------
       DO 8 II=1,IGK2M
 C*****THE IF-STRUCTURE  WHICH FOLLOWS  CAN BE  OMITTED  IF THE ACCURACY
 C*****'MACHEP' OF THE SUBROUTINE COMLR2 IS CHOSEN GREATER THAN 2**(-47)
-      IF((RR(II)==0.D0).AND.(RI(II)==0.D0)) THEN
+      IF((RR(II)==0.0_dp).AND.(RI(II)==0.0_dp)) THEN
       RR(II)=1.D-20
       RI(II)=1.D-20
       ENDIF
@@ -3256,7 +3256,7 @@ C*****'MACHEP' OF THE SUBROUTINE COMLR2 IS CHOSEN GREATER THAN 2**(-47)
       DO 10 KD=1,IGK2M
 C*****WARNING!! THE APPROPRIATE LIMITS FOR DIMAG(AKZ(KD))
 C*****DEPEND STRONGLY ON IGMAX.
-      IF(DIMAG(AKZ(KD))>0.D0) THEN
+      IF(DIMAG(AKZ(KD))>0.0_dp) THEN
       AKZREP(LP)=DREAL(AKZ(KD))
       AKZIMP(LP)=DIMAG(AKZ(KD))
       LP=LP+1
@@ -3346,53 +3346,53 @@ C
       DATA PI/3.14159265358979D0/
 C----------------------------------------------------------------------
       ALPHA=AR1(1)
-      RA=2.D0*PI/ALPHA
+      RA=2.0_dp*PI/ALPHA
       D=AR2(1)
       B=AR2(2)
-      IF( (DABS(D)-0.5D0)>EMACH) STOP 'IMPROPER LATTICE VECTORS'
-      IF((DABS(DABS(D)-0.5D0)<EMACH).AND.(DABS(DABS(B)-
-     &    DSQRT(3.D0)/2.D0)>EMACH)) THEN
-      B=2.D0*B           ! CENTRED RECTANGULAR LATTICE
-        IF((DABS(B)-1.D0)<0.D0) THEN
-      VX(1)= 1.D0
-      VY(1)=0.5D0*(1.D0/B - B)
-      VX(2)= 0.D0
-      VY(2)=0.5D0*(1.D0/B + B)
-      VX(3)=-1.D0
+      IF( (DABS(D)-0.5_dp)>EMACH) STOP 'IMPROPER LATTICE VECTORS'
+      IF((DABS(DABS(D)-0.5_dp)<EMACH).AND.(DABS(DABS(B)-
+     &    DSQRT(3.0_dp)/2.0_dp)>EMACH)) THEN
+      B=2.0_dp*B           ! CENTRED RECTANGULAR LATTICE
+        IF((DABS(B)-1.0_dp)<0.0_dp) THEN
+      VX(1)= 1.0_dp
+      VY(1)=0.5_dp*(1.0_dp/B - B)
+      VX(2)= 0.0_dp
+      VY(2)=0.5_dp*(1.0_dp/B + B)
+      VX(3)=-1.0_dp
       VY(3)= VY(1)
-      VX(4)=-1.D0
+      VX(4)=-1.0_dp
       VY(4)=-VY(1)
-      VX(5)= 0.D0
+      VX(5)= 0.0_dp
       VY(5)=-VY(2)
-      VX(6)= 1.D0
+      VX(6)= 1.0_dp
       VY(6)=-VY(1)
         ELSE
-      VX(1)=0.5D0+0.5D0/B/B
-      VY(1)=0.D0
-      VX(2)=0.5D0-0.5D0/B/B
-      VY(2)=1.D0/B
+      VX(1)=0.5_dp+0.5_dp/B/B
+      VY(1)=0.0_dp
+      VX(2)=0.5_dp-0.5_dp/B/B
+      VY(2)=1.0_dp/B
       VX(3)=-VX(2)
       VY(3)=VY(2)
       VX(4)=-VX(1)
-      VY(4)=0.D0
+      VY(4)=0.0_dp
       VX(5)=-VX(2)
       VY(5)=-VY(2)
       VX(6)=VX(2)
       VY(6)=-VY(2)
         ENDIF
       ELSE             !OBLIQUE OR HEXAGONAL LATTICE
-        IF(D>0.D0) THEN
-      P     =0.5D0*D*(D-1)/B/B
-      VX(1)=0.5D0-P
-      VY(1)=0.5D0*(1.D0-2.D0*D)/B
-      VX(2)=0.5D0+P
-      VY(2)=0.5D0/B
+        IF(D>0.0_dp) THEN
+      P     =0.5_dp*D*(D-1)/B/B
+      VX(1)=0.5_dp-P
+      VY(1)=0.5_dp*(1.0_dp-2.0_dp*D)/B
+      VX(2)=0.5_dp+P
+      VY(2)=0.5_dp/B
         ELSE
-      P     = 0.5D0*D*(D+1)/B/B
-      VX(1)= 0.5D0-P
-      VY(1)=-0.5D0*(1.D0+2.D0*D)/B
-      VX(2)= 0.5D0+P
-      VY(2)=-0.5D0/B
+      P     = 0.5_dp*D*(D+1)/B/B
+      VX(1)= 0.5_dp-P
+      VY(1)=-0.5_dp*(1.0_dp+2.0_dp*D)/B
+      VX(2)= 0.5_dp+P
+      VY(2)=-0.5_dp/B
         ENDIF
       VX(3)=-VX(2)
       VY(3)= VY(2)
@@ -3410,7 +3410,7 @@ C----------------------------------------------------------------------
   1   CONTINUE
       IF(DABS(D)<EMACH) THEN
       N=4              !RECTANGULAR OR SQUARE LATTICE
-      IF(  B>0.D0) THEN
+      IF(  B>0.0_dp) THEN
       X(1)=VX(6)*RA
       Y(1)=VY(6)*RA
       X(2)=VX(4)*RA
@@ -3429,7 +3429,7 @@ C----------------------------------------------------------------------
 C*****VERTICES ARE ARRANGED IN ASCENDING ORDER OF THE POLAR ANGLE FI
       DO 2 I=1,N
       FI(I)=DATAN2(Y(I),X(I))
-      IF(FI(I)<0.D0) FI(I)=FI(I) + 2.D0*PI
+      IF(FI(I)<0.0_dp) FI(I)=FI(I) + 2.0_dp*PI
    2  CONTINUE
       DO 3  J=2,N
       AFI=FI(J)
@@ -3453,7 +3453,7 @@ C*****"AK" IS REDUCED WITHIN THE SBZ
       AKY=AK(2)-G(2,IG0)
       IF((ABS(AKX)<EMACH).AND.(ABS(AKY)<EMACH)) RETURN
       FI0=DATAN2(AKY,AKX)   ! FIND POLAR ANGLES OF THE WAVEVECTOR
-      IF(FI0<0.D0) FI0=FI0+2.D0*PI
+      IF(FI0<0.0_dp) FI0=FI0+2.0_dp*PI
         I1=N
         I=1
     7       CONTINUE
