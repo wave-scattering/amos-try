@@ -122,10 +122,10 @@ contains
         INTEGER KODE, N, NZ, IERR
         real(dp)     :: zr, zi, FNU
         real(dp), allocatable :: cyr(:), cyi(:), cwrkr(:), cwrki(:)
-        complex(dp)  :: z
         complex(dp),allocatable :: cy(:)
         !-----------------------------------------------------------------------
         lmax1 = size(BJ) ! to store from l=0 to l=lmax
+        if (size(BJ)/=size(Y) .or. size(BJ)/=size(H)) stop 1
         allocate(cy(1:lmax1)); allocate(cyr(1:lmax1)); allocate(cyi(1:lmax1))
         allocate(cwrki(1:lmax1));  allocate(cwrkr(1:lmax1))
         zr = real(arg); zi = aimag(arg)

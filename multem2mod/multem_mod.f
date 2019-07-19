@@ -602,9 +602,9 @@ C     ------------------------------------------------------------------
 C
 C ..  PARAMETER STATEMENTS ..
 C
-      INTEGER LMAXD,LMAX1D,LMODD,LMEVEN,LMTD
+      INTEGER LMAXD,LMAX1D,LMODD,LMEVEN
       PARAMETER (LMAXD=14,LMAX1D=LMAXD+1,LMODD=(LMAXD*LMAX1D)/2)
-      PARAMETER (LMEVEN=(LMAX1D*(LMAX1D+1))/2,LMTD=LMAX1D*LMAX1D-1)
+      PARAMETER (LMEVEN=(LMAX1D*(LMAX1D+1))/2)
 C
 C ..  SCALAR ARGUMENTS ..
 C
@@ -2088,83 +2088,7 @@ C                EIGENVALUE AFTER 30 ITERATIONS **********
  1001 RETURN
       END subroutine
 C=======================================================================
-      SUBROUTINE ERRCHK(NCHARS,NARRAY)
-
-C     ------------------------------------------------------------------
-C     THE ROUTINES ERRCHK, ERXSET, AND ERRGET TOGETHER PROVIDE A UNIFORM
-C     METHOD WITH SEVERAL OPTIONS FOR THE PROCESSING  OF DIAGNOSTICS AND
-C     WARNING  MESSAGES  WHICH ORIGINATE  IN  THE  MATHEMATICAL  PROGRAM
-C     LIBRARY ROUTINES.  ERRCHK IS THE  CENTRAL  ROUTINE, WHICH ACTUALLY
-C     PROCESSES MESSAGES.
-C
-C     DESCRIPTION OF ARGUMENTS
-C         NCHARS - NUMBER OF CHARACTERS IN HOLLERITH MESSAGE.
-C                  IF NCHARS IS NEGATED, ERRCHK WILL UNCONDITIONALLY
-C                  PRINT THE MESSAGE AND STOP EXECUTION.  OTHERWISE,
-C                  THE BEHAVIOR OF ERRCHK MAY BE CONTROLLED BY
-C                  AN APPROPRIATE CALL TO ERXSET.
-C         NARRAY - NAME OF ARRAY OR VARIABLE CONTAINING THE MESSAGE,
-C                  OR ELSE A LITERAL HOLLERITH CONSTANT CONTAINING
-C                  THE MESSAGE.  BY CONVENTION, ALL MESSAGES SHOULD
-C                  BEGIN WITH *IN SUBNAM, ...*, WHERE SUBNAM IS THE
-C                  NAME OF THE ROUTINE CALLING ERRCHK.
-C
-C     EXAMPLES
-C         1. TO ALLOW CONTROL BY CALLING ERXSET, USE
-C            CALL ERRCHK(30,30HIN QUAD, INVALID VALUE OF ERR.)
-C         2. TO UNCONDITIONALLY PRINT A MESSAGE AND STOP EXECUTION, USE
-C            CALL ERRCHK(-30,30HIN QUAD, INVALID VALUE OF ERR.)
-C     ------------------------------------------------------------------
-C
-C ..  SCALAR ARGUMENTS  ..
-C
-      INTEGER NCHARS
-C
-C ..  ARRAY ARGUMENTS  ..
-C
-      INTEGER NARRAY(14)
-C
-C ..  LOCAL SCALARS  ..
-C
-      INTEGER NF,NT
-C     ------------------------------------------------------------------
-C
-      CALL ERRGET(NF,NT)
-C     IF ERRCHK WAS CALLED WITH NEGATIVE CHARACTER COUNT, SET FATAL FLAG
-      IF (NCHARS<0) NF = -1
-C     IF MESSAGES ARE TO BE SUPPRESSED, RETURN
-      IF (NF==0) RETURN
-C     IF CHARACTER COUNT IS INVALID, STOP
-      IF (NCHARS==0) PRINT 5
-    5 FORMAT(/31H ERRCHK WAS CALLED INCORRECTLY.)
-      IF (NCHARS==0) STOP
-C     PRINT MESSAGE
-      CALL ERRPRT(IABS(NCHARS),NARRAY)
-C     IF LAST MESSAGE, SAY SO
-      IF (NF==1) PRINT 10
-   10 FORMAT (30H ERRCHK MESSAGE LIMIT REACHED.)
-C     PRINT TRACE-BACK IF ASKED TO
-C     IF ((NT>0).OR.(NF<0)) CALL SYSTEM ROUTINE FOR TRACEBACK
-C     DECREMENT MESSAGE COUNT
-      IF (NF>0) NF = NF-1
-      CALL ERXSET(NF,NT)
-C     IF ALL IS WELL, RETURN
-      IF (NF>=0) RETURN
-C     IF THIS MESSAGE IS SUPPRESSABLE BY AN ERXSET CALL,
-C     THEN EXPLAIN ERXSET USAGE.
-C     IF (NCHARS>0) PRINT 15
-C  15 FORMAT (/13H *** NOTE ***
-C    1/53H TO MAKE THE ERROR MESSAGE PRINTED ABOVE BE NONFATAL,
-C    2/39H OR TO SUPPRESS THE MESSAGE COMPLETELY,
-C    3/37H INSERT AN APPROPRIATE CALL TO ERXSET
-C    4 30H AT THE START OF YOUR PROGRAM.
-C    5/62H FOR EXAMPLE, TO PRINT UP TO 10 NONFATAL WARNING MESSAGES, USE
-C    6/27H          CALL ERXSET(10,0)    )
-      PRINT 20
-   20 FORMAT (/28H PROGRAM ABORT DUE TO ERROR.)
-      STOP
-      END subroutine
-!=======================================================================
+!!=======================================================================
 !     SUBROUTINE ONECHK(NCHARS,NARRAY)
 !     IMPLICIT NONE
 !     ------------------------------------------------------------------
@@ -2242,98 +2166,47 @@ C   1 FORMAT (1X,7A10)
       RETURN
       END subroutine
 C=======================================================================
-      SUBROUTINE ERXSET(NFATAL,NTRACE)
-
-C     ------------------------------------------------------------------
-C     ERXSET IS A COMPANION ROUTINE TO SUBROUTINE ERRCHK. ERXSET ASSIGNS
-C     THE VALUES OF NFATAL AND NTRACE  RESPECTIVELY  TO  NF  AND  NT  IN
-C     COMMON BLOCK MLBLK0 THEREBY SPECIFYING THE  STATE  OF  THE OPTIONS
-C     WHICH CONTROL THE EXECUTION OF ERRCHK.
-C
-C     DESCRIPTION OF ARGUMENTS
-C         BOTH ARGUMENTS ARE INPUT ARGUMENTS OF DATA TYPE INTEGER.
-C         NFATAL - IS A  FATAL-ERROR / MESSAGE-LIMIT  FLAG.  A  NEGATIVE
-C                  VALUE DENOTES THAT DETECTED DIFFICULTIES   ARE  TO BE
-C                  TREATED AS FATAL ERRORS.  NONNEGATIVE MEANS NONFATAL.
-C                  A NONNEGATIVE VALUE IS THE MAXIMUM NUMBER OF NONFATAL
-C                  WARNING MESSAGES WHICH WILL  BE  PRINTED  BY  ERRCHK,
-C                  AFTER WHICH NONFATAL MESSAGES  WILL  NOT BE  PRINTED.
-C                  (DEFAULT VALUE IS -1.)
-C         NTRACE - >=1 WILL CAUSE A TRACE-BACK TO BE GIVEN,
-C                        IF THIS FEATURE IS IMPLEMENTED ON THIS  SYSTEM.
-C                  <=0 WILL SUPPRESS ANY TRACE-BACK, EXCEPT FOR  CASES
-C                        WHEN EXECUTION IS TERMINATED (DEFAULT VALUE:0.)
-C
-C         *NOTE* -- SOME CALLS TO ERRCHK WILL CAUSE UNCONDITIONAL
-C         TERMINATION OF EXECUTION.  ERXSET HAS NO EFFECT ON SUCH CALLS.
-C
-C     EXAMPLES
-C         1. TO PRINT UP TO 100 MESSAGES AS NONFATAL WARNINGS USE
-C            CALL ERXSET(100,0)
-C         2. TO SUPPRESS ALL MATHLIB WARNING MESSAGES USE
-C            CALL ERXSET(0,0)
-C     ------------------------------------------------------------------
-C
-C ..  SCALAR ARGUMENTS  ..
-C
-      INTEGER NFATAL,NTRACE
-C     ------------------------------------------------------------------
-C
-      CALL ERSTGT(0,NFATAL,NTRACE)
-      RETURN
-      END subroutine
+!     SUBROUTINE ERXSET(NFATAL,NTRACE)
+!!     ------------------------------------------------------------------
+!     ERXSET IS A COMPANION ROUTINE TO SUBROUTINE ERRCHK. ERXSET ASSIGNS
+!     THE VALUES OF NFATAL AND NTRACE  RESPECTIVELY  TO  NF  AND  NT  IN
+!     COMMON BLOCK MLBLK0 THEREBY SPECIFYING THE  STATE  OF  THE OPTIONS
+!     WHICH CONTROL THE EXECUTION OF ERRCHK.
+!
+!     DESCRIPTION OF ARGUMENTS
+!         BOTH ARGUMENTS ARE INPUT ARGUMENTS OF DATA TYPE INTEGER.
+!         NFATAL - IS A  FATAL-ERROR / MESSAGE-LIMIT  FLAG.  A  NEGATIVE
+!                  VALUE DENOTES THAT DETECTED DIFFICULTIES   ARE  TO BE
+!                  TREATED AS FATAL ERRORS.  NONNEGATIVE MEANS NONFATAL.
+!                  A NONNEGATIVE VALUE IS THE MAXIMUM NUMBER OF NONFATAL
+!                  WARNING MESSAGES WHICH WILL  BE  PRINTED  BY  ERRCHK,
+!                  AFTER WHICH NONFATAL MESSAGES  WILL  NOT BE  PRINTED.
+!                  (DEFAULT VALUE IS -1.)
+!         NTRACE - >=1 WILL CAUSE A TRACE-BACK TO BE GIVEN,
+!                        IF THIS FEATURE IS IMPLEMENTED ON THIS  SYSTEM.
+!                  <=0 WILL SUPPRESS ANY TRACE-BACK, EXCEPT FOR  CASES
+!                        WHEN EXECUTION IS TERMINATED (DEFAULT VALUE:0.)
+!
+!         *NOTE* -- SOME CALLS TO ERRCHK WILL CAUSE UNCONDITIONAL
+!         TERMINATION OF EXECUTION.  ERXSET HAS NO EFFECT ON SUCH CALLS.
+!
+!     EXAMPLES
+!         1. TO PRINT UP TO 100 MESSAGES AS NONFATAL WARNINGS USE
+!            CALL ERXSET(100,0)
+!         2. TO SUPPRESS ALL MATHLIB WARNING MESSAGES USE
+!            CALL ERXSET(0,0)
+!     ------------------------------------------------------------------
+!
+! ..  SCALAR ARGUMENTS  ..
+!
+!     INTEGER NFATAL,NTRACE
+!     ------------------------------------------------------------------
+!
+!     CALL ERSTGT(0,NFATAL,NTRACE)
+!     RETURN
+!     END subroutine
 C=======================================================================
-      SUBROUTINE ERRGET(NFATAL,NTRACE)
-
-C     ------------------------------------------------------------------
-C     ERRGET IS A COMPANION ROUTINE TO SUBROUTINE ERRCHK. ERRGET ASSIGNS
-C     TO NFATAL AND NTRACE RESPECTIVELY  THE  VALUES OF  NF  AND  NT  IN
-C     COMMON BLOCK MLBLK0 THEREBY ASCERTAINING THE  STATE OF THE OPTIONS
-C     WHICH CONTROL THE EXECUTION OF ERRCHK.
-C
-C     DESCRIPTION OF ARGUMENTS
-C         BOTH ARGUMENTS ARE OUTPUT ARGUMENTS OF DATA TYPE INTEGER.
-C         NFATAL - CURRENT VALUE OF NF (SEE DESCRIPTION OF ERXSET.)
-C         NTRACE - CURRENT VALUE OF NT (SEE DESCRIPTION OF ERXSET.)
-C     ------------------------------------------------------------------
-C
-C ..  SCALAR ARGUMENTS  ..
-C
-      INTEGER NFATAL,NTRACE
-C     ------------------------------------------------------------------
-C
-      CALL ERSTGT(1,NFATAL,NTRACE)
-      RETURN
-      END subroutine
-C=======================================================================
-      SUBROUTINE ERSTGT(K,NFATAL,NTRACE)
-
-C     ------------------------------------------------------------------
-C     THIS ROUTINE IS A SLAVE TO ERRGET AND ERRSET WHICH KEEPS THE FLAGS
-C     AS LOCAL VARIABLES.
-C
-C     *** IF LOCAL VARIABLES ARE NOT NORMALLY RETAINED BETWEEN CALLS  ON
-C     THIS SYSTEM, THE VARIABLES LNF AND LNT CAN BE  PLACED  IN A COMMON
-C     BLOCK AND PRESET TO THE FOLLOWING VALUES IN THE MAIN PROGRAM.
-C     ------------------------------------------------------------------
-C
-C ..  SCALAR ARGUMENTS  ..
-C
-      INTEGER K,NFATAL,NTRACE
-C
-C ..  LOCAL SCALARS  ..
-C
-      INTEGER LNF,LNT
-      DATA LNF/-1/,LNT/0/
-C     ------------------------------------------------------------------
-C
-      IF (K<=0) LNF = NFATAL
-      IF (K<=0) LNT = NTRACE
-      IF (K>0) NFATAL = LNF
-      IF (K>0) NTRACE = LNT
-      RETURN
-      END subroutine
-C=======================================================================
+!C=======================================================================
       COMPLEX(dp) FUNCTION CERF(Z,EMACH)
 
 C     ------------------------------------------------------------------
@@ -2785,7 +2658,7 @@ C
       complex(dp) GK(3),LAME(2),LAMH(2)
       complex(dp) XEVEN(LMEVEN,LMEVEN),XODD(LMODD,LMODD)
 !      complex(dp) TE(LMAX1D),TH(LMAX1D),BMEL1(LMTD),BMEL2(LMTD)
-      complex(dp),allocatable :: TE(:),TH(:)
+      complex(dp) :: TE(lmax+1),TH(lmax+1)
       complex(dp) BMEL1((LMAX+1)**2-1),BMEL2((LMAX+1)**2-1)
       complex(dp) XXMAT1((LMAX+1)**2-1,(LMAX+1)**2-1),
      & XXMAT2((LMAX+1)**2-1,(LMAX+1)**2-1)
@@ -2796,8 +2669,6 @@ C
       real(dp)     AR1(2),AR2(2)
       COMMON/X1/AR1,AR2
 C     ------------------------------------------------------------------
-      allocate(TE(1:(lmax+1)))
-      allocate(TH(1:(lmax+1)))
       IGKMAX=2*IGMAX
       LMAX1=LMAX+1
       LMTOT=LMAX1*LMAX1-1
@@ -3480,7 +3351,7 @@ CCCCCCCCC-----------> HERE STARTS THE FIRST INPUT DATA FILE
       integer, parameter:: dp=kind(0.d0)
       real(dp), parameter :: pi=4.0_dp*ATAN(1.0_dp)
       complex(dp), parameter :: czero = (0.0_dp, 0.0_dp)
-      complex(dp), parameter :: ci    = (0.0_dp, 1.0_dp)
+!     complex(dp), parameter :: ci    = (0.0_dp, 1.0_dp)
       complex(dp), parameter :: cone  = (1.0_dp, 0.0_dp)
 C     ------------------------------------------------------------------
 C     A B S T R A C T
