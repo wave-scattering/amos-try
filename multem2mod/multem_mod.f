@@ -66,10 +66,6 @@ C ..  LOCAL SCALARS  ..
 C
       INTEGER    IGK1,IG1,K1,IGK2,IGKMAX
       REAL(dp)   DOWN,REFLE,TRANS,ABSOR,GKZIN,GKZOUT,TES1
-      COMPLEX(dp) CZERO
-C
-C ..  LOCAL ARRAYS  ..
-C
       COMPLEX(dp) ETRANS(IGKD),EREFLE(IGKD)
 C     ------------------------------------------------------------------
       DOWN=0.D0
@@ -138,7 +134,7 @@ C  .. LOCAL SCALARS ..
 C
       INTEGER    I,J,IA,IB,JA,IG1,IGKMAX
       REAL(dp)   GKKPAR
-      COMPLEX(dp) CZERO,CONE,CI,CTWO,GKKZ1,GKKZ2,GKKZ3,Z1,Z2,Z3,CQI,CQII
+      COMPLEX(dp) GKKZ1,GKKZ2,GKKZ3,Z1,Z2,Z3,CQI,CQII
       COMPLEX(dp) CQIII,CQIV,DENOMA,DENOMB,GKKDUM
 C
 C  .. LOCAL ARRAYS ..
@@ -537,25 +533,12 @@ C
 C ..  LOCAL SCALARS  ..
 C
       INTEGER    M,II,L,I,K
-      REAL(dp)   AKPAR,PI,FPI,A,SIGNUS,AKG1,AKG2
-      COMPLEX(dp) CT,ST,CF,N1,N2,N3,CI,CZERO,CONE,CC,CC1,Z1,Z2,Z3
+      REAL(dp)   AKPAR,FPI,A,SIGNUS,AKG1,AKG2
+      COMPLEX(dp) CT,ST,CF,N1,N2,N3,CC,CC1,Z1,Z2,Z3
 C
 C ..  LOCAL ARRAYS  ..
 C
       COMPLEX(dp) YLM((lmax+1)**2)
-C
-C ..  INTRINSIC FUNCTIONS  ..
-C
-C      INTRINSIC ABS,DCMPLX,CSQRT,DFLOAT,SQRT,DREAL
-C
-C ..  EXTERNAL ROUTINES  ..
-C
-C     EXTERNAL SPHRM4
-C
-C ..  DATA STATEMENTS  ..
-C
-      DATA CZERO/(0.D0,0.D0)/,CONE/(1.D0,0.D0)/,CI/(0.D0,1.D0)/
-      DATA PI/3.14159265358979D0/
 C-----------------------------------------------------------------------
 C
       IF(LMAX>LMAXD)  GO TO 10
@@ -637,22 +620,10 @@ C ..  LOCAL SCALARS ..
 C
       INTEGER IA,LA,MA,LMTOT,LTT,LMAX1,IB,LB,MB,I,LMXOD,IAOD,IAEV,IBOD
       INTEGER IBEV
-      REAL(dp)  C0,SIGNUS,UP,C,B1,B2,B3,U1,U2,A,DOWN,PI
+      REAL(dp)  C0,SIGNUS,UP,C,B1,B2,B3,U1,U2,A,DOWN
       REAL(dp)  ALPHA1,ALPHA2,BETA1,BETA2
-      COMPLEX(dp) OMEGA1,OMEGA2,Z1,Z2,Z3,CONE,CZERO
-C
-C ..  EXTERNAL FUNCTIONS ..
-C
-C     REAL(dp)    BLM
-C     COMPLEX*16 CODD,CEVEN
-C     EXTERNAL BLM,CODD,CEVEN
-C
-C ..  DATA STATEMENTS ..
-C
-      DATA CZERO/(0.D0,0.D0)/ , CONE/(1.D0,0.D0)/
-      DATA PI/3.14159265358979D0/
+      COMPLEX(dp) OMEGA1,OMEGA2,Z1,Z2,Z3
 C     ------------------------------------------------------------------
-C
       IF(LMAX>LMAXD)   GO TO 10
       LMAX1=LMAX+1
       LMTOT=LMAX1*LMAX1-1
@@ -793,9 +764,9 @@ C
       INTEGER    NA,LLL,N,IL,NM,IN,L2,IL2,M2,IL3,L3,M3,LA1,LB1,LA11,LB11
       INTEGER    LL,J,L1
       REAL(dp)   AB1,AB2,AC,ACSQ,AD,AL,AN,AN1,AN2,AP,AP1,AP2,AR,B
-      REAL(dp)   DNORM,RTPI,RTV,TEST,TEST1,TEST2,TV,PI
-      COMPLEX(dp) ALPHA,RTA,RTAI,KAPSQ,KANT,KNSQ,XPK,XPA,CF,CI,CP,CX,CZ
-      COMPLEX(dp) CZERO,Z,ZZ,W,WW,A,ACC,GPSQ,GP,BT,AA,AB,U,U1,U2,GAM
+      REAL(dp)   DNORM,RTPI,RTV,TEST,TEST1,TEST2,TV
+      COMPLEX(dp) ALPHA,RTA,RTAI,KAPSQ,KANT,KNSQ,XPK,XPA,CF,CP,CX,CZ
+      COMPLEX(dp) Z,ZZ,W,WW,A,ACC,GPSQ,GP,BT,AA,AB,U,U1,U2,GAM
       COMPLEX(dp) GK,GKK,SD,ALM
 C
 C ..  LOCAL ARRAYS  ..
@@ -808,19 +779,6 @@ C ..  ARRAYS IN COMMON  ..
 C
       REAL(dp)  AR1(2),AR2(2)
       COMMON/X1/AR1,AR2
-C
-C ..  INTRINSIC FUNCTIONS  ..
-C
-C      INTRINSIC ABS,ALOG,DCMPLX,CSQRT,EXP,DFLOAT,IABS
-C      INTRINSIC MAX0,MOD,SQRT
-C
-C ..  EXTERNAL FUNCTIONS  ..
-C
-C     EXTERNAL CERF
-C
-C ..  DATA STATEMENTS  ..
-C
-      DATA CZERO/(0.D0,0.D0)/,CI/(0.D0,1.D0)/,PI/3.14159265358979D0/
 C----------------------------------------------------------------------
       IF(LMAX>14.OR.LMAX>LMAXD)
      &   STOP 'FROM XMAT: LAMX>MIN0(14,LMAXD)'
@@ -2395,19 +2353,10 @@ C
 C ..  LOCAL SCALARS  ..
 C
       INTEGER    NN,N
-      REAL(dp)   ABSZ,ABTERM,API,EPS,FACT,FACTD,FACTN,PI
+      REAL(dp)   ABSZ,ABTERM,API,EPS,FACT,FACTD,FACTN
       REAL(dp)   Q,RTPI,TEST,X,Y,YY
-      COMPLEX(dp) ZZ,CONE,CI,CZERO,SUM,ZZS,XZZS,CER
+      COMPLEX(dp) ZZ,SUM,ZZS,XZZS,CER
       COMPLEX(dp) H1,H2,H3,U1,U2,U3,TERM1,TERM2
-C
-C ..  INTRINSIC FUNCTIONS  ..
-C
-C      INTRINSIC DCMPLX,EXP,CONJG
-C
-C ..  DATA STATEMENTS  ..
-C
-      DATA PI/3.14159265358979D0/
-      DATA CONE/(1.D0,0.D0)/,CI/(0.D0,1.D0)/,CZERO/(0.D0,0.D0)/
 C     ------------------------------------------------------------------
 C
       EPS=5.0_dp*EMACH
@@ -2542,15 +2491,11 @@ C
       INTEGER I,IA1,IA2,IA3,IA4,IA5,IA6,IA7,IA8,IA9,IB1,IB2,IB3,IB4
       INTEGER IB5,IC,IC1,IC2,IC3,IC4,IC5,IC6,IS,IT,IT1,IT2,NL1,NL2
       INTEGER NL3,NM1,NM2,NM3,NTEMP,NN
-      REAL(dp)PI,SIGN,A,AD,AN,B,BD,BN,C,CD,CN
+      REAL(dp) SIGN,A,AD,AN,B,BD,BN,C,CD,CN
 C
 C ..  LOCAL ARRAYS  ..
 C
       REAL(dp)FAC(LMAX4D)
-C
-C ..  DATA STATEMENTS  ..
-C
-      DATA PI/3.14159265358979D0/
 C-----------------------------------------------------------------------
       FAC(1)=1.0_dp
       NN=4*LMAX+1
@@ -2669,19 +2614,7 @@ C
 C ..  ARRAY ARGUMENTS  ..
 C
       COMPLEX(dp) XODD(LMODD,LMODD)
-C
-C ..  LOCAL SCALARS  ..
-C
       INTEGER I,J
-      COMPLEX(dp) CZERO
-C
-C ..  INTRINSIC FUNCTIONS
-C
-      INTRINSIC ABS
-C
-C ..  DATA STATEMENTS  ..
-C
-      DATA CZERO/(0.D0,0.D0)/
 C     ------------------------------------------------------------------
       IF(ABS(M)<=L.AND.ABS(M1)<=L1) THEN
       I=(L*L+M+1)/2
@@ -2708,15 +2641,6 @@ C
 C ..  LOCAL SCALARS  ..
 C
       INTEGER I,J
-      COMPLEX(dp) CZERO
-C
-C ..  INTRINSIC FUNCTIONS
-C
-      INTRINSIC ABS
-C
-C ..  DATA STATEMENTS  ..
-C
-      DATA CZERO/(0.D0,0.D0)/
 C     ------------------------------------------------------------------
       IF(ABS(M)<=L.AND.ABS(M1)<=L1) THEN
       I=(L*L+2*L+M+2)/2
@@ -2752,25 +2676,13 @@ C
       COMPLEX(dp) QIR (IGKD,IGKD),QIIR(IGKD,IGKD),QIIIR(IGKD,IGKD)
       COMPLEX(dp) QIVR(IGKD,IGKD)
 C
-C ..  LOCAL SCALARS  ..
-C
+C ..  LOCAL
       INTEGER    IGK1,IGK2,IGK3
       REAL(dp)   EMACH
-      COMPLEX(dp) CZERO,CONE
-C
-C ..  LOCAL ARRAYS  ..
-C
       INTEGER    INT(IGKD),JNT(IGKD)
       COMPLEX(dp) QINV1(IGKD,IGKD),QINV2(IGKD,IGKD),W1(IGKD,IGKD)
       COMPLEX(dp) W2(IGKD,IGKD),W3(IGKD,IGKD),W4(IGKD,IGKD)
 C
-C ..  EXTERNAL ROUTINES  ..
-C
-C     EXTERNAL ZGE,ZSU
-C
-C ..  DATA STATEMENTS  ..
-C
-      DATA CZERO/(0.D0,0.D0)/, CONE/(1.D0,0.D0)/
       DATA EMACH/1.D-8/
 C-----------------------------------------------------------------------
 C
@@ -3047,8 +2959,8 @@ C ..  SCALAR VARIABLES ..
 C
       INTEGER    II,I,IGK1,IGK2,IGKMAX,J
       INTEGER    KD,LIB1,LIB2,LU,LP,LN,IFAIL,IGK3,IGK2M
-      REAL(dp)   PI,AKA,BKZRE,BKZIM
-      COMPLEX(dp) CONE,CI,CZERO,EAKA
+      REAL(dp)   AKA,BKZRE,BKZIM
+      COMPLEX(dp) EAKA
 C
 C ..  ARRAY VARIABLES ..
 C
@@ -3195,15 +3107,11 @@ C
 C ..  LOCAL SCALARS  ..
 C
       INTEGER I,J,N,I1,I2
-      REAL(dp) D,B,P,AFI,AX,AY,AKX,AKY,FI0,AM,BM,PI,ALPHA,RA
+      REAL(dp) D,B,P,AFI,AX,AY,AKX,AKY,FI0,AM,BM,ALPHA,RA
 C
 C ..  LOCAL ARRAYS ..
 C
       REAL(dp) VX(6),VY(6),FI(6),X(6),Y(6)
-C
-C ..  DATA STATEMENTS ..
-C
-      DATA PI/3.14159265358979D0/
 C----------------------------------------------------------------------
       ALPHA=AR1(1)
       RA=2.0_dp*PI/ALPHA
@@ -3570,6 +3478,10 @@ CCCCCCCCC-----------> HERE STARTS THE FIRST INPUT DATA FILE
       use libmultem2b
       IMPLICIT NONE
       integer, parameter:: dp=kind(0.d0)
+      real(dp), parameter :: pi=4.0_dp*ATAN(1.0_dp)
+      complex(dp), parameter :: czero = (0.0_dp, 0.0_dp)
+      complex(dp), parameter :: ci    = (0.0_dp, 1.0_dp)
+      complex(dp), parameter :: cone  = (1.0_dp, 0.0_dp)
 C     ------------------------------------------------------------------
 C     A B S T R A C T
 C     THIS PROGRAM CALCULATES EITHER THE ABSORBANCE, REFLECTIVITY  AND
@@ -3650,10 +3562,10 @@ C ..  SCALAR VARIABLES ..
 C
       INTEGER      LMAX,I,IGKMAX,IGK1,IGK2,IGMAX,KTYPE,KSCAN,NCOMP,IG1
       INTEGER      N,NP,IG0,NUNIT,ICOMP,KEMB,IU,IPL,ILAYER
-      REAL(dp)     ALPHA,EMACH,PI,EPSILON
+      REAL(dp)     ALPHA,EMACH,EPSILON
       REAL(dp)     A0,RA0,RMAX,AKXY
       REAL(dp)     ZVAL,ZSTEP,ZINF,ZSUP,FAB,ALPHAP,THETA,FI,FEIN
-      COMPLEX(dp)   KAPPA,KAPPA0,CZERO,CONE,AKZIN,MUEMBL,EPSEMBL
+      COMPLEX(dp)   KAPPA,KAPPA0,AKZIN,MUEMBL,EPSEMBL
       COMPLEX(dp)   MUEMBR,EPSEMBR,D2,KAPOUT
       COMPLEX(dp)   KAPPAL,KAPPAR,KAPPASL,D1,KAPIN,KAPL,KAPR
       COMPLEX(dp)   MLAST,ELAST,MFIRST,EFIRST,RAP
@@ -3691,10 +3603,9 @@ C     EXTERNAL ELMGEN,LAT2D,PCSLAB,HOSLAB,PAIR,SCAT,BAND,REDUCE
 C
 C ..  DATA STATEMENTS ..
 C
-      DATA PI/3.14159265358979D0/,EMACH/1.D-8/,EPSILON/0.D0/
-      DATA CZERO/(0.D0,0.D0)/,EINCID/IGKD*(0.D0,0.D0)/,VEC0/3*0.D0/
+      DATA EMACH/1.D-8/,EPSILON/0.D0/
+      DATA EINCID/IGKD*(0.D0,0.D0)/,VEC0/3*0.D0/
       DATA TEXT1/'HOMOGENEOUS PLATE','PHOTONIC CRYSTAL'/
-      DATA CONE/(1.D0,0.D0)/
 C     ------------------------------------------------------------------
 C
       READ(10,200) KTYPE,KSCAN,KEMB,LMAX,NCOMP,NUNIT
