@@ -1,4 +1,5 @@
 #!/bin/bash
+make
 #cp input_sadrieva_band.txt fort.10 && ./multem2
 cp input2_band.txt fort.10 && ./multem2
 #cp input_sadrieva.txt fort.10 && ./multem2

@@ -24,6 +24,7 @@ CCCCCCCCC-----------> HERE STARTS THE FORTRAN SOURCE CODE
 C=======================================================================
       module libmultem2a
       use dense_solve
+!      use errfun, only: erf_pop
       use libmultem2b
       implicit none
       integer, parameter:: dp=kind(0.d0)
@@ -2109,10 +2110,12 @@ C
       INTEGER    NN,N
       REAL(dp)   ABSZ,ABTERM,API,EPS,FACT,FACTD,FACTN
       REAL(dp)   Q,RTPI,TEST,X,Y,YY
-      COMPLEX(dp) ZZ,SUM,ZZS,XZZS,CER
+      COMPLEX(dp) ZZ,SUM,ZZS,XZZS,CER, erf
       COMPLEX(dp) H1,H2,H3,U1,U2,U3,TERM1,TERM2
 C     ------------------------------------------------------------------
 C
+!     erf = erf_pop(z)
+!     return
       EPS=5.0_dp*EMACH
       API=1.0_dp/PI
       IF(ABS(Z))2,1,2
@@ -2392,57 +2395,81 @@ C
       DATA EMACH/1.D-8/
 C-----------------------------------------------------------------------
 C
-      DO 1 IGK1=1,IGKMAX
-      DO 1 IGK2=1,IGKMAX
-      QINV1(IGK1,IGK2)=QIL (IGK1,IGK2)
-      QINV2(IGK1,IGK2)=QIVR(IGK1,IGK2)
-      W2(IGK1,IGK2)=CZERO
-      W3(IGK1,IGK2)=CZERO
-    1 CONTINUE
-      DO 2 IGK1=1,IGKMAX
-      W2(IGK1,IGK1)=CONE
-      W3(IGK1,IGK1)=CONE
-      DO 2 IGK2=1,IGKMAX
-      DO 3 IGK3=1,IGKMAX
-      W2(IGK1,IGK2)=W2(IGK1,IGK2)-QIIL (IGK1,IGK3)*QIIIR(IGK3,IGK2)
-      W3(IGK1,IGK2)=W3(IGK1,IGK2)-QIIIR(IGK1,IGK3)*QIIL (IGK3,IGK2)
-    3 CONTINUE
-    2 CONTINUE
+      DO IGK1=1,IGKMAX
+        DO IGK2=1,IGKMAX
+          QINV1(IGK1,IGK2)=QIL (IGK1,IGK2)
+          QINV2(IGK1,IGK2)=QIVR(IGK1,IGK2)
+          W2(IGK1,IGK2)=CZERO
+          W3(IGK1,IGK2)=CZERO
+        end do
+      end do
+
+      DO IGK1=1,IGKMAX
+        W2(IGK1,IGK1)=CONE
+        W3(IGK1,IGK1)=CONE
+        DO IGK2=1,IGKMAX
+          DO IGK3=1,IGKMAX
+            W2(IGK1,IGK2)=W2(IGK1,IGK2)
+     &         -QIIL (IGK1,IGK3)*QIIIR(IGK3,IGK2)
+            W3(IGK1,IGK2)=W3(IGK1,IGK2)
+     &         -QIIIR(IGK1,IGK3)*QIIL (IGK3,IGK2)
+          end do
+        end do
+      end do
+
+!     call zgetrf_wrap(w2, int)
+!     call zgetrf_wrap(w3, jnt)
+!     call zgetrs_wrap(w2, QINV1(1,IGK2), int)
+!     call zgetrs_wrap(w3, QINV2(1,IGK2), jnt)
+
       CALL ZGE(W2,INT,IGKMAX,IGKD,EMACH)
       CALL ZGE(W3,JNT,IGKMAX,IGKD,EMACH)
-      DO 4 IGK2=1,IGKMAX
-      CALL ZSU(W2,INT,QINV1(1,IGK2),IGKMAX,IGKD,EMACH)
-      CALL ZSU(W3,JNT,QINV2(1,IGK2),IGKMAX,IGKD,EMACH)
-    4 CONTINUE
-      DO 5 IGK1=1,IGKMAX
-      DO 5 IGK2=1,IGKMAX
-      W1(IGK1,IGK2)=CZERO
-      W2(IGK1,IGK2)=CZERO
-      W3(IGK1,IGK2)=CZERO
-      W4(IGK1,IGK2)=CZERO
-      DO 6 IGK3=1,IGKMAX
-      W1(IGK1,IGK2)=W1(IGK1,IGK2)+QIR  (IGK1,IGK3)*QINV1(IGK3,IGK2)
-      W2(IGK1,IGK2)=W2(IGK1,IGK2)+QIIL (IGK1,IGK3)*QINV2(IGK3,IGK2)
-      W3(IGK1,IGK2)=W3(IGK1,IGK2)+QIIIR(IGK1,IGK3)*QINV1(IGK3,IGK2)
-      W4(IGK1,IGK2)=W4(IGK1,IGK2)+QIVL (IGK1,IGK3)*QINV2(IGK3,IGK2)
-    6 CONTINUE
-    5 CONTINUE
-      DO 7 IGK1=1,IGKMAX
-      DO 7 IGK2=1,IGKMAX
-      QINV1(IGK1,IGK2)=QIIR (IGK1,IGK2)
-      QINV2(IGK1,IGK2)=QIIIL(IGK1,IGK2)
-      DO 8 IGK3=1,IGKMAX
-      QINV1(IGK1,IGK2)=QINV1(IGK1,IGK2)+QIR (IGK1,IGK3)*W2(IGK3,IGK2)
-      QINV2(IGK1,IGK2)=QINV2(IGK1,IGK2)+QIVL(IGK1,IGK3)*W3(IGK3,IGK2)
-   8  CONTINUE
-   7  CONTINUE
-      DO 9 IGK1=1,IGKMAX
-      DO 9 IGK2=1,IGKMAX
-      QIL  (IGK1,IGK2)=W1   (IGK1,IGK2)
-      QIIL (IGK1,IGK2)=QINV1(IGK1,IGK2)
-      QIIIL(IGK1,IGK2)=QINV2(IGK1,IGK2)
-      QIVL (IGK1,IGK2)=W4   (IGK1,IGK2)
-   9  CONTINUE
+      DO IGK2=1,IGKMAX
+        CALL ZSU(W2,INT,QINV1(1,IGK2),IGKMAX,IGKD,EMACH)
+        CALL ZSU(W3,JNT,QINV2(1,IGK2),IGKMAX,IGKD,EMACH)
+      end do
+
+      DO IGK1=1,IGKMAX
+        DO IGK2=1,IGKMAX
+          W1(IGK1,IGK2)=CZERO
+          W2(IGK1,IGK2)=CZERO
+          W3(IGK1,IGK2)=CZERO
+          W4(IGK1,IGK2)=CZERO
+          DO IGK3=1,IGKMAX
+            W1(IGK1,IGK2)=W1(IGK1,IGK2)
+     &                    +QIR  (IGK1,IGK3)*QINV1(IGK3,IGK2)
+            W2(IGK1,IGK2)=W2(IGK1,IGK2)
+     &                    +QIIL (IGK1,IGK3)*QINV2(IGK3,IGK2)
+            W3(IGK1,IGK2)=W3(IGK1,IGK2)
+     &                    +QIIIR(IGK1,IGK3)*QINV1(IGK3,IGK2)
+            W4(IGK1,IGK2)=W4(IGK1,IGK2)
+     &                    +QIVL (IGK1,IGK3)*QINV2(IGK3,IGK2)
+          end do
+        end do
+      end do
+
+      DO IGK1=1,IGKMAX
+        DO IGK2=1,IGKMAX
+          QINV1(IGK1,IGK2)=QIIR (IGK1,IGK2)
+          QINV2(IGK1,IGK2)=QIIIL(IGK1,IGK2)
+          DO IGK3=1,IGKMAX
+            QINV1(IGK1,IGK2)=QINV1(IGK1,IGK2)
+     &                       +QIR (IGK1,IGK3)*W2(IGK3,IGK2)
+            QINV2(IGK1,IGK2)=QINV2(IGK1,IGK2)
+     &                       +QIVL(IGK1,IGK3)*W3(IGK3,IGK2)
+          end do
+        end do
+      end do
+
+      DO IGK1=1,IGKMAX
+        DO IGK2=1,IGKMAX
+          QIL  (IGK1,IGK2)=W1   (IGK1,IGK2)
+          QIIL (IGK1,IGK2)=QINV1(IGK1,IGK2)
+          QIIIL(IGK1,IGK2)=QINV2(IGK1,IGK2)
+          QIVL (IGK1,IGK2)=W4   (IGK1,IGK2)
+        end do
+      end do
+
       RETURN
       END subroutine
 C=======================================================================
