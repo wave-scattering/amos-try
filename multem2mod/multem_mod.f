@@ -72,14 +72,6 @@ C
 C ..  LOCAL ARRAYS  ..
 C
       COMPLEX(dp) ETRANS(IGKD),EREFLE(IGKD)
-C
-C ..  INTRINSIC FUNCTIONS ..
-C
-      INTRINSIC SQRT,CONJG
-C
-C ..  DATA STATEMENTS ..
-C
-C      DATA CZERO/(0.D0,0.D0)/
 C     ------------------------------------------------------------------
       DOWN=0.D0
       REFLE=0.D0
@@ -155,14 +147,6 @@ C  .. LOCAL ARRAYS ..
 C
       COMPLEX(dp) T(4,2),R(4,2),X(4),P(4,2)
 C
-C  .. INTRINSIC FUNCTIONS ..
-C
-      INTRINSIC SQRT,EXP
-C
-C  .. DATA STATEMENTS ..
-C
-      DATA CZERO/(0.D0,0.D0)/, CONE/(1.D0,0.D0)/, CTWO/(2.D0,0.D0)/
-      DATA CI/(0.D0,1.D0)/
 C     -----------------------------------------------------------------
 C
       IGKMAX=2*IGMAX
@@ -269,18 +253,6 @@ C  .. LOCAL ARRAYS ..
 C
       COMPLEX(dp) YLM(LM1SQD)
 C
-C  .. INTRINSIC FUNCTIONS ..
-C
-C      INTRINSIC ABS,DCMPLX,DFLOAT,SQRT,DREAL
-C
-C  .. EXTERNAL ROUTINES ..
-C
-C     EXTERNAL SPHRM4
-C
-C  .. DATA STATEMENTS .
-C
-      DATA CZERO/(0.D0,0.D0)/,CONE/(1.D0,0.D0)/,CI/(0.D0,1.D0)/
-      DATA PI/3.14159265358979D0/
 C     ------------------------------------------------------------------
 C
       IF(LMAX>LMAXD)  GO TO 10
@@ -367,21 +339,7 @@ C
       INTEGER K,II,LL,IL2,L2,M2,I2,IL3,L3,M3,I3,LA1,LB1,LA11,LB11,M1
       INTEGER L11,L1,L
       REAL(dp)PI,FOURPI
-C
-C ..   EXTERNAL FUNCTION  ..
-C
-C     REAL(dp) BLM
-C     EXTERNAL BLM
-C
-C ..  INTRINSIC FUNCTIONS  ..
-C
-      INTRINSIC MAX0,IABS
-C
-C ..  DATA STATEMENTS  ..
-C
-      DATA PI/3.14159265358979D0/
 C     ------------------------------------------------------------------
-C
       FOURPI=4.D0*PI
       K=1
       II=0
@@ -606,21 +564,7 @@ C
 C ..  LOCAL ARRAYS  ..
 C
       COMPLEX(dp) YLM(LM1SQD)
-C
-C ..  INTRINSIC FUNCTIONS  ..
-C
-C      INTRINSIC ABS,DCMPLX,CSQRT,DFLOAT,SQRT,DREAL
-C
-C ..  EXTERNAL ROUTINES  ..
-C
-C     EXTERNAL SPHRM4
-C
-C ..  DATA STATEMENTS  ..
-C
-      DATA CZERO/(0.D0,0.D0)/,CONE/(1.D0,0.D0)/,CI/(0.D0,1.D0)/
-      DATA PI/3.14159265358979D0/
 C-----------------------------------------------------------------------
-C
       IF(LMAX>LMAXD)  GO TO 10
       AKG1=DREAL(GK(1))
       AKG2=DREAL(GK(2))
