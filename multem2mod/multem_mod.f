@@ -319,22 +319,8 @@ C ..  LOCAL SCALARS  ..
 C
       INTEGER K,II,LL,IL2,L2,M2,I2,IL3,L3,M3,I3,LA1,LB1,LA11,LB11,M1
       INTEGER L11,L1,L
-      REAL(dp)PI,FOURPI
-C
-C ..   EXTERNAL FUNCTION  ..
-C
-C     REAL(dp) BLM
-C     EXTERNAL BLM
-C
-C ..  INTRINSIC FUNCTIONS  ..
-C
-      INTRINSIC MAX0,IABS
-C
-C ..  DATA STATEMENTS  ..
-C
-      DATA PI/3.14159265358979D0/
+      REAL(dp) FOURPI
 C     ------------------------------------------------------------------
-C
       FOURPI=4.0_dp*PI
       K=1
       II=0
