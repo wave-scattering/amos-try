@@ -9,10 +9,39 @@ module libmultem2b
     complex(dp), parameter :: cone  = (1.0_dp, 0.0_dp)
     complex(dp), parameter :: ctwo  = (2.0_dp, 0.0_dp)
     real(dp), parameter :: pi=4.0_dp*ATAN(1.0_dp)
-    public bessel, tmtrx, sphrm4
+    public bessel, tmtrx, sphrm4, ceven, codd
 contains
     !=======================================================================
     !=======================================================================
+    complex(dp) function codd(l,m,l1,m1,xodd)
+        integer, intent(in) ::l,m,l1,m1
+        complex(dp), intent(in) :: xodd(:,:)
+        integer i,j
+        !     ------------------------------------------------------------------
+        if(abs(m)<=l.and.abs(m1)<=l1) then
+            i=(l*l+m+1)/2
+            j=(l1*l1+m1+1)/2
+            codd=xodd(i,j)
+        else
+            codd=czero
+        end if
+        return
+    end function
+    !=======================================================================
+    complex(dp) function ceven(l,m,l1,m1,xeven)
+        integer l,m,l1,m1
+        complex(dp) xeven(:,:)
+        integer i,j
+        !     ------------------------------------------------------------------
+        if(abs(m)<=l.and.abs(m1)<=l1) then
+            i=(l*l+2*l+m+2)/2
+            j=(l1*l1+2*l1+m1+2)/2
+            ceven=xeven(i,j)
+        else
+            ceven=czero
+        end if
+        return
+    end function
     !=======================================================================
     subroutine sphrm4(ylm,ct,st,cf,lmax)
         !     -----------------------------------------------------------------

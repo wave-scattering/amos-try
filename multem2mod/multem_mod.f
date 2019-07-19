@@ -602,9 +602,8 @@ C     ------------------------------------------------------------------
 C
 C ..  PARAMETER STATEMENTS ..
 C
-      INTEGER LMAXD,LMAX1D,LMODD,LMEVEN
-      PARAMETER (LMAXD=14,LMAX1D=LMAXD+1,LMODD=(LMAXD*LMAX1D)/2)
-      PARAMETER (LMEVEN=(LMAX1D*(LMAX1D+1))/2)
+      INTEGER LMAXD,LMAX1D
+      PARAMETER (LMAXD=14,LMAX1D=LMAXD+1)
 C
 C ..  SCALAR ARGUMENTS ..
 C
@@ -742,10 +741,10 @@ C     ------------------------------------------------------------------
 C
 C ..  PARAMETER STATEMENTS  ..
 C
-      INTEGER   LMAXD,LMAX1D,LMODD,LMEVEN,NDEND,LM1SQD,NELMD,LMDLMD
-      PARAMETER (LMAXD=14,LMAX1D=LMAXD+1,LMODD=(LMAXD*LMAX1D)/2)
+      INTEGER   LMAXD,LMAX1D,NDEND,LM1SQD,NELMD,LMDLMD
+      PARAMETER (LMAXD=14,LMAX1D=LMAXD+1)
       PARAMETER (LM1SQD=LMAX1D*LMAX1D,NELMD=165152,NDEND=1240)
-      PARAMETER (LMEVEN=(LMAX1D*(LMAX1D+1))/2,LMDLMD=LMAX1D*(2*LMAXD+1))
+      PARAMETER (LMDLMD=LMAX1D*(2*LMAXD+1))
 C
 C ..  SCALAR ARGUMENTS  ..
 C
@@ -2358,54 +2357,6 @@ C
       RETURN
       END function
 C=======================================================================
-      COMPLEX(dp) FUNCTION CODD(L,M,L1,M1,XODD)
-
-C     ------------------------------------------------------------------
-C
-C ..  SCALAR ARGUMENTS  ..
-C
-      INTEGER L,M,L1,M1
-C
-C ..  ARRAY ARGUMENTS  ..
-C
-      COMPLEX(dp) XODD(:,:)
-      INTEGER I,J
-C     ------------------------------------------------------------------
-      IF(ABS(M)<=L.AND.ABS(M1)<=L1) THEN
-      I=(L*L+M+1)/2
-      J=(L1*L1+M1+1)/2
-      CODD=XODD(I,J)
-                                        ELSE
-      CODD=CZERO
-                                        END IF
-      RETURN
-      END function
-C=======================================================================
-      COMPLEX(dp) FUNCTION CEVEN(L,M,L1,M1,XEVEN)
-
-C     ------------------------------------------------------------------
-C
-C ..  SCALAR ARGUMENTS  ..
-C
-      INTEGER L,M,L1,M1
-C
-C ..  ARRAY ARGUMENTS  ..
-C
-      COMPLEX(dp) XEVEN(:,:)
-C
-C ..  LOCAL SCALARS  ..
-C
-      INTEGER I,J
-C     ------------------------------------------------------------------
-      IF(ABS(M)<=L.AND.ABS(M1)<=L1) THEN
-      I=(L*L+2*L+M+2)/2
-      J=(L1*L1+2*L1+M1+2)/2
-      CEVEN=XEVEN(I,J)
-                                        ELSE
-      CEVEN=CZERO
-                                        END IF
-      RETURN
-      END function
 C=======================================================================
       SUBROUTINE PAIR(IGKMAX,QIL,QIIL,QIIIL,QIVL,QIR,QIIR,QIIIR,QIVR)
 
@@ -2505,10 +2456,9 @@ C     ------------------------------------------------------------------
 C
 C ..  PARAMETER STATEMENTS ..
 C
-      INTEGER   LMAXD,LMAX1D,LMODD,LMEVEN,LM1SQD,IGD,IGKD,NELMD
-      PARAMETER (LMAXD=14,LMAX1D=LMAXD+1,LMODD=(LMAXD*LMAX1D)/2)
+      INTEGER   LMAXD,LMAX1D,LM1SQD,IGD,IGKD,NELMD
+      PARAMETER (LMAXD=14,LMAX1D=LMAXD+1)
       PARAMETER (LM1SQD=LMAX1D*LMAX1D,IGD=21,IGKD=2*IGD,NELMD=165152)
-      PARAMETER (LMEVEN=(LMAX1D*(LMAX1D+1))/2)
 C
 C ..  SCALAR ARGUMENTS ..
 C
