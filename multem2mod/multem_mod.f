@@ -612,7 +612,7 @@ C
 C
 C ..  ARRAY ARGUMENTS ..
 C
-      COMPLEX(dp) XEVEN(LMEVEN,LMEVEN),XODD(LMODD,LMODD)
+      COMPLEX(dp) XEVEN(:,:),XODD(:,:)
       COMPLEX(dp) XXMAT2(:,:)
       COMPLEX(dp) TE(LMAX1D),TH(LMAX1D),XXMAT1(:,:)
 C
@@ -671,9 +671,9 @@ C     ------------------------------------------------------------------
       LTT=LA+MA+LB+MB
           IF(MOD(LTT,2)/=0)           then
              IF(MOD((LA+MA),2)==0)       then
-             Z1=CEVEN(LB,MB+1,LA-1,MA+1,LMEVEN,XEVEN)
-             Z2=CEVEN(LB,MB-1,LA-1,MA-1,LMEVEN,XEVEN)
-             Z3=CODD (LB,MB  ,LA-1,MA  ,LMODD ,XODD )
+             Z1=CEVEN(LB,MB+1,LA-1,MA+1,XEVEN)
+             Z2=CEVEN(LB,MB-1,LA-1,MA-1,XEVEN)
+             Z3=CODD (LB,MB  ,LA-1,MA  ,XODD )
              Z1= C*ALPHA2*B1*Z1
              Z2=-C*BETA2* B2*Z2
              Z3=DFLOAT(MB)*B3*Z3
@@ -681,9 +681,9 @@ C     ------------------------------------------------------------------
              XXMAT1(IA,IB)=-TH(LA+1)*OMEGA2
              XXMAT2(IA,IB)= TE(LA+1)*OMEGA2
                                            else
-             Z1=CODD (LB,MB+1,LA-1,MA+1,LMODD ,XODD )
-             Z2=CODD (LB,MB-1,LA-1,MA-1,LMODD ,XODD )
-             Z3=CEVEN(LB,MB  ,LA-1,MA  ,LMEVEN,XEVEN)
+             Z1=CODD (LB,MB+1,LA-1,MA+1,XODD )
+             Z2=CODD (LB,MB-1,LA-1,MA-1,XODD )
+             Z3=CEVEN(LB,MB  ,LA-1,MA  ,XEVEN)
              Z1= C*ALPHA2*B1*Z1
              Z2=-C*BETA2* B2*Z2
              Z3=DFLOAT(MB)*B3*Z3
@@ -693,9 +693,9 @@ C     ------------------------------------------------------------------
                                            end if
                                         else
              IF(MOD((LA+MA),2)==0)       then
-             Z1=CODD (LB,MB-1,LA,MA-1,LMODD ,XODD )
-             Z2=CODD (LB,MB+1,LA,MA+1,LMODD ,XODD )
-             Z3=CEVEN(LB,MB  ,LA,MA  ,LMEVEN,XEVEN)
+             Z1=CODD (LB,MB-1,LA,MA-1,XODD )
+             Z2=CODD (LB,MB+1,LA,MA+1,XODD )
+             Z3=CEVEN(LB,MB  ,LA,MA  ,XEVEN)
              Z1=2.0_dp*BETA1 *BETA2 *Z1
              Z2=2.0_dp*ALPHA1*ALPHA2*Z2
              Z3=DFLOAT(MA)*DFLOAT(MB)*Z3
@@ -703,9 +703,9 @@ C     ------------------------------------------------------------------
              XXMAT1(IA,IB)=-TH(LA+1)*OMEGA1
              XXMAT2(IA,IB)=-TE(LA+1)*OMEGA1
                                            else
-             Z1=CEVEN(LB,MB-1,LA,MA-1,LMEVEN,XEVEN)
-             Z2=CEVEN(LB,MB+1,LA,MA+1,LMEVEN,XEVEN)
-             Z3=CODD (LB,MB  ,LA,MA  ,LMODD ,XODD )
+             Z1=CEVEN(LB,MB-1,LA,MA-1,XEVEN)
+             Z2=CEVEN(LB,MB+1,LA,MA+1,XEVEN)
+             Z3=CODD (LB,MB  ,LA,MA  ,XODD )
              Z1=2.0_dp*BETA1 *BETA2 *Z1
              Z2=2.0_dp*ALPHA1*ALPHA2*Z2
              Z3=DFLOAT(MA)*DFLOAT(MB)*Z3
@@ -756,7 +756,7 @@ C
 C ..  ARRAY ARGUMENTS  ..
 C
       REAL(dp)   AK(2),ELM(NELMD)
-      COMPLEX(dp) XODD(LMODD,LMODD),XEVEN(LMEVEN,LMEVEN)
+      COMPLEX(dp) XODD(:,:),XEVEN(:,:)
 C
 C ..  LOCAL SCALARS  ..
 C
@@ -2358,17 +2358,17 @@ C
       RETURN
       END function
 C=======================================================================
-      COMPLEX(dp) FUNCTION CODD(L,M,L1,M1,LMODD,XODD)
+      COMPLEX(dp) FUNCTION CODD(L,M,L1,M1,XODD)
 
 C     ------------------------------------------------------------------
 C
 C ..  SCALAR ARGUMENTS  ..
 C
-      INTEGER L,M,L1,M1,LMODD
+      INTEGER L,M,L1,M1
 C
 C ..  ARRAY ARGUMENTS  ..
 C
-      COMPLEX(dp) XODD(LMODD,LMODD)
+      COMPLEX(dp) XODD(:,:)
       INTEGER I,J
 C     ------------------------------------------------------------------
       IF(ABS(M)<=L.AND.ABS(M1)<=L1) THEN
@@ -2381,17 +2381,17 @@ C     ------------------------------------------------------------------
       RETURN
       END function
 C=======================================================================
-      COMPLEX(dp) FUNCTION CEVEN(L,M,L1,M1,LMEVEN,XEVEN)
+      COMPLEX(dp) FUNCTION CEVEN(L,M,L1,M1,XEVEN)
 
 C     ------------------------------------------------------------------
 C
 C ..  SCALAR ARGUMENTS  ..
 C
-      INTEGER L,M,L1,M1,LMEVEN
+      INTEGER L,M,L1,M1
 C
 C ..  ARRAY ARGUMENTS  ..
 C
-      COMPLEX(dp) XEVEN(LMEVEN,LMEVEN)
+      COMPLEX(dp) XEVEN(:,:)
 C
 C ..  LOCAL SCALARS  ..
 C
@@ -2537,7 +2537,8 @@ C
       integer     :: int1((lmax+1)**2-1), int2((lmax+1)**2-1)
       complex(dp) AE(2,LM1SQD),AH(2,LM1SQD),GKK(3,IGD)
       complex(dp) GK(3),LAME(2),LAMH(2)
-      complex(dp) XEVEN(LMEVEN,LMEVEN),XODD(LMODD,LMODD)
+      complex(dp) XEVEN(((lmax+1)*(lmax+2))/2,((lmax+1)*(lmax+2))/2),
+     & XODD((lmax*(lmax+1))/2,(lmax*(lmax+1))/2)
       complex(dp) :: TE(lmax+1),TH(lmax+1)
       complex(dp) BMEL1((LMAX+1)**2-1),BMEL2((LMAX+1)**2-1)
       complex(dp) XXMAT1((LMAX+1)**2-1,(LMAX+1)**2-1),
