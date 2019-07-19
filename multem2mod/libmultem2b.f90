@@ -9,8 +9,88 @@ module libmultem2b
     complex(dp), parameter :: cone  = (1.0_dp, 0.0_dp)
     complex(dp), parameter :: ctwo  = (2.0_dp, 0.0_dp)
     real(dp), parameter :: pi=4.0_dp*ATAN(1.0_dp)
-    public bessel, tmtrx
+    public bessel, tmtrx, sphrm4
 contains
+    !=======================================================================
+    !=======================================================================
+    !=======================================================================
+    subroutine sphrm4(ylm,ct,st,cf,lmax)
+        !     -----------------------------------------------------------------
+        !     given  ct=cos(theta),  st=sin(theta),  and cf=exp(i*fi), this
+        !     subroutine  calculates  all the  ylm(theta,fi) up to  l=lmax.
+        !     subscripts are ordered thus:(l,m)=(0,0),(1,-1),(1,0),(1,1)...
+        !     -----------------------------------------------------------------
+        integer    lmax
+        complex(dp) ct,st,cf
+        complex(dp) ylm(:)
+        ! ..  local
+        integer    l,ll,lm,lm2,lm3,ln,lo,lp,lq,m
+        real(dp)   a,asg,b,cl,cm
+        complex(dp) sf,sa
+        real(dp)   fac1(lmax+1),fac3(lmax+1),fac2((lmax+1)**2)
+        !-----------------------------------------------------------------------
+        lm=0
+        cl=0.0_dp
+        a=1.0_dp
+        b=1.0_dp
+        asg=1.0_dp
+        ll=lmax+1
+        !****** multiplicative factors required ******
+        do l=1,ll
+            fac1(l)=asg*sqrt((2.0_dp*cl+1.0_dp)*a/(4.0_dp*pi*b*b))
+            fac3(l)=sqrt(2.0_dp*cl)
+            cm=-cl
+            ln=l+l-1
+            do m=1,ln
+                lo=lm+m
+                fac2(lo)=sqrt((cl+1.0_dp+cm)*(cl+1.0_dp-cm) &
+                        & /((2.0_dp*cl+3.0_dp)*(2.0_dp*cl+1.0_dp)))
+                cm=cm+1.0_dp
+            end do
+            cl=cl+1.0_dp
+            a=a*2.0_dp*cl*(2.0_dp*cl-1.0_dp)/4.0_dp
+            b=b*cl
+            asg=-asg
+            lm=lm+ln
+        end do
+        !****** first all the ylm for m=+-l and m=+-(l-1) are ******
+        !****** calculated by explicit formulae               ******
+        lm=1
+        cl=1.0_dp
+        asg=-1.0_dp
+        sf=cf
+        sa= cmplx(1.0_dp,0.0_dp, kind=dp)
+        ylm(1)=cmplx(fac1(1),0.0_dp, kind=dp)
+        do l=1,lmax
+            ln=lm+l+l+1
+            ylm(ln)=fac1(l+1)*sa*sf*st
+            ylm(lm+1)=asg*fac1(l+1)*sa*st/sf
+            ylm(ln-1)=-fac3(l+1)*fac1(l+1)*sa*sf*ct/cf
+            ylm(lm+2)=asg*fac3(l+1)*fac1(l+1)*sa*ct*cf/sf
+            sa=st*sa
+            sf=sf*cf
+            cl=cl+1.0_dp
+            asg=-asg
+            lm=ln
+        end do
+        !****** using ylm and yl(m-1) in a recurence relation ******
+        !****** yl(m+1) is calculated                         ******
+        lm=1
+        ll=lmax-1
+        do l=1,ll
+            ln=l+l-1
+            lm2=lm+ln+4
+            lm3=lm-ln
+            do m=1,ln
+                lo=lm2+m
+                lp=lm3+m
+                lq=lm+m+1
+                ylm(lo)=-(fac2(lp)*ylm(lp)-ct*ylm(lq))/fac2(lq)
+            end do
+            lm=lm+l+l+1
+        end do
+        return
+    end subroutine
     !=======================================================================
     subroutine bessel(BJ,Y,H,arg)
         !     ------------------------------------------------------------------

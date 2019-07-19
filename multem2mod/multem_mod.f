@@ -217,51 +217,24 @@ C     -----------------------------------------------------------------
       END subroutine
 C=======================================================================
       SUBROUTINE DLMKG(LMAX,A0,GK,SIGNUS,KAPPA,DLME,DLMH,EMACH)
-
 C     ------------------------------------------------------------------
 C     THIS SUBROUTINE CALCULATES THE COEFFICIENTS DLM(KG)
 C     ------------------------------------------------------------------
-C
 C ..  PARAMETER STATEMENTS  ..
-C
       INTEGER LMAXD,LMAX1D,LM1SQD
       PARAMETER(LMAXD=14,LMAX1D=LMAXD+1,LM1SQD=LMAX1D*LMAX1D)
-C
-C ..  SCALAR ARGUMENTS  ..
-C
+C ..  ARGUMENTS  ..
       INTEGER    LMAX
       REAL(dp)   A0,SIGNUS,EMACH
       COMPLEX(dp) KAPPA
-C
-C ..  ARRAY ARGUMENTS  ..
-C
       COMPLEX(dp) DLME(2,LM1SQD),DLMH(2,LM1SQD),GK(3)
-C
-C  .. LOCAL SCALARS ..
-C
+C  .. LOCAL
       INTEGER    K,II,L,M,I
-      REAL(dp)   AKPAR,PI,ALPHA,BETA,AKG1,AKG2
-      COMPLEX(dp) CI,CZERO,CONE,C0,CC,COEF,Z1,Z2,Z3
+      REAL(dp)   AKPAR,ALPHA,BETA,AKG1,AKG2
+      COMPLEX(dp) C0,CC,COEF,Z1,Z2,Z3
       COMPLEX(dp) CT,ST,CF
-C
-C  .. LOCAL ARRAYS ..
-C
-      COMPLEX(dp) YLM(LM1SQD)
-C
-C  .. INTRINSIC FUNCTIONS ..
-C
-C      INTRINSIC ABS,DCMPLX,DFLOAT,SQRT,DREAL
-C
-C  .. EXTERNAL ROUTINES ..
-C
-C     EXTERNAL SPHRM4
-C
-C  .. DATA STATEMENTS .
-C
-      DATA CZERO/(0.0d0,0.0d0)/,CONE/(1.0d0,0.0d0)/,CI/(0.0d0,1.0d0)/
-      DATA PI/3.14159265358979D0/
+      COMPLEX(dp) YLM((lmax+1)**2)
 C     ------------------------------------------------------------------
-C
       IF(LMAX>LMAXD)  GO TO 10
       AKG1=DREAL(GK(1))
       AKG2=DREAL(GK(2))
@@ -583,7 +556,7 @@ C
 C
 C ..  LOCAL ARRAYS  ..
 C
-      COMPLEX(dp) YLM(LM1SQD)
+      COMPLEX(dp) YLM((lmax+1)**2)
 C
 C ..  INTRINSIC FUNCTIONS  ..
 C
@@ -796,105 +769,6 @@ C
      *       ' IS GREATER THAN DIMENSIONED   LMAXD=',I5)
       END subroutine
 C=======================================================================
-      SUBROUTINE SPHRM4(YLM,CT,ST,CF,LMAX)
-
-C     -----------------------------------------------------------------
-C     GIVEN  CT=COS(THETA),  ST=SIN(THETA),  AND CF=EXP(I*FI), THIS
-C     SUBROUTINE  CALCULATES  ALL THE  YLM(THETA,FI) UP TO  L=LMAX.
-C     SUBSCRIPTS ARE ORDERED THUS:(L,M)=(0,0),(1,-1),(1,0),(1,1)...
-C     -----------------------------------------------------------------
-C
-C ..  PARAMETER STATEMENTS  ..
-C
-      INTEGER LMAXD,LMAX1D,LM1SQD
-      PARAMETER(LMAXD=14,LMAX1D=LMAXD+1,LM1SQD=LMAX1D*LMAX1D)
-C
-C ..  SCALAR ARGUMENTS  ..
-C
-      INTEGER    LMAX
-      COMPLEX(dp) CT,ST,CF
-C
-C ..  ARRAY ARGUMENTS  ..
-C
-      COMPLEX(dp) YLM(LM1SQD)
-C
-C ..  LOCAL SCALARS  ..
-C
-      INTEGER    L,LL,LM,LM2,LM3,LN,LO,LP,LQ,M
-      REAL(dp)   A,ASG,B,CL,CM,PI
-      COMPLEX(dp) SF,SA
-C
-C ..  LOCAL ARRAYS   ..
-C
-      REAL(dp)   FAC1(LMAX1D),FAC3(LMAX1D),FAC2(LM1SQD)
-C
-C ..  INTRINSIC FUNCTIONS  ..
-C
-C      INTRINSIC DCMPLX,SQRT
-C
-C ..  DATA STATEMENTS  ..
-C
-      DATA PI/3.14159265358979D0/
-C-----------------------------------------------------------------------
-C
-      LM=0
-      CL=0.0_dp
-      A=1.0_dp
-      B=1.0_dp
-      ASG=1.0_dp
-      LL=LMAX+1
-C****** MULTIPLICATIVE FACTORS REQUIRED ******
-      DO 2 L=1,LL
-      FAC1(L)=ASG*SQRT((2.0_dp*CL+1.0_dp)*A/(4.0_dp*PI*B*B))
-      FAC3(L)=SQRT(2.0_dp*CL)
-      CM=-CL
-      LN=L+L-1
-      DO 1 M=1,LN
-      LO=LM+M
-      FAC2(LO)=SQRT((CL+1.0_dp+CM)*(CL+1.0_dp-CM)
-     1/((2.0_dp*CL+3.0_dp)*(2.0_dp*CL+1.0_dp)))
-   1  CM=CM+1.0_dp
-      CL=CL+1.0_dp
-      A=A*2.0_dp*CL*(2.0_dp*CL-1.0_dp)/4.0_dp
-      B=B*CL
-      ASG=-ASG
-   2  LM=LM+LN
-C****** FIRST ALL THE YLM FOR M=+-L AND M=+-(L-1) ARE ******
-C****** CALCULATED BY EXPLICIT FORMULAE               ******
-      LM=1
-      CL=1.0_dp
-      ASG=-1.0_dp
-      SF=CF
-      SA=DCMPLX(1.0_dp,0.0_dp)
-      YLM(1)=DCMPLX(FAC1(1),0.0_dp)
-      DO 3 L=1,LMAX
-      LN=LM+L+L+1
-      YLM(LN)=FAC1(L+1)*SA*SF*ST
-      YLM(LM+1)=ASG*FAC1(L+1)*SA*ST/SF
-      YLM(LN-1)=-FAC3(L+1)*FAC1(L+1)*SA*SF*CT/CF
-      YLM(LM+2)=ASG*FAC3(L+1)*FAC1(L+1)*SA*CT*CF/SF
-      SA=ST*SA
-      SF=SF*CF
-      CL=CL+1.0_dp
-      ASG=-ASG
-   3  LM=LN
-C****** USING YLM AND YL(M-1) IN A RECURENCE RELATION ******
-C****** YL(M+1) IS CALCULATED                         ******
-      LM=1
-      LL=LMAX-1
-      DO 5 L=1,LL
-      LN=L+L-1
-      LM2=LM+LN+4
-      LM3=LM-LN
-      DO 4 M=1,LN
-      LO=LM2+M
-      LP=LM3+M
-      LQ=LM+M+1
-      YLM(LO)=-(FAC2(LP)*YLM(LP)-CT*YLM(LQ))/FAC2(LQ)
-   4  CONTINUE
-   5  LM=LM+L+L+1
-      RETURN
-      END subroutine
 C=======================================================================
 C=======================================================================
       SUBROUTINE XMAT(XODD,XEVEN,LMAX,KAPPA,AK,ELM,EMACH)
