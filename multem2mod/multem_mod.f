@@ -2110,7 +2110,7 @@ C
       INTEGER    NN,N
       REAL(dp)   ABSZ,ABTERM,API,EPS,FACT,FACTD,FACTN
       REAL(dp)   Q,RTPI,TEST,X,Y,YY
-      COMPLEX(dp) ZZ,SUM,ZZS,XZZS,CER, erf
+      COMPLEX(dp) ZZ,SUM,ZZS,XZZS,CER!, erf
       COMPLEX(dp) H1,H2,H3,U1,U2,U3,TERM1,TERM2
 C     ------------------------------------------------------------------
 C
@@ -2419,15 +2419,15 @@ C
 
 !     call zgetrf_wrap(w2, int)
 !     call zgetrf_wrap(w3, jnt)
-!     call zgetrs_wrap(w2, QINV1(1,IGK2), int)
-!     call zgetrs_wrap(w3, QINV2(1,IGK2), jnt)
+!     call zgetrs_wrap(w2, QINV1(1,:), int)
+!     call zgetrs_wrap(w3, QINV2(1,:), jnt)
 
-      CALL ZGE(W2,INT,IGKMAX,IGKD,EMACH)
-      CALL ZGE(W3,JNT,IGKMAX,IGKD,EMACH)
-      DO IGK2=1,IGKMAX
-        CALL ZSU(W2,INT,QINV1(1,IGK2),IGKMAX,IGKD,EMACH)
-        CALL ZSU(W3,JNT,QINV2(1,IGK2),IGKMAX,IGKD,EMACH)
-      end do
+       CALL ZGE(W2,INT,IGKMAX,IGKD,EMACH)
+       CALL ZGE(W3,JNT,IGKMAX,IGKD,EMACH)
+       DO IGK2=1,IGKMAX
+         CALL ZSU(W2,INT,QINV1(1,IGK2),IGKMAX,IGKD,EMACH)
+         CALL ZSU(W3,JNT,QINV2(1,IGK2),IGKMAX,IGKD,EMACH)
+       end do
 
       DO IGK1=1,IGKMAX
         DO IGK2=1,IGKMAX
@@ -2717,11 +2717,17 @@ C     ------------------------------------------------------------------
       QH1(IGK1,IGK2)=QH1(IGK1,IGK2)-QIII(IGK1,IGK3)*QI (IGK3,IGK2)
     6 QH2(IGK1,IGK2)=QH2(IGK1,IGK2)-QIII(IGK1,IGK3)*QII(IGK3,IGK2)
     5 CONTINUE
+
+!     call zgetrf_wrap(QIV, int)
+!     call zgetrs_wrap(QIV, QH1(1,:), int)
+!     call zgetrs_wrap(QIV, QH2(1,:), int)
+
       CALL ZGE(QIV,INT,IGKMAX,IGKD,EMACH)
-      DO 7 IGK2=1,IGKMAX
-      CALL ZSU(QIV,INT,QH1(1,IGK2),IGKMAX,IGKD,EMACH)
-      CALL ZSU(QIV,INT,QH2(1,IGK2),IGKMAX,IGKD,EMACH)
-    7 CONTINUE
+      do IGK2=1,IGKMAX
+        CALL ZSU(QIV,INT,QH1(1,IGK2),IGKMAX,IGKD,EMACH)
+        CALL ZSU(QIV,INT,QH2(1,IGK2),IGKMAX,IGKD,EMACH)
+      end do
+
       DO 9 IGK1=1,IGKMAX
       DO 9 IGK2=1,IGKMAX
       AR(IGK1,IGK2)=DREAL(QI(IGK1,IGK2))
