@@ -694,8 +694,8 @@ C
 C ..  ARRAY ARGUMENTS ..
 C
       COMPLEX(dp) XEVEN(LMEVEN,LMEVEN),XODD(LMODD,LMODD)
-      COMPLEX(dp) XXMAT2(LMTD,LMTD)
-      COMPLEX(dp) TE(LMAX1D),TH(LMAX1D),XXMAT1(LMTD,LMTD)
+      COMPLEX(dp) XXMAT2(:,:)
+      COMPLEX(dp) TE(LMAX1D),TH(LMAX1D),XXMAT1(:,:)
 C
 C ..  LOCAL SCALARS ..
 C
@@ -3057,13 +3057,9 @@ C
       complex(dp) XEVEN(LMEVEN,LMEVEN),XODD(LMODD,LMODD)
 !      complex(dp) TE(LMAX1D),TH(LMAX1D),BMEL1(LMTD),BMEL2(LMTD)
       complex(dp),allocatable :: TE(:),TH(:)
-!     complex(dp)BMEL1(LMTD),BMEL2(LMTD)
       complex(dp) BMEL1((LMAX+1)**2-1),BMEL2((LMAX+1)**2-1)
-      complex(dp) XXMAT1(LMTD,LMTD),XXMAT2(LMTD,LMTD)
-!     complex(dp) XXMAT1((LMAX+1)**2-1,(LMAX+1)**2-1),
-!    & XXMAT2((LMAX+1)**2-1,(LMAX+1)**2-1)
-      complex(dp) vXXMAT1((LMAX+1)**2-1,(LMAX+1)**2-1),
-     & vXXMAT2((LMAX+1)**2-1,(LMAX+1)**2-1)
+      complex(dp) XXMAT1((LMAX+1)**2-1,(LMAX+1)**2-1),
+     & XXMAT2((LMAX+1)**2-1,(LMAX+1)**2-1)
       complex(dp) DLME(2,LM1SQD),DLMH(2,LM1SQD)
 C
 C ..  COMMON BLOCKS ..
@@ -3077,110 +3073,109 @@ C     ------------------------------------------------------------------
       LMAX1=LMAX+1
       LMTOT=LMAX1*LMAX1-1
       LMXOD=(LMAX*LMAX1)/2
-      DO 1 IG1=1,IGMAX
-      GKK(1,IG1)=cmplx((AK(1)+G(1,IG1)),0.D0, kind=dp)
-      GKK(2,IG1)=cmplx((AK(2)+G(2,IG1)),0.D0, kind=dp)
-      GKK(3,IG1)=SQRT(KAPPA*KAPPA-GKK(1,IG1)*GKK(1,IG1)-
+      DO IG1=1,IGMAX
+        GKK(1,IG1)=cmplx((AK(1)+G(1,IG1)),0.D0, kind=dp)
+        GKK(2,IG1)=cmplx((AK(2)+G(2,IG1)),0.D0, kind=dp)
+        GKK(3,IG1)=SQRT(KAPPA*KAPPA-GKK(1,IG1)*GKK(1,IG1)-
      &                            GKK(2,IG1)*GKK(2,IG1))
-    1 CONTINUE
+      end do
       CALL TMTRX(RAP,EPSSPH,EPSMED,MUMED,MUSPH,TE,TH)
       CALL XMAT(XODD,XEVEN,LMAX,KAPPA,AK,ELM,EMACH)
       CALL SETUP(LMAX,XEVEN,XODD,TE,TH,XXMAT1,XXMAT2)
-      vXXMAT1 = XXMAT1(1:lmtot, 1:lmtot)
-      vXXMAT2 = XXMAT2(1:lmtot, 1:lmtot)
-      call zgetrf_wrap ( vXXMAT1, int1 )
-      call zgetrf_wrap ( vXXMAT2, int2 )
+      call zgetrf_wrap ( XXMAT1, int1 )
+      call zgetrf_wrap ( XXMAT2, int2 )
       ISIGN2=1
       SIGN2=3.D0-2.D0*ISIGN2
       IGK2=0
-      DO 8 IG2=1,IGMAX
-      GK(1)=      GKK(1,IG2)
-      GK(2)=      GKK(2,IG2)
-      GK(3)=SIGN2*GKK(3,IG2)
-      CALL PLW(KAPPA,GK,LMAX,AE,AH)
-      DO 3 K2=1,2
-      IGK2=IGK2+1
-      II=0
-      IEV=LMXOD
-      IOD=0
-      DO 2 L=1,LMAX
-      DO 2 M=-L,L
-      II=II+1
-      IF(MOD((L+M),2)==0)  THEN
-      IEV=IEV+1
-      BMEL1(IEV)=TH(L+1)*AH(K2,II+1)
-      BMEL2(IEV)=TE(L+1)*AE(K2,II+1)
-                             ELSE
-      IOD=IOD+1
-      BMEL1(IOD)=TE(L+1)*AE(K2,II+1)
-      BMEL2(IOD)=TH(L+1)*AH(K2,II+1)
-                             END IF
-    2 CONTINUE
+      DO IG2=1,IGMAX
+        GK(1)=      GKK(1,IG2)
+        GK(2)=      GKK(2,IG2)
+        GK(3)=SIGN2*GKK(3,IG2)
+        CALL PLW(KAPPA,GK,LMAX,AE,AH)
+        DO K2=1,2
+          IGK2=IGK2+1
+          II=0
+          IEV=LMXOD
+          IOD=0
+          DO L=1,LMAX
+            DO M=-L,L
+              II=II+1
+              IF(MOD((L+M),2)==0)  THEN
+                IEV=IEV+1
+                BMEL1(IEV)=TH(L+1)*AH(K2,II+1)
+                BMEL2(IEV)=TE(L+1)*AE(K2,II+1)
+              ELSE
+                IOD=IOD+1
+                BMEL1(IOD)=TE(L+1)*AE(K2,II+1)
+                BMEL2(IOD)=TH(L+1)*AH(K2,II+1)
+              END IF
+            end do
+          end do
 
-
-      call zgetrs_wrap(vXXMAT1, BMEL1, INT1)
-      call zgetrs_wrap(vXXMAT2, BMEL2, INT2)
-      DO 4 ISIGN1=1,2
-      SIGN1=3.D0-2.D0*ISIGN1
-      IGK1=0
-      DO 9 IG1=1,IGMAX
-      GK(1)=      GKK(1,IG1)
-      GK(2)=      GKK(2,IG1)
-      GK(3)=SIGN1*GKK(3,IG1)
-      CALL DLMKG(LMAX,A0,GK,SIGN1,KAPPA,DLME,DLMH,EMACH)
-      DO 5 K1=1,2
-      LAME(K1)=CZERO
-      LAMH(K1)=CZERO
-      II=0
-      IEV=LMXOD
-      IOD=0
-      DO L=1,LMAX
-        DO M=-L,L
-          II=II+1
-          IF(MOD((L+M),2) == 0)  THEN
-              IEV=IEV+1
-              LAME(K1)=LAME(K1)+DLME(K1,II+1)*BMEL2(IEV)
-              LAMH(K1)=LAMH(K1)+DLMH(K1,II+1)*BMEL1(IEV)
-          ELSE
-              IOD=IOD+1
-              LAME(K1)=LAME(K1)+DLME(K1,II+1)*BMEL1(IOD)
-              LAMH(K1)=LAMH(K1)+DLMH(K1,II+1)*BMEL2(IOD)
-          END IF
+          call zgetrs_wrap(XXMAT1, BMEL1, INT1)
+          call zgetrs_wrap(XXMAT2, BMEL2, INT2)
+          DO ISIGN1=1,2
+            SIGN1=3.D0-2.D0*ISIGN1
+            IGK1=0
+            do IG1=1,IGMAX
+              GK(1)=      GKK(1,IG1)
+              GK(2)=      GKK(2,IG1)
+              GK(3)=SIGN1*GKK(3,IG1)
+              CALL DLMKG(LMAX,A0,GK,SIGN1,KAPPA,DLME,DLMH,EMACH)
+              DO K1=1,2
+                LAME(K1)=CZERO;      LAMH(K1)=CZERO
+                II=0; IOD=0
+                IEV=LMXOD
+                do L=1,lmax
+                  do M=-L,L
+                    II=II+1
+                    if(MOD((L+M),2) == 0)  then
+                      IEV=IEV+1
+                      LAME(K1)=LAME(K1)+DLME(K1,II+1)*BMEL2(IEV)
+                      LAMH(K1)=LAMH(K1)+DLMH(K1,II+1)*BMEL1(IEV)
+                    else
+                      IOD=IOD+1
+                      LAME(K1)=LAME(K1)+DLME(K1,II+1)*BMEL1(IOD)
+                      LAMH(K1)=LAMH(K1)+DLMH(K1,II+1)*BMEL2(IOD)
+                    end if
+                  end do
+                end do
+              end do
+              do K1=1,2
+                IGK1=IGK1+1
+                IF(ISIGN1==1) QI  (IGK1,IGK2)=LAMH(K1)+LAME(K1)
+                IF(ISIGN1==2) QIII(IGK1,IGK2)=LAMH(K1)+LAME(K1)
+              end do
+            end do
+          end do
         end do
       end do
-    5 CONTINUE
-      DO 7 K1=1,2
-      IGK1=IGK1+1
-      IF(ISIGN1==1) QI  (IGK1,IGK2)=LAMH(K1)+LAME(K1)
-      IF(ISIGN1==2) QIII(IGK1,IGK2)=LAMH(K1)+LAME(K1)
-    7 CONTINUE
-    9 CONTINUE
-    4 CONTINUE
-    3 CONTINUE
-    8 CONTINUE
-                  IGK2=0
-                  DO IG2=1,IGMAX
-                    DO K2=1,2
-                      IGK2=IGK2+1
-                      IGK1=0
-                      DO IG1=1,IGMAX
-                        DO K1=1,2
-                          IGK1=IGK1+1
-                          SIGNUS=1.D0
-                          IF(K2/=K1) SIGNUS=-1.D0
-                          QII(IGK1,IGK2)=SIGNUS*QIII(IGK1,IGK2)
-                          QIV(IGK1,IGK2)=SIGNUS*QI  (IGK1,IGK2)
-                        end do
-                      end do
-                    end do
-                  end do
+
+      IGK2=0
+      DO IG2=1,IGMAX
+        DO K2=1,2
+          IGK2=IGK2+1
+          IGK1=0
+          DO IG1=1,IGMAX
+            DO K1=1,2
+              IGK1=IGK1+1
+              SIGNUS=1.D0
+              IF(K2/=K1) SIGNUS=-1.D0
+              QII(IGK1,IGK2)=SIGNUS*QIII(IGK1,IGK2)
+              QIV(IGK1,IGK2)=SIGNUS*QI  (IGK1,IGK2)
+            end do
+          end do
+        end do
+      end do
+
       DO IGK1=1,IGKMAX
         QI (IGK1,IGK1)=CONE + QI (IGK1,IGK1)
         QIV(IGK1,IGK1)=CONE + QIV(IGK1,IGK1)
       end do
+
       IGK2=0
-      DO 14 IG2=1,IGMAX
-      DO 14 IG1=1,IGMAX
+      DO IG2=1,IGMAX
+        DO IG1=1,IGMAX
       CQI  =EXP(CI*(GKK(1,IG1)*DR(1)+GKK(2,IG1)*DR(2)+GKK(3,IG1)*DR(3)+
      &              GKK(1,IG2)*DL(1)+GKK(2,IG2)*DL(2)+GKK(3,IG2)*DL(3)))
       CQII =EXP(CI*((GKK(1,IG1)-GKK(1,IG2))*DR(1)+(GKK(2,IG1)
@@ -3189,16 +3184,18 @@ C     ------------------------------------------------------------------
      &     -GKK(2,IG2))*DL(2)-(GKK(3,IG1)+GKK(3,IG2))*DL(3)))
       CQIV =EXP(-CI*(GKK(1,IG1)*DL(1)+GKK(2,IG1)*DL(2)-GKK(3,IG1)*DL(3)+
      &              GKK(1,IG2)*DR(1)+GKK(2,IG2)*DR(2)-GKK(3,IG2)*DR(3)))
-      DO 13 K2=1,2
-      IGK2=(IG2-1)*2+K2
-      DO 13 K1=1,2
-      IGK1=(IG1-1)*2+K1
-      QI  (IGK1,IGK2)=CQI  *QI  (IGK1,IGK2)
-      QII (IGK1,IGK2)=CQII *QII (IGK1,IGK2)
-      QIII(IGK1,IGK2)=CQIII*QIII(IGK1,IGK2)
-      QIV (IGK1,IGK2)=CQIV *QIV (IGK1,IGK2)
-   13 CONTINUE
-   14 CONTINUE
+          DO K2=1,2
+            IGK2=(IG2-1)*2+K2
+            DO K1=1,2
+              IGK1=(IG1-1)*2+K1
+              QI  (IGK1,IGK2)=CQI  *QI  (IGK1,IGK2)
+              QII (IGK1,IGK2)=CQII *QII (IGK1,IGK2)
+              QIII(IGK1,IGK2)=CQIII*QIII(IGK1,IGK2)
+              QIV (IGK1,IGK2)=CQIV *QIV (IGK1,IGK2)
+            end do
+          end do
+        end do
+      end do
       RETURN
       END subroutine
 C=======================================================================
