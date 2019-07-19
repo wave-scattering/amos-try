@@ -41,9 +41,9 @@ contains
         integer      :: lmax1
         INTEGER KODE, N, NZ, IERR
         real(dp)     :: zr, zi, FNU
-        real(dp),dimension(:),allocatable :: cyr, cyi, cwrkr, cwrki
+        real(dp), allocatable :: cyr(:), cyi(:), cwrkr(:), cwrki(:)
         complex(dp)  :: z
-        complex(dp),dimension(:),allocatable :: cy
+        complex(dp),allocatable :: cy(:)
         !-----------------------------------------------------------------------
         lmax1 = size(BJ) ! to store from l=0 to l=lmax
         allocate(cy(1:lmax1)); allocate(cyr(1:lmax1)); allocate(cyi(1:lmax1))
@@ -73,11 +73,11 @@ contains
         !     LMAX   : MAXIMUM ANGULAR MOMENTUM from TE(0..LMAX) and TH
         !     ------------------------------------------------------------------
         complex(dp), intent(in) :: EPSSPH,EPSMED,MUSPH,MUMED,RAP
-        complex(dp), dimension(:), intent(out) :: TE(:),TH(:)
+        complex(dp), intent(out) :: TE(:),TH(:)
         ! local
         INTEGER  ::  l1, lmax, lmax1, b_size
         complex(dp) :: C1,C2,C3,C4,C5,C6,AN,AJ,BN,BJ,ARG,ARGM,XISQ,XISQM,AR
-        complex(dp), dimension(:), allocatable:: J,Y,H,JM,YM,HM
+        complex(dp), allocatable:: J(:),Y(:),H(:),JM(:),YM(:),HM(:)
         !-----------------------------------------------------------------------
         lmax1 = size(TE)
         ! to evaluate TE(0..lmax) we need one more oder in Bessel functions

@@ -3118,17 +3118,11 @@ C     ------------------------------------------------------------------
                              END IF
     2 CONTINUE
 
-!     CALL ZSU(XXMAT1,INT1,BMEL1,LMTOT,LMTD,EMACH)
-!     CALL ZSU(XXMAT2,INT2,BMEL2,LMTOT,LMTD,EMACH)
 
       vBMEL1 = BMEL1(1:LMTOT)
       vBMEL2 = BMEL2(1:LMTOT)
-      CALL ZGETRS( 'No transpose', lmtot, 1, vXXMAT1, lmtot, vINT1,
-     $  vBMEL1, lmtot, INFO )
-      CALL ZGETRS( 'No transpose', lmtot, 1, vXXMAT2, lmtot, vINT2,
-     $  vBMEL2, lmtot, INFO )
-!      call zgesv(lmtot, 1, vXXMAT1, lmtot, vINT1, vBMEL1,lmtot,info)
-!      call zgesv(lmtot, 1, vXXMAT2, lmtot, vINT2, vBMEL2,lmtot,info)
+      call zgetrs_wrap(vXXMAT1, vBMEL1, vINT1)
+      call zgetrs_wrap(vXXMAT2, vBMEL2, vINT2)
       BMEL1(1:LMTOT) = vBMEL1
       BMEL2(1:LMTOT) = vBMEL2
       DO 4 ISIGN1=1,2
