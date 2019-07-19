@@ -601,11 +601,6 @@ C     ------------------------------------------------------------------
 C     THIS SUBROUTINE CONSTRUCTS THE SECULAR MATRIX
 C     ------------------------------------------------------------------
 C
-C ..  PARAMETER STATEMENTS ..
-C
-      INTEGER LMAXD,LMAX1D
-      PARAMETER (LMAXD=14,LMAX1D=LMAXD+1)
-C
 C ..  SCALAR ARGUMENTS ..
 C
       INTEGER LMAX
@@ -614,7 +609,7 @@ C ..  ARRAY ARGUMENTS ..
 C
       COMPLEX(dp) XEVEN(:,:),XODD(:,:)
       COMPLEX(dp) XXMAT2(:,:)
-      COMPLEX(dp) TE(LMAX1D),TH(LMAX1D),XXMAT1(:,:)
+      COMPLEX(dp) TE(:),TH(:),XXMAT1(:,:)
 C
 C ..  LOCAL SCALARS ..
 C
@@ -624,7 +619,6 @@ C
       REAL(dp)  ALPHA1,ALPHA2,BETA1,BETA2
       COMPLEX(dp) OMEGA1,OMEGA2,Z1,Z2,Z3
 C     ------------------------------------------------------------------
-      IF(LMAX>LMAXD)   GO TO 10
       LMAX1=LMAX+1
       LMTOT=LMAX1*LMAX1-1
       LMXOD=(LMAX*LMAX1)/2
@@ -720,10 +714,6 @@ C     ------------------------------------------------------------------
       XXMAT1(I,I)=CONE+XXMAT1(I,I)
     3 XXMAT2(I,I)=CONE+XXMAT2(I,I)
       RETURN
-   10 WRITE(6,100) LMAX,LMAXD
-      STOP
-  100 FORMAT(//13X,'FROM SETUP: LMAX=',I5,
-     *       ' IS GREATER THAN DIMENSIONED   LMAXD=',I5)
       END subroutine
 C=======================================================================
 C=======================================================================
@@ -742,10 +732,8 @@ C     ------------------------------------------------------------------
 C
 C ..  PARAMETER STATEMENTS  ..
 C
-      INTEGER   LMAXD,LMAX1D,NDEND,LM1SQD,NELMD,LMDLMD
-      PARAMETER (LMAXD=14,LMAX1D=LMAXD+1)
-      PARAMETER (LM1SQD=LMAX1D*LMAX1D,NELMD=165152,NDEND=1240)
-      PARAMETER (LMDLMD=LMAX1D*(2*LMAXD+1))
+      INTEGER   NDEND
+      PARAMETER (NDEND=1240)
 C
 C ..  SCALAR ARGUMENTS  ..
 C
@@ -755,7 +743,7 @@ C
 C
 C ..  ARRAY ARGUMENTS  ..
 C
-      REAL(dp)   AK(2),ELM(NELMD)
+      REAL(dp)   AK(2),ELM(:)
       COMPLEX(dp) XODD(:,:),XEVEN(:,:)
 C
 C ..  LOCAL SCALARS  ..
@@ -771,17 +759,17 @@ C
 C
 C ..  LOCAL ARRAYS  ..
 C
-      REAL(dp)   DENOM(NDEND),R(2),B1(2),B2(2),AKPT(2),FAC(4*LMAXD+1)
-      COMPLEX(dp) GKN(LMAX1D),AGK(2*LMAXD+1),XPM(2*LMAXD+1),PREF(LM1SQD)
-      COMPLEX(dp) DLM(LMDLMD)
-C
+      REAL(dp)   DENOM(NDEND),R(2),B1(2),B2(2),AKPT(2),FAC(4*lmax+1)
+      COMPLEX(dp) GKN(lmax+1),AGK(2*lmax+1),XPM(2*lmax+1),
+     &  PREF((lmax+1)**2)
+      complex(dp) DLM((lmax+1)*(2*lmax+1))
+c
 C ..  ARRAYS IN COMMON  ..
 C
       REAL(dp)  AR1(2),AR2(2)
       COMMON/X1/AR1,AR2
 C----------------------------------------------------------------------
-      IF(LMAX>14.OR.LMAX>LMAXD)
-     &   STOP 'FROM XMAT: LAMX>MIN0(14,LMAXD)'
+
 C
 C     AK(1)  AND  AK(2)  ARE THE X  AND Y COMPONENTS OF THE
 C     MOMENTUM PARALLEL TO THE SURFACE, MODULO A RECIPROCAL
