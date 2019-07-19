@@ -2132,40 +2132,7 @@ C=======================================================================
 !     NARRAY(1) = NFLAG
 !     END subroutine
 C=======================================================================
-      SUBROUTINE ERRPRT(NCHARS,NARRAY)
-
-C     ------------------------------------------------------------------
-C     UTILITY ROUTINE TO SIMPLY PRINT THE HOLLERITH MESSAGE IN NARRAY,
-C     WHOSE LENGTH IS NCHARS CHARACTERS.
-C     ------------------------------------------------------------------
-C
-C ..  SCALAR ARGUMENTS  ..
-C
-      INTEGER NCHARS
-C
-C ..  ARRAY ARGUMENTS  ..
-C
-      INTEGER NARRAY(14)
-C
-C ..  LOCAL SCALARS  ..
-C
-      INTEGER I,NCH,NWORDS
-C     ------------------------------------------------------------------
-C
-C     NOTE - NCH MUST BE THE NUMBER OF HOLLERITH CHARACTERS STORED
-C     PER WORD.  IF NCH IS CHANGED, FORMAT 1 MUST ALSO BE
-C     CHANGED CORRESPONDINGLY.
-C
-      NCH = 10
-C     FOR LINE PRINTERS, USE
-    1 FORMAT (1X,13A10)
-C     FOR DATA TERMINALS, USE
-C   1 FORMAT (1X,7A10)
-      NWORDS = (NCHARS+NCH-1)/NCH
-      PRINT 1,(NARRAY(I),I=1,NWORDS)
-      RETURN
-      END subroutine
-C=======================================================================
+!C=======================================================================
 !     SUBROUTINE ERXSET(NFATAL,NTRACE)
 !!     ------------------------------------------------------------------
 !     ERXSET IS A COMPANION ROUTINE TO SUBROUTINE ERRCHK. ERXSET ASSIGNS
@@ -2623,10 +2590,10 @@ C     ------------------------------------------------------------------
 C
 C ..  PARAMETER STATEMENTS ..
 C
-      INTEGER   LMAXD,LMAX1D,LMODD,LMEVEN,LMTD,LM1SQD,IGD,IGKD,NELMD
+      INTEGER   LMAXD,LMAX1D,LMODD,LMEVEN,LM1SQD,IGD,IGKD,NELMD
       PARAMETER (LMAXD=14,LMAX1D=LMAXD+1,LMODD=(LMAXD*LMAX1D)/2)
       PARAMETER (LM1SQD=LMAX1D*LMAX1D,IGD=21,IGKD=2*IGD,NELMD=165152)
-      PARAMETER (LMEVEN=(LMAX1D*(LMAX1D+1))/2,LMTD=LM1SQD-1)
+      PARAMETER (LMEVEN=(LMAX1D*(LMAX1D+1))/2)
 C
 C ..  SCALAR ARGUMENTS ..
 C
@@ -2647,7 +2614,6 @@ C
       INTEGER    LMTOT,L,M,II,IGK1,IGK2,LMAX1,IGKMAX
       INTEGER    IG1,IG2,ISIGN1,ISIGN2,K1,K2
       INTEGER    LMXOD,IEV,IOD
-      integer info
       real(dp)     SIGN1,SIGN2,SIGNUS
       complex(dp) CQI,CQII,CQIII,CQIV
 C
@@ -2657,7 +2623,6 @@ C
       complex(dp) AE(2,LM1SQD),AH(2,LM1SQD),GKK(3,IGD)
       complex(dp) GK(3),LAME(2),LAMH(2)
       complex(dp) XEVEN(LMEVEN,LMEVEN),XODD(LMODD,LMODD)
-!      complex(dp) TE(LMAX1D),TH(LMAX1D),BMEL1(LMTD),BMEL2(LMTD)
       complex(dp) :: TE(lmax+1),TH(lmax+1)
       complex(dp) BMEL1((LMAX+1)**2-1),BMEL2((LMAX+1)**2-1)
       complex(dp) XXMAT1((LMAX+1)**2-1,(LMAX+1)**2-1),
@@ -3116,232 +3081,6 @@ C*****"AK" IS REDUCED WITHIN THE SBZ
      &RECIPROCAL LATTICE VECTORS '
       GOTO 6
       END subroutine
-CCCCCCCCC-----------> HERE ENDS THE FORTRAN SOURCE CODE
-CCCCCCCCC-----------> HERE STARTS THE FIRST INPUT DATA FILE
-!                  ********************************************
-!                ********INPUT FILE FOR TRANSMISSION*********
-!       ********************************************
-!  KTYPE = 2   KSCAN = 1   KEMB  = 1    LMAX = 4   NCOMP = 4   NUNIT = 6
-!ALPHA =    1.000000  BETA =    1.000000   FAB =   90.000000  RMAX =   16.000000
-! NP =  17  ZINF =   1.00000000  ZSUP =   2.000000000
-! THETA/AK(1) =   0.00000000     FI/AK(2) =   0.00000000   POLAR =S     FEIN =   0.00
-!!ive information for the "NCOMP" components
-!!    IT  = 2
-!    MUMED =   1.00000000   0.00000000     EPSMED=   2.00000000   0.00000000
-!  NPLAN = 2  NLAYER = 1
-!      S =   0.35000000     MUSPH =   1.00000000   0.00000000     EPSSPH=   5.00000000   0.00000000
-!yzDL 0.0  0.0  0.4
-!yzDR 0.25 0.25 0.3
-!      S =   0.35000000     MUSPH =   1.00000000   0.00000000     EPSSPH=   5.00000000   0.00000000
-!yzDL 0.25 0.25 0.3
-!yzDR 0.25 0.25 0.4
-!    IT  = 1
-! DSLAB       =   0.00000000
-!    MU1   =   1.00000000   0.00000000     EPS1  =   2.00000000   0.00000000
-!    MU2   =   1.00000000   0.00000000     EPS2  =   1.10000000   0.00000000
-!    MU3   =   1.00000000   0.00000000     EPS3  =   7.00000000   0.00000000
-!yzDL 0.0  0.0  0.0
-!yzDR 0.0  0.0  0.0
-!    IT  = 2
-!    MUMED =   1.00000000   0.00000000     EPSMED=   7.00000000   0.00000000
-!  NPLAN = 1  NLAYER = 1
-!      S =   0.25000000     MUSPH =   1.00000000   0.00000000     EPSSPH=   5.00000000   0.00000000
-!yzDL 0.25 0.25 0.3
-!yzDR 0.0  0.0  0.3
-!    IT  = 1
-! DSLAB       =   1.00000000
-!    MU1   =   1.00000000   0.00000000     EPS1  =   7.00000000   0.00000000
-!    MU2   =   1.00000000   0.00000000     EPS2  =   9.00000000   0.00000000
-!    MU3   =   1.00000000   0.00000000     EPS3  =   2.00000000   0.00000000
-!yzDL 0.0  0.0  0.0
-!yzDR 0.0  0.0  0.0
-!    MUEMBL=   1.00000000   0.00000000    EPSEMBL=   1.00000000   0.00000000
-!    MUEMBR=   1.00000000   0.00000000    EPSEMBR=   1.00000000   0.00000000
-!CCCCCCCC-----------> HERE ENDS   THE FIRST  INPUT DATA FILE
-!CCCCCCCC-----------> HERE STARTS THE SECOND INPUT DATA FILE
-!                  ********************************************
-!                *******INPUT FILE FOR BAND STRUCTURE********
-!       ********************************************
-!  KTYPE = 3   KSCAN = 1   KEMB  = 1    LMAX = 4   NCOMP = 4   NUNIT = 6
-!ALPHA =    1.000000  BETA =    1.000000   FAB =   90.000000  RMAX =   16.000000
-! NP =  17  ZINF =   1.00000000  ZSUP =   2.000000000
-! THETA/AK(1) =   0.00000000     FI/AK(2) =   0.00000000   POLAR =S     FEIN =   0.00
-!!ive information for the "NCOMP" components
-!!    IT  = 2
-!    MUMED =   1.00000000   0.00000000     EPSMED=   2.00000000   0.00000000
-!  NPLAN = 2  NLAYER = 1
-!      S =   0.35000000     MUSPH =   1.00000000   0.00000000     EPSSPH=   5.00000000   0.00000000
-!yzDL 0.0  0.0  0.4
-!yzDR 0.25 0.25 0.3
-!      S =   0.35000000     MUSPH =   1.00000000   0.00000000     EPSSPH=   5.00000000   0.00000000
-!yzDL 0.25 0.25 0.3
-!yzDR 0.25 0.25 0.4
-!    IT  = 1
-! DSLAB       =   0.00000000
-!    MU1   =   1.00000000   0.00000000     EPS1  =   2.00000000   0.00000000
-!    MU2   =   1.00000000   0.00000000     EPS2  =   1.10000000   0.00000000
-!    MU3   =   1.00000000   0.00000000     EPS3  =   7.00000000   0.00000000
-!yzDL 0.0  0.0  0.0
-!yzDR 0.0  0.0  0.0
-!    IT  = 2
-!    MUMED =   1.00000000   0.00000000     EPSMED=   7.00000000   0.00000000
-!  NPLAN = 1  NLAYER = 1
-!      S =   0.25000000     MUSPH =   1.00000000   0.00000000     EPSSPH=   5.00000000   0.00000000
-!yzDL 0.25 0.25 0.3
-!yzDR 0.0  0.0  0.3
-!    IT  = 1
-! DSLAB       =   1.00000000
-!    MU1   =   1.00000000   0.00000000     EPS1  =   7.00000000   0.00000000
-!    MU2   =   1.00000000   0.00000000     EPS2  =   9.00000000   0.00000000
-!    MU3   =   1.00000000   0.00000000     EPS3  =   2.00000000   0.00000000
-!yzDL 0.0  0.0  0.0
-!yzDR 0.0  0.0  0.0
-!yzAL 0.0  0.0  3.0
-!CCCCCCCC-----------> HERE ENDS   THE SECOND INPUT DATA FILE
-!CCCCCCCC-----------> HERE STARTS THE FIRST OUTPUT FILE (WRITTEN IN UNIT 6)
-!    ****************************************************
-!    *** OUTPUT: TRANSMITTANCE/REFLECTANCE/ABSORBANCE ***
-!    ****************************************************
-!  K_PARALLEL=     .000000     .000000     S POLARIZATION
-!  COMPONENT NR. 1   TYPE:  PHOTONIC CRYSTAL
-!  MU :   1.00000    .00000 |       1.00000    .00000      1.00000    .00000
-!  EPS:   2.00000    .00000 |       5.00000    .00000      5.00000    .00000
-!    S:                              .35000                 .35000
-!                                 1 UNIT LAYERS
-!  COMPONENT NR. 2   TYPE:  HOMOGENEOUS PLATE
-!  MU :   1.00000    .00000 |    1.00000    .00000 |    1.00000    .00000
-!  EPS:   2.00000    .00000 |    1.10000    .00000 |    7.00000    .00000
-!  COMPONENT NR. 3   TYPE:  PHOTONIC CRYSTAL
-!  MU :   1.00000    .00000 |       1.00000    .00000
-!  EPS:   7.00000    .00000 |       5.00000    .00000
-!    S:                              .25000
-!                                 1 UNIT LAYERS
-!  COMPONENT NR. 4   TYPE:  HOMOGENEOUS PLATE
-!  MU :   1.00000    .00000 |    1.00000    .00000 |    1.00000    .00000
-!  EPS:   7.00000    .00000 |    9.00000    .00000 |    2.00000    .00000
-!  THE SAMPLE CONSISTS OF     32 UNIT SLICES
-!!            PRIMITIVE LATTICE VECTORS
-!            AR1 = (      1.0000       .0000)
-!            AR2 = (       .0000      1.0000)
-!            UNIT VECTORS IN RECIPROCAL SPACE:
-!            B1  = (       .0000      6.2832)
-!            B2  = (     -6.2832       .0000)
-!!  RECIPROCAL VECTORS     LENGTH
-! 1        0    0        .000000E+00
-! 2       -1    0        .628319E+01
-! 3        0   -1        .628319E+01
-! 4        1    0        .628319E+01
-! 5        0    1        .628319E+01
-! 6       -1    1        .888577E+01
-! 7        1   -1        .888577E+01
-! 8       -1   -1        .888577E+01
-! 9        1    1        .888577E+01
-!10        0    2        .125664E+02
-!11        0   -2        .125664E+02
-!12       -2    0        .125664E+02
-!13        2    0        .125664E+02
-!14        2   -1        .140496E+02
-!15       -2    1        .140496E+02
-!16       -1    2        .140496E+02
-!17        1   -2        .140496E+02
-!18       -2   -1        .140496E+02
-!19       -1   -2        .140496E+02
-!20        1    2        .140496E+02
-!21        2    1        .140496E+02
-!!!   FREQUENCY   TRANSMITTANCE  REFLECTANCE   ABSORBANCE
-!-----------------------------------------------------------
-!  .100000E+01   .211294E+00   .788706E+00   .166533E-13
-!  .106250E+01   .940804E+00   .591957E-01  -.371508E-13
-!  .112500E+01   .543944E+00   .456056E+00  -.166755E-12
-!  .118750E+01   .722408E+00   .277592E+00  -.253575E-12
-!  .125000E+01   .718011E+00   .281989E+00  -.344169E-13
-!  .131250E+01   .588369E+00   .411631E+00   .851541E-13
-!  .137500E+01   .359722E-02   .996403E+00   .651701E-13
-!  .143750E+01   .973861E+00   .261393E-01  -.379245E-13
-!  .150000E+01   .544856E+00   .455144E+00   .684452E-13
-!  .156250E+01   .598532E+00   .401468E+00   .255240E-12
-!  .162500E+01   .974029E+00   .259715E-01   .318141E-12
-!  .168750E+01   .774661E+00   .225339E+00   .418499E-12
-!  .175000E+01   .590934E+00   .409066E+00   .173811E-11
-!  .181250E+01   .183498E-13   .100000E+01   .821565E-14
-!  .187500E+01   .781130E-12   .100000E+01   .179856E-13
-!  .193750E+01   .880987E+00   .119013E+00   .511771E-12
-!  .200000E+01   .815268E+00   .184732E+00   .151545E-12
-!CCCCCCCC-----------> HERE ENDS   THE FIRST  OUTPUT FILE (WRITTEN IN UNIT 6)
-!CCCCCCCC-----------> HERE STARTS THE SECOND OUTPUT FILE (WRITTEN IN UNIT 6)
-!    ****************************************************
-!    ************** OUTPUT: BAND STRUCTURE **************
-!    ****************************************************
-!  K_PARALLEL=     .000000     .000000
-!  COMPONENT NR. 1   TYPE:  PHOTONIC CRYSTAL
-!  MU :   1.00000    .00000 |       1.00000    .00000      1.00000    .00000
-!  EPS:   2.00000    .00000 |       5.00000    .00000      5.00000    .00000
-!    S:                              .35000                 .35000
-!                                 1 UNIT LAYERS
-!  COMPONENT NR. 2   TYPE:  HOMOGENEOUS PLATE
-!  MU :   1.00000    .00000 |    1.00000    .00000 |    1.00000    .00000
-!  EPS:   2.00000    .00000 |    1.10000    .00000 |    7.00000    .00000
-!  COMPONENT NR. 3   TYPE:  PHOTONIC CRYSTAL
-!  MU :   1.00000    .00000 |       1.00000    .00000
-!  EPS:   7.00000    .00000 |       5.00000    .00000
-!    S:                              .25000
-!                                 1 UNIT LAYERS
-!  COMPONENT NR. 4   TYPE:  HOMOGENEOUS PLATE
-!  MU :   1.00000    .00000 |    1.00000    .00000 |    1.00000    .00000
-!  EPS:   7.00000    .00000 |    9.00000    .00000 |    2.00000    .00000
-!!            PRIMITIVE LATTICE VECTORS
-!            AR1 = (      1.0000       .0000)
-!            AR2 = (       .0000      1.0000)
-!            UNIT VECTORS IN RECIPROCAL SPACE:
-!            B1  = (       .0000      6.2832)
-!            B2  = (     -6.2832       .0000)
-!!  RECIPROCAL VECTORS     LENGTH
-! 1        0    0        .000000E+00
-! 2       -1    0        .628319E+01
-! 3        0   -1        .628319E+01
-! 4        1    0        .628319E+01
-! 5        0    1        .628319E+01
-! 6       -1    1        .888577E+01
-! 7        1   -1        .888577E+01
-! 8       -1   -1        .888577E+01
-! 9        1    1        .888577E+01
-!10        0    2        .125664E+02
-!11        0   -2        .125664E+02
-!12       -2    0        .125664E+02
-!13        2    0        .125664E+02
-!14        2   -1        .140496E+02
-!15       -2    1        .140496E+02
-!16       -1    2        .140496E+02
-!17        1   -2        .140496E+02
-!18       -2   -1        .140496E+02
-!19       -1   -2        .140496E+02
-!20        1    2        .140496E+02
-!21        2    1        .140496E+02
-!!!FREQUENCY       NORMALIZED K_Z
-!---------       --------------
-!.1000E+01    .1121E+00 -.1121E+00  .1121E+00 -.1121E+00
-!.1063E+01    .2791E+00 -.2791E+00  .2791E+00 -.2791E+00
-!.1125E+01    .4263E+00  .4263E+00 -.4263E+00 -.4263E+00
-!.1188E+01    .5695E+00 -.5695E+00  .5695E+00 -.5695E+00
-!.1250E+01    .7115E+00 -.7115E+00  .7115E+00 -.7115E+00
-!.1313E+01    .8543E+00  .8543E+00 -.8543E+00 -.8543E+00
-!.1375E+01    .1000E+01 -.1000E+01
-!             .3456E-01 -.3456E-01
-!.1438E+01   -.8735E+00 -.8735E+00  .8735E+00  .8735E+00
-!.1500E+01   -.7292E+00 -.7292E+00  .7292E+00  .7292E+00
-!.1563E+01   -.5853E+00 -.5853E+00  .5853E+00  .5853E+00
-!.1625E+01   -.4388E+00  .4388E+00 -.4388E+00  .4388E+00
-!.1688E+01   -.2849E+00 -.2849E+00  .2849E+00  .2849E+00
-!.1750E+01   -.9137E-01 -.9137E-01  .9137E-01  .9137E-01
-!.1813E+01    .3435E-11 -.7213E-12
-!             .1608E+00 -.1608E+00
-!.1875E+01   -.4845E-11  .3361E-11
-!             .1455E+00 -.1455E+00
-!.1938E+01    .1511E+00 -.1511E+00  .1511E+00 -.1511E+00
-!.2000E+01    .3269E+00  .3269E+00 -.3269E+00 -.3269E+00
-!CCCCCCCC-----------> HERE ENDS THE SECOND OUTPUT FILE (WRITTEN IN UNIT 6)
-!CCCCCCCC-----------> THIS IS THE FIRST LINE OF THE FILE
-                                                                            ****
       END module
 
       PROGRAM MULTEM
