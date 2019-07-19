@@ -484,7 +484,7 @@ C
       NTA(I)=NA
       NTB(I)=NB
       VECMOD(I)=SQRT(VMOD2)
-      IF(NA.eq.0.AND.NB.eq.0) GO TO 11
+      IF(NA==0.AND.NB==0) GO TO 11
       I=I+1
       IF(I>ID) GO TO 13
       NTA(I)=-NA
@@ -727,7 +727,7 @@ C
       IAEV=LMXOD
       DO 1 LA=1,LMAX
       DO 1 MA=-LA,LA
-      IF(MOD((LA+MA),2).eq.0) THEN
+      IF(MOD((LA+MA),2)==0) THEN
       IAEV=IAEV+1
       IA=IAEV
                               ELSE
@@ -750,7 +750,7 @@ C
       IBEV=LMXOD
       DO 2 LB=1,LMAX
       DO 2 MB=-LB,LB
-      IF(MOD((LB+MB),2).eq.0) THEN
+      IF(MOD((LB+MB),2)==0) THEN
       IBEV=IBEV+1
       IB=IBEV
                               ELSE
@@ -763,7 +763,7 @@ C
       BETA2 =SQRT(DFLOAT((LB+MB)*(LB-MB+1)))/2.D0
       LTT=LA+MA+LB+MB
           IF(MOD(LTT,2)/=0)           then
-             IF(MOD((LA+MA),2).eq.0)       then
+             IF(MOD((LA+MA),2)==0)       then
              Z1=CEVEN(LB,MB+1,LA-1,MA+1,LMEVEN,XEVEN)
              Z2=CEVEN(LB,MB-1,LA-1,MA-1,LMEVEN,XEVEN)
              Z3=CODD (LB,MB  ,LA-1,MA  ,LMODD ,XODD )
@@ -785,7 +785,7 @@ C
              XXMAT2(IA,IB)=-TH(LA+1)*OMEGA2
                                            end if
                                         else
-             IF(MOD((LA+MA),2).eq.0)       then
+             IF(MOD((LA+MA),2)==0)       then
              Z1=CODD (LB,MB-1,LA,MA-1,LMODD ,XODD )
              Z2=CODD (LB,MB+1,LA,MA+1,LMODD ,XODD )
              Z3=CEVEN(LB,MB  ,LA,MA  ,LMEVEN,XEVEN)
@@ -1534,8 +1534,8 @@ C
       REAL(dp)S
 C     ------------------------------------------------------------------
 C
-      IF (M.eq.0) GO TO 200
-      IF (IGH.eq.LOW) GO TO 120
+      IF (M==0) GO TO 200
+      IF (IGH==LOW) GO TO 120
 C
       DO 110 I = LOW, IGH
          S = SCALE(I)
@@ -1555,7 +1555,7 @@ C                IGH+1 STEP 1 UNTIL N DO -- **********
          IF (I >= LOW .AND. I <= IGH) GO TO 140
          IF (I < LOW) I = LOW - II
          K = SCALE(I)
-         IF (K .eq. I) GO TO 140
+         IF (K == I) GO TO 140
 C
          DO 130 J = 1, M
             S = ZR(I,J)
@@ -1641,7 +1641,7 @@ C
       GO TO 100
 C     ******** IN-LINE PROCEDURE FOR ROW AND COLUMN EXCHANGE ********
    20 SCALE(M) = J
-      IF (J .eq. M) GO TO 50
+      IF (J == M) GO TO 50
 C
       DO 30 I = 1, L
          F = AR(I,J)
@@ -1664,14 +1664,14 @@ C
    50 GO TO (80,130), IEXC
 C     ********** SEARCH FOR ROWS ISOLATING AN EIGENVALUE
 C                AND PUSH THEM DOWN **********
-   80 IF (L .eq. 1) GO TO 280
+   80 IF (L == 1) GO TO 280
       L = L - 1
 C     ********** FOR J=L STEP -1 UNTIL 1 DO -- **********
   100 DO 120 JJ = 1, L
          J = L + 1 - JJ
 C
          DO 110 I = 1, L
-            IF (I .eq. J) GO TO 110
+            IF (I == J) GO TO 110
             IF (AR(J,I) /= 0.0D0.OR. AI(J,I) /=0.0D0) GO TO 120
   110    CONTINUE
 C
@@ -1688,7 +1688,7 @@ C
   140 DO 170 J = K, L
 C
          DO 150 I = K, L
-            IF (I .eq. J) GO TO 150
+            IF (I == J) GO TO 150
             IF (AR(I,J) /= 0.0D0 .OR. AI(I,J) /= 0.0D0) GO TO 170
   150    CONTINUE
 C
@@ -1707,12 +1707,12 @@ C
          R = 0.0D0
 C
          DO 200 J = K, L
-            IF (J .eq. I) GO TO 200
+            IF (J == I) GO TO 200
             C = C + ABS(AR(J,I)) + ABS(AI(J,I))
             R = R + ABS(AR(I,J)) + ABS(AI(I,J))
   200    CONTINUE
 C     ********** GUARD AGAINST ZERO C OR R DUE TO UNDERFLOW **********
-         IF (C .eq. 0.0D0 .OR. R .eq. 0.0D0) GO TO 270
+         IF (C == 0.0D0 .OR. R == 0.0D0) GO TO 270
          G = R / RADIX
          F = 1.0D0
          S = C + R
@@ -1825,10 +1825,10 @@ C
       CALL CBAL(NDIM,N,AR,AI,LOW,IGH,SCALE)
       CALL COMHES(NDIM,N,LOW,IGH,AR,AI,INT)
       CALL COMLR2(NDIM,N,LOW,IGH,INT,AR,AI,EVR,EVI,VECR,VECI,IERR)
-      IF(IERR.eq.0) GO TO 2
+      IF(IERR==0) GO TO 2
 !     CALL ERRCHK(54,54HIN CNAA  , SOME EIGENVALUE NOT FOUND IN 30 ITERA
 !    1TIONS.)
-      IF(IERR.eq.N) GO TO 20
+      IF(IERR==N) GO TO 20
       NMIERR = N - IERR
       DO 1 I=1,NMIERR
       IERRPI = IERR + I
@@ -1911,7 +1911,7 @@ C
   100    CONTINUE
 C
          INT(M) = I
-         IF (I .eq. M) GO TO 130
+         IF (I == M) GO TO 130
 C     ********** INTERCHANGE ROWS AND COLUMNS OF AR AND AI **********
          DO 110 J = MM1, N
             YR = AR(I,J)
@@ -1931,13 +1931,13 @@ C
             AI(J,M) = YI
   120    CONTINUE
 C     ********** END INTERCHANGE **********
-  130    IF (XR .eq. 0.0D0 .AND. XI .eq. 0.0D0) GO TO 180
+  130    IF (XR == 0.0D0 .AND. XI == 0.0D0) GO TO 180
          MP1 = M + 1
 C
          DO 160 I = MP1, IGH
             YR = AR(I,MM1)
             YI = AI(I,MM1)
-            IF (YR .eq. 0.0D0 .AND. YI .eq. 0.0D0) GO TO 160
+            IF (YR == 0.0D0 .AND. YI == 0.0D0) GO TO 160
             Z3 = DCMPLX(YR,YI) / DCMPLX(XR,XI)
             YR = DREAL(Z3)
             YI = DIMAG (Z3)
@@ -2038,7 +2038,7 @@ C
          DO 100 J = 1, N
             ZR(I,J) = 0.0_dp
             ZI(I,J) = 0.0_dp
-            IF (I .eq. J) ZR(I,J) = 1.0_dp
+            IF (I == J) ZR(I,J) = 1.0_dp
   100 CONTINUE
 C     ********** FORM THE MATRIX OF ACCUMULATED TRANSFORMATIONS
 C                FROM THE INFORMATION LEFT BY COMHES **********
@@ -2055,7 +2055,7 @@ C
   120    CONTINUE
 C
          J = INT(I)
-         IF (I .eq. J) GO TO 160
+         IF (I == J) GO TO 160
 C
          DO 140 K = I, IGH
             ZR(I,K) = ZR(J,K)
@@ -2084,20 +2084,20 @@ C     ********** LOOK FOR SINGLE SMALL SUB-DIAGONAL ELEMENT
 C                FOR L=EN STEP -1 UNTIL LOW DO -- **********
   240 DO 260 LL = LOW, EN
          L = EN + LOW - LL
-         IF (L .eq. LOW) GO TO 300
+         IF (L == LOW) GO TO 300
          IF (ABS(HR(L,L-1)) + ABS(HI(L,L-1)) <=
      X      MACHEP * (ABS(HR(L-1,L-1)) + ABS(HI(L-1,L-1))
      X             + ABS(HR(L,L)) + ABS(HI(L,L)))) GO TO 300
   260 CONTINUE
 C     ********** FORM SHIFT **********
-  300 IF (L .eq. EN) GO TO 660
-      IF (ITS .eq. 30) GO TO 1000
-      IF (ITS .eq. 10 .OR. ITS .eq. 20) GO TO 320
+  300 IF (L == EN) GO TO 660
+      IF (ITS == 30) GO TO 1000
+      IF (ITS == 10 .OR. ITS == 20) GO TO 320
       SR = HR(EN,EN)
       SI = HI(EN,EN)
       XR = HR(ENM1,EN) * HR(EN,ENM1) - HI(ENM1,EN) * HI(EN,ENM1)
       XI = HR(ENM1,EN) * HI(EN,ENM1) + HI(ENM1,EN) * HR(EN,ENM1)
-      IF (XR .eq. 0.0_dp .AND. XI .eq. 0.0_dp) GO TO 340
+      IF (XR == 0.0_dp .AND. XI == 0.0_dp) GO TO 340
       YR = (HR(ENM1,ENM1) - SR) / 2.0_dp
       YI = (HI(ENM1,ENM1) - SI) / 2.0_dp
       Z3 = SQRT(DCMPLX(YR**2-YI**2+XR,2.0_dp*YR*YI+XI))
@@ -2130,7 +2130,7 @@ C                SUB-DIAGONAL ELEMENTS **********
 C     ********** FOR M=EN-1 STEP -1 UNTIL L DO -- **********
       DO 380 MM = L, ENM1
          M = ENM1 + L - MM
-         IF (M .eq. L) GO TO 420
+         IF (M == L) GO TO 420
          YI = YR
          YR = ABS(HR(M,M-1)) + ABS(HI(M,M-1))
          XI = ZZR
@@ -2233,7 +2233,7 @@ C
   720 CONTINUE
 C
       HR(1,1) = NORM
-      IF (N .eq. 1 .OR. NORM .eq. 0.0D0) GO TO 1001
+      IF (N == 1 .OR. NORM == 0.0D0) GO TO 1001
 C     ********** FOR EN=N STEP -1 UNTIL 2 DO -- **********
       DO 800 NN = 2, N
          EN = N + 2 - NN
@@ -2245,7 +2245,7 @@ C     ********** FOR I=EN-1 STEP -1 UNTIL 1 DO -- **********
             I = EN - II
             ZZR = HR(I,EN)
             ZZI = HI(I,EN)
-            IF (I .eq. ENM1) GO TO 760
+            IF (I == ENM1) GO TO 760
             IP1 = I + 1
 C
             DO 740 J = IP1, ENM1
@@ -2255,7 +2255,7 @@ C
 C
   760       YR = XR - WR(I)
             YI = XI - WI(I)
-            IF (YR .eq. 0.0D0 .AND. YI .eq. 0.0D0) YR = MACHEP * NORM
+            IF (YR == 0.0D0 .AND. YI == 0.0D0) YR = MACHEP * NORM
             Z3 = DCMPLX(ZZR,ZZI) / DCMPLX(YR,YI)
             HR(I,EN) = DREAL(Z3)
             HI(I,EN) = DIMAG(Z3)
@@ -2348,15 +2348,15 @@ C
 C     IF ERRCHK WAS CALLED WITH NEGATIVE CHARACTER COUNT, SET FATAL FLAG
       IF (NCHARS<0) NF = -1
 C     IF MESSAGES ARE TO BE SUPPRESSED, RETURN
-      IF (NF.eq.0) RETURN
+      IF (NF==0) RETURN
 C     IF CHARACTER COUNT IS INVALID, STOP
-      IF (NCHARS.eq.0) PRINT 5
+      IF (NCHARS==0) PRINT 5
     5 FORMAT(/31H ERRCHK WAS CALLED INCORRECTLY.)
-      IF (NCHARS.eq.0) STOP
+      IF (NCHARS==0) STOP
 C     PRINT MESSAGE
       CALL ERRPRT(IABS(NCHARS),NARRAY)
 C     IF LAST MESSAGE, SAY SO
-      IF (NF.eq.1) PRINT 10
+      IF (NF==1) PRINT 10
    10 FORMAT (30H ERRCHK MESSAGE LIMIT REACHED.)
 C     PRINT TRACE-BACK IF ASKED TO
 C     IF ((NT>0).OR.(NF<0)) CALL SYSTEM ROUTINE FOR TRACEBACK
@@ -3106,7 +3106,7 @@ C     ------------------------------------------------------------------
       DO 2 L=1,LMAX
       DO 2 M=-L,L
       II=II+1
-      IF(MOD((L+M),2).eq.0)  THEN
+      IF(MOD((L+M),2)==0)  THEN
       IEV=IEV+1
       BMEL1(IEV)=TH(L+1)*AH(K2,II+1)
       BMEL2(IEV)=TE(L+1)*AE(K2,II+1)
@@ -3151,8 +3151,8 @@ C     ------------------------------------------------------------------
     5 CONTINUE
       DO 7 K1=1,2
       IGK1=IGK1+1
-      IF(ISIGN1.eq.1) QI  (IGK1,IGK2)=LAMH(K1)+LAME(K1)
-      IF(ISIGN1.eq.2) QIII(IGK1,IGK2)=LAMH(K1)+LAME(K1)
+      IF(ISIGN1==1) QI  (IGK1,IGK2)=LAMH(K1)+LAME(K1)
+      IF(ISIGN1==2) QIII(IGK1,IGK2)=LAMH(K1)+LAME(K1)
     7 CONTINUE
     9 CONTINUE
     4 CONTINUE
@@ -3301,7 +3301,7 @@ C
       DO 8 II=1,IGK2M
 C*****THE IF-STRUCTURE  WHICH FOLLOWS  CAN BE  OMITTED  IF THE ACCURACY
 C*****'MACHEP' OF THE SUBROUTINE COMLR2 IS CHOSEN GREATER THAN 2**(-47)
-      IF((RR(II).eq.0.D0).AND.(RI(II).eq.0.D0)) THEN
+      IF((RR(II)==0.D0).AND.(RI(II)==0.D0)) THEN
       RR(II)=1.D-20
       RI(II)=1.D-20
       ENDIF
@@ -3926,8 +3926,8 @@ C
       ELSE
       WRITE(6,223)
       ENDIF
-      IF(KTYPE.eq.2) WRITE(6,207) AQ(1),AQ(2),POLAR
-      IF(KTYPE.eq.3) WRITE(6,225) AQ(1),AQ(2)
+      IF(KTYPE==2) WRITE(6,207) AQ(1),AQ(2),POLAR
+      IF(KTYPE==3) WRITE(6,225) AQ(1),AQ(2)
                              ELSE
       READ(10,204) THETA,FI,POLAR,FEIN
       WRITE(6,208) THETA,FI,POLAR
@@ -3940,7 +3940,7 @@ C
       IF(IT(ICOMP)<=0.OR.IT(ICOMP)>2)
      &                    STOP 'ILLEGAL COMPONENT TYPE'
       WRITE(6,209) ICOMP,TEXT1(IT(ICOMP))
-      IF(IT(ICOMP).eq.1) THEN
+      IF(IT(ICOMP)==1) THEN
       READ(10,204) D(ICOMP)
       READ(10,205) MU1(ICOMP),EPS1(ICOMP),MU2(ICOMP),EPS2(ICOMP),
      &             MU3(ICOMP),EPS3(ICOMP)
@@ -3969,7 +3969,7 @@ C
     3 CONTINUE
                          D1=SQRT(MU1(1)    *EPS1(1))
                          D2=SQRT(MU1(NCOMP)*EPS1(NCOMP))
-      IF(IT(NCOMP).eq.1) D2=SQRT(MU3(NCOMP)*EPS3(NCOMP))
+      IF(IT(NCOMP)==1) D2=SQRT(MU3(NCOMP)*EPS3(NCOMP))
       IF(DIMAG(D1)/=0.D0) THEN
       WRITE(6,227)
       STOP
@@ -3980,7 +3980,7 @@ C
       ENDIF
       IF(KTYPE/=3) THEN
       WRITE(6,221) 2**(NUNIT-1)
-      IF(KEMB.eq.1) THEN
+      IF(KEMB==1) THEN
       READ(10,205) MUEMBL,EPSEMBL
       READ(10,205) MUEMBR,EPSEMBR
       D1=SQRT(MUEMBL*EPSEMBL)
@@ -4023,14 +4023,14 @@ C
       ZSTEP=(ZSUP-ZINF)/DFLOAT(NP-1)
       ZVAL=ZINF-ZSTEP
       IF(KTYPE<3) THEN
-      IF(KSCAN.eq.1) WRITE(6,216)
-      IF(KSCAN.eq.2) WRITE(6,217)
+      IF(KSCAN==1) WRITE(6,216)
+      IF(KSCAN==2) WRITE(6,217)
       IF(POLAR/='S '.AND.POLAR/='P ') STOP 'ILLEGAL POLARIZATION'
                      ELSE
-      IF(KSCAN.eq.1) WRITE(6,218)
-      IF(KSCAN.eq.2) WRITE(6,219)
+      IF(KSCAN==1) WRITE(6,218)
+      IF(KSCAN==2) WRITE(6,219)
                      ENDIF
-      IF(POLAR.eq.'P ') THEN
+      IF(POLAR=='P ') THEN
       EIN(1)=CONE
       EIN(2)=CZERO
                         ELSE
@@ -4039,11 +4039,11 @@ C
                         END IF
       DO 1 N=1,NP   !****** SCANNING OVER FREQUENCIES/WAVELENGTHS ******
       ZVAL=ZVAL+ZSTEP
-      IF(KSCAN.eq.1) KAPPA0=DCMPLX(ZVAL,EPSILON)
-      IF(KSCAN.eq.2) KAPPA0=DCMPLX(2.D0*PI/ZVAL,EPSILON)
+      IF(KSCAN==1) KAPPA0=DCMPLX(ZVAL,EPSILON)
+      IF(KSCAN==2) KAPPA0=DCMPLX(2.D0*PI/ZVAL,EPSILON)
       KAPIN =KAPPA0*D1
       KAPOUT=KAPPA0*D2
-                                             IF(KTYPE.eq.1) THEN
+                                             IF(KTYPE==1) THEN
                            AK(1)=DREAL(KAPIN)*SIN(THETA)*COS(FI)
                            AK(2)=DREAL(KAPIN)*SIN(THETA)*SIN(FI)
                DO 50 I=1,IGKMAX
@@ -4072,7 +4072,7 @@ C
 C
 C****** CONSTRUCT THE TRANSFER MATRIX OF THE UNIT SLICE ******
 C
-      IF(IT(1).eq.1) THEN
+      IF(IT(1)==1) THEN
       KAPPAL =SQRT(MU1(1)*EPS1(1))*KAPPA0
       KAPPASL=SQRT(MU2(1)*EPS2(1))*KAPPA0
       KAPPAR =SQRT(MU3(1)*EPS3(1))*KAPPA0
@@ -4113,7 +4113,7 @@ C
                       ENDIF
                                                     IF(NCOMP>=2) THEN
       DO 4 ICOMP=2,NCOMP
-      IF(IT(ICOMP).eq.1) THEN
+      IF(IT(ICOMP)==1) THEN
       KAPPAL =SQRT(MU1(ICOMP)*EPS1(ICOMP))*KAPPA0
       KAPPASL=SQRT(MU2(ICOMP)*EPS2(ICOMP))*KAPPA0
       KAPPAR =SQRT(MU3(ICOMP)*EPS3(ICOMP))*KAPPA0
@@ -4174,14 +4174,14 @@ C****** THE UNIT SLICE IS DEFINED. THIS CAN BE REPEATED BY THE ******
 C****** DOUBLING-LAYER  TECHNIQUE, INTERFACES CAN BE ADDED AND ******
 C****** REFLECTIVITY/TRANSMITTANCE/ABSORBANCE ARE CALCULATED.  ******
 C
-             IF(NUNIT.eq.1) GO TO 30
+             IF(NUNIT==1) GO TO 30
          IF(ABS(MLAST-MFIRST)/=0.D0.OR.ABS(ELAST-EFIRST)/=0.D0)
      &       STOP 'IMPROPER MATCHING OF SUCCESSIVE HOST MEDIA'
          DO 9 IU=1,NUNIT-1
              CALL PAIR(IGKMAX,QIL,QIIL,QIIIL,QIVL,QIL,QIIL,QIIIL,QIVL)
     9        CONTINUE
    30        CONTINUE
-             IF(KEMB.eq.1) THEN
+             IF(KEMB==1) THEN
              CALL HOSLAB(IGMAX,KAPR,(KAPR+KAPOUT)/2.D0,KAPOUT,AK,G,VEC0,
      &                   VEC0,0.D0,QIR,QIIR,QIIIR,QIVR,EMACH)
          CALL PAIR(IGKMAX,QIL,QIIL,QIIIL,QIVL,QIR,QIIR,QIIIR,QIVR)
