@@ -40,8 +40,7 @@ C=======================================================================
 
 C=======================================================================
       SUBROUTINE SCAT(IGMAX,ZVAL,AK,G,KAPIN,KAPOUT,EINCID,QI,QIII)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C     ------------------------------------------------------------------
 C     THIS SUBROUTINE CALCULATES THE REFLECTIVITY, TRANSMITTANCE AND
 C     ABSORBANCE OF A FINITE SLAB, CHARACTERIZED BY TRANSMISSION AND
@@ -110,8 +109,7 @@ C
 C======================================================================
       SUBROUTINE HOSLAB(IGMAX,KAPPA1,KAPPA2,KAPPA3,AK,G,DL,DR,D,
      &                  QI,QII,QIII,QIV,EMACH)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C-----------------------------------------------------------------------
 C     THIS SUBROUTINE CALCULATES THE  Q-MATRICES FOR A HOMOGENEOUS
 C     PLATE  '2' OF THICKNESS 'D', HAVING THE SEMI-INFINITE MEDIUM
@@ -146,9 +144,7 @@ C
 C  .. LOCAL ARRAYS ..
 C
       COMPLEX(dp) T(4,2),R(4,2),X(4),P(4,2)
-C
 C     -----------------------------------------------------------------
-C
       IGKMAX=2*IGMAX
       DO 1 IA=1,IGKMAX
       DO 1 IB=1,IGKMAX
@@ -221,8 +217,7 @@ C
       END subroutine
 C=======================================================================
       SUBROUTINE DLMKG(LMAX,A0,GK,SIGNUS,KAPPA,DLME,DLMH,EMACH)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C     ------------------------------------------------------------------
 C     THIS SUBROUTINE CALCULATES THE COEFFICIENTS DLM(KG)
 C     ------------------------------------------------------------------
@@ -253,19 +248,32 @@ C  .. LOCAL ARRAYS ..
 C
       COMPLEX(dp) YLM(LM1SQD)
 C
+C  .. INTRINSIC FUNCTIONS ..
+C
+C      INTRINSIC ABS,DCMPLX,DFLOAT,SQRT,DREAL
+C
+C  .. EXTERNAL ROUTINES ..
+C
+C     EXTERNAL SPHRM4
+C
+C  .. DATA STATEMENTS .
+C
+      DATA CZERO/(0.0d0,0.0d0)/,CONE/(1.0d0,0.0d0)/,CI/(0.0d0,1.0d0)/
+      DATA PI/3.14159265358979D0/
 C     ------------------------------------------------------------------
 C
       IF(LMAX>LMAXD)  GO TO 10
       AKG1=DREAL(GK(1))
       AKG2=DREAL(GK(2))
-      DO 1 K=1,2
-      DLME(K,1)=CZERO
-    1 DLMH(K,1)=CZERO
+      DO K=1,2
+        DLME(K,1)=CZERO
+        DLMH(K,1)=CZERO
+      end do
       IF(ABS(GK(3))<EMACH)   THEN
       WRITE(7,101)
       STOP
       ENDIF
-      C0=2.D0*PI/(KAPPA*A0*GK(3)*SIGNUS)
+      C0=2.0_dp*PI/(KAPPA*A0*GK(3)*SIGNUS)
       AKPAR=SQRT(AKG1*AKG1+AKG2*AKG2)
       CT=GK(3)/KAPPA
       ST=AKPAR/KAPPA
@@ -274,34 +282,35 @@ C
       CALL SPHRM4(YLM,CT,ST,CF,LMAX)
       II=1
       CC=CONE
-      DO 2 L=1,LMAX
-      CC=CC/CI
-      COEF=C0*CC/SQRT(DFLOAT(L*(L+1)))
-      DO 2 M=-L,L
-      II=II+1
-      ALPHA=SQRT(DFLOAT((L-M)*(L+M+1)))/2.D0
-      BETA =SQRT(DFLOAT((L+M)*(L-M+1)))/2.D0
-      IF(ABS(M+1)<=L)  then
-      I=L*L+L+M+2
-      Z1=YLM(I)
-                         else
-      Z1=CZERO
-                         end if
-      IF(ABS(M-1)<=L)  then
-      I=L*L+L+M
-      Z2=YLM(I)
-                         else
-      Z2=CZERO
-                         end if
-      I=L*L+L+M+1
-      Z3=YLM(I)
-      DLMH(1,II)=COEF*(BETA*CT*CF*Z2-DFLOAT(M)*ST*Z3
-     &         +ALPHA*CT*CONJG(CF)*Z1)
-      DLMH(2,II)=COEF*CI*(BETA*CF*Z2-ALPHA*CONJG(CF)*Z1)
-      DLME(1,II)=COEF*CI*(BETA*CF*Z2-ALPHA*CONJG(CF)*Z1)
-      DLME(2,II)=-COEF*(BETA*CT*CF*Z2-DFLOAT(M)*ST*Z3
-     &         +ALPHA*CT*CONJG(CF)*Z1)
-    2 CONTINUE
+      DO L=1,LMAX
+        CC=CC/CI
+        COEF=C0*CC/SQRT(DFLOAT(L*(L+1)))
+        DO M=-L,L
+          II=II+1
+          ALPHA=SQRT(DFLOAT((L-M)*(L+M+1)))/2.0_dp
+          BETA =SQRT(DFLOAT((L+M)*(L-M+1)))/2.0_dp
+          if(ABS(M+1)<=L)  then
+            I=L*L+L+M+2
+            Z1=YLM(I)
+          else
+            Z1=CZERO
+          end if
+          if(ABS(M-1)<=L)  then
+            I=L*L+L+M
+            Z2=YLM(I)
+          else
+            Z2=CZERO
+          end if
+          I=L*L+L+M+1
+          Z3=YLM(I)
+          DLMH(1,II)=COEF*(BETA*CT*CF*Z2-DFLOAT(M)*ST*Z3
+     &             +ALPHA*CT*CONJG(CF)*Z1)
+          DLMH(2,II)=COEF*CI*(BETA*CF*Z2-ALPHA*CONJG(CF)*Z1)
+          DLME(1,II)=COEF*CI*(BETA*CF*Z2-ALPHA*CONJG(CF)*Z1)
+          DLME(2,II)=-COEF*(BETA*CT*CF*Z2-DFLOAT(M)*ST*Z3
+     &             +ALPHA*CT*CONJG(CF)*Z1)
+        end do
+      end do
       RETURN
    10 WRITE(6,100) LMAX,LMAXD
       STOP
@@ -317,8 +326,7 @@ C=======================================================================
 C=======================================================================
 C=======================================================================
       SUBROUTINE ELMGEN(ELM,NELMD,LMAX)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C     ------------------------------------------------------------------
 C     ROUTINE TO TABULATE THE CLEBSCH-GORDON TYPE COEFFICIENTS ELM,  FOR
 C     USE WITH THE SUBROUTINE XMAT. THE NON-ZERO ELM ARE TABULATED FIRST
@@ -339,7 +347,21 @@ C
       INTEGER K,II,LL,IL2,L2,M2,I2,IL3,L3,M3,I3,LA1,LB1,LA11,LB11,M1
       INTEGER L11,L1,L
       REAL(dp)PI,FOURPI
+C
+C ..   EXTERNAL FUNCTION  ..
+C
+C     REAL(dp) BLM
+C     EXTERNAL BLM
+C
+C ..  INTRINSIC FUNCTIONS  ..
+C
+      INTRINSIC MAX0,IABS
+C
+C ..  DATA STATEMENTS  ..
+C
+      DATA PI/3.14159265358979D0/
 C     ------------------------------------------------------------------
+C
       FOURPI=4.D0*PI
       K=1
       II=0
@@ -372,8 +394,7 @@ C     ------------------------------------------------------------------
       END subroutine
 C=======================================================================
       SUBROUTINE LAT2D(A,B,RMAX,IMAX,ID,NTA,NTB,VECMOD)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C     --------------------------------------------------------------
 C     GIVEN A TWO DIMENSIONAL BRAVAIS LATTICE WITH PRIMITIVE VECTORS
 C     (A(1),A(2)) , (B(1),B(2)) , DEFINED SO THAT 'B' IS LONGER THAN
@@ -533,8 +554,7 @@ C
       END subroutine
 C=======================================================================
       SUBROUTINE PLW(KAPPA,GK,LMAX,AE,AH)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C     ------------------------------------------------------------------
 C     THIS ROUTINE CALCULATES THE EXPANSION COEFFICIENTS 'AE,AH' OF AN
 C     INCIDENT PLANE ELECTROMAGNETIC WAVE OF WAVE VECTOR  'KAPPA' WITH
@@ -564,7 +584,21 @@ C
 C ..  LOCAL ARRAYS  ..
 C
       COMPLEX(dp) YLM(LM1SQD)
+C
+C ..  INTRINSIC FUNCTIONS  ..
+C
+C      INTRINSIC ABS,DCMPLX,CSQRT,DFLOAT,SQRT,DREAL
+C
+C ..  EXTERNAL ROUTINES  ..
+C
+C     EXTERNAL SPHRM4
+C
+C ..  DATA STATEMENTS  ..
+C
+      DATA CZERO/(0.D0,0.D0)/,CONE/(1.D0,0.D0)/,CI/(0.D0,1.D0)/
+      DATA PI/3.14159265358979D0/
 C-----------------------------------------------------------------------
+C
       IF(LMAX>LMAXD)  GO TO 10
       AKG1=DREAL(GK(1))
       AKG2=DREAL(GK(2))
@@ -619,8 +653,7 @@ C-----------------------------------------------------------------------
       END subroutine
 C=======================================================================
       SUBROUTINE SETUP(LMAX,XEVEN,XODD,TE,TH,XXMAT1,XXMAT2)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C     ------------------------------------------------------------------
 C     THIS SUBROUTINE CONSTRUCTS THE SECULAR MATRIX
 C     ------------------------------------------------------------------
@@ -764,8 +797,7 @@ C
       END subroutine
 C=======================================================================
       SUBROUTINE SPHRM4(YLM,CT,ST,CF,LMAX)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C     -----------------------------------------------------------------
 C     GIVEN  CT=COS(THETA),  ST=SIN(THETA),  AND CF=EXP(I*FI), THIS
 C     SUBROUTINE  CALCULATES  ALL THE  YLM(THETA,FI) UP TO  L=LMAX.
@@ -866,8 +898,7 @@ C****** YL(M+1) IS CALCULATED                         ******
 C=======================================================================
 C=======================================================================
       SUBROUTINE XMAT(XODD,XEVEN,LMAX,KAPPA,AK,ELM,EMACH)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C     ------------------------------------------------------------------
 C     XMAT CALCULATES THE MATRIX DESCRIBING MULTIPLE SCATERING  WITHIN
 C     A  LAYER, RETURNING  IT AS :  XODD,  CORRESPONDING  TO  ODD  L+M,
@@ -1327,8 +1358,7 @@ C
       END subroutine
 C=======================================================================
       SUBROUTINE ZGE(A,INT,N,NC,EMACH)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C     ------------------------------------------------------------------
 C     ZGE IS A STANDARD SUBROUTINE TO PERFORM GAUSSIAN ELIMINATION ON
 C     A NC*NC MATRIX 'A' PRIOR  TO INVERSION, DETAILS STORED IN 'INT'
@@ -1381,8 +1411,7 @@ C
       END subroutine
 C=======================================================================
       SUBROUTINE ZSU(A,INT,X,N,NC,EMACH)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C     ------------------------------------------------------------------
 C     ZSU  IS  A STANDARD BACK-SUBSTITUTION  SUBROUTINE  USING THE
 C     OUTPUT OF ZGE TO CALCULATE  A-INVERSE TIMES X, RETURNED IN X
@@ -1433,8 +1462,7 @@ C
       END subroutine
 C=======================================================================
       SUBROUTINE CBABK2(NM,N,LOW,IGH,SCALE,M,ZR,ZI)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C     ------------------------------------------------------------------
 C     THIS SUBROUTINE FORMS THE EIGENVECTORS OF A COMPLEX GENERAL
 C     MATRIX BY BACK TRANSFORMING THOSE OF THE CORRESPONDING
@@ -1516,8 +1544,7 @@ C
       END subroutine
 C=======================================================================
       SUBROUTINE CBAL(NM,N,AR,AI,LOW,IGH,SCALE)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C     ------------------------------------------------------------------
 C     THIS SUBROUTINE BALANCES A COMPLEX MATRIX AND ISOLATES
 C     EIGENVALUES WHENEVER POSSIBLE.
@@ -1695,8 +1722,7 @@ C
       END subroutine
 C=======================================================================
       SUBROUTINE CNAA(NDIM,N,AR,AI,EVR,EVI,VECR,VECI,IERR)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C     ------------------------------------------------------------------
 C     'EISPACK'  IS A  COLLECTION  OF CODES FOR  SOLVING  THE ALGEBRAIC
 C     EIGENVALUE  PROBLEM.  THE ORIGINAL  ALGOL  CODES WERE  WRITTEN BY
@@ -1790,8 +1816,7 @@ C
       END subroutine
 C=======================================================================
       SUBROUTINE COMHES(NM,N,LOW,IGH,AR,AI,INT)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C     ------------------------------------------------------------------
 C     GIVEN A  COMPLEX  GENERAL  MATRIX, THIS  SUBROUTINE  REDUCES  A
 C     SUBMATRIX SITUATED IN ROWS AND COLUMNS LOW THROUGH IGH TO UPPER
@@ -1906,8 +1931,7 @@ C
       END subroutine
 C=======================================================================
       SUBROUTINE COMLR2(NM,N,LOW,IGH,INT,HR,HI,WR,WI,ZR,ZI,IERR)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C     ------------------------------------------------------------------
 C     THIS SUBROUTINE FINDS  THE  EIGENVALUES AND  EIGENVECTORS  OF  A
 C     COMPLEX UPPER HESSENBERG  MATRIX BY THE MODIFIED  LR METHOD. THE
@@ -2247,8 +2271,7 @@ C                EIGENVALUE AFTER 30 ITERATIONS **********
       END subroutine
 C=======================================================================
       SUBROUTINE ERRCHK(NCHARS,NARRAY)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C     ------------------------------------------------------------------
 C     THE ROUTINES ERRCHK, ERXSET, AND ERRGET TOGETHER PROVIDE A UNIFORM
 C     METHOD WITH SEVERAL OPTIONS FOR THE PROCESSING  OF DIAGNOSTICS AND
@@ -2368,8 +2391,7 @@ C    6/27H          CALL ERXSET(10,0)    )
 !     END subroutine
 C=======================================================================
       SUBROUTINE ERRPRT(NCHARS,NARRAY)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C     ------------------------------------------------------------------
 C     UTILITY ROUTINE TO SIMPLY PRINT THE HOLLERITH MESSAGE IN NARRAY,
 C     WHOSE LENGTH IS NCHARS CHARACTERS.
@@ -2403,8 +2425,7 @@ C   1 FORMAT (1X,7A10)
       END subroutine
 C=======================================================================
       SUBROUTINE ERXSET(NFATAL,NTRACE)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C     ------------------------------------------------------------------
 C     ERXSET IS A COMPANION ROUTINE TO SUBROUTINE ERRCHK. ERXSET ASSIGNS
 C     THE VALUES OF NFATAL AND NTRACE  RESPECTIVELY  TO  NF  AND  NT  IN
@@ -2445,8 +2466,7 @@ C
       END subroutine
 C=======================================================================
       SUBROUTINE ERRGET(NFATAL,NTRACE)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C     ------------------------------------------------------------------
 C     ERRGET IS A COMPANION ROUTINE TO SUBROUTINE ERRCHK. ERRGET ASSIGNS
 C     TO NFATAL AND NTRACE RESPECTIVELY  THE  VALUES OF  NF  AND  NT  IN
@@ -2469,8 +2489,7 @@ C
       END subroutine
 C=======================================================================
       SUBROUTINE ERSTGT(K,NFATAL,NTRACE)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C     ------------------------------------------------------------------
 C     THIS ROUTINE IS A SLAVE TO ERRGET AND ERRSET WHICH KEEPS THE FLAGS
 C     AS LOCAL VARIABLES.
@@ -2498,8 +2517,7 @@ C
       END subroutine
 C=======================================================================
       COMPLEX(dp) FUNCTION CERF(Z,EMACH)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C     ------------------------------------------------------------------
 C     cerf,GIVEN COMPLEX ARGUMENT Z,PROVIDES THE COMPLEX ERROR FUNCTION:
 C     W(Z)=EXP(-Z**2)*(1.0-ERF(-I*Z))
@@ -2640,8 +2658,7 @@ C
       END function
 C=======================================================================
       REAL(dp) FUNCTION BLM(L1,M1,L2,M2,L3,M3,LMAX)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C-----------------------------------------------------------------------
 C     FUNCTION BLM  PROVIDES  THE  INTEGRAL  OF  THE  PRODUCT  OF THREE
 C     SPHERICAL HARMONICS,EACH OF WHICH CAN BE EXPRESSED AS A PREFACTOR
@@ -2782,8 +2799,7 @@ C
       END function
 C=======================================================================
       COMPLEX(dp) FUNCTION CODD(L,M,L1,M1,LMODD,XODD)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C     ------------------------------------------------------------------
 C
 C ..  SCALAR ARGUMENTS  ..
@@ -2818,8 +2834,7 @@ C     ------------------------------------------------------------------
       END function
 C=======================================================================
       COMPLEX(dp) FUNCTION CEVEN(L,M,L1,M1,LMEVEN,XEVEN)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C     ------------------------------------------------------------------
 C
 C ..  SCALAR ARGUMENTS  ..
@@ -2854,8 +2869,7 @@ C     ------------------------------------------------------------------
       END function
 C=======================================================================
       SUBROUTINE PAIR(IGKMAX,QIL,QIIL,QIIIL,QIVL,QIR,QIIR,QIIIR,QIVR)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C     ------------------------------------------------------------------
 C     THIS SUBROUTINE CALCULATES SCATTERING Q-MATRICES FOR A  DOUBLE
 C     LAYER, FROM THE CORRESPONDING MATRICES OF THE INDIVIDUAL, LEFT
@@ -2956,8 +2970,7 @@ C
 C=======================================================================
       SUBROUTINE PCSLAB(LMAX,IGMAX,RAP,EPSMED,EPSSPH,MUMED,MUSPH,KAPPA,
      &                  AK,DL,DR,G,ELM,A0,EMACH,QI,QII,QIII,QIV)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C     ------------------------------------------------------------------
 C     THIS SUBROUTINE COMPUTES THE TRANSMISSION/REFLECTION MATRICES FOR
 C     A PLANE OF SPHERES EMBEDDED IN A HOMOGENEOUS HOST MEDIUM.
@@ -3145,8 +3158,7 @@ C     ------------------------------------------------------------------
 C=======================================================================
       SUBROUTINE BAND(IGMAX,ZVAL,EMACH,AK,G,AL,KAPL,KAPR,
      &                QI,QII,QIII,QIV)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C     ------------------------------------------------------------------
 C     THIS SUBROUTINE CALCULATES THE COMPLEX PHOTONIC BAND STRUCTURE OF
 C     AN INFINITE CRYSTAL. IT  PROVIDES THE  PROPAGATING AND EVANESCENT
@@ -3187,21 +3199,7 @@ C
       REAL(dp)   AKZREP(IGK2D),AKZIMP(IGK2D),AKZREN(IGK2D),AKZIMN(IGK2D)
       COMPLEX(dp) QH1(IGKD,IGKD),QH2(IGKD,IGKD),AKZ(IGK2D)
       COMPLEX(dp) COMVEC(IGK2D,IGK2D)
-C
-C ..  INTRINSIC FUNCTIONS ..
-C
-C      INTRINSIC ABS,DCMPLX,SQRT,DIMAG,DREAL,EXP,LOG
-C
-C ..  EXTERNAL ROUTINES ..
-C
-C     EXTERNAL ZGE,ZSU,CNAA
-C
-C ..  DATA STATEMENTS ..
-C
-      DATA PI/3.14159265358979D0/
-      DATA CONE/(1.D0,0.D0)/,CI/(0.D0,1.D0)/,CZERO/(0.D0,0.D0)/
 C     ------------------------------------------------------------------
-C
       IGKMAX=2*IGMAX
       IGK2M=2*IGKMAX
       AKA=AK(1)*AL(1)+AK(2)*AL(2)
@@ -3312,8 +3310,7 @@ C*****DEPEND STRONGLY ON IGMAX.
       END subroutine
 C======================================================================
       SUBROUTINE REDUCE(AR1,AR2,AK,IGMAX,G,IG0,EMACH)
-      IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
+
 C----------------------------------------------------------------------
 C     GIVEN THE PRIMITIVE VECTORS AR1,AR2 OF A 2D LATTICE (IN UNITS OF
 C     ALPHA), THIS  SUBROUTINE  REDUCES A WAVECTOR "AK" (IN  UNITS  OF
@@ -3343,10 +3340,6 @@ C
 C ..  LOCAL ARRAYS ..
 C
       REAL(dp) VX(6),VY(6),FI(6),X(6),Y(6)
-C
-C ..  INTRINSIC FUNCTIONS  ..
-C
-C     INTRINSIC DSQRT,DABS,DATAN2
 C
 C ..  DATA STATEMENTS ..
 C
