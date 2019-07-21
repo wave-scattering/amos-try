@@ -1,4 +1,5 @@
 project(amos)
+
 set(SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/amos.f90
     ${CMAKE_CURRENT_SOURCE_DIR}/d1mach.f90

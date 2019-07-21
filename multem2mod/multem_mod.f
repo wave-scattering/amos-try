@@ -27,164 +27,20 @@ C=======================================================================
 !      use errfun, only: erf_pop
       use libmultem2b
       implicit none
-      integer, parameter:: dp=kind(0.d0)
-      real(dp), parameter :: pi=4.0_dp*ATAN(1.0_dp)
-      complex(dp), parameter :: czero = (0.0_dp, 0.0_dp)
-      complex(dp), parameter :: ci    = (0.0_dp, 1.0_dp)
-      complex(dp), parameter :: cone  = (1.0_dp, 0.0_dp)
-      complex(dp), parameter :: ctwo  = (2.0_dp, 0.0_dp)
+!     integer, parameter, public:: dp=kind(0.d0)
+!     real(dp), parameter :: pi=4.0_dp*ATAN(1.0_dp)
+!     complex(dp), parameter :: czero = (0.0_dp, 0.0_dp)
+!     complex(dp), parameter :: ci    = (0.0_dp, 1.0_dp)
+!     complex(dp), parameter :: cone  = (1.0_dp, 0.0_dp)
+!     complex(dp), parameter :: ctwo  = (2.0_dp, 0.0_dp)
       private
-      public cerf, blm, ceven, codd, band, scat, pair, hoslab, pcslab,
-     & reduce, lat2d, elmgen
+      public cerf, ceven, codd, band, scat, pair, pcslab,
+     & reduce, lat2d
       contains
 C=======================================================================
 
 C=======================================================================
-      SUBROUTINE SCAT(IGMAX,ZVAL,AK,G,KAPIN,KAPOUT,EINCID,QI,QIII)
-C     ------------------------------------------------------------------
-C     THIS SUBROUTINE CALCULATES THE REFLECTIVITY, TRANSMITTANCE AND
-C     ABSORBANCE OF A FINITE SLAB, CHARACTERIZED BY TRANSMISSION AND
-C     REFLECTION MATRICES QI AND QIII, RESPECTIVELY.
-C     ------------------------------------------------------------------
-C ..  ARGUMENTS  ..
-      INTEGER    IGMAX
-      REAL(dp)   ZVAL,KAPIN,KAPOUT
-      REAL(dp)   AK(:),G(:,:)
-      COMPLEX(dp) QI(:,:),QIII(:,:),EINCID(:)
-C ..  LOCAL 
-      INTEGER   IGKD
-      INTEGER    IGK1,IG1,K1,IGK2,IGKMAX
-      REAL(dp)   DOWN,REFLE,TRANS,ABSOR,GKZIN,GKZOUT,TES1
-      COMPLEX(dp), allocatable :: ETRANS(:),EREFLE(:)
-C     ------------------------------------------------------------------
-      igkd = size(eincid)
-      allocate(etrans(1:igkd)); allocate(erefle(1:igkd))
-      DOWN=0.D0
-      REFLE=0.D0
-      TRANS=0.D0
-      IGKMAX=2*IGMAX
-      IGK1=0
-      DO 1 IG1=1,IGMAX
-      TES1=(AK(1)+G(1,IG1))*(AK(1)+G(1,IG1))+(AK(2)+G(2,IG1))*(AK(2)+
-     &            G(2,IG1))
-      GKZIN =0.D0
-      GKZOUT=0.D0
-      IF(( KAPIN*KAPIN -TES1)>0.D0) GKZIN =SQRT( KAPIN*KAPIN -TES1)
-      IF((KAPOUT*KAPOUT-TES1)>0.D0) GKZOUT=SQRT(KAPOUT*KAPOUT-TES1)
-      DO 1 K1=1,2
-      IGK1=IGK1+1
-      ETRANS(IGK1)=CZERO
-      EREFLE(IGK1)=CZERO
-      DO 2 IGK2=1,IGKMAX
-      ETRANS(IGK1)=ETRANS(IGK1)+QI  (IGK1,IGK2)*EINCID(IGK2)
-      EREFLE(IGK1)=EREFLE(IGK1)+QIII(IGK1,IGK2)*EINCID(IGK2)
-    2 CONTINUE
-C
-      DOWN =DOWN +EINCID(IGK1)*CONJG(EINCID(IGK1))*GKZIN
-      TRANS=TRANS+ETRANS(IGK1)*CONJG(ETRANS(IGK1))*GKZOUT
-      REFLE=REFLE+EREFLE(IGK1)*CONJG(EREFLE(IGK1))*GKZIN
-    1 CONTINUE
-      TRANS=TRANS/DOWN
-      REFLE=REFLE/DOWN
-      ABSOR=1.D0-TRANS-REFLE
-      WRITE(8,101)  ZVAL,TRANS,REFLE,ABSOR
-      WRITE(6,101)  ZVAL,TRANS,REFLE,ABSOR
-      RETURN
-C
-  101 FORMAT(5E14.6)
-      END subroutine
 C======================================================================
-      SUBROUTINE HOSLAB(IGMAX,KAPPA1,KAPPA2,KAPPA3,AK,G,DL,DR,D,
-     &                  QI,QII,QIII,QIV,EMACH)
-C-----------------------------------------------------------------------
-C     THIS SUBROUTINE CALCULATES THE  Q-MATRICES FOR A HOMOGENEOUS
-C     PLATE  '2' OF THICKNESS 'D', HAVING THE SEMI-INFINITE MEDIUM
-C     '1' ON ITS LEFT AND THE SEMI-INFINITE MEDIUM '3' ON ITS RIGHT
-C     ------------------------------------------------------------------
-C  .. ARGUMENTS ..
-      INTEGER    IGMAX
-      REAL(dp)   EMACH,D
-      COMPLEX(dp) KAPPA1,KAPPA2,KAPPA3
-      REAL(dp)   AK(:),G(:,:),DL(3),DR(3)
-      COMPLEX(dp) QI(:,:),QII(:,:),QIII(:,:)
-      COMPLEX(dp) QIV(:,:)
-C  .. LOCAL
-      INTEGER    I,J,IA,IB,JA,IG1,IGKMAX
-      REAL(dp)   GKKPAR
-      COMPLEX(dp) GKKZ1,GKKZ2,GKKZ3,Z1,Z2,Z3,CQI,CQII
-      COMPLEX(dp) CQIII,CQIV,DENOMA,DENOMB,GKKDUM
-      COMPLEX(dp) T(4,2),R(4,2),X(4),P(4,2)
-C     -----------------------------------------------------------------
-      IGKMAX=2*IGMAX
-      DO 1 IA=1,IGKMAX
-      DO 1 IB=1,IGKMAX
-      QI  (IA,IB)=CZERO
-      QII (IA,IB)=CZERO
-      QIII(IA,IB)=CZERO
-      QIV (IA,IB)=CZERO
-    1 CONTINUE
-      X(1)=KAPPA1/KAPPA2
-      X(2)=CONE/X(1)
-      X(3)=KAPPA2/KAPPA3
-      X(4)=CONE/X(3)
-      DO 3 IG1=1,IGMAX
-      GKKPAR=SQRT((AK(1)+G(1,IG1))*(AK(1)+G(1,IG1))+
-     &            (AK(2)+G(2,IG1))*(AK(2)+G(2,IG1)))
-      GKKZ1=SQRT(KAPPA1*KAPPA1-GKKPAR*GKKPAR)
-      GKKZ2=SQRT(KAPPA2*KAPPA2-GKKPAR*GKKPAR)
-      GKKZ3=SQRT(KAPPA3*KAPPA3-GKKPAR*GKKPAR)
-      DO 9 J=1,2
-      DENOMA=X(J)*X(J)*GKKZ2+GKKZ1
-      DENOMB=     GKKZ2+GKKZ1
-      IF(ABS(DENOMA)<EMACH.OR.ABS(DENOMB)<EMACH) GO TO 20
-      R(J,1)=(GKKZ1-X(J)*X(J)*GKKZ2)/DENOMA
-      R(J,2)=           (GKKZ1-GKKZ2)/DENOMB
-      T(J,1)=CTWO*X(J)*GKKZ1/DENOMA
-      T(J,2)=CTWO*GKKZ1/DENOMB
-      GKKDUM=GKKZ1
-      GKKZ1 =GKKZ2
-      GKKZ2 =GKKDUM
- 9    CONTINUE
-      DO 10 J=3,4
-      DENOMA=X(J)*X(J)*GKKZ3+GKKZ2
-      DENOMB=          GKKZ3+GKKZ2
-      IF(ABS(DENOMA)<EMACH.OR.ABS(DENOMB)<EMACH) GO TO 20
-      R(J,1)=(GKKZ2-X(J)*X(J)*GKKZ3)/DENOMA
-      R(J,2)=           (GKKZ2-GKKZ3)/DENOMB
-      T(J,1)=CTWO*X(J)*GKKZ2/DENOMA
-      T(J,2)=CTWO*GKKZ2/DENOMB
-      GKKDUM=GKKZ2
-      GKKZ2 =GKKZ3
-      GKKZ3 =GKKDUM
- 10   CONTINUE
-      Z1=EXP(CI*GKKZ2*D)
-      Z2=Z1*Z1
-      DO 5 I=1,2
-      Z3=CONE/(CONE-Z2*R(2,I)*R(3,I))
-      P(1,I)=T(3,I)*Z3*Z1*T(1,I)
-      P(2,I)=R(4,I)+T(4,I)*R(2,I)*T(3,I)*Z2*Z3
-      P(3,I)=R(1,I)+T(2,I)*R(3,I)*T(1,I)*Z2*Z3
-      P(4,I)=T(2,I)*Z3*Z1*T(4,I)
-    5 CONTINUE
-      CQI  =EXP(CI*((AK(1)+G(1,IG1))*(DL(1)+DR(1))+
-     &              (AK(2)+G(2,IG1))*(DL(2)+DR(2))+
-     &                 GKKZ1*DL(3)+GKKZ3*DR(3)))
-      CQII =EXP(CTWO*CI*GKKZ3*DR(3))
-      CQIII=EXP(CTWO*CI*GKKZ1*DL(3))
-      CQIV =EXP(-CI*((AK(1)+G(1,IG1))*(DL(1)+DR(1))+
-     &               (AK(2)+G(2,IG1))*(DL(2)+DR(2))-
-     &                 GKKZ1*DL(3)-GKKZ3*DR(3)))
-      DO 7 JA=1,2
-      IA=2*IG1-2+JA
-      QI  (IA,IA)=CQI  *P(1,JA)
-      QII (IA,IA)=CQII *P(2,JA)
-      QIII(IA,IA)=CQIII*P(3,JA)
-      QIV (IA,IA)=CQIV *P(4,JA)
-    7 CONTINUE
-    3 CONTINUE
-      RETURN
-   20 STOP 'FATAL ERROR IN HOSLAB'
-      END subroutine
 C=======================================================================
       SUBROUTINE DLMKG(LMAX,A0,GK,SIGNUS,KAPPA,DLME,DLMH,EMACH)
 C     ------------------------------------------------------------------
@@ -261,59 +117,58 @@ C     ------------------------------------------------------------------
 C=======================================================================
 C=======================================================================
 C=======================================================================
-      SUBROUTINE ELMGEN(ELM,NELMD,LMAX)
-
-C     ------------------------------------------------------------------
-C     ROUTINE TO TABULATE THE CLEBSCH-GORDON TYPE COEFFICIENTS ELM,  FOR
-C     USE WITH THE SUBROUTINE XMAT. THE NON-ZERO ELM ARE TABULATED FIRST
-C     FOR  L2,M2; AND L3,M3; ODD. THEN FOR L2,M2; AND L3,M3; EVEN, USING
-C     THE SAME SCHEME AS THAT BY WHICH THEY ARE ACCESSED IN XMAT.
-C     ------------------------------------------------------------------
-C
-C ..  SCALAR ARGUMENTS  ..
-C
-      INTEGER NELMD,LMAX
-C
-C ..  ARRAY ARGUMENTS  ..
-C
-      REAL(dp) ELM(NELMD)
-C
-C ..  LOCAL SCALARS  ..
-C
-      INTEGER K,II,LL,IL2,L2,M2,I2,IL3,L3,M3,I3,LA1,LB1,LA11,LB11,M1
-      INTEGER L11,L1,L
-      REAL(dp) FOURPI
-C     ------------------------------------------------------------------
-      FOURPI=4.0_dp*PI
-      K=1
-      II=0
-   1  LL=LMAX+II
-      DO 6 IL2=1,LL
-      L2=IL2-II
-      M2=-L2+1-II
-      DO 6 I2=1,IL2
-      DO 5 IL3=1,LL
-      L3=IL3-II
-      M3=-L3+1-II
-      DO 5 I3=1,IL3
-      LA1=MAX0(IABS(L2-L3),IABS(M2-M3))
-      LB1=L2+L3
-      LA11=LA1+1
-      LB11=LB1+1
-      M1=M2-M3
-      DO 3 L11=LA11,LB11,2
-      L1=L11-1
-      L=(L2-L3-L1)/2+M2
-      ELM(K)=((-1.0_dp)**L)*FOURPI*BLM(L1,M1,L3,M3,L2,-M2,LMAX)
-   3  K=K+1
-   5  M3=M3+2
-   6  M2=M2+2
-      IF(II)7,7,8
-   7  II=1
-      GOTO 1
-   8  CONTINUE
-      RETURN
-      END subroutine
+!     SUBROUTINE ELMGEN(ELM,NELMD,LMAX)
+!!     ------------------------------------------------------------------
+!     ROUTINE TO TABULATE THE CLEBSCH-GORDON TYPE COEFFICIENTS ELM,  FOR
+!     USE WITH THE SUBROUTINE XMAT. THE NON-ZERO ELM ARE TABULATED FIRST
+!     FOR  L2,M2; AND L3,M3; ODD. THEN FOR L2,M2; AND L3,M3; EVEN, USING
+!     THE SAME SCHEME AS THAT BY WHICH THEY ARE ACCESSED IN XMAT.
+!     ------------------------------------------------------------------
+!
+! ..  SCALAR ARGUMENTS  ..
+!
+!     INTEGER NELMD,LMAX
+!
+! ..  ARRAY ARGUMENTS  ..
+!
+!     REAL(dp) ELM(NELMD)
+!
+! ..  LOCAL SCALARS  ..
+!
+!     INTEGER K,II,LL,IL2,L2,M2,I2,IL3,L3,M3,I3,LA1,LB1,LA11,LB11,M1
+!     INTEGER L11,L1,L
+!     REAL(dp) FOURPI
+!     ------------------------------------------------------------------
+!     FOURPI=4.0_dp*PI
+!     K=1
+!     II=0
+!  1  LL=LMAX+II
+!     DO 6 IL2=1,LL
+!     L2=IL2-II
+!     M2=-L2+1-II
+!     DO 6 I2=1,IL2
+!     DO 5 IL3=1,LL
+!     L3=IL3-II
+!     M3=-L3+1-II
+!     DO 5 I3=1,IL3
+!     LA1=MAX0(IABS(L2-L3),IABS(M2-M3))
+!     LB1=L2+L3
+!     LA11=LA1+1
+!     LB11=LB1+1
+!     M1=M2-M3
+!     DO 3 L11=LA11,LB11,2
+!     L1=L11-1
+!     L=(L2-L3-L1)/2+M2
+!     ELM(K)=((-1.0_dp)**L)*FOURPI*BLM(L1,M1,L3,M3,L2,-M2,LMAX)
+!  3  K=K+1
+!  5  M3=M3+2
+!  6  M2=M2+2
+!     IF(II)7,7,8
+!  7  II=1
+!     GOTO 1
+!  8  CONTINUE
+!     RETURN
+!     END subroutine
 C=======================================================================
       SUBROUTINE LAT2D(A,B,RMAX,IMAX,ID,NTA,NTB,VECMOD)
 
@@ -2165,137 +2020,136 @@ C
   29  RETURN
 
       END function
-C=======================================================================
-      REAL(dp) FUNCTION BLM(L1,M1,L2,M2,L3,M3,LMAX)
-
-C-----------------------------------------------------------------------
-C     FUNCTION BLM  PROVIDES  THE  INTEGRAL  OF  THE  PRODUCT  OF THREE
-C     SPHERICAL HARMONICS,EACH OF WHICH CAN BE EXPRESSED AS A PREFACTOR
-C     TIMES  A  LEGENDRE  FUNCTION. THE  THREE  PREFACTORS  ARE  LUMPED
-C     TOGETHER AS  FACTOR 'C'; AND   THE INTEGRAL OF THE THREE LEGENDRE
-C     FUNCTIONS FOLLOWS GAUNT SUMMATION SCHEME SET OUT BY SLATER(ATOMIC
-C     STRUCTURE, VOL1, 309,310
-C-----------------------------------------------------------------------
-C ..  SCALAR ARGUMENTS  ..
-C
-      INTEGER L1,M1,L2,M2,L3,M3,LMAX
-C
-C ..  LOCAL SCALARS  ..
-C
-      INTEGER I,IA1,IA2,IA3,IA4,IA5,IA6,IA7,IA8,IA9,IB1,IB2,IB3,IB4
-      INTEGER IB5,IC,IC1,IC2,IC3,IC4,IC5,IC6,IS,IT,IT1,IT2,NL1,NL2
-      INTEGER NL3,NM1,NM2,NM3,NTEMP,NN
-      REAL(dp) SIGN,A,AD,AN,B,BD,BN,C,CD,CN
-C
-C ..  LOCAL ARRAYS  ..
-C
-      REAL(dp)FAC(4*LMAX+2)
-C-----------------------------------------------------------------------
-      FAC(1)=1.0_dp
-      NN=4*LMAX+1
-      DO 1 I=1,NN
-   1  FAC(I+1)=DFLOAT(I)*FAC(I)
-      IF(M1+M2+M3)8,21,8
-  21  IF(L1-LMAX-LMAX)2,2,19
-   2  IF(L2-LMAX)3,3,19
-   3  IF(L3-LMAX)4,4,19
-   4  IF(L1-IABS(M1))19,5,5
-   5  IF(L2-IABS(M2))19,6,6
-   6  IF(L3-IABS(M3))19,7,7
-   7  IF(MOD  (L1+L2+L3,2))8,9,8
-   8  BLM=0.0_dp
-      RETURN
-   9  NL1=L1
-      NL2=L2
-      NL3=L3
-      NM1=IABS(M1)
-      NM2=IABS(M2)
-      NM3=IABS(M3)
-      IC=(NM1+NM2+NM3)/2
-      IF(MAX0(NM1,NM2,NM3)-NM1)13,13,10
-  10  IF(MAX0(NM2,NM3)-NM2)11,11,12
-  11  NL1=L2
-      NL2=L1
-      NM1=NM2
-      NM2=IABS(M1)
-      GOTO 13
-  12  NL1=L3
-      NL3=L1
-      NM1=NM3
-      NM3=IABS(M1)
-  13  IF(NL2-NL3)14,15,15
-  14  NTEMP=NL2
-      NL2=NL3
-      NL3=NTEMP
-      NTEMP=NM2
-      NM2=NM3
-      NM3=NTEMP
-  15  IF(NL3-IABS(NL2-NL1))16,17,17
-  16  BLM=0.0_dp
-      RETURN
-C
-C     CALCULATION OF FACTOR  'A'.
-C
-  17  IS=(NL1+NL2+NL3)/2
-      IA1=IS-NL2-NM3
-      IA2=NL2+NM2
-      IA3=NL2-NM2
-      IA4=NL3+NM3
-      IA5=NL1+NL2-NL3
-      IA6=IS-NL1
-      IA7=IS-NL2
-      IA8=IS-NL3
-      IA9=NL1+NL2+NL3+1
-      AN=((-1.0_dp)**IA1)*FAC(IA2+1)*FAC(IA4+1)*FAC(IA5+1)*FAC(IS+1)
-      AD=FAC(IA3+1)*FAC(IA6+1)*FAC(IA7+1)*FAC(IA8+1)*FAC(IA9+1)
-      A=AN/AD
-C
-C     CALCULATION OF SUM 'B'
-C
-      IB1=NL1+NM1
-      IB2=NL2+NL3-NM1
-      IB3=NL1-NM1
-      IB4=NL2-NL3+NM1
-      IB5=NL3-NM3
-      IT1=MAX0(0,-IB4)+1
-      IT2=MIN0(IB2,IB3,IB5)+1
-      B=0.0_dp
-      SIGN=(-1.0_dp)**(IT1)
-      IB1=IB1+IT1-2
-      IB2=IB2-IT1+2
-      IB3=IB3-IT1+2
-      IB4=IB4+IT1-2
-      IB5=IB5-IT1+2
-      DO 18 IT=IT1,IT2
-      SIGN=-SIGN
-      IB1=IB1+1
-      IB2=IB2-1
-      IB3=IB3-1
-      IB4=IB4+1
-      IB5=IB5-1
-      BN=SIGN*FAC(IB1+1)*FAC(IB2+1)
-      BD=FAC(IT)*FAC(IB3+1)*FAC(IB4+1)*FAC(IB5+1)
-  18  B=B+(BN/BD)
-C
-C       CALCULATION OF FACTOR 'C'
-C
-      IC1=NL1-NM1
-      IC2=NL1+NM1
-      IC3=NL2-NM2
-      IC4=NL2+NM2
-      IC5=NL3-NM3
-      IC6=NL3+NM3
-      CN=DFLOAT((2*NL1+1)*(2*NL2+1)*(2*NL3+1))*FAC(IC1+1)*FAC(IC3+1)*
-     1FAC(IC5+1)
-      CD=FAC(IC2+1)*FAC(IC4+1)*FAC(IC6+1)
-      C=CN/(PI*CD)
-      C=(SQRT(C))/2.0_dp
-      BLM=((-1.0_dp)**IC)*A*B*C
-      RETURN
-  19  WRITE(6,20)L1,L2,M2,L3,M3
-  20  FORMAT(28H INVALID ARGUMENTS FOR BLM. ,5(I2,1H,))
-      RETURN
-      END function
+!=======================================================================
+!     REAL(dp) FUNCTION BLM(L1,M1,L2,M2,L3,M3,LMAX)
+!!-----------------------------------------------------------------------
+!     FUNCTION BLM  PROVIDES  THE  INTEGRAL  OF  THE  PRODUCT  OF THREE
+!     SPHERICAL HARMONICS,EACH OF WHICH CAN BE EXPRESSED AS A PREFACTOR
+!     TIMES  A  LEGENDRE  FUNCTION. THE  THREE  PREFACTORS  ARE  LUMPED
+!     TOGETHER AS  FACTOR 'C'; AND   THE INTEGRAL OF THE THREE LEGENDRE
+!     FUNCTIONS FOLLOWS GAUNT SUMMATION SCHEME SET OUT BY SLATER(ATOMIC
+!     STRUCTURE, VOL1, 309,310
+!-----------------------------------------------------------------------
+! ..  SCALAR ARGUMENTS  ..
+!
+!     INTEGER L1,M1,L2,M2,L3,M3,LMAX
+!
+! ..  LOCAL SCALARS  ..
+!
+!     INTEGER I,IA1,IA2,IA3,IA4,IA5,IA6,IA7,IA8,IA9,IB1,IB2,IB3,IB4
+!     INTEGER IB5,IC,IC1,IC2,IC3,IC4,IC5,IC6,IS,IT,IT1,IT2,NL1,NL2
+!     INTEGER NL3,NM1,NM2,NM3,NTEMP,NN
+!     REAL(dp) SIGN,A,AD,AN,B,BD,BN,C,CD,CN
+!
+! ..  LOCAL ARRAYS  ..
+!
+!     REAL(dp)FAC(4*LMAX+2)
+!-----------------------------------------------------------------------
+!     FAC(1)=1.0_dp
+!     NN=4*LMAX+1
+!     DO 1 I=1,NN
+!  1  FAC(I+1)=DFLOAT(I)*FAC(I)
+!     IF(M1+M2+M3)8,21,8
+! 21  IF(L1-LMAX-LMAX)2,2,19
+!  2  IF(L2-LMAX)3,3,19
+!  3  IF(L3-LMAX)4,4,19
+!  4  IF(L1-IABS(M1))19,5,5
+!  5  IF(L2-IABS(M2))19,6,6
+!  6  IF(L3-IABS(M3))19,7,7
+!  7  IF(MOD  (L1+L2+L3,2))8,9,8
+!  8  BLM=0.0_dp
+!     RETURN
+!  9  NL1=L1
+!     NL2=L2
+!     NL3=L3
+!     NM1=IABS(M1)
+!     NM2=IABS(M2)
+!     NM3=IABS(M3)
+!     IC=(NM1+NM2+NM3)/2
+!     IF(MAX0(NM1,NM2,NM3)-NM1)13,13,10
+! 10  IF(MAX0(NM2,NM3)-NM2)11,11,12
+! 11  NL1=L2
+!     NL2=L1
+!     NM1=NM2
+!     NM2=IABS(M1)
+!     GOTO 13
+! 12  NL1=L3
+!     NL3=L1
+!     NM1=NM3
+!     NM3=IABS(M1)
+! 13  IF(NL2-NL3)14,15,15
+! 14  NTEMP=NL2
+!     NL2=NL3
+!     NL3=NTEMP
+!     NTEMP=NM2
+!     NM2=NM3
+!     NM3=NTEMP
+! 15  IF(NL3-IABS(NL2-NL1))16,17,17
+! 16  BLM=0.0_dp
+!     RETURN
+!
+!     CALCULATION OF FACTOR  'A'.
+!
+! 17  IS=(NL1+NL2+NL3)/2
+!     IA1=IS-NL2-NM3
+!     IA2=NL2+NM2
+!     IA3=NL2-NM2
+!     IA4=NL3+NM3
+!     IA5=NL1+NL2-NL3
+!     IA6=IS-NL1
+!     IA7=IS-NL2
+!     IA8=IS-NL3
+!     IA9=NL1+NL2+NL3+1
+!     AN=((-1.0_dp)**IA1)*FAC(IA2+1)*FAC(IA4+1)*FAC(IA5+1)*FAC(IS+1)
+!     AD=FAC(IA3+1)*FAC(IA6+1)*FAC(IA7+1)*FAC(IA8+1)*FAC(IA9+1)
+!     A=AN/AD
+!
+!     CALCULATION OF SUM 'B'
+!
+!     IB1=NL1+NM1
+!     IB2=NL2+NL3-NM1
+!     IB3=NL1-NM1
+!     IB4=NL2-NL3+NM1
+!     IB5=NL3-NM3
+!     IT1=MAX0(0,-IB4)+1
+!     IT2=MIN0(IB2,IB3,IB5)+1
+!     B=0.0_dp
+!     SIGN=(-1.0_dp)**(IT1)
+!     IB1=IB1+IT1-2
+!     IB2=IB2-IT1+2
+!     IB3=IB3-IT1+2
+!     IB4=IB4+IT1-2
+!     IB5=IB5-IT1+2
+!     DO 18 IT=IT1,IT2
+!     SIGN=-SIGN
+!     IB1=IB1+1
+!     IB2=IB2-1
+!     IB3=IB3-1
+!     IB4=IB4+1
+!     IB5=IB5-1
+!     BN=SIGN*FAC(IB1+1)*FAC(IB2+1)
+!     BD=FAC(IT)*FAC(IB3+1)*FAC(IB4+1)*FAC(IB5+1)
+! 18  B=B+(BN/BD)
+!
+!       CALCULATION OF FACTOR 'C'
+!
+!     IC1=NL1-NM1
+!     IC2=NL1+NM1
+!     IC3=NL2-NM2
+!     IC4=NL2+NM2
+!     IC5=NL3-NM3
+!     IC6=NL3+NM3
+!     CN=DFLOAT((2*NL1+1)*(2*NL2+1)*(2*NL3+1))*FAC(IC1+1)*FAC(IC3+1)*
+!    1FAC(IC5+1)
+!     CD=FAC(IC2+1)*FAC(IC4+1)*FAC(IC6+1)
+!     C=CN/(PI*CD)
+!     C=(SQRT(C))/2.0_dp
+!     BLM=((-1.0_dp)**IC)*A*B*C
+!     RETURN
+! 19  WRITE(6,20)L1,L2,M2,L3,M3
+! 20  FORMAT(28H INVALID ARGUMENTS FOR BLM. ,5(I2,1H,))
+!     RETURN
+!     END function
 C=======================================================================
 C=======================================================================
       SUBROUTINE PAIR(IGKMAX,QIL,QIIL,QIIIL,QIVL,QIR,QIIR,QIIIR,QIVR)
@@ -2916,11 +2770,11 @@ C*****"AK" IS REDUCED WITHIN THE SBZ
       use libmultem2a
       use libmultem2b
       IMPLICIT NONE
-      integer, parameter:: dp=kind(0.d0)
-      real(dp), parameter :: pi=4.0_dp*ATAN(1.0_dp)
-      complex(dp), parameter :: czero = (0.0_dp, 0.0_dp)
+!     integer, parameter:: dp=kind(0.d0)
+!     real(dp), parameter :: pi=4.0_dp*ATAN(1.0_dp)
+!     complex(dp), parameter :: czero = (0.0_dp, 0.0_dp)
 !     complex(dp), parameter :: ci    = (0.0_dp, 1.0_dp)
-      complex(dp), parameter :: cone  = (1.0_dp, 0.0_dp)
+!     complex(dp), parameter :: cone  = (1.0_dp, 0.0_dp)
 C     ------------------------------------------------------------------
 C     A B S T R A C T
 C     THIS PROGRAM CALCULATES EITHER THE ABSORBANCE, REFLECTIVITY  AND

@@ -37,17 +37,26 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     # the Debug build):
     #set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -fdefault-real-8")
 endif ()
+
+set(CMAKE_BUILD_TYPE Release
+        CACHE STRING "Build type (Debug, Release)" FORCE)
+set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -march=native -ffast-math -funroll-loops -mtune=native -fopenmp" )
+add_subdirectory(amos)
+add_subdirectory(try-zbesj)
+add_subdirectory(lapack_wrapper)
+
 #set(common "-std=f2003")
 
+set(CMAKE_BUILD_TYPE Debug
+        CACHE STRING "Build type (Debug, Release)" FORCE)
 set(warn "-Wall -Wextra -Wimplicit-interface -fPIC -fmax-errors=1")
 set(CMAKE_Fortran_FLAGS_DEBUG   "${common} ${warn} -g -fbounds-check -fcheck-array-temporaries -fbacktrace")
 
+#    set(CMAKE_BUILD_TYPE Release
+#            CACHE STRING "Build type (Debug, Release)" FORCE)
 #set(CMAKE_Fortran_FLAGS_RELEASE "${common} -O3 -march=native -ffast-math -funroll-loops -mtune=native -fopenmp" )
 
-add_subdirectory(amos)
 #add_subdirectory(errfun)
-add_subdirectory(lapack_wrapper)
-add_subdirectory(try-zbesj)
 #add_subdirectory(cylinder)
 add_subdirectory(multem2mod)
 
