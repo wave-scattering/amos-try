@@ -1519,7 +1519,7 @@ C
             IF (YR == 0.0_dp .AND. YI == 0.0_dp) GO TO 160
             Z3 = DCMPLX(YR,YI) / DCMPLX(XR,XI)
             YR = dble(Z3)
-            YI = DIMAG (Z3)
+            YI = aimag (Z3)
             AR(I,MM1) = YR
             AI(I,MM1) = YI
 C
@@ -1680,13 +1680,13 @@ C     ********** FORM SHIFT **********
       YI = (HI(ENM1,ENM1) - SI) / 2.0_dp
       Z3 = SQRT(DCMPLX(YR**2-YI**2+XR,2.0_dp*YR*YI+XI))
       ZZR = dble(Z3)
-      ZZI = DIMAG(Z3)
+      ZZI = aimag(Z3)
       IF (YR * ZZR + YI * ZZI >= 0.0_dp) GO TO 310
       ZZR = -ZZR
       ZZI = -ZZI
   310 Z3 = DCMPLX(XR,XI) / DCMPLX(YR+ZZR,YI+ZZI)
       SR = SR - dble(Z3)
-      SI = SI - DIMAG(Z3)
+      SI = SI - aimag(Z3)
       GO TO 340
 C     ********** FORM EXCEPTIONAL SHIFT **********
   320 SR = ABS(HR(EN,ENM1)) + ABS(HR(ENM1,EN-2))
@@ -1742,7 +1742,7 @@ C
   460    Z3 = DCMPLX(YR,YI) / DCMPLX(XR,XI)
          WR(I) = -1.0_dp
   480    ZZR = dble(Z3)
-         ZZI = DIMAG(Z3)
+         ZZI = aimag(Z3)
          HR(I,IM1) = ZZR
          HI(I,IM1) = ZZI
 C
@@ -1836,7 +1836,7 @@ C
             IF (YR == 0.0_dp .AND. YI == 0.0_dp) YR = MACHEP * NORM
             Z3 = DCMPLX(ZZR,ZZI) / DCMPLX(YR,YI)
             HR(I,EN) = dble(Z3)
-            HI(I,EN) = DIMAG(Z3)
+            HI(I,EN) = aimag(Z3)
   780    CONTINUE
 C
   800 CONTINUE
@@ -1919,7 +1919,7 @@ C     THE NN_TH QUADRANT, BEFORE THE METHOD FOR THE FUNCTION
 C     EVALUATION IS CHOSEN
 C
    2  X=dble(Z)
-      Y=DIMAG(Z)
+      Y=aimag(Z)
       YY=Y
       IF(Y)6,3,3
    3  IF(X)5,4,4
@@ -2512,13 +2512,13 @@ C     ------------------------------------------------------------------
       DO 9 IGK1=1,IGKMAX
       DO 9 IGK2=1,IGKMAX
       AR(IGK1,IGK2)=dble(QI(IGK1,IGK2))
-      AI(IGK1,IGK2)=DIMAG(QI(IGK1,IGK2))
+      AI(IGK1,IGK2)=aimag(QI(IGK1,IGK2))
       AR(IGK1,IGKMAX+IGK2)=dble(QII(IGK1,IGK2))
-      AI(IGK1,IGKMAX+IGK2)=DIMAG(QII(IGK1,IGK2))
+      AI(IGK1,IGKMAX+IGK2)=aimag(QII(IGK1,IGK2))
       AR(IGKMAX+IGK1,IGK2)=dble(QH1(IGK1,IGK2))
-      AI(IGKMAX+IGK1,IGK2)=DIMAG(QH1(IGK1,IGK2))
+      AI(IGKMAX+IGK1,IGK2)=aimag(QH1(IGK1,IGK2))
       AR(IGKMAX+IGK1,IGKMAX+IGK2)=dble(QH2(IGK1,IGK2))
-      AI(IGKMAX+IGK1,IGKMAX+IGK2)=DIMAG(QH2(IGK1,IGK2))
+      AI(IGKMAX+IGK1,IGKMAX+IGK2)=aimag(QH2(IGK1,IGK2))
     9 CONTINUE
       CALL CNAA(IGK2D,IGK2M,AR,AI,RR,RI,VR,VI,IFAIL)
       IF(IFAIL/=0) THEN
@@ -2542,20 +2542,20 @@ C*****'MACHEP' OF THE SUBROUTINE COMLR2 IS CHOSEN GREATER THAN 2**(-47)
       LP=1
       LN=1
       DO 10 KD=1,IGK2M
-C*****WARNING!! THE APPROPRIATE LIMITS FOR DIMAG(AKZ(KD))
+C*****WARNING!! THE APPROPRIATE LIMITS FOR aimag(AKZ(KD))
 C*****DEPEND STRONGLY ON IGMAX.
-      IF(DIMAG(AKZ(KD))>0.0_dp) THEN
+      IF(aimag(AKZ(KD))>0.0_dp) THEN
       AKZREP(LP)=dble(AKZ(KD))
-      AKZIMP(LP)=DIMAG(AKZ(KD))
+      AKZIMP(LP)=aimag(AKZ(KD))
       LP=LP+1
       ELSE
       AKZREN(LN)=dble(AKZ(KD))
-      AKZIMN(LN)=DIMAG(AKZ(KD))
+      AKZIMN(LN)=aimag(AKZ(KD))
       LN=LN+1
       ENDIF
-      IF(ABS(DIMAG(AKZ(KD)))>1.0D-2) GO TO 10
+      IF(ABS(aimag(AKZ(KD)))>1.0D-2) GO TO 10
       AKZAP(LU)=dble(AKZ(KD))
-      AKZIP(LU)=DIMAG(AKZ(KD))
+      AKZIP(LU)=aimag(AKZ(KD))
       LU=LU+1
    10 CONTINUE
       IF (LU<1.1D0) THEN
@@ -2951,11 +2951,11 @@ C
                          D1=SQRT(MU1(1)    *EPS1(1))
                          D2=SQRT(MU1(NCOMP)*EPS1(NCOMP))
       IF(IT(NCOMP)==1) D2=SQRT(MU3(NCOMP)*EPS3(NCOMP))
-      IF(DIMAG(D1)/=0.D0) THEN
+      IF(aimag(D1)/=0.D0) THEN
       WRITE(6,227)
       STOP
       ENDIF
-      IF(DIMAG(D2)/=0.D0) THEN
+      IF(aimag(D2)/=0.D0) THEN
       WRITE(6,228)
       STOP
       ENDIF
@@ -2966,11 +2966,11 @@ C
       READ(10,205) MUEMBR,EPSEMBR
       D1=SQRT(MUEMBL*EPSEMBL)
       D2=SQRT(MUEMBR*EPSEMBR)
-      IF(DIMAG(D1)/=0.D0) THEN
+      IF(aimag(D1)/=0.D0) THEN
       WRITE(6,227)
       STOP
       ENDIF
-      IF(DIMAG(D2)/=0.D0) THEN
+      IF(aimag(D2)/=0.D0) THEN
       WRITE(6,228)
       STOP
       ENDIF
