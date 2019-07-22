@@ -59,8 +59,8 @@ C  .. LOCAL
       COMPLEX(dp) CT,ST,CF
       COMPLEX(dp) YLM((lmax+1)**2)
 C     ------------------------------------------------------------------
-      AKG1=DREAL(GK(1))
-      AKG2=DREAL(GK(2))
+      AKG1=dble(GK(1))
+      AKG2=dble(GK(2))
       DO K=1,2
         DLME(K,1)=CZERO
         DLMH(K,1)=CZERO
@@ -351,8 +351,8 @@ C
       COMPLEX(dp) YLM((lmax+1)**2)
 C-----------------------------------------------------------------------
 C
-      AKG1=DREAL(GK(1))
-      AKG2=DREAL(GK(2))
+      AKG1=dble(GK(1))
+      AKG2=dble(GK(2))
       DO 3 K=1,2
       AE(K,1)=CZERO
     3 AH(K,1)=CZERO
@@ -1518,7 +1518,7 @@ C
             YI = AI(I,MM1)
             IF (YR == 0.0_dp .AND. YI == 0.0_dp) GO TO 160
             Z3 = DCMPLX(YR,YI) / DCMPLX(XR,XI)
-            YR = DREAL(Z3)
+            YR = dble(Z3)
             YI = DIMAG (Z3)
             AR(I,MM1) = YR
             AI(I,MM1) = YI
@@ -1679,13 +1679,13 @@ C     ********** FORM SHIFT **********
       YR = (HR(ENM1,ENM1) - SR) / 2.0_dp
       YI = (HI(ENM1,ENM1) - SI) / 2.0_dp
       Z3 = SQRT(DCMPLX(YR**2-YI**2+XR,2.0_dp*YR*YI+XI))
-      ZZR = DREAL(Z3)
+      ZZR = dble(Z3)
       ZZI = DIMAG(Z3)
       IF (YR * ZZR + YI * ZZI >= 0.0_dp) GO TO 310
       ZZR = -ZZR
       ZZI = -ZZI
   310 Z3 = DCMPLX(XR,XI) / DCMPLX(YR+ZZR,YI+ZZI)
-      SR = SR - DREAL(Z3)
+      SR = SR - dble(Z3)
       SI = SI - DIMAG(Z3)
       GO TO 340
 C     ********** FORM EXCEPTIONAL SHIFT **********
@@ -1741,7 +1741,7 @@ C
          GO TO 480
   460    Z3 = DCMPLX(YR,YI) / DCMPLX(XR,XI)
          WR(I) = -1.0_dp
-  480    ZZR = DREAL(Z3)
+  480    ZZR = dble(Z3)
          ZZI = DIMAG(Z3)
          HR(I,IM1) = ZZR
          HI(I,IM1) = ZZI
@@ -1835,7 +1835,7 @@ C
             YI = XI - WI(I)
             IF (YR == 0.0_dp .AND. YI == 0.0_dp) YR = MACHEP * NORM
             Z3 = DCMPLX(ZZR,ZZI) / DCMPLX(YR,YI)
-            HR(I,EN) = DREAL(Z3)
+            HR(I,EN) = dble(Z3)
             HI(I,EN) = DIMAG(Z3)
   780    CONTINUE
 C
@@ -1918,7 +1918,7 @@ C     THE ARGUMENT IS TRANSLATED TO THE FIRST QUADRANT FROM
 C     THE NN_TH QUADRANT, BEFORE THE METHOD FOR THE FUNCTION
 C     EVALUATION IS CHOSEN
 C
-   2  X=DREAL(Z)
+   2  X=dble(Z)
       Y=DIMAG(Z)
       YY=Y
       IF(Y)6,3,3
@@ -2511,13 +2511,13 @@ C     ------------------------------------------------------------------
 
       DO 9 IGK1=1,IGKMAX
       DO 9 IGK2=1,IGKMAX
-      AR(IGK1,IGK2)=DREAL(QI(IGK1,IGK2))
+      AR(IGK1,IGK2)=dble(QI(IGK1,IGK2))
       AI(IGK1,IGK2)=DIMAG(QI(IGK1,IGK2))
-      AR(IGK1,IGKMAX+IGK2)=DREAL(QII(IGK1,IGK2))
+      AR(IGK1,IGKMAX+IGK2)=dble(QII(IGK1,IGK2))
       AI(IGK1,IGKMAX+IGK2)=DIMAG(QII(IGK1,IGK2))
-      AR(IGKMAX+IGK1,IGK2)=DREAL(QH1(IGK1,IGK2))
+      AR(IGKMAX+IGK1,IGK2)=dble(QH1(IGK1,IGK2))
       AI(IGKMAX+IGK1,IGK2)=DIMAG(QH1(IGK1,IGK2))
-      AR(IGKMAX+IGK1,IGKMAX+IGK2)=DREAL(QH2(IGK1,IGK2))
+      AR(IGKMAX+IGK1,IGKMAX+IGK2)=dble(QH2(IGK1,IGK2))
       AI(IGKMAX+IGK1,IGKMAX+IGK2)=DIMAG(QH2(IGK1,IGK2))
     9 CONTINUE
       CALL CNAA(IGK2D,IGK2M,AR,AI,RR,RI,VR,VI,IFAIL)
@@ -2545,16 +2545,16 @@ C*****'MACHEP' OF THE SUBROUTINE COMLR2 IS CHOSEN GREATER THAN 2**(-47)
 C*****WARNING!! THE APPROPRIATE LIMITS FOR DIMAG(AKZ(KD))
 C*****DEPEND STRONGLY ON IGMAX.
       IF(DIMAG(AKZ(KD))>0.0_dp) THEN
-      AKZREP(LP)=DREAL(AKZ(KD))
+      AKZREP(LP)=dble(AKZ(KD))
       AKZIMP(LP)=DIMAG(AKZ(KD))
       LP=LP+1
       ELSE
-      AKZREN(LN)=DREAL(AKZ(KD))
+      AKZREN(LN)=dble(AKZ(KD))
       AKZIMN(LN)=DIMAG(AKZ(KD))
       LN=LN+1
       ENDIF
       IF(ABS(DIMAG(AKZ(KD)))>1.0D-2) GO TO 10
-      AKZAP(LU)=DREAL(AKZ(KD))
+      AKZAP(LU)=dble(AKZ(KD))
       AKZIP(LU)=DIMAG(AKZ(KD))
       LU=LU+1
    10 CONTINUE
@@ -2877,14 +2877,6 @@ C
       REAL(dp)   AR1(2),AR2(2)
       COMMON/X1/AR1,AR2
 C
-C ..  INTRINSIC FUNCTIONS ..
-C
-      INTRINSIC DCMPLX,SQRT,DREAL,SIN,COS,dble,ABS,DIMAG
-C
-C ..  EXTERNAL ROUTINES ..
-C
-C     EXTERNAL ELMGEN,LAT2D,PCSLAB,HOSLAB,PAIR,SCAT,BAND,REDUCE
-C
 C ..  DATA STATEMENTS ..
 C
       DATA EMACH/1.D-8/,EPSILON/0.D0/
@@ -2939,7 +2931,7 @@ C
       READ(10,*) DUMMY,(DR(I,ICOMP,1),I=1,3)
                       ELSE
       READ(10,205) MU1(ICOMP),EPS1(ICOMP)
-      IF(DREAL(MU1(ICOMP))<=0.D0.OR.DREAL(EPS1(ICOMP))<=0.D0)
+      IF(dble(MU1(ICOMP))<=0.D0.OR.dble(EPS1(ICOMP))<=0.D0)
      &THEN
       WRITE(6,226)
       STOP
@@ -3033,8 +3025,8 @@ C
       KAPIN =KAPPA0*D1
       KAPOUT=KAPPA0*D2
                                              IF(KTYPE==1) THEN
-                           AK(1)=DREAL(KAPIN)*SIN(THETA)*COS(FI)
-                           AK(2)=DREAL(KAPIN)*SIN(THETA)*SIN(FI)
+                           AK(1)=dble(KAPIN)*SIN(THETA)*COS(FI)
+                           AK(2)=dble(KAPIN)*SIN(THETA)*SIN(FI)
                DO 50 I=1,IGKMAX
                EINCID(I)=CZERO
   50                       CONTINUE
@@ -3045,7 +3037,7 @@ C
       IF(KTYPE/=3) THEN !DEFINE THE POLARIZATION VECTOR FROM "AK"*****
       AKXY=AK(1)*AK(1)+AK(2)*AK(2)
       AKZIN=SQRT(KAPIN*KAPIN-AKXY)
-      IF(DREAL(AKZIN)<EMACH)      STOP 'IMPROPER INCIDENT WAVE'
+      IF(dble(AKZIN)<EMACH)      STOP 'IMPROPER INCIDENT WAVE'
       AKXY=SQRT(AKXY)
       IF(AKXY<EMACH) THEN
       EIN(1)=DCMPLX(COS(FEIN),0.D0)
@@ -3185,7 +3177,7 @@ C
      &                   VEC0,0.D0,QIL,QIIL,QIIIL,QIVL,EMACH)
          CALL PAIR(IGKMAX,QIL,QIIL,QIIIL,QIVL,QIR,QIIR,QIIIR,QIVR)
                       ENDIF
-             CALL SCAT(IGMAX,ZVAL,AK,G,DREAL(KAPIN),DREAL(KAPOUT),
+             CALL SCAT(IGMAX,ZVAL,AK,G,dble(KAPIN),dble(KAPOUT),
      &                 EINCID,QIL,QIIIL)
                      ELSE
 C
