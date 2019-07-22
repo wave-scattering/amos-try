@@ -49,7 +49,7 @@ add_subdirectory(lapack_wrapper)
 
 set(CMAKE_BUILD_TYPE Debug
         CACHE STRING "Build type (Debug, Release)" FORCE)
-set(warn "-Wall -Wextra -Wimplicit-interface -fPIC -fmax-errors=1")
+#set(warn "-Wall -Wextra -Wimplicit-interface -fPIC")# -fmax-errors=1")
 set(CMAKE_Fortran_FLAGS_DEBUG   "${common} ${warn} -g -fbounds-check -fcheck-array-temporaries -fbacktrace")
 
 #    set(CMAKE_BUILD_TYPE Release

@@ -34,7 +34,7 @@ C=======================================================================
 !     complex(dp), parameter :: cone  = (1.0_dp, 0.0_dp)
 !     complex(dp), parameter :: ctwo  = (2.0_dp, 0.0_dp)
       private
-      public cerf, ceven, codd, band, scat, pair, pcslab,
+      public cerf, ceven, codd, band, scat, pcslab,
      & reduce, lat2d
       contains
 C=======================================================================
@@ -2146,112 +2146,6 @@ C
 !     END function
 C=======================================================================
 C=======================================================================
-      SUBROUTINE PAIR(IGKMAX,QIL,QIIL,QIIIL,QIVL,QIR,QIIR,QIIIR,QIVR)
-
-C     ------------------------------------------------------------------
-C     THIS SUBROUTINE CALCULATES SCATTERING Q-MATRICES FOR A  DOUBLE
-C     LAYER, FROM THE CORRESPONDING MATRICES OF THE INDIVIDUAL, LEFT
-C     (L) AND RIGHT (R), LAYERS. THE RESULTS ARE STORED IN Q*L.
-C     -----------------------------------------------------------------
-C
-C ..  PARAMETER STATEMENTS  ..
-C
-      INTEGER   IGD,IGKD
-      PARAMETER (IGD=21,IGKD=2*IGD)
-C
-C ..  SCALAR ARGUMENTS  ..
-C
-      INTEGER IGKMAX
-C
-C ..  ARRAY ARGUMENTS  ..
-C
-      COMPLEX(dp) QIL (IGKD,IGKD),QIIL(IGKD,IGKD),QIIIL(IGKD,IGKD)
-      COMPLEX(dp) QIVL(IGKD,IGKD)
-      COMPLEX(dp) QIR (IGKD,IGKD),QIIR(IGKD,IGKD),QIIIR(IGKD,IGKD)
-      COMPLEX(dp) QIVR(IGKD,IGKD)
-C
-C ..  LOCAL
-      INTEGER    IGK1,IGK2,IGK3
-      REAL(dp)   EMACH
-      INTEGER    INT(IGKD),JNT(IGKD)
-      COMPLEX(dp) QINV1(IGKD,IGKD),QINV2(IGKD,IGKD),W1(IGKD,IGKD)
-      COMPLEX(dp) W2(IGKD,IGKD),W3(IGKD,IGKD),W4(IGKD,IGKD)
-C
-      DATA EMACH/1.D-8/
-C-----------------------------------------------------------------------
-C
-      DO IGK1=1,IGKMAX
-        DO IGK2=1,IGKMAX
-          QINV1(IGK1,IGK2)=QIL (IGK1,IGK2)
-          QINV2(IGK1,IGK2)=QIVR(IGK1,IGK2)
-          W2(IGK1,IGK2)=CZERO
-          W3(IGK1,IGK2)=CZERO
-        end do
-      end do
-
-      DO IGK1=1,IGKMAX
-        W2(IGK1,IGK1)=CONE
-        W3(IGK1,IGK1)=CONE
-        DO IGK2=1,IGKMAX
-          DO IGK3=1,IGKMAX
-            W2(IGK1,IGK2)=W2(IGK1,IGK2)
-     &         -QIIL (IGK1,IGK3)*QIIIR(IGK3,IGK2)
-            W3(IGK1,IGK2)=W3(IGK1,IGK2)
-     &         -QIIIR(IGK1,IGK3)*QIIL (IGK3,IGK2)
-          end do
-        end do
-      end do
-
-      call zgetrf_wrap(w2, int)
-      call zgetrf_wrap(w3, jnt)
-      DO IGK2=1,IGKMAX
-        call zgetrs_wrap(w2, QINV1(:,IGK2), int)
-        call zgetrs_wrap(w3, QINV2(:,IGK2), jnt)
-      end do
-
-      DO IGK1=1,IGKMAX
-        DO IGK2=1,IGKMAX
-          W1(IGK1,IGK2)=CZERO
-          W2(IGK1,IGK2)=CZERO
-          W3(IGK1,IGK2)=CZERO
-          W4(IGK1,IGK2)=CZERO
-          DO IGK3=1,IGKMAX
-            W1(IGK1,IGK2)=W1(IGK1,IGK2)
-     &                    +QIR  (IGK1,IGK3)*QINV1(IGK3,IGK2)
-            W2(IGK1,IGK2)=W2(IGK1,IGK2)
-     &                    +QIIL (IGK1,IGK3)*QINV2(IGK3,IGK2)
-            W3(IGK1,IGK2)=W3(IGK1,IGK2)
-     &                    +QIIIR(IGK1,IGK3)*QINV1(IGK3,IGK2)
-            W4(IGK1,IGK2)=W4(IGK1,IGK2)
-     &                    +QIVL (IGK1,IGK3)*QINV2(IGK3,IGK2)
-          end do
-        end do
-      end do
-
-      DO IGK1=1,IGKMAX
-        DO IGK2=1,IGKMAX
-          QINV1(IGK1,IGK2)=QIIR (IGK1,IGK2)
-          QINV2(IGK1,IGK2)=QIIIL(IGK1,IGK2)
-          DO IGK3=1,IGKMAX
-            QINV1(IGK1,IGK2)=QINV1(IGK1,IGK2)
-     &                       +QIR (IGK1,IGK3)*W2(IGK3,IGK2)
-            QINV2(IGK1,IGK2)=QINV2(IGK1,IGK2)
-     &                       +QIVL(IGK1,IGK3)*W3(IGK3,IGK2)
-          end do
-        end do
-      end do
-
-      DO IGK1=1,IGKMAX
-        DO IGK2=1,IGKMAX
-          QIL  (IGK1,IGK2)=W1   (IGK1,IGK2)
-          QIIL (IGK1,IGK2)=QINV1(IGK1,IGK2)
-          QIIIL(IGK1,IGK2)=QINV2(IGK1,IGK2)
-          QIVL (IGK1,IGK2)=W4   (IGK1,IGK2)
-        end do
-      end do
-
-      RETURN
-      END subroutine
 C=======================================================================
       SUBROUTINE PCSLAB(LMAX,IGMAX,RAP,EPSMED,EPSSPH,MUMED,MUSPH,KAPPA,
      &                  AK,DL,DR,G,ELM,A0,EMACH,QI,QII,QIII,QIV)
@@ -2532,7 +2426,7 @@ C*****'MACHEP' OF THE SUBROUTINE COMLR2 IS CHOSEN GREATER THAN 2**(-47)
       RR(II)=1.D-20
       RI(II)=1.D-20
       ENDIF
-      AKZ(II)=(-CI/PI)*LOG(DCMPLX(RR(II),RI(II))/EAKA) ! NORMALIZED K_Z
+      AKZ(II)=(-CI/PI)*LOG(CMPLX(RR(II),RI(II),kind=dp)/EAKA) ! NORMALIZED K_Z
     8 CONTINUE
       DO 2 LIB2=1,IGK2M
       DO 2 LIB1=1,IGK2M
@@ -3083,12 +2977,12 @@ C
       CALL PCSLAB(LMAX,IGMAX,RAP,EPS1(1),EPSSPH(1,IPL),MU1(1),
      &           MUSPH(1,IPL),KAPPA,AK,DL(1,1,IPL),DR(1,1,IPL),
      &           G,ELM,A0,EMACH, QIR,QIIR,QIIIR,QIVR)
-      CALL PAIR(IGKMAX,QIL,QIIL,QIIIL,QIVL,QIR,QIIR,QIIIR,QIVR)
+      CALL PAIR(IGKMAX,igkd,QIL,QIIL,QIIIL,QIVL,QIR,QIIR,QIIIR,QIVR)
    13 CONTINUE
             ENDIF
       IF(NLAYER(1)>=2) THEN
       DO 14 ILAYER=1,NLAYER(1)-1
-      CALL PAIR(IGKMAX,QIL,QIIL,QIIIL,QIVL,QIL,QIIL,QIIIL,QIVL)
+      CALL PAIR(IGKMAX,igkd,QIL,QIIL,QIIIL,QIVL,QIL,QIIL,QIIIL,QIVL)
    14 CONTINUE
              ENDIF
                       ENDIF
@@ -3130,7 +3024,7 @@ C
      &           MU1(ICOMP),MUSPH(ICOMP,IPL),KAPPA,AK,
      &           DL(1,ICOMP,IPL),DR(1,ICOMP,IPL),G,ELM,A0,EMACH,
      &           QIR,QIIR,QIIIR,QIVR)
-      CALL PAIR(IGKMAX,WIL,WIIL,WIIIL,WIVL,QIR,QIIR,QIIIR,QIVR)
+      CALL PAIR(IGKMAX,igkd,WIL,WIIL,WIIIL,WIVL,QIR,QIIR,QIIIR,QIVR)
    15 CONTINUE
          DO 18 IGK1=1,IGKMAX
          DO 18 IGK2=1,IGKMAX
@@ -3142,11 +3036,11 @@ C
             ENDIF
       IF(NLAYER(ICOMP)>=2) THEN
       DO 16 ILAYER=1,NLAYER(ICOMP)-1
-      CALL PAIR(IGKMAX,QIR,QIIR,QIIIR,QIVR,QIR,QIIR,QIIIR,QIVR)
+      CALL PAIR(IGKMAX,igkd,QIR,QIIR,QIIIR,QIVR,QIR,QIIR,QIIIR,QIVR)
    16 CONTINUE
              ENDIF
                       ENDIF
-      CALL PAIR(IGKMAX,QIL,QIIL,QIIIL,QIVL,QIR,QIIR,QIIIR,QIVR)
+      CALL PAIR(IGKMAX,igkd,QIL,QIIL,QIIIL,QIVL,QIR,QIIR,QIIIR,QIVR)
     4 CONTINUE
                                                                    ENDIF
       IF(KTYPE<3) THEN
@@ -3159,13 +3053,14 @@ C
          IF(ABS(MLAST-MFIRST)/=0.D0.OR.ABS(ELAST-EFIRST)/=0.D0)
      &       STOP 'IMPROPER MATCHING OF SUCCESSIVE HOST MEDIA'
          DO 9 IU=1,NUNIT-1
-             CALL PAIR(IGKMAX,QIL,QIIL,QIIIL,QIVL,QIL,QIIL,QIIIL,QIVL)
+             CALL PAIR(IGKMAX,igkd,QIL,QIIL,QIIIL,QIVL,
+     &                 QIL,QIIL,QIIIL,QIVL)
     9        CONTINUE
    30        CONTINUE
              IF(KEMB==1) THEN
              CALL HOSLAB(IGMAX,KAPR,(KAPR+KAPOUT)/2.D0,KAPOUT,AK,G,VEC0,
      &                   VEC0,0.D0,QIR,QIIR,QIIIR,QIVR,EMACH)
-         CALL PAIR(IGKMAX,QIL,QIIL,QIIIL,QIVL,QIR,QIIR,QIIIR,QIVR)
+         CALL PAIR(IGKMAX,igkd,QIL,QIIL,QIIIL,QIVL,QIR,QIIR,QIIIR,QIVR)
          DO 11 IGK1=1,IGKMAX
          DO 11 IGK2=1,IGKMAX
          QIR  (IGK1,IGK2)=QIL  (IGK1,IGK2)
@@ -3175,7 +3070,7 @@ C
    11        CONTINUE
              CALL HOSLAB(IGMAX,KAPIN,(KAPL+KAPIN)/2.D0,KAPL,AK,G,VEC0,
      &                   VEC0,0.D0,QIL,QIIL,QIIIL,QIVL,EMACH)
-         CALL PAIR(IGKMAX,QIL,QIIL,QIIIL,QIVL,QIR,QIIR,QIIIR,QIVR)
+         CALL PAIR(IGKMAX,igkd,QIL,QIIL,QIIIL,QIVL,QIR,QIIR,QIIIR,QIVR)
                       ENDIF
              CALL SCAT(IGMAX,ZVAL,AK,G,dble(KAPIN),dble(KAPOUT),
      &                 EINCID,QIL,QIIIL)

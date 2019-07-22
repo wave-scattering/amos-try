@@ -11,13 +11,120 @@ module libmultem2b
     complex(dp), parameter, public :: cone  = (1.0_dp, 0.0_dp)
     complex(dp), parameter, public :: ctwo  = (2.0_dp, 0.0_dp)
     real(dp), parameter, public :: pi=4.0_dp*ATAN(1.0_dp)
-    public bessel, tmtrx, sphrm4, ceven, codd, scat, hoslab, blm, elmgen
+    public bessel, tmtrx, sphrm4, ceven, codd, scat, hoslab, blm, elmgen, pair
 contains
     !=======================================================================
     !=======================================================================
     !=======================================================================
     !=======================================================================
     !=======================================================================
+    subroutine pair(igkmax, igkd, qil, qiil, qiiil, qivl, qir, qiir, qiiir, qivr)
+
+        !     ------------------------------------------------------------------
+        !     this subroutine calculates scattering q-matrices for a  double
+        !     layer, from the corresponding matrices of the individual, left
+        !     (l) and right (r), layers. the results are stored in q*l.
+        !     -----------------------------------------------------------------
+        !
+        ! ..  parameter statements  ..
+        !
+!        integer   igd, igkd
+!        parameter (igd = 21, igkd = 2 * igd)
+        !
+        ! ..  scalar arguments  ..
+        !
+        integer igkmax
+        !
+        ! ..  array arguments  ..
+        !
+        integer   igkd
+        complex(dp) qil (:, :), qiil(:, :), qiiil(:, :)
+        complex(dp) qivl(:, :)
+        complex(dp) qir (:, :), qiir(:, :), qiiir(:, :)
+        complex(dp) qivr(:, :)
+        !
+        ! ..  local
+        integer    igk1, igk2, igk3
+        real(dp)   emach
+        integer    int(igkd), jnt(igkd)
+        complex(dp) qinv1(igkd, igkd), qinv2(igkd, igkd), w1(igkd, igkd)
+        complex(dp) w2(igkd, igkd), w3(igkd, igkd), w4(igkd, igkd)
+        !
+        data emach/1.d-8/
+        !-----------------------------------------------------------------------
+        !
+        do igk1 = 1, igkmax
+            do igk2 = 1, igkmax
+                qinv1(igk1, igk2) = qil (igk1, igk2)
+                qinv2(igk1, igk2) = qivr(igk1, igk2)
+                w2(igk1, igk2) = czero
+                w3(igk1, igk2) = czero
+            end do
+        end do
+
+        do igk1 = 1, igkmax
+            w2(igk1, igk1) = cone
+            w3(igk1, igk1) = cone
+            do igk2 = 1, igkmax
+                do igk3 = 1, igkmax
+                    w2(igk1, igk2) = w2(igk1, igk2)&
+                            - qiil (igk1, igk3) * qiiir(igk3, igk2)
+                    w3(igk1, igk2) = w3(igk1, igk2)&
+                            - qiiir(igk1, igk3) * qiil (igk3, igk2)
+                end do
+            end do
+        end do
+
+        call zgetrf_wrap(w2, int)
+        call zgetrf_wrap(w3, jnt)
+        do igk2 = 1, igkmax
+            call zgetrs_wrap(w2, qinv1(:, igk2), int)
+            call zgetrs_wrap(w3, qinv2(:, igk2), jnt)
+        end do
+
+        do igk1 = 1, igkmax
+            do igk2 = 1, igkmax
+                w1(igk1, igk2) = czero
+                w2(igk1, igk2) = czero
+                w3(igk1, igk2) = czero
+                w4(igk1, igk2) = czero
+                do igk3 = 1, igkmax
+                    w1(igk1, igk2) = w1(igk1, igk2)&
+                            + qir  (igk1, igk3) * qinv1(igk3, igk2)
+                    w2(igk1, igk2) = w2(igk1, igk2)&
+                            + qiil (igk1, igk3) * qinv2(igk3, igk2)
+                    w3(igk1, igk2) = w3(igk1, igk2)&
+                            + qiiir(igk1, igk3) * qinv1(igk3, igk2)
+                    w4(igk1, igk2) = w4(igk1, igk2)&
+                            + qivl (igk1, igk3) * qinv2(igk3, igk2)
+                end do
+            end do
+        end do
+
+        do igk1 = 1, igkmax
+            do igk2 = 1, igkmax
+                qinv1(igk1, igk2) = qiir (igk1, igk2)
+                qinv2(igk1, igk2) = qiiil(igk1, igk2)
+                do igk3 = 1, igkmax
+                    qinv1(igk1, igk2) = qinv1(igk1, igk2)&
+                            + qir (igk1, igk3) * w2(igk3, igk2)
+                    qinv2(igk1, igk2) = qinv2(igk1, igk2)&
+                            + qivl(igk1, igk3) * w3(igk3, igk2)
+                end do
+            end do
+        end do
+
+        do igk1 = 1, igkmax
+            do igk2 = 1, igkmax
+                qil  (igk1, igk2) = w1   (igk1, igk2)
+                qiil (igk1, igk2) = qinv1(igk1, igk2)
+                qiiil(igk1, igk2) = qinv2(igk1, igk2)
+                qivl (igk1, igk2) = w4   (igk1, igk2)
+            end do
+        end do
+
+        return
+    end subroutine
     !=======================================================================
     subroutine elmgen(elm, nelmd, lmax)
 
