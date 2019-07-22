@@ -24,7 +24,7 @@ CCCCCCCCC-----------> HERE STARTS THE FORTRAN SOURCE CODE
 C=======================================================================
       module libmultem2a
       use dense_solve
-!      use errfun, only: erf_pop
+      use errfun, only: erf_pop
       use libmultem2b
       implicit none
 !     integer, parameter, public:: dp=kind(0.d0)
@@ -1902,116 +1902,117 @@ C
       INTEGER    NN,N
       REAL(dp)   ABSZ,ABTERM,API,EPS,FACT,FACTD,FACTN
       REAL(dp)   Q,RTPI,TEST,X,Y,YY
-      COMPLEX(dp) ZZ,SUM,ZZS,XZZS,CER!, erf
+      COMPLEX(dp) ZZ,SUM,ZZS,XZZS,CER, erf
       COMPLEX(dp) H1,H2,H3,U1,U2,U3,TERM1,TERM2
 C     ------------------------------------------------------------------
 C
-!     erf = erf_pop(z)
-!     return
-      EPS=5.0_dp*EMACH
-      API=1.0_dp/PI
-      IF(ABS(Z))2,1,2
-   1  cerf=CONE
-      GOTO 29
-C
-C     THE ARGUMENT IS TRANSLATED TO THE FIRST QUADRANT FROM
-C     THE NN_TH QUADRANT, BEFORE THE METHOD FOR THE FUNCTION
-C     EVALUATION IS CHOSEN
-C
-   2  X=dble(Z)
-      Y=aimag(Z)
-      YY=Y
-      IF(Y)6,3,3
-   3  IF(X)5,4,4
-   4  ZZ=Z
-      NN=1
-      GOTO 9
-   5  ZZ=cmplx_dp(-X,Y)
-      NN=2
-      GOTO 9
-   6  YY=-Y
-      IF(X)7,8,8
-   7  ZZ=-Z
-      NN=3
-      GOTO 9
-   8  ZZ=cmplx_dp(X,-Y)
-      NN=4
-   9  ZZS=ZZ*ZZ
-      XZZS=EXP(-ZZS)
-      ABSZ=ABS(ZZ)
-      IF(ABSZ-10.0_dp)10,10,23
-  10  IF(YY-1.0_dp)11,12,12
-  11  IF(ABSZ-4.0_dp)13,18,18
-  12  IF(ABSZ-1.0_dp)13,18,18
-C
-C     POWER SERIES(SEE ABRAMOWITZ AND STEGUN HANDBOOK OF
-C     MATHEMATICAL FUNCTIONS, P297)
-C
-  13  Q=1.0_dp
-      FACTN=-1.0_dp
-      FACTD=1.0_dp
-      TERM1=ZZ
-      SUM=ZZ
-  14  DO 15 N=1,5
-      FACTN=FACTN+2.0_dp
-      FACTD=FACTD+2.0_dp
-      FACT=FACTN/(Q*FACTD)
-      TERM1=FACT*ZZS*TERM1
-      SUM=SUM+TERM1
-  15  Q=Q+1.0_dp
-      ABTERM=ABS(TERM1)
-      IF(ABTERM-EPS)17,16,16
-  16  IF(Q-100.0_dp)14,17,17
-  17  FACT=2.0_dp*SQRT(API)
-      SUM=FACT*CI*SUM
-      CER=XZZS+XZZS*SUM
-      GOTO 24
-C
-C     CONTINUED FRACTION THEORY(W(Z) IS RELATED TO THE LIMITING
-C     VALUE OF U(N,Z)/H(N,Z), WHERE U AND H OBEY THE SAME
-C     RECURRENCE RELATION IN N. SEE FADDEEVA AND TERENTIEV
-C     (TABLES OF VALUES OF W(Z) FOR COMPLEX ARGUMENTS,PERGAMON
-C       N.Y. 1961)
-C
-  18  TERM2=cmplx_dp(1.D6,0.0_dp)
-      Q=1.0_dp
-      H1=CONE
-      H2=2.0_dp*ZZ
-      U1=CZERO
-      RTPI=2.0_dp*SQRT(PI)
-      U2=cmplx_dp(RTPI,0.0_dp)
-  19  TERM1=TERM2
-      DO 20 N=1,5
-      H3=H2*ZZ-Q*H1
-      U3=U2*ZZ-Q*U1
-      H1=H2
-      H2=2.0_dp*H3
-      U1=U2
-      U2=2.0_dp*U3
-  20  Q=Q+1.0_dp
-      TERM2=U3/H3
-      TEST=ABS((TERM2-TERM1)/TERM1)
-      IF(TEST-EPS)22,21,21
-  21  IF(Q-60.0_dp)19,19,13
-  22  CER=API*CI*TERM2
-      GOTO 24
-C
-C     ASYMPTOTIC SERIES: SEE ABRAMOWITZ AND STEGUN, P328
-C
-  23  CER=0.5124242D0/(ZZS-0.2752551D0)+0.05176536D0/(ZZS-2.724745D0)
-      CER=CI*ZZ*CER
-C
-C     SYMMETRY RELATIONS ARE NOW USED TO TRANSFORM THE FUNCTION
-C     BACK TO QUADRANT NN
-C
-  24  GOTO(28,26,27,25),NN
-  25  CER=2.0_dp*XZZS-CER
-  26  cerf=CONJG(CER)
-      GOTO 29
-  27  cerf=2.0_dp*XZZS-CER
-      GOTO 29
-  28  cerf=CER
-  29  RETURN
+      !erf = erf_pop(z)
+      cerf=EXP(-Z**2)*(1.0-ERF_pop(-ci*z))
+      return
+!     EPS=5.0_dp*EMACH
+!     API=1.0_dp/PI
+!     IF(ABS(Z))2,1,2
+!  1  cerf=CONE
+!     GOTO 29
+!
+!     THE ARGUMENT IS TRANSLATED TO THE FIRST QUADRANT FROM
+!     THE NN_TH QUADRANT, BEFORE THE METHOD FOR THE FUNCTION
+!     EVALUATION IS CHOSEN
+!
+!  2  X=dble(Z)
+!     Y=aimag(Z)
+!     YY=Y
+!     IF(Y)6,3,3
+!  3  IF(X)5,4,4
+!  4  ZZ=Z
+!     NN=1
+!     GOTO 9
+!  5  ZZ=cmplx_dp(-X,Y)
+!     NN=2
+!     GOTO 9
+!  6  YY=-Y
+!     IF(X)7,8,8
+!  7  ZZ=-Z
+!     NN=3
+!     GOTO 9
+!  8  ZZ=cmplx_dp(X,-Y)
+!     NN=4
+!  9  ZZS=ZZ*ZZ
+!     XZZS=EXP(-ZZS)
+!     ABSZ=ABS(ZZ)
+!     IF(ABSZ-10.0_dp)10,10,23
+! 10  IF(YY-1.0_dp)11,12,12
+! 11  IF(ABSZ-4.0_dp)13,18,18
+! 12  IF(ABSZ-1.0_dp)13,18,18
+!
+!     POWER SERIES(SEE ABRAMOWITZ AND STEGUN HANDBOOK OF
+!     MATHEMATICAL FUNCTIONS, P297)
+!
+! 13  Q=1.0_dp
+!     FACTN=-1.0_dp
+!     FACTD=1.0_dp
+!     TERM1=ZZ
+!     SUM=ZZ
+! 14  DO 15 N=1,5
+!     FACTN=FACTN+2.0_dp
+!     FACTD=FACTD+2.0_dp
+!     FACT=FACTN/(Q*FACTD)
+!     TERM1=FACT*ZZS*TERM1
+!     SUM=SUM+TERM1
+! 15  Q=Q+1.0_dp
+!     ABTERM=ABS(TERM1)
+!     IF(ABTERM-EPS)17,16,16
+! 16  IF(Q-100.0_dp)14,17,17
+! 17  FACT=2.0_dp*SQRT(API)
+!     SUM=FACT*CI*SUM
+!     CER=XZZS+XZZS*SUM
+!     GOTO 24
+!
+!     CONTINUED FRACTION THEORY(W(Z) IS RELATED TO THE LIMITING
+!     VALUE OF U(N,Z)/H(N,Z), WHERE U AND H OBEY THE SAME
+!     RECURRENCE RELATION IN N. SEE FADDEEVA AND TERENTIEV
+!     (TABLES OF VALUES OF W(Z) FOR COMPLEX ARGUMENTS,PERGAMON
+!       N.Y. 1961)
+!
+! 18  TERM2=cmplx_dp(1.D6,0.0_dp)
+!     Q=1.0_dp
+!     H1=CONE
+!     H2=2.0_dp*ZZ
+!     U1=CZERO
+!     RTPI=2.0_dp*SQRT(PI)
+!     U2=cmplx_dp(RTPI,0.0_dp)
+! 19  TERM1=TERM2
+!     DO 20 N=1,5
+!     H3=H2*ZZ-Q*H1
+!     U3=U2*ZZ-Q*U1
+!     H1=H2
+!     H2=2.0_dp*H3
+!     U1=U2
+!     U2=2.0_dp*U3
+! 20  Q=Q+1.0_dp
+!     TERM2=U3/H3
+!     TEST=ABS((TERM2-TERM1)/TERM1)
+!     IF(TEST-EPS)22,21,21
+! 21  IF(Q-60.0_dp)19,19,13
+! 22  CER=API*CI*TERM2
+!     GOTO 24
+!
+!     ASYMPTOTIC SERIES: SEE ABRAMOWITZ AND STEGUN, P328
+!
+! 23  CER=0.5124242D0/(ZZS-0.2752551D0)+0.05176536D0/(ZZS-2.724745D0)
+!     CER=CI*ZZ*CER
+!
+!     SYMMETRY RELATIONS ARE NOW USED TO TRANSFORM THE FUNCTION
+!     BACK TO QUADRANT NN
+!
+! 24  GOTO(28,26,27,25),NN
+! 25  CER=2.0_dp*XZZS-CER
+! 26  cerf=CONJG(CER)
+!     GOTO 29
+! 27  cerf=2.0_dp*XZZS-CER
+!     GOTO 29
+! 28  cerf=CER
+! 29  RETURN
 
       END function
 !=======================================================================
@@ -2747,9 +2748,9 @@ C
       COMPLEX(dp)   MUEMBR,EPSEMBR,D2,KAPOUT
       COMPLEX(dp)   KAPPAL,KAPPAR,KAPPASL,D1,KAPIN,KAPL,KAPR
       COMPLEX(dp)   MLAST,ELAST,MFIRST,EFIRST,RAP
-      CHARACTER*2  POLAR
-      CHARACTER*17 TEXT1(2)
-      CHARACTER*5  DUMMY
+      CHARACTER(2)  POLAR
+      CHARACTER(17) TEXT1(2)
+      CHARACTER(5)  DUMMY
 C
 C ..  ARRAY VARIABLES ..
 C

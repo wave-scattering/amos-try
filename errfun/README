@@ -1,0 +1,15 @@
+$Id: README 11 2016-08-15 19:49:44Z mexas $
+
+15-AUG-2016: version 1
+- added TOMS 680, reimplemented in Fortran 2008
+- wpop - Faddeyeva function using TOMS 680 algorithm
+- erf_pop - the error function using wpop
+- wzag - Faddeyeva using TOMS 916
+- erf_zag - erf using wzag
+- test program calculates the values in Abramowitz, Stegun,
+  p. 325-328.
+
+11-AUG-2016: initial commit
+errfun.f90 - the module with 2 functions:
+- fad - Faddeyeva, w(z)
+- erf_complex - error function of a complex argument.

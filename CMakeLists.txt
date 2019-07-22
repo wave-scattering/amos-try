@@ -56,7 +56,7 @@ set(CMAKE_Fortran_FLAGS_DEBUG   "${common} ${warn} -g -fbounds-check -fcheck-arr
 #            CACHE STRING "Build type (Debug, Release)" FORCE)
 #set(CMAKE_Fortran_FLAGS_RELEASE "${common} -O3 -march=native -ffast-math -funroll-loops -mtune=native -fopenmp" )
 
-#add_subdirectory(errfun)
+add_subdirectory(errfun)
 #add_subdirectory(cylinder)
 add_subdirectory(multem2mod)
 
