@@ -219,49 +219,55 @@ contains
         do i = 1, nn
             fac(i + 1) = dble(i) * fac(i)
         end do
-!        TODO: remove arithmetic if in BLM()
-        if(m1 + m2 + m3)8, 21, 8
-        21  if(l1 - lmax - lmax)2, 2, 19
-        2  if(l2 - lmax)3, 3, 19
-        3  if(l3 - lmax)4, 4, 19
-        4  if(l1 - iabs(m1))19, 5, 5
-        5  if(l2 - iabs(m2))19, 6, 6
-        6  if(l3 - iabs(m3))19, 7, 7
-        7  if(mod  (l1 + l2 + l3, 2))8, 9, 8
-        8  blm = 0.0_dp
-        return
-        9  nl1 = l1
+
+        if(m1 + m2 + m3 /= 0) then
+           blm = 0.0_dp
+           return
+        end if
+        if ((l1 - lmax - lmax > 0).or.(l2 - lmax >0).or.(l3 - lmax >0) &
+           .or.(l1 - iabs(m1)<0).or.(l2 - iabs(m2)<0).or.(l3 - iabs(m3)<0)) then
+            stop 'invalid arguments for blm'
+        end if
+        if(mod  (l1 + l2 + l3, 2) /= 0) then
+            blm = 0.0_dp
+            return
+        end if
+        nl1 = l1
         nl2 = l2
         nl3 = l3
         nm1 = iabs(m1)
         nm2 = iabs(m2)
         nm3 = iabs(m3)
         ic = (nm1 + nm2 + nm3) / 2
-        if(max0(nm1, nm2, nm3) - nm1)13, 13, 10
-        10  if(max0(nm2, nm3) - nm2)11, 11, 12
-        11  nl1 = l2
-        nl2 = l1
-        nm1 = nm2
-        nm2 = iabs(m1)
-        goto 13
-        12  nl1 = l3
-        nl3 = l1
-        nm1 = nm3
-        nm3 = iabs(m1)
-        13  if(nl2 - nl3)14, 15, 15
-        14  ntemp = nl2
-        nl2 = nl3
-        nl3 = ntemp
-        ntemp = nm2
-        nm2 = nm3
-        nm3 = ntemp
-        15  if(nl3 - iabs(nl2 - nl1))16, 17, 17
-        16  blm = 0.0_dp
-        return
+        if(max0(nm1, nm2, nm3) - nm1 > 0) then
+            if(max0(nm2, nm3) - nm2 > 0) then
+                nl1 = l3
+                nl3 = l1
+                nm1 = nm3
+                nm3 = iabs(m1)
+            else
+                nl1 = l2
+                nl2 = l1
+                nm1 = nm2
+                nm2 = iabs(m1)
+            end if
+        end if
+        if(nl2 - nl3 <0) then
+            ntemp = nl2
+            nl2 = nl3
+            nl3 = ntemp
+            ntemp = nm2
+            nm2 = nm3
+            nm3 = ntemp
+        end if
+        if(nl3 - iabs(nl2 - nl1) < 0) then
+                blm = 0.0_dp
+                return
+        end if
         !
         !     calculation of factor  'a'.
         !
-        17  is = (nl1 + nl2 + nl3) / 2
+        is = (nl1 + nl2 + nl3) / 2
         ia1 = is - nl2 - nm3
         ia2 = nl2 + nm2
         ia3 = nl2 - nm2
@@ -317,9 +323,6 @@ contains
         c = cn / (pi * cd)
         c = (sqrt(c)) / 2.0_dp
         blm = ((-1.0_dp)**ic) * a * b * c
-        return
-        19  write(6, 20)l1, l2, m2, l3, m3
-        20  format(28h invalid arguments for blm. , 5(i2, 1h,))
         return
     end function
     !=======================================================================
