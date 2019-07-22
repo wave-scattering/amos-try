@@ -1,7 +1,7 @@
 module libmultem2b
     use dense_solve
     use amos
-!    use libmultem2a
+    use errfun, only: erf_pop
 
     implicit none
     private
@@ -12,11 +12,18 @@ module libmultem2b
     complex(dp), parameter, public :: ctwo  = (2.0_dp, 0.0_dp)
     real(dp), parameter, public :: pi=4.0_dp*ATAN(1.0_dp)
     public bessel, tmtrx, sphrm4, ceven, codd, scat, hoslab, blm, elmgen, &
-           pair, cmplx_dp
+           pair, cmplx_dp, cerf
 contains
     !=======================================================================
     !=======================================================================
     !=======================================================================
+    complex(dp) function cerf(z)
+        !     cerf,given complex argument z,provides the complex error function:
+        !     w(z)=exp(-z**2)*(1.0-erf(-i*z))
+        complex(dp), intent(in):: z
+        cerf=exp(-z**2)*(1.0-erf_pop(-ci*z))
+        return
+    end function
     !=======================================================================
     complex(dp) function cmplx_dp(re, im)
         real(dp), intent(in) :: re, im
