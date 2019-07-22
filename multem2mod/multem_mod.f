@@ -80,11 +80,11 @@ C     ------------------------------------------------------------------
       CC=CONE
       DO L=1,LMAX
         CC=CC/CI
-        COEF=C0*CC/SQRT(DFLOAT(L*(L+1)))
+        COEF=C0*CC/SQRT(dble(L*(L+1)))
         DO M=-L,L
           II=II+1
-          ALPHA=SQRT(DFLOAT((L-M)*(L+M+1)))/2.0_dp
-          BETA =SQRT(DFLOAT((L+M)*(L-M+1)))/2.0_dp
+          ALPHA=SQRT(dble((L-M)*(L+M+1)))/2.0_dp
+          BETA =SQRT(dble((L+M)*(L-M+1)))/2.0_dp
           if(ABS(M+1)<=L)  then
             I=L*L+L+M+2
             Z1=YLM(I)
@@ -99,11 +99,11 @@ C     ------------------------------------------------------------------
           end if
           I=L*L+L+M+1
           Z3=YLM(I)
-          DLMH(1,II)=COEF*(BETA*CT*CF*Z2-DFLOAT(M)*ST*Z3
+          DLMH(1,II)=COEF*(BETA*CT*CF*Z2-dble(M)*ST*Z3
      &             +ALPHA*CT*CONJG(CF)*Z1)
           DLMH(2,II)=COEF*CI*(BETA*CF*Z2-ALPHA*CONJG(CF)*Z1)
           DLME(1,II)=COEF*CI*(BETA*CF*Z2-ALPHA*CONJG(CF)*Z1)
-          DLME(2,II)=-COEF*(BETA*CT*CF*Z2-DFLOAT(M)*ST*Z3
+          DLME(2,II)=-COEF*(BETA*CT*CF*Z2-dble(M)*ST*Z3
      &             +ALPHA*CT*CONJG(CF)*Z1)
         end do
       end do
@@ -371,25 +371,25 @@ C
       SIGNUS=-1.0_dp
       DO 1 L=1,LMAX
       CC=CC*CI
-      A=DFLOAT(L*(L+1))
+      A=dble(L*(L+1))
       CC1=CC/SQRT(A)
       DO 2 M=-L,L
       SIGNUS=-SIGNUS
       II=II+1
       IF(ABS(M+1)<=L)  then
       I=L*L+L-M
-      Z1=CC1*SQRT(DFLOAT((L-M)*(L+M+1)))*YLM(I)/2.0_dp
+      Z1=CC1*SQRT(dble((L-M)*(L+M+1)))*YLM(I)/2.0_dp
                          else
       Z1=CZERO
                          end if
       IF(ABS(M-1)<=L)  then
       I=L*L+L-M+2
-      Z2=CC1*SQRT(DFLOAT((L+M)*(L-M+1)))*YLM(I)/2.0_dp
+      Z2=CC1*SQRT(dble((L+M)*(L-M+1)))*YLM(I)/2.0_dp
                          else
       Z2=CZERO
                          end if
       I=L*L+L-M+1
-      Z3=CC1*DFLOAT(M)*YLM(I)
+      Z3=CC1*dble(M)*YLM(I)
       AE(1,II)= SIGNUS*CI*(CF*Z1-CONJG(CF)*Z2)
       AE(2,II)=-SIGNUS*(CT*CF*Z1+ST*Z3+CT*CONJG(CF)*Z2)
       AH(1,II)= SIGNUS*(CT*CF*Z1+ST*Z3+CT*CONJG(CF)*Z2)
@@ -439,18 +439,18 @@ C     ------------------------------------------------------------------
       IAOD=IAOD+1
       IA=IAOD
                               END IF
-      UP=DFLOAT(2*LA+1)
+      UP=dble(2*LA+1)
       SIGNUS=-SIGNUS
       C=SIGNUS*C0
       B1=0.0_dp
       IF(ABS(MA+1)<=(LA-1)) B1=BLM(LA-1,MA+1,1,-1,LA,-MA,LMAX)
       B2=0.0_dp
       IF(ABS(MA-1)<=(LA-1)) B2=BLM(LA-1,MA-1,1, 1,LA,-MA,LMAX)
-      U1=DFLOAT((LA+MA)*(LA-MA))
-      U2=DFLOAT((2*LA-1)*(2*LA+1))
+      U1=dble((LA+MA)*(LA-MA))
+      U2=dble((2*LA-1)*(2*LA+1))
       B3=SQRT(U1/U2)
-      ALPHA1=SQRT(DFLOAT((LA-MA)*(LA+MA+1)))/2.0_dp
-      BETA1 =SQRT(DFLOAT((LA+MA)*(LA-MA+1)))/2.0_dp
+      ALPHA1=SQRT(dble((LA-MA)*(LA+MA+1)))/2.0_dp
+      BETA1 =SQRT(dble((LA+MA)*(LA-MA+1)))/2.0_dp
       IBOD=0
       IBEV=LMXOD
       DO 2 LB=1,LMAX
@@ -462,10 +462,10 @@ C     ------------------------------------------------------------------
       IBOD=IBOD+1
       IB=IBOD
                               END IF
-      A=DFLOAT(LB*(LB+1)*LA*(LA+1))
+      A=dble(LB*(LB+1)*LA*(LA+1))
       DOWN=SQRT(A)
-      ALPHA2=SQRT(DFLOAT((LB-MB)*(LB+MB+1)))/2.0_dp
-      BETA2 =SQRT(DFLOAT((LB+MB)*(LB-MB+1)))/2.0_dp
+      ALPHA2=SQRT(dble((LB-MB)*(LB+MB+1)))/2.0_dp
+      BETA2 =SQRT(dble((LB+MB)*(LB-MB+1)))/2.0_dp
       LTT=LA+MA+LB+MB
           IF(MOD(LTT,2)/=0)           then
              IF(MOD((LA+MA),2)==0)       then
@@ -474,7 +474,7 @@ C     ------------------------------------------------------------------
              Z3=CODD (LB,MB  ,LA-1,MA  ,XODD )
              Z1= C*ALPHA2*B1*Z1
              Z2=-C*BETA2* B2*Z2
-             Z3=DFLOAT(MB)*B3*Z3
+             Z3=dble(MB)*B3*Z3
              OMEGA2=UP*(Z1+Z2+Z3)/DOWN
              XXMAT1(IA,IB)=-TH(LA+1)*OMEGA2
              XXMAT2(IA,IB)= TE(LA+1)*OMEGA2
@@ -484,7 +484,7 @@ C     ------------------------------------------------------------------
              Z3=CEVEN(LB,MB  ,LA-1,MA  ,XEVEN)
              Z1= C*ALPHA2*B1*Z1
              Z2=-C*BETA2* B2*Z2
-             Z3=DFLOAT(MB)*B3*Z3
+             Z3=dble(MB)*B3*Z3
              OMEGA2=UP*(Z1+Z2+Z3)/DOWN
              XXMAT1(IA,IB)= TE(LA+1)*OMEGA2
              XXMAT2(IA,IB)=-TH(LA+1)*OMEGA2
@@ -496,7 +496,7 @@ C     ------------------------------------------------------------------
              Z3=CEVEN(LB,MB  ,LA,MA  ,XEVEN)
              Z1=2.0_dp*BETA1 *BETA2 *Z1
              Z2=2.0_dp*ALPHA1*ALPHA2*Z2
-             Z3=DFLOAT(MA)*DFLOAT(MB)*Z3
+             Z3=dble(MA)*dble(MB)*Z3
              OMEGA1=(Z1+Z2+Z3)/DOWN
              XXMAT1(IA,IB)=-TH(LA+1)*OMEGA1
              XXMAT2(IA,IB)=-TE(LA+1)*OMEGA1
@@ -506,7 +506,7 @@ C     ------------------------------------------------------------------
              Z3=CODD (LB,MB  ,LA,MA  ,XODD )
              Z1=2.0_dp*BETA1 *BETA2 *Z1
              Z2=2.0_dp*ALPHA1*ALPHA2*Z2
-             Z3=DFLOAT(MA)*DFLOAT(MB)*Z3
+             Z3=dble(MA)*dble(MB)*Z3
              OMEGA1=(Z1+Z2+Z3)/DOWN
              XXMAT1(IA,IB)=-TE(LA+1)*OMEGA1
              XXMAT2(IA,IB)=-TH(LA+1)*OMEGA1
@@ -591,7 +591,7 @@ C
       FAC(1)=1.0_dp
       II=L2MAX+L2MAX
       DO 2 I=1,II
-   2  FAC(I+1)=DFLOAT(I)*FAC(I)
+   2  FAC(I+1)=dble(I)*FAC(I)
       NNDLM=L2MAX*(L2MAX+3)/2+1
       DO 3 I=1,NNDLM
    3  DLM(I)=CZERO
@@ -660,7 +660,7 @@ C
       N1=-1
    9  N1=N1+1
       NA=N1+N1+II
-      AN1=DFLOAT(N1)
+      AN1=dble(N1)
       AN2=-AN1-1.0_dp
       DO 22 I1=1,NA
       AN2=AN2+1.0_dp
@@ -813,7 +813,7 @@ C
       N1=0
   32  N1=N1+1
       NA=N1+N1
-      AN1=DFLOAT(N1)
+      AN1=dble(N1)
       AN2=-AN1-1.0_dp
       DO 40 I1=1,NA
       AN2=AN2+1.0_dp
@@ -2042,7 +2042,7 @@ C
 !     FAC(1)=1.0_dp
 !     NN=4*LMAX+1
 !     DO 1 I=1,NN
-!  1  FAC(I+1)=DFLOAT(I)*FAC(I)
+!  1  FAC(I+1)=dble(I)*FAC(I)
 !     IF(M1+M2+M3)8,21,8
 ! 21  IF(L1-LMAX-LMAX)2,2,19
 !  2  IF(L2-LMAX)3,3,19
@@ -2133,7 +2133,7 @@ C
 !     IC4=NL2+NM2
 !     IC5=NL3-NM3
 !     IC6=NL3+NM3
-!     CN=DFLOAT((2*NL1+1)*(2*NL2+1)*(2*NL3+1))*FAC(IC1+1)*FAC(IC3+1)*
+!     CN=dble((2*NL1+1)*(2*NL2+1)*(2*NL3+1))*FAC(IC1+1)*FAC(IC3+1)*
 !    1FAC(IC5+1)
 !     CD=FAC(IC2+1)*FAC(IC4+1)*FAC(IC6+1)
 !     C=CN/(PI*CD)
@@ -2498,8 +2498,10 @@ C     ------------------------------------------------------------------
     5 CONTINUE
 
 !     call zgetrf_wrap(QIV, int)
-!     call zgetrs_wrap(QIV, QH1(1,:), int)
-!     call zgetrs_wrap(QIV, QH2(1,:), int)
+!     do IGK2=1,IGKMAX
+!     call zgetrs_wrap(QIV, QH1(:,IGK2), int)
+!     call zgetrs_wrap(QIV, QH2(:,IGK2), int)
+!     end do
 
       CALL ZGE(QIV,INT,IGKMAX,IGKD,EMACH)
       do IGK2=1,IGKMAX
@@ -2877,7 +2879,7 @@ C
 C
 C ..  INTRINSIC FUNCTIONS ..
 C
-      INTRINSIC DCMPLX,SQRT,DREAL,SIN,COS,DFLOAT,ABS,DIMAG
+      INTRINSIC DCMPLX,SQRT,DREAL,SIN,COS,dble,ABS,DIMAG
 C
 C ..  EXTERNAL ROUTINES ..
 C
@@ -3007,7 +3009,7 @@ C
       G(2,IG1)=NT1(IG1)*B1(2)+NT2(IG1)*B2(2)
       WRITE(6,215) IG1,NT1(IG1),NT2(IG1),VECMOD(IG1)
     5 CONTINUE
-      ZSTEP=(ZSUP-ZINF)/DFLOAT(NP-1)
+      ZSTEP=(ZSUP-ZINF)/dble(NP-1)
       ZVAL=ZINF-ZSTEP
       IF(KTYPE<3) THEN
       IF(KSCAN==1) WRITE(6,216)

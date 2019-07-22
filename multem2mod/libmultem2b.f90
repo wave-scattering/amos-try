@@ -108,7 +108,7 @@ contains
         fac(1) = 1.0_dp
         nn = 4 * lmax + 1
         do i = 1, nn
-            fac(i + 1) = dfloat(i) * fac(i)
+            fac(i + 1) = dble(i) * fac(i)
         end do
 !        TODO: remove arithmetic if in BLM()
         if(m1 + m2 + m3)8, 21, 8
@@ -202,7 +202,7 @@ contains
         ic4 = nl2 + nm2
         ic5 = nl3 - nm3
         ic6 = nl3 + nm3
-        cn = dfloat((2 * nl1 + 1) * (2 * nl2 + 1) * (2 * nl3 + 1)) * fac(ic1 + 1) * fac(ic3 + 1) * &
+        cn = dble((2 * nl1 + 1) * (2 * nl2 + 1) * (2 * nl3 + 1)) * fac(ic1 + 1) * fac(ic3 + 1) * &
                 fac(ic5 + 1)
         cd = fac(ic2 + 1) * fac(ic4 + 1) * fac(ic6 + 1)
         c = cn / (pi * cd)
