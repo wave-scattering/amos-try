@@ -124,18 +124,12 @@ C=======================================================================
 !     FOR  L2,M2; AND L3,M3; ODD. THEN FOR L2,M2; AND L3,M3; EVEN, USING
 !     THE SAME SCHEME AS THAT BY WHICH THEY ARE ACCESSED IN XMAT.
 !     ------------------------------------------------------------------
-!
-! ..  SCALAR ARGUMENTS  ..
-!
-!     INTEGER NELMD,LMAX
-!
-! ..  ARRAY ARGUMENTS  ..
-!
-!     REAL(dp) ELM(NELMD)
-!
-! ..  LOCAL SCALARS  ..
-!
-!     INTEGER K,II,LL,IL2,L2,M2,I2,IL3,L3,M3,I3,LA1,LB1,LA11,LB11,M1
+!! ..  SCALAR ARGUMENTS  ..
+!!     INTEGER NELMD,LMAX
+!! ..  ARRAY ARGUMENTS  ..
+!!     REAL(dp) ELM(NELMD)
+!! ..  LOCAL SCALARS  ..
+!!     INTEGER K,II,LL,IL2,L2,M2,I2,IL3,L3,M3,I3,LA1,LB1,LA11,LB11,M1
 !     INTEGER L11,L1,L
 !     REAL(dp) FOURPI
 !     ------------------------------------------------------------------
@@ -2208,17 +2202,12 @@ C
         end do
       end do
 
-!     call zgetrf_wrap(w2, int)
-!     call zgetrf_wrap(w3, jnt)
-!     call zgetrs_wrap(w2, QINV1(1,:), int)
-!     call zgetrs_wrap(w3, QINV2(1,:), jnt)
-
-       CALL ZGE(W2,INT,IGKMAX,IGKD,EMACH)
-       CALL ZGE(W3,JNT,IGKMAX,IGKD,EMACH)
-       DO IGK2=1,IGKMAX
-         CALL ZSU(W2,INT,QINV1(1,IGK2),IGKMAX,IGKD,EMACH)
-         CALL ZSU(W3,JNT,QINV2(1,IGK2),IGKMAX,IGKD,EMACH)
-       end do
+      call zgetrf_wrap(w2, int)
+      call zgetrf_wrap(w3, jnt)
+      DO IGK2=1,IGKMAX
+        call zgetrs_wrap(w2, QINV1(:,IGK2), int)
+        call zgetrs_wrap(w3, QINV2(:,IGK2), jnt)
+      end do
 
       DO IGK1=1,IGKMAX
         DO IGK2=1,IGKMAX
