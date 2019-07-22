@@ -157,38 +157,35 @@ contains
         fourpi = 4.0_dp * pi
         k = 1
         ii = 0
-        1  ll = lmax + ii
-        do il2 = 1, ll
-            l2 = il2 - ii
-            m2 = -l2 + 1 - ii
-            do i2 = 1, il2
-                do il3 = 1, ll
-                    l3 = il3 - ii
-                    m3 = -l3 + 1 - ii
-                    do i3 = 1, il3
-                        la1 = max0(iabs(l2 - l3), iabs(m2 - m3))
-                        lb1 = l2 + l3
-                        la11 = la1 + 1
-                        lb11 = lb1 + 1
-                        m1 = m2 - m3
-                        do l11 = la11, lb11, 2
-                            l1 = l11 - 1
-                            l = (l2 - l3 - l1) / 2 + m2
-                            elm(k) = ((-1.0_dp)**l) * fourpi * blm(l1, m1, l3, m3, l2, -m2, lmax&
-                                    )
-                            k = k + 1
-                        end do
-                        m3 = m3 + 2
-                    end do
-                end do
-                m2 = m2 + 2
-            end do
+        do ii = 0, 1
+          ll = lmax + ii
+          do il2 = 1, ll
+              l2 = il2 - ii
+              m2 = -l2 + 1 - ii
+              do i2 = 1, il2
+                  do il3 = 1, ll
+                      l3 = il3 - ii
+                      m3 = -l3 + 1 - ii
+                      do i3 = 1, il3
+                          la1 = max0(iabs(l2 - l3), iabs(m2 - m3))
+                          lb1 = l2 + l3
+                          la11 = la1 + 1
+                          lb11 = lb1 + 1
+                          m1 = m2 - m3
+                          do l11 = la11, lb11, 2
+                              l1 = l11 - 1
+                              l = (l2 - l3 - l1) / 2 + m2
+                              elm(k) = ((-1.0_dp)**l) * fourpi * blm(l1, m1, l3, m3, l2, -m2, lmax&
+                                      )
+                              k = k + 1
+                          end do
+                          m3 = m3 + 2
+                      end do
+                  end do
+                  m2 = m2 + 2
+              end do
+          end do
         end do
-        !        TODO: convert arithmetic if into some loop in elmgen()
-        if(ii)7, 7, 8
-        7  ii = 1
-        goto 1
-        8  continue
         return
     end subroutine
     !=======================================================================
