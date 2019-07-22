@@ -45,7 +45,7 @@ add_subdirectory(amos)
 add_subdirectory(try-zbesj)
 add_subdirectory(lapack_wrapper)
 
-#set(common "-std=f2003")
+set(common "-std=f2003")
 
 set(CMAKE_BUILD_TYPE Debug
         CACHE STRING "Build type (Debug, Release)" FORCE)

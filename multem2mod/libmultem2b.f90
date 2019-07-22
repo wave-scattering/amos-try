@@ -11,12 +11,17 @@ module libmultem2b
     complex(dp), parameter, public :: cone  = (1.0_dp, 0.0_dp)
     complex(dp), parameter, public :: ctwo  = (2.0_dp, 0.0_dp)
     real(dp), parameter, public :: pi=4.0_dp*ATAN(1.0_dp)
-    public bessel, tmtrx, sphrm4, ceven, codd, scat, hoslab, blm, elmgen, pair
+    public bessel, tmtrx, sphrm4, ceven, codd, scat, hoslab, blm, elmgen, &
+           pair, cmplx_dp
 contains
     !=======================================================================
     !=======================================================================
     !=======================================================================
     !=======================================================================
+    complex(dp) function cmplx_dp(re, im)
+        real(dp), intent(in) :: re, im
+        cmplx_dp = cmplx(re,im, kind=dp)
+    end function cmplx_dp
     !=======================================================================
     subroutine pair(igkmax, igkd, qil, qiil, qiiil, qivl, qir, qiir, qiiir, qivr)
 

@@ -74,7 +74,7 @@ C     ------------------------------------------------------------------
       CT=GK(3)/KAPPA
       ST=AKPAR/KAPPA
       CF=CONE
-      IF(AKPAR>1.D-8) CF=DCMPLX(AKG1/AKPAR,AKG2/AKPAR)
+      IF(AKPAR>1.D-8) CF=cmplx_dp(AKG1/AKPAR,AKG2/AKPAR)
       CALL SPHRM4(YLM,CT,ST,CF,LMAX)
       II=1
       CC=CONE
@@ -367,7 +367,7 @@ C
       N3=GK(3)/KAPPA
       CALL SPHRM4(YLM,CT,ST,CF,LMAX)
       II=1
-      CC=DCMPLX(FPI,0.0_dp)
+      CC=cmplx_dp(FPI,0.0_dp)
       SIGNUS=-1.0_dp
       DO 1 L=1,LMAX
       CC=CC*CI
@@ -605,7 +605,7 @@ C
       AL=ABS(ALPHA)
       IF(EXP(AL)*EMACH-5.0D-5)5,5,4
    4  AL=LOG(5.0D-5/EMACH)
-   5  ALPHA=DCMPLX(AL,0.0_dp)
+   5  ALPHA=cmplx_dp(AL,0.0_dp)
       RTA=SQRT(ALPHA)
 C
 C     DLM1 , THE  SUM  OVER  RECIPROCAL   LATTICE  VECTORS  , IS
@@ -701,13 +701,13 @@ C
       GP=SQRT(GPSQ)
       XPK=CZERO
       GK=CZERO
-      GKK=DCMPLX(1.0_dp,0.0_dp)
+      GKK=cmplx_dp(1.0_dp,0.0_dp)
       IF(AC-EMACH)11,11,10
-  10  XPK=DCMPLX(AKPT(1)/AC,AKPT(2)/AC)
+  10  XPK=cmplx_dp(AKPT(1)/AC,AKPT(2)/AC)
       GK=AC/KAPPA
       GKK=GPSQ/KAPSQ
-  11  XPM(1)=DCMPLX(1.0_dp,0.0_dp)
-      AGK(1)=DCMPLX(1.0_dp,0.0_dp)
+  11  XPM(1)=cmplx_dp(1.0_dp,0.0_dp)
+      AGK(1)=cmplx_dp(1.0_dp,0.0_dp)
       DO 12 I=2,LL2
       XPM(I)=XPM(I-1)*XPK
   12  AGK(I)=AGK(I-1)*GK
@@ -824,8 +824,8 @@ C
       R(1)=AN1*AR1(1)+AN2*AR2(1)
       R(2)=AN1*AR1(2)+AN2*AR2(2)
       AR=SQRT(R(1)*R(1)+R(2)*R(2))
-      XPK=DCMPLX(R(1)/AR,R(2)/AR)
-      XPM(1)=DCMPLX(1.0_dp,0.0_dp)
+      XPK=cmplx_dp(R(1)/AR,R(2)/AR)
+      XPM(1)=cmplx_dp(1.0_dp,0.0_dp)
       DO 33 I=2,LL2
   33  XPM(I)=XPM(I-1)*XPK
       AD=AK(1)*R(1)+AK(2)*R(2)
@@ -859,7 +859,7 @@ C
       KK=1
       AL=-0.5_dp
       CP=RTA
-      CF=DCMPLX(1.0_dp,0.0_dp)
+      CF=cmplx_dp(1.0_dp,0.0_dp)
       DO 39 L=1,LL2
       MM=1
       IF(MOD  (L,2))35,34,35
@@ -1517,7 +1517,7 @@ C
             YR = AR(I,MM1)
             YI = AI(I,MM1)
             IF (YR == 0.0_dp .AND. YI == 0.0_dp) GO TO 160
-            Z3 = DCMPLX(YR,YI) / DCMPLX(XR,XI)
+            Z3 = cmplx_dp(YR,YI) / cmplx_dp(XR,XI)
             YR = dble(Z3)
             YI = aimag (Z3)
             AR(I,MM1) = YR
@@ -1678,13 +1678,13 @@ C     ********** FORM SHIFT **********
       IF (XR == 0.0_dp .AND. XI == 0.0_dp) GO TO 340
       YR = (HR(ENM1,ENM1) - SR) / 2.0_dp
       YI = (HI(ENM1,ENM1) - SI) / 2.0_dp
-      Z3 = SQRT(DCMPLX(YR**2-YI**2+XR,2.0_dp*YR*YI+XI))
+      Z3 = SQRT(cmplx_dp(YR**2-YI**2+XR,2.0_dp*YR*YI+XI))
       ZZR = dble(Z3)
       ZZI = aimag(Z3)
       IF (YR * ZZR + YI * ZZI >= 0.0_dp) GO TO 310
       ZZR = -ZZR
       ZZI = -ZZI
-  310 Z3 = DCMPLX(XR,XI) / DCMPLX(YR+ZZR,YI+ZZI)
+  310 Z3 = cmplx_dp(XR,XI) / cmplx_dp(YR+ZZR,YI+ZZI)
       SR = SR - dble(Z3)
       SI = SI - aimag(Z3)
       GO TO 340
@@ -1736,10 +1736,10 @@ C     ********** INTERCHANGE ROWS OF HR AND HI **********
             HI(I,J) = ZZI
   440    CONTINUE
 C
-         Z3 = DCMPLX(XR,XI) / DCMPLX(YR,YI)
+         Z3 = cmplx_dp(XR,XI) / cmplx_dp(YR,YI)
          WR(I) = 1.0_dp
          GO TO 480
-  460    Z3 = DCMPLX(YR,YI) / DCMPLX(XR,XI)
+  460    Z3 = cmplx_dp(YR,YI) / cmplx_dp(XR,XI)
          WR(I) = -1.0_dp
   480    ZZR = dble(Z3)
          ZZI = aimag(Z3)
@@ -1834,7 +1834,7 @@ C
   760       YR = XR - WR(I)
             YI = XI - WI(I)
             IF (YR == 0.0_dp .AND. YI == 0.0_dp) YR = MACHEP * NORM
-            Z3 = DCMPLX(ZZR,ZZI) / DCMPLX(YR,YI)
+            Z3 = cmplx_dp(ZZR,ZZI) / cmplx_dp(YR,YI)
             HR(I,EN) = dble(Z3)
             HI(I,EN) = aimag(Z3)
   780    CONTINUE
@@ -1926,7 +1926,7 @@ C
    4  ZZ=Z
       NN=1
       GOTO 9
-   5  ZZ=DCMPLX(-X,Y)
+   5  ZZ=cmplx_dp(-X,Y)
       NN=2
       GOTO 9
    6  YY=-Y
@@ -1934,7 +1934,7 @@ C
    7  ZZ=-Z
       NN=3
       GOTO 9
-   8  ZZ=DCMPLX(X,-Y)
+   8  ZZ=cmplx_dp(X,-Y)
       NN=4
    9  ZZS=ZZ*ZZ
       XZZS=EXP(-ZZS)
@@ -1973,13 +1973,13 @@ C     RECURRENCE RELATION IN N. SEE FADDEEVA AND TERENTIEV
 C     (TABLES OF VALUES OF W(Z) FOR COMPLEX ARGUMENTS,PERGAMON
 C       N.Y. 1961)
 C
-  18  TERM2=DCMPLX(1.D6,0.0_dp)
+  18  TERM2=cmplx_dp(1.D6,0.0_dp)
       Q=1.0_dp
       H1=CONE
       H2=2.0_dp*ZZ
       U1=CZERO
       RTPI=2.0_dp*SQRT(PI)
-      U2=DCMPLX(RTPI,0.0_dp)
+      U2=cmplx_dp(RTPI,0.0_dp)
   19  TERM1=TERM2
       DO 20 N=1,5
       H3=H2*ZZ-Q*H1
@@ -2914,8 +2914,8 @@ C
                         END IF
       DO 1 N=1,NP   !****** SCANNING OVER FREQUENCIES/WAVELENGTHS ******
       ZVAL=ZVAL+ZSTEP
-      IF(KSCAN==1) KAPPA0=DCMPLX(ZVAL,EPSILON)
-      IF(KSCAN==2) KAPPA0=DCMPLX(2.D0*PI/ZVAL,EPSILON)
+      IF(KSCAN==1) KAPPA0=cmplx_dp(ZVAL,EPSILON)
+      IF(KSCAN==2) KAPPA0=cmplx_dp(2.D0*PI/ZVAL,EPSILON)
       KAPIN =KAPPA0*D1
       KAPOUT=KAPPA0*D2
                                              IF(KTYPE==1) THEN
@@ -2934,8 +2934,8 @@ C
       IF(dble(AKZIN)<EMACH)      STOP 'IMPROPER INCIDENT WAVE'
       AKXY=SQRT(AKXY)
       IF(AKXY<EMACH) THEN
-      EIN(1)=DCMPLX(COS(FEIN),0.D0)
-      EIN(2)=DCMPLX(SIN(FEIN),0.D0)
+      EIN(1)=cmplx_dp(COS(FEIN),0.D0)
+      EIN(2)=cmplx_dp(SIN(FEIN),0.D0)
                         END IF
       CALL REDUCE(AR1,AR2,AK,IGMAX,G,IG0,EMACH)   !"AK" IN SBZ*******
       DO 2 I=1,2
