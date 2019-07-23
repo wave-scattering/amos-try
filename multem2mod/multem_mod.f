@@ -1141,183 +1141,6 @@ C
   200 RETURN
       END subroutine
 C=======================================================================
-      SUBROUTINE CBAL(NM,N,AR,AI,LOW,IGH,SCALE)
-
-C     ------------------------------------------------------------------
-C     THIS SUBROUTINE BALANCES A COMPLEX MATRIX AND ISOLATES
-C     EIGENVALUES WHENEVER POSSIBLE.
-C
-C     ON INPUT--->
-C        NM MUST BE SET TO THE ROW DIMENSION OF TWO-DIMENSIONAL
-C          ARRAY PARAMETERS AS DECLARED IN THE CALLING PROGRAM
-C          DIMENSION STATEMENT,
-C
-C        N IS THE ORDER OF THE MATRIX,
-C
-C        AR AND AI CONTAIN THE REAL AND IMAGINARY PARTS,
-C          RESPECTIVELY, OF THE COMPLEX MATRIX TO BE BALANCED.
-C
-C     ON OUTPUT--->
-C        AR AND AI CONTAIN THE REAL AND IMAGINARY PARTS,
-C          RESPECTIVELY, OF THE BALANCED MATRIX,
-C
-C        LOW AND IGH ARE TWO INTEGERS SUCH THAT AR(I,J) AND AI(I,J)
-C          ARE EQUAL TO ZERO IF
-C           (1) I IS GREATER THAN J AND
-C           (2) J=1,...,LOW-1 OR I=IGH+1,...,N,
-C
-C        SCALE CONTAINS INFORMATION DETERMINING THE
-C           PERMUTATIONS AND SCALING FACTORS USED.
-C
-C     SUPPOSE THAT THE PRINCIPAL SUBMATRIX IN ROWS LOW THROUGH IGH
-C     HAS BEEN BALANCED, THAT P(J) DENOTES THE INDEX INTERCHANGED
-C     WITH J DURING THE PERMUTATION STEP, AND THAT THE ELEMENTS
-C     OF THE DIAGONAL MATRIX USED ARE DENOTED BY D(I,J).  THEN
-C        SCALE(J) = P(J),    FOR J = 1,...,LOW-1
-C                 = D(J,J)       J = LOW,...,IGH
-C                 = P(J)         J = IGH+1,...,N.
-C     THE ORDER IN WHICH THE INTERCHANGES ARE MADE IS N TO IGH+1,
-C     THEN 1 TO LOW-1.
-C
-C     NOTE THAT 1 IS RETURNED FOR IGH IF IGH IS ZERO FORMALLY.
-C
-C     ARITHMETIC IS REAL THROUGHOUT.
-C     ------------------------------------------------------------------
-C
-C ..  SCALAR ARGUMENTS  ..
-C
-      INTEGER NM,N,LOW,IGH
-C
-C ..  ARRAY ARGUMENTS  ..
-C
-      REAL(dp) AR(NM,N),AI(NM,N),SCALE(N)
-C
-C ..  LOCAL SCALARS  ..
-C
-      INTEGER I,J,K,L,M,JJ,IEXC
-      REAL(dp)C,F,G,R,S,B2,RADIX
-      LOGICAL NOCONV
-C     ------------------------------------------------------------------
-C
-C     ********** RADIX IS A MACHINE DEPENDENT PARAMETER SPECIFYING
-C                THE BASE OF THE MACHINE FLOATING POINT REPRESENTATION.
-C
-      RADIX = 2.0_dp
-C
-      B2 = RADIX * RADIX
-      K = 1
-      L = N
-      GO TO 100
-C     ******** IN-LINE PROCEDURE FOR ROW AND COLUMN EXCHANGE ********
-   20 SCALE(M) = J
-      IF (J == M) GO TO 50
-C
-      DO 30 I = 1, L
-         F = AR(I,J)
-         AR(I,J) = AR(I,M)
-         AR(I,M) = F
-         F = AI(I,J)
-         AI(I,J) = AI(I,M)
-         AI(I,M) = F
-   30 CONTINUE
-C
-      DO 40 I = K, N
-         F = AR(J,I)
-         AR(J,I) = AR(M,I)
-         AR(M,I) = F
-         F = AI(J,I)
-         AI(J,I) = AI(M,I)
-         AI(M,I) = F
-   40 CONTINUE
-C
-   50 GO TO (80,130), IEXC
-C     ********** SEARCH FOR ROWS ISOLATING AN EIGENVALUE
-C                AND PUSH THEM DOWN **********
-   80 IF (L == 1) GO TO 280
-      L = L - 1
-C     ********** FOR J=L STEP -1 UNTIL 1 DO -- **********
-  100 DO 120 JJ = 1, L
-         J = L + 1 - JJ
-C
-         DO 110 I = 1, L
-            IF (I == J) GO TO 110
-            IF (AR(J,I) /= 0.0_dp.OR. AI(J,I) /=0.0_dp) GO TO 120
-  110    CONTINUE
-C
-         M = L
-         IEXC = 1
-         GO TO 20
-  120 CONTINUE
-C
-      GO TO 140
-C     ********** SEARCH FOR COLUMNS ISOLATING AN EIGENVALUE
-C                AND PUSH THEM LEFT **********
-  130 K = K + 1
-C
-  140 DO 170 J = K, L
-C
-         DO 150 I = K, L
-            IF (I == J) GO TO 150
-            IF (AR(I,J) /= 0.0_dp .OR. AI(I,J) /= 0.0_dp) GO TO 170
-  150    CONTINUE
-C
-         M = K
-         IEXC = 2
-         GO TO 20
-  170 CONTINUE
-C     ********** NOW BALANCE THE SUBMATRIX IN ROWS K TO L **********
-      DO 180 I = K, L
-  180 SCALE(I) = 1.0_dp
-C     ********** ITERATIVE LOOP FOR NORM REDUCTION **********
-  190 NOCONV = .FALSE.
-C
-      DO 270 I = K, L
-         C = 0.0_dp
-         R = 0.0_dp
-C
-         DO 200 J = K, L
-            IF (J == I) GO TO 200
-            C = C + ABS(AR(J,I)) + ABS(AI(J,I))
-            R = R + ABS(AR(I,J)) + ABS(AI(I,J))
-  200    CONTINUE
-C     ********** GUARD AGAINST ZERO C OR R DUE TO UNDERFLOW **********
-         IF (C == 0.0_dp .OR. R == 0.0_dp) GO TO 270
-         G = R / RADIX
-         F = 1.0_dp
-         S = C + R
-  210    IF (C >= G) GO TO 220
-         F = F * RADIX
-         C = C * B2
-         GO TO 210
-  220    G = R * RADIX
-  230    IF (C < G) GO TO 240
-         F = F / RADIX
-         C = C / B2
-         GO TO 230
-C     ********** NOW BALANCE **********
-  240    IF ((C + R) / F >= 0.95D0 * S) GO TO 270
-         G = 1.0_dp / F
-         SCALE(I) = SCALE(I) * F
-         NOCONV = .TRUE.
-C
-         DO 250 J = K, N
-            AR(I,J) = AR(I,J) * G
-            AI(I,J) = AI(I,J) * G
-  250    CONTINUE
-C
-         DO 260 J = 1, L
-            AR(J,I) = AR(J,I) * F
-            AI(J,I) = AI(J,I) * F
-  260    CONTINUE
-C
-  270 CONTINUE
-C
-      IF (NOCONV) GO TO 190
-C
-  280 LOW = K
-      IGH = L
-      RETURN
-      END subroutine
 C=======================================================================
       SUBROUTINE CNAA(NDIM,N,AR,AI,EVR,EVI,VECR,VECI,IERR)
 
@@ -1376,6 +1199,7 @@ C
 C ..  ARRAY ARGUMENTS  ..
 C
       REAL(dp)AR(NDIM,N),AI(NDIM,N),EVR(N),EVI(N)
+      complex(dp)::a(ndim, n)
       REAL(dp)VECR(NDIM,N),VECI(NDIM,N)
 C
 C ..  LOCAL SCALARS  ..
@@ -1390,7 +1214,10 @@ C     ------------------------------------------------------------------
 C
       IF(NDIM<N .OR. N<1) GO TO 10
       IF(N*NDIM > 72900) GO TO 10
-      CALL CBAL(NDIM,N,AR,AI,LOW,IGH,SCALE)
+      a = ar + ci*ai
+      call zgebal_wrap(a,scale, low, igh)
+      ar = dble(a)
+      ai = aimag(a)
       CALL COMHES(NDIM,N,LOW,IGH,AR,AI,INT)
       CALL COMLR2(NDIM,N,LOW,IGH,INT,AR,AI,EVR,EVI,VECR,VECI,IERR)
       IF(IERR==0) GO TO 2
@@ -2092,11 +1919,14 @@ C=======================================================================
 
       integer    int(igkd)
       real(dp)   ar(igk2d,igk2d),ai(igk2d,igk2d)
+      complex(dp) :: a(igk2d,igk2d)
       real(dp)   rr(igk2d),ri(igk2d),vr(igk2d,igk2d),vi(igk2d,igk2d)
+      complex(dp) :: r2(igk2d)
       real(dp)   akzap(igk2d),akzip(igk2d)
       real(dp)   akzrep(igk2d),akzimp(igk2d),akzren(igk2d),akzimn(igk2d)
       complex(dp) qh1(igkd,igkd),qh2(igkd,igkd),akz(igk2d)
       complex(dp) comvec(igk2d,igk2d)
+      complex(dp) comvec2(igk2d,igk2d)
 !     ------------------------------------------------------------------
       igkmax=2*igmax
       igk2m=2*igkmax
@@ -2117,16 +1947,19 @@ C=======================================================================
           end do
         end do
       end do
- !     call zgetrf_wrap(qiv, int)
+
+!     call zgetrf_wrap(qiv, int)
 !     do igk2=1,igkmax
 !     call zgetrs_wrap(qiv, qh1(:,igk2), int)
 !     call zgetrs_wrap(qiv, qh2(:,igk2), int)
 !     end do
+
       call zge(qiv,int,igkmax,igkd,emach)
       do igk2=1,igkmax
         call zsu(qiv,int,qh1(1,igk2),igkmax,igkd,emach)
         call zsu(qiv,int,qh2(1,igk2),igkmax,igkd,emach)
       end do
+
       do igk1=1,igkmax
         do igk2=1,igkmax
           ar(igk1,igk2)=dble(qi(igk1,igk2))
@@ -2139,11 +1972,21 @@ C=======================================================================
           ai(igkmax+igk1,igkmax+igk2)=aimag(qh2(igk1,igk2))
         end do
       end do
+      do igk1=1,igkmax
+        do igk2=1,igkmax
+          a(igk1,igk2) = qi(igk1,igk2)
+          a(igk1,igkmax+igk2) = qii(igk1,igk2)
+          a(igkmax+igk1,igk2) = qh1(igk1,igk2)
+          ar(igkmax+igk1,igkmax+igk2)=qh2(igk1,igk2)
+        end do
+      end do
       call cnaa(igk2d,igk2m,ar,ai,rr,ri,vr,vi,ifail)
-      if(ifail/=0) then
-        write(6,102) ifail
-        stop
-      endif
+
+      call zgeev_wrap (a, r2, comvec2)
+!     if(ifail/=0) then
+!       write(6,102) ifail
+!       stop
+!     endif
       do ii=1,igk2m
 !*****the if-structure  which follows  can be  omitted  if the accuracy
 !*****'machep' of the subroutine comlr2 is chosen greater than 2**(-47)
@@ -2153,6 +1996,7 @@ C=======================================================================
         endif
         ! normalized k_z
         akz(ii)=(-ci/pi)*log(cmplx(rr(ii),ri(ii),kind=dp)/eaka)
+!       akz(ii)=(-ci/pi)*log(r2(ii)/eaka)
       end do
       do lib2=1,igk2m
         do lib1=1,igk2m

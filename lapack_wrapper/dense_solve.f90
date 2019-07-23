@@ -2,9 +2,21 @@ module dense_solve
     implicit none
     integer, parameter:: dp=kind(0.d0)
     private
-    public zgetrf_wrap, zgetrs_wrap, zgeev_wrap
+    public zgetrf_wrap, zgetrs_wrap, zgeev_wrap, zgebal_wrap
 contains
     !=======================================================================
+    subroutine zgebal_wrap(a, scale, ilo, ihi)
+        CHARACTER          job
+        INTEGER            ihi, ilo, info, lda, n, shapes(2)
+        REAL(dp)               scale(:)
+        COMPLEX(dp)            a(:,: )
+        shapes = shape(a)
+        n = shapes(1)
+        lda = shapes(2)
+        job = 'B'
+        call zgebal(job, n, a, lda, ilo, ihi, scale, info)
+        if (info /= 0) stop 'error in zegbal_wrap'
+    end subroutine
     !=======================================================================
     subroutine zgeev_wrap (a, w, vr)
         ! call Lapack zgeev
