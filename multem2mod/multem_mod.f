@@ -2114,7 +2114,6 @@ C=======================================================================
           do igk3=1,igkmax
             qh1(igk1,igk2)=qh1(igk1,igk2)-qiii(igk1,igk3)*qi (igk3,igk2)
             qh2(igk1,igk2)=qh2(igk1,igk2)-qiii(igk1,igk3)*qii(igk3,igk2)
-     &
           end do
         end do
       end do
@@ -2142,15 +2141,15 @@ C=======================================================================
       end do
       call cnaa(igk2d,igk2m,ar,ai,rr,ri,vr,vi,ifail)
       if(ifail/=0) then
-      write(6,102) ifail
-                         stop
-                     endif
+        write(6,102) ifail
+        stop
+      endif
       do ii=1,igk2m
 !*****the if-structure  which follows  can be  omitted  if the accuracy
 !*****'machep' of the subroutine comlr2 is chosen greater than 2**(-47)
         if((rr(ii)==0.0_dp).and.(ri(ii)==0.0_dp)) then
-        rr(ii)=1.d-20
-        ri(ii)=1.d-20
+          rr(ii)=1.d-20
+          ri(ii)=1.d-20
         endif
         ! normalized k_z
         akz(ii)=(-ci/pi)*log(cmplx(rr(ii),ri(ii),kind=dp)/eaka)
@@ -2167,13 +2166,13 @@ C=======================================================================
 !*****warning!! the appropriate limits for aimag(akz(kd))
 !*****depend strongly on igmax.
         if(aimag(akz(kd))>0.0_dp) then
-        akzrep(lp)=dble(akz(kd))
-        akzimp(lp)=aimag(akz(kd))
-        lp=lp+1
+          akzrep(lp)=dble(akz(kd))
+          akzimp(lp)=aimag(akz(kd))
+          lp=lp+1
         else
-        akzren(ln)=dble(akz(kd))
-        akzimn(ln)=aimag(akz(kd))
-        ln=ln+1
+          akzren(ln)=dble(akz(kd))
+          akzimn(ln)=aimag(akz(kd))
+          ln=ln+1
         endif
         if(abs(aimag(akz(kd)))>1.0d-2) cycle
         akzap(lu)=dble(akz(kd))
@@ -2182,37 +2181,37 @@ C=======================================================================
       end do
 
       if (lu<1.1d0) then
-      do j=2,lp-1
-        bkzim=akzimp(j)
-        bkzre=akzrep(j)
-        do i=j-1,1,-1
-          if(akzimp(i)<=bkzim) go to 15
-          akzimp(i+1)=akzimp(i)
-          akzrep(i+1)=akzrep(i)
+        do j=2,lp-1
+          bkzim=akzimp(j)
+          bkzre=akzrep(j)
+          do i=j-1,1,-1
+            if(akzimp(i)<=bkzim) go to 15
+            akzimp(i+1)=akzimp(i)
+            akzrep(i+1)=akzrep(i)
+          end do
+          i=0
+   15     akzimp(i+1)=bkzim
+          akzrep(i+1)=bkzre
         end do
-        i=0
-   15   akzimp(i+1)=bkzim
-        akzrep(i+1)=bkzre
-      end do
-      do j=2,ln-1
-        bkzim=akzimn(j)
-        bkzre=akzren(j)
-        do i=j-1,1,-1
-          if(akzimn(i)<=bkzim) go to 18
-          akzimn(i+1)=akzimn(i)
-          akzren(i+1)=akzren(i)
+        do j=2,ln-1
+          bkzim=akzimn(j)
+          bkzre=akzren(j)
+          do i=j-1,1,-1
+            if(akzimn(i)<=bkzim) go to 18
+            akzimn(i+1)=akzimn(i)
+            akzren(i+1)=akzren(i)
+          end do
+          i=0
+   18     akzimn(i+1)=bkzim
+          akzren(i+1)=bkzre
         end do
-        i=0
-   18   akzimn(i+1)=bkzim
-        akzren(i+1)=bkzre
-      end do
-      write(6,101)  zval,akzrep(1),akzren(ln-1)
-      write(6,103)  akzimp(1),akzimn(ln-1)
-      write(9,101)  zval,akzrep(1),akzren(ln-1)
-      write(9,103)  akzimp(1),akzimn(ln-1)
+        write(6,101)  zval,akzrep(1),akzren(ln-1)
+        write(6,103)  akzimp(1),akzimn(ln-1)
+        write(9,101)  zval,akzrep(1),akzren(ln-1)
+        write(9,103)  akzimp(1),akzimn(ln-1)
       else
-      write(6,101)  zval,(akzap(i),i=1,lu-1)
-      write(9,101)  zval,(akzap(i),i=1,lu-1)
+        write(6,101)  zval,(akzap(i),i=1,lu-1)
+        write(9,101)  zval,(akzap(i),i=1,lu-1)
       end if
       return
   101 format(e10.4,3x,10(e10.4,1x))
