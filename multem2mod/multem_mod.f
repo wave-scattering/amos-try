@@ -188,9 +188,6 @@ C
       INTEGER I,NA,NB,NA0,J,NMA,NMB,IORD
       REAL(dp)RMAX2,SP,AMOD2,BMOD2,DUM,VMOD2,VM
 C
-C ..  INTRINSIC FUNCTIONS ..
-C
-      INTRINSIC SQRT
 C     ------------------------------------------------------------------
 C
       RMAX2=RMAX*RMAX
@@ -987,10 +984,6 @@ C ..  LOCAL SCALARS  ..
 C
       INTEGER    I,II,IN,J,K
       COMPLEX(dp) YR,DUM
-C
-C ..  INTRINSIC FUNCTIONS  ..
-C
-      INTRINSIC ABS
 C     ------------------------------------------------------------------
 C
       DO 10 II=2,N
@@ -1040,10 +1033,6 @@ C ..  LOCAL SCALARS  ..
 C
       INTEGER    I,II,IN,J,IJ
       COMPLEX(dp) DUM
-C
-C ..  INTRINSIC FUNCTIONS  ..
-C
-      INTRINSIC ABS
 C     ------------------------------------------------------------------
 C
       DO 5 II=2,N
@@ -2066,166 +2055,170 @@ C     ------------------------------------------------------------------
       RETURN
       END subroutine
 C=======================================================================
-      SUBROUTINE BAND(IGMAX,ZVAL,EMACH,AK,G,AL,KAPL,KAPR,
-     &                QI,QII,QIII,QIV)
+      subroutine band(igmax,zval,emach,ak,g,al,kapl,kapr,
+     &                qi,qii,qiii,qiv)
+!!     ------------------------------------------------------------------
+!     this subroutine calculates the complex photonic band structure of
+!     an infinite crystal. it  provides the  propagating and evanescent
+!     eigenmodes of the em field in the given crystal, corresponding to
+!     "ak" and a given frequency.
+!     ------------------------------------------------------------------
+!
+! ..  parameter statements ..
+!
+      integer   igd,igkd,igk2d
+      parameter(igd=21,igkd=2*igd,igk2d=2*igkd)
 
-C     ------------------------------------------------------------------
-C     THIS SUBROUTINE CALCULATES THE COMPLEX PHOTONIC BAND STRUCTURE OF
-C     AN INFINITE CRYSTAL. IT  PROVIDES THE  PROPAGATING AND EVANESCENT
-C     EIGENMODES OF THE EM FIELD IN THE GIVEN CRYSTAL, CORRESPONDING TO
-C     "AK" AND A GIVEN FREQUENCY.
-C     ------------------------------------------------------------------
-C
-C ..  PARAMETER STATEMENTS ..
-C
-      INTEGER   IGD,IGKD,IGK2D
-      PARAMETER(IGD=21,IGKD=2*IGD,IGK2D=2*IGKD)
-C
-C ..  SCALAR ARGUMENTS  ..
-C
-      INTEGER    IGMAX
-      REAL(dp)   ZVAL,EMACH
-      COMPLEX(dp) KAPL,KAPR
-C
-C ..  ARRAY ARGUMENTS ..
-C
-      REAL(dp)   AK(2),G(2,IGD),AL(3)
-      COMPLEX(dp) QI(IGKD,IGKD),QII(IGKD,IGKD)
-      COMPLEX(dp) QIII(IGKD,IGKD),QIV(IGKD,IGKD)
-C
-C ..  SCALAR VARIABLES ..
-C
-      INTEGER    II,I,IGK1,IGK2,IGKMAX,J
-      INTEGER    KD,LIB1,LIB2,LU,LP,LN,IFAIL,IGK3,IGK2M
-      REAL(dp)   AKA,BKZRE,BKZIM
-      COMPLEX(dp) EAKA
-C
-C ..  ARRAY VARIABLES ..
-C
-      INTEGER    INT(IGKD)
-      REAL(dp)   AR(IGK2D,IGK2D),AI(IGK2D,IGK2D)
-      REAL(dp)   RR(IGK2D),RI(IGK2D),VR(IGK2D,IGK2D),VI(IGK2D,IGK2D)
-      REAL(dp)   AKZAP(IGK2D),AKZIP(IGK2D)
-      REAL(dp)   AKZREP(IGK2D),AKZIMP(IGK2D),AKZREN(IGK2D),AKZIMN(IGK2D)
-      COMPLEX(dp) QH1(IGKD,IGKD),QH2(IGKD,IGKD),AKZ(IGK2D)
-      COMPLEX(dp) COMVEC(IGK2D,IGK2D)
-C     ------------------------------------------------------------------
-      IGKMAX=2*IGMAX
-      IGK2M=2*IGKMAX
-      AKA=AK(1)*AL(1)+AK(2)*AL(2)
-      EAKA=EXP(CI*AKA)
-      DO 1 IGK1=1,IGKMAX
-      DO 1 IGK2=1,IGKMAX
-      QH1(IGK1,IGK2)=CZERO
-      QH2(IGK1,IGK2)=CZERO
-    1 CONTINUE
-      DO 5 IGK1=1,IGKMAX
-      QH2(IGK1,IGK1)=CONE
-      DO 5 IGK2=1,IGKMAX
-      DO 6 IGK3=1,IGKMAX
-      QH1(IGK1,IGK2)=QH1(IGK1,IGK2)-QIII(IGK1,IGK3)*QI (IGK3,IGK2)
-    6 QH2(IGK1,IGK2)=QH2(IGK1,IGK2)-QIII(IGK1,IGK3)*QII(IGK3,IGK2)
-    5 CONTINUE
+! ..  scalar arguments  ..
 
-!     call zgetrf_wrap(QIV, int)
-!     do IGK2=1,IGKMAX
-!     call zgetrs_wrap(QIV, QH1(:,IGK2), int)
-!     call zgetrs_wrap(QIV, QH2(:,IGK2), int)
+      integer    igmax
+      real(dp)   zval,emach
+      complex(dp) kapl,kapr
+
+! ..  array arguments ..
+
+      real(dp)   ak(2),g(2,igd),al(3)
+      complex(dp) qi(igkd,igkd),qii(igkd,igkd)
+      complex(dp) qiii(igkd,igkd),qiv(igkd,igkd)
+
+! ..  scalar variables ..
+
+      integer    ii,i,igk1,igk2,igkmax,j
+      integer    kd,lib1,lib2,lu,lp,ln,ifail,igk3,igk2m
+      real(dp)   aka,bkzre,bkzim
+      complex(dp) eaka
+!
+! ..  array variables ..
+
+      integer    int(igkd)
+      real(dp)   ar(igk2d,igk2d),ai(igk2d,igk2d)
+      real(dp)   rr(igk2d),ri(igk2d),vr(igk2d,igk2d),vi(igk2d,igk2d)
+      real(dp)   akzap(igk2d),akzip(igk2d)
+      real(dp)   akzrep(igk2d),akzimp(igk2d),akzren(igk2d),akzimn(igk2d)
+      complex(dp) qh1(igkd,igkd),qh2(igkd,igkd),akz(igk2d)
+      complex(dp) comvec(igk2d,igk2d)
+!     ------------------------------------------------------------------
+      igkmax=2*igmax
+      igk2m=2*igkmax
+      aka=ak(1)*al(1)+ak(2)*al(2)
+      eaka=exp(ci*aka)
+      do igk1=1,igkmax
+        do igk2=1,igkmax
+          qh1(igk1,igk2)=czero
+          qh2(igk1,igk2)=czero
+        end do
+      end do
+      do igk1=1,igkmax
+        qh2(igk1,igk1)=cone
+        do igk2=1,igkmax
+          do igk3=1,igkmax
+            qh1(igk1,igk2)=qh1(igk1,igk2)-qiii(igk1,igk3)*qi (igk3,igk2)
+            qh2(igk1,igk2)=qh2(igk1,igk2)-qiii(igk1,igk3)*qii(igk3,igk2)
+     &
+          end do
+        end do
+      end do
+ !     call zgetrf_wrap(qiv, int)
+!     do igk2=1,igkmax
+!     call zgetrs_wrap(qiv, qh1(:,igk2), int)
+!     call zgetrs_wrap(qiv, qh2(:,igk2), int)
 !     end do
-
-      CALL ZGE(QIV,INT,IGKMAX,IGKD,EMACH)
-      do IGK2=1,IGKMAX
-        CALL ZSU(QIV,INT,QH1(1,IGK2),IGKMAX,IGKD,EMACH)
-        CALL ZSU(QIV,INT,QH2(1,IGK2),IGKMAX,IGKD,EMACH)
+      call zge(qiv,int,igkmax,igkd,emach)
+      do igk2=1,igkmax
+        call zsu(qiv,int,qh1(1,igk2),igkmax,igkd,emach)
+        call zsu(qiv,int,qh2(1,igk2),igkmax,igkd,emach)
+      end do
+      do igk1=1,igkmax
+        do igk2=1,igkmax
+          ar(igk1,igk2)=dble(qi(igk1,igk2))
+          ai(igk1,igk2)=aimag(qi(igk1,igk2))
+          ar(igk1,igkmax+igk2)=dble(qii(igk1,igk2))
+          ai(igk1,igkmax+igk2)=aimag(qii(igk1,igk2))
+          ar(igkmax+igk1,igk2)=dble(qh1(igk1,igk2))
+          ai(igkmax+igk1,igk2)=aimag(qh1(igk1,igk2))
+          ar(igkmax+igk1,igkmax+igk2)=dble(qh2(igk1,igk2))
+          ai(igkmax+igk1,igkmax+igk2)=aimag(qh2(igk1,igk2))
+        end do
+      end do
+      call cnaa(igk2d,igk2m,ar,ai,rr,ri,vr,vi,ifail)
+      if(ifail/=0) then
+      write(6,102) ifail
+                         stop
+                     endif
+      do ii=1,igk2m
+!*****the if-structure  which follows  can be  omitted  if the accuracy
+!*****'machep' of the subroutine comlr2 is chosen greater than 2**(-47)
+        if((rr(ii)==0.0_dp).and.(ri(ii)==0.0_dp)) then
+        rr(ii)=1.d-20
+        ri(ii)=1.d-20
+        endif
+        ! normalized k_z
+        akz(ii)=(-ci/pi)*log(cmplx(rr(ii),ri(ii),kind=dp)/eaka)
+      end do
+      do lib2=1,igk2m
+        do lib1=1,igk2m
+          comvec(lib1,lib2)=vr(lib1,lib2)+ci*vi(lib1,lib2)
+        end do
+      end do
+      lu=1
+      lp=1
+      ln=1
+      do kd=1,igk2m
+!*****warning!! the appropriate limits for aimag(akz(kd))
+!*****depend strongly on igmax.
+        if(aimag(akz(kd))>0.0_dp) then
+        akzrep(lp)=dble(akz(kd))
+        akzimp(lp)=aimag(akz(kd))
+        lp=lp+1
+        else
+        akzren(ln)=dble(akz(kd))
+        akzimn(ln)=aimag(akz(kd))
+        ln=ln+1
+        endif
+        if(abs(aimag(akz(kd)))>1.0d-2) cycle
+        akzap(lu)=dble(akz(kd))
+        akzip(lu)=aimag(akz(kd))
+        lu=lu+1
       end do
 
-      DO 9 IGK1=1,IGKMAX
-      DO 9 IGK2=1,IGKMAX
-      AR(IGK1,IGK2)=dble(QI(IGK1,IGK2))
-      AI(IGK1,IGK2)=aimag(QI(IGK1,IGK2))
-      AR(IGK1,IGKMAX+IGK2)=dble(QII(IGK1,IGK2))
-      AI(IGK1,IGKMAX+IGK2)=aimag(QII(IGK1,IGK2))
-      AR(IGKMAX+IGK1,IGK2)=dble(QH1(IGK1,IGK2))
-      AI(IGKMAX+IGK1,IGK2)=aimag(QH1(IGK1,IGK2))
-      AR(IGKMAX+IGK1,IGKMAX+IGK2)=dble(QH2(IGK1,IGK2))
-      AI(IGKMAX+IGK1,IGKMAX+IGK2)=aimag(QH2(IGK1,IGK2))
-    9 CONTINUE
-      CALL CNAA(IGK2D,IGK2M,AR,AI,RR,RI,VR,VI,IFAIL)
-      IF(IFAIL/=0) THEN
-      WRITE(6,102) IFAIL
-                         STOP
-                     ENDIF
-      DO 8 II=1,IGK2M
-C*****THE IF-STRUCTURE  WHICH FOLLOWS  CAN BE  OMITTED  IF THE ACCURACY
-C*****'MACHEP' OF THE SUBROUTINE COMLR2 IS CHOSEN GREATER THAN 2**(-47)
-      IF((RR(II)==0.0_dp).AND.(RI(II)==0.0_dp)) THEN
-      RR(II)=1.D-20
-      RI(II)=1.D-20
-      ENDIF
-      AKZ(II)=(-CI/PI)*LOG(CMPLX(RR(II),RI(II),kind=dp)/EAKA) ! NORMALIZED K_Z
-    8 CONTINUE
-      DO 2 LIB2=1,IGK2M
-      DO 2 LIB1=1,IGK2M
-      COMVEC(LIB1,LIB2)=VR(LIB1,LIB2)+CI*VI(LIB1,LIB2)
-    2 CONTINUE
-      LU=1
-      LP=1
-      LN=1
-      DO 10 KD=1,IGK2M
-C*****WARNING!! THE APPROPRIATE LIMITS FOR aimag(AKZ(KD))
-C*****DEPEND STRONGLY ON IGMAX.
-      IF(aimag(AKZ(KD))>0.0_dp) THEN
-      AKZREP(LP)=dble(AKZ(KD))
-      AKZIMP(LP)=aimag(AKZ(KD))
-      LP=LP+1
-      ELSE
-      AKZREN(LN)=dble(AKZ(KD))
-      AKZIMN(LN)=aimag(AKZ(KD))
-      LN=LN+1
-      ENDIF
-      IF(ABS(aimag(AKZ(KD)))>1.0D-2) GO TO 10
-      AKZAP(LU)=dble(AKZ(KD))
-      AKZIP(LU)=aimag(AKZ(KD))
-      LU=LU+1
-   10 CONTINUE
-      IF (LU<1.1D0) THEN
-      DO 13 J=2,LP-1
-      BKZIM=AKZIMP(J)
-      BKZRE=AKZREP(J)
-      DO 14 I=J-1,1,-1
-      IF(AKZIMP(I)<=BKZIM) GO TO 15
-      AKZIMP(I+1)=AKZIMP(I)
-      AKZREP(I+1)=AKZREP(I)
-   14 CONTINUE
-      I=0
-   15 AKZIMP(I+1)=BKZIM
-      AKZREP(I+1)=BKZRE
-   13 CONTINUE
-      DO 16 J=2,LN-1
-      BKZIM=AKZIMN(J)
-      BKZRE=AKZREN(J)
-      DO 17 I=J-1,1,-1
-      IF(AKZIMN(I)<=BKZIM) GO TO 18
-      AKZIMN(I+1)=AKZIMN(I)
-      AKZREN(I+1)=AKZREN(I)
-   17 CONTINUE
-      I=0
-   18 AKZIMN(I+1)=BKZIM
-      AKZREN(I+1)=BKZRE
-   16 CONTINUE
-      WRITE(6,101)  ZVAL,AKZREP(1),AKZREN(LN-1)
-      WRITE(6,103)  AKZIMP(1),AKZIMN(LN-1)
-      WRITE(9,101)  ZVAL,AKZREP(1),AKZREN(LN-1)
-      WRITE(9,103)  AKZIMP(1),AKZIMN(LN-1)
-      ELSE
-      WRITE(6,101)  ZVAL,(AKZAP(I),I=1,LU-1)
-      WRITE(9,101)  ZVAL,(AKZAP(I),I=1,LU-1)
-      END IF
-      RETURN
-  101 FORMAT(E10.4,3X,10(E10.4,1X))
-  102 FORMAT(//13X,'ERROR IN CNAA   IFAIL = ',I2)
-  103 FORMAT(13X,10(E10.4,1X))
-      END subroutine
+      if (lu<1.1d0) then
+      do j=2,lp-1
+        bkzim=akzimp(j)
+        bkzre=akzrep(j)
+        do i=j-1,1,-1
+          if(akzimp(i)<=bkzim) go to 15
+          akzimp(i+1)=akzimp(i)
+          akzrep(i+1)=akzrep(i)
+        end do
+        i=0
+   15   akzimp(i+1)=bkzim
+        akzrep(i+1)=bkzre
+      end do
+      do j=2,ln-1
+        bkzim=akzimn(j)
+        bkzre=akzren(j)
+        do i=j-1,1,-1
+          if(akzimn(i)<=bkzim) go to 18
+          akzimn(i+1)=akzimn(i)
+          akzren(i+1)=akzren(i)
+        end do
+        i=0
+   18   akzimn(i+1)=bkzim
+        akzren(i+1)=bkzre
+      end do
+      write(6,101)  zval,akzrep(1),akzren(ln-1)
+      write(6,103)  akzimp(1),akzimn(ln-1)
+      write(9,101)  zval,akzrep(1),akzren(ln-1)
+      write(9,103)  akzimp(1),akzimn(ln-1)
+      else
+      write(6,101)  zval,(akzap(i),i=1,lu-1)
+      write(9,101)  zval,(akzap(i),i=1,lu-1)
+      end if
+      return
+  101 format(e10.4,3x,10(e10.4,1x))
+  102 format(//13x,'error in cnaa   ifail = ',i2)
+  103 format(13x,10(e10.4,1x))
+      end subroutine
 C======================================================================
       SUBROUTINE REDUCE(AR1,AR2,AK,IGMAX,G,IG0,EMACH)
 

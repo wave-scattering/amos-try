@@ -37,18 +37,9 @@ contains
         !     layer, from the corresponding matrices of the individual, left
         !     (l) and right (r), layers. the results are stored in q*l.
         !     -----------------------------------------------------------------
-        !
-        ! ..  parameter statements  ..
-        !
-!        integer   igd, igkd
-!        parameter (igd = 21, igkd = 2 * igd)
-        !
         ! ..  scalar arguments  ..
-        !
         integer igkmax
-        !
         ! ..  array arguments  ..
-        !
         integer   igkd
         complex(dp) qil (:, :), qiil(:, :), qiiil(:, :)
         complex(dp) qivl(:, :)
@@ -165,33 +156,33 @@ contains
         k = 1
         ii = 0
         do ii = 0, 1
-          ll = lmax + ii
-          do il2 = 1, ll
-              l2 = il2 - ii
-              m2 = -l2 + 1 - ii
-              do i2 = 1, il2
-                  do il3 = 1, ll
-                      l3 = il3 - ii
-                      m3 = -l3 + 1 - ii
-                      do i3 = 1, il3
-                          la1 = max0(iabs(l2 - l3), iabs(m2 - m3))
-                          lb1 = l2 + l3
-                          la11 = la1 + 1
-                          lb11 = lb1 + 1
-                          m1 = m2 - m3
-                          do l11 = la11, lb11, 2
-                              l1 = l11 - 1
-                              l = (l2 - l3 - l1) / 2 + m2
-                              elm(k) = ((-1.0_dp)**l) * fourpi * blm(l1, m1, l3, m3, l2, -m2, lmax&
-                                      )
-                              k = k + 1
-                          end do
-                          m3 = m3 + 2
-                      end do
-                  end do
-                  m2 = m2 + 2
-              end do
-          end do
+            ll = lmax + ii
+            do il2 = 1, ll
+                l2 = il2 - ii
+                m2 = -l2 + 1 - ii
+                do i2 = 1, il2
+                    do il3 = 1, ll
+                        l3 = il3 - ii
+                        m3 = -l3 + 1 - ii
+                        do i3 = 1, il3
+                            la1 = max0(iabs(l2 - l3), iabs(m2 - m3))
+                            lb1 = l2 + l3
+                            la11 = la1 + 1
+                            lb11 = lb1 + 1
+                            m1 = m2 - m3
+                            do l11 = la11, lb11, 2
+                                l1 = l11 - 1
+                                l = (l2 - l3 - l1) / 2 + m2
+                                elm(k) = ((-1.0_dp)**l) * fourpi * blm(l1, m1, l3, m3, l2, -m2, lmax&
+                                        )
+                                k = k + 1
+                            end do
+                            m3 = m3 + 2
+                        end do
+                    end do
+                    m2 = m2 + 2
+                end do
+            end do
         end do
         return
     end subroutine
@@ -376,7 +367,7 @@ contains
             do j = 1, 2
                 denoma = x(j) * x(j) * gkkz2 + gkkz1
                 denomb = gkkz2 + gkkz1
-                if(abs(denoma)<emach.or.abs(denomb)<emach) go to 20
+                if(abs(denoma)<emach.or.abs(denomb)<emach) goto 20
                 r(j, 1) = (gkkz1 - x(j) * x(j) * gkkz2) / denoma
                 r(j, 2) = (gkkz1 - gkkz2) / denomb
                 t(j, 1) = ctwo * x(j) * gkkz1 / denoma
@@ -385,10 +376,11 @@ contains
                 gkkz1 = gkkz2
                 gkkz2 = gkkdum
             end do
+            ! asdfa
             do j = 3, 4
                 denoma = x(j) * x(j) * gkkz3 + gkkz2
                 denomb = gkkz3 + gkkz2
-                if(abs(denoma)<emach.or.abs(denomb)<emach) go to 20
+                if(abs(denoma)<emach.or.abs(denomb)<emach) goto 20
                 r(j, 1) = (gkkz2 - x(j) * x(j) * gkkz3) / denoma
                 r(j, 2) = (gkkz2 - gkkz3) / denomb
                 t(j, 1) = ctwo * x(j) * gkkz2 / denoma
