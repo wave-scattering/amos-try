@@ -35,450 +35,470 @@ C=======================================================================
 C======================================================================
 C=======================================================================
 C=======================================================================
-      SUBROUTINE XMAT(XODD,XEVEN,LMAX,KAPPA,AK,ELM,EMACH)
+      subroutine xmat(xodd,xeven,lmax,kappa,ak,elm,emach,ar1, ar2)
+!     ------------------------------------------------------------------
+!     xmat calculates the matrix describing multiple scatering  within
+!     a  layer, returning  it as :  xodd,  corresponding  to  odd  l+m,
+!     with lm=(10),(2-1),(21),... and xeven, corresponding to even l+m,
+!     with lm=(00),(1-1),(11),(2-2),(20),(22),...
+!     the  program  assumes  that  the  layer is a bravais lattice. the
+!     summation over the lattice follows the ewald method  suggested by
+!     kambe. emach is the machine accuracy.
+!     ------------------------------------------------------------------
+! ..  parameter statements  ..
+      integer   ndend
+      parameter (ndend=1240)
+! ..  scalar arguments  ..
+      integer    lmax
+      real(dp)   emach
+      complex(dp) kappa
+! ..  array arguments  ..
+      real(dp)  ar1(2),ar2(2)
+      real(dp)   ak(2),elm(:)
+      complex(dp) xodd(:,:),xeven(:,:)
+! ..  local scalars  ..
+      integer    l2max,ll2,ii,i,nndlm,k,kk,l,mm,nn,m,j1,j2,i1,i2,i3,n1
+      integer    na,lll,n,il,nm,in,l2,il2,m2,il3,l3,m3,la1,lb1,la11,lb11
+      integer    ll,j,l1
+      real(dp)   ab1,ab2,ac,acsq,ad,al,an,an1,an2,ap,ap1,ap2,ar,b
+      real(dp)   dnorm,rtpi,rtv,test,test1,test2,tv
+      complex(dp) alpha,rta,rtai,kapsq,kant,knsq,xpk,xpa,cf,cp,cx,cz
+      complex(dp) z,zz,w,ww,a,acc,gpsq,gp,bt,aa,ab,u,u1,u2,gam
+      complex(dp) gk,gkk,sd,alm
+!
+! ..  local arrays  ..
+!
+      real(dp)   denom(ndend),r(2),b1(2),b2(2),akpt(2),fac(4*lmax+1)
+      complex(dp) gkn(lmax+1),agk(2*lmax+1),xpm(2*lmax+1),
+     &  pref((lmax+1)**2)
+      complex(dp) dlm((lmax+1)*(2*lmax+1))
+!
+! ..  arrays in common  ..
+!
+!      common/x1/ar1,ar2
+!----------------------------------------------------------------------
 
-C     ------------------------------------------------------------------
-C     XMAT CALCULATES THE MATRIX DESCRIBING MULTIPLE SCATERING  WITHIN
-C     A  LAYER, RETURNING  IT AS :  XODD,  CORRESPONDING  TO  ODD  L+M,
-C     WITH LM=(10),(2-1),(21),... AND XEVEN, CORRESPONDING TO EVEN L+M,
-C     WITH LM=(00),(1-1),(11),(2-2),(20),(22),...
-C     THE  PROGRAM  ASSUMES  THAT  THE  LAYER IS A BRAVAIS LATTICE. THE
-C     SUMMATION OVER THE LATTICE FOLLOWS THE EWALD METHOD  SUGGESTED BY
-C     KAMBE. EMACH IS THE MACHINE ACCURACY.
-C     ------------------------------------------------------------------
-C
-C ..  PARAMETER STATEMENTS  ..
-C
-      INTEGER   NDEND
-      PARAMETER (NDEND=1240)
-C
-C ..  SCALAR ARGUMENTS  ..
-C
-      INTEGER    LMAX
-      REAL(dp)   EMACH
-      COMPLEX(dp) KAPPA
-C
-C ..  ARRAY ARGUMENTS  ..
-C
-      REAL(dp)   AK(2),ELM(:)
-      COMPLEX(dp) XODD(:,:),XEVEN(:,:)
-C
-C ..  LOCAL SCALARS  ..
-C
-      INTEGER    L2MAX,LL2,II,I,NNDLM,K,KK,L,MM,NN,M,J1,J2,I1,I2,I3,N1
-      INTEGER    NA,LLL,N,IL,NM,IN,L2,IL2,M2,IL3,L3,M3,LA1,LB1,LA11,LB11
-      INTEGER    LL,J,L1
-      REAL(dp)   AB1,AB2,AC,ACSQ,AD,AL,AN,AN1,AN2,AP,AP1,AP2,AR,B
-      REAL(dp)   DNORM,RTPI,RTV,TEST,TEST1,TEST2,TV
-      COMPLEX(dp) ALPHA,RTA,RTAI,KAPSQ,KANT,KNSQ,XPK,XPA,CF,CP,CX,CZ
-      COMPLEX(dp) Z,ZZ,W,WW,A,ACC,GPSQ,GP,BT,AA,AB,U,U1,U2,GAM
-      COMPLEX(dp) GK,GKK,SD,ALM
-C
-C ..  LOCAL ARRAYS  ..
-C
-      REAL(dp)   DENOM(NDEND),R(2),B1(2),B2(2),AKPT(2),FAC(4*lmax+1)
-      COMPLEX(dp) GKN(lmax+1),AGK(2*lmax+1),XPM(2*lmax+1),
-     &  PREF((lmax+1)**2)
-      complex(dp) DLM((lmax+1)*(2*lmax+1))
-c
-C ..  ARRAYS IN COMMON  ..
-C
-      REAL(dp)  AR1(2),AR2(2)
-      COMMON/X1/AR1,AR2
-C----------------------------------------------------------------------
-
-C
-C     AK(1)  AND  AK(2)  ARE THE X  AND Y COMPONENTS OF THE
-C     MOMENTUM PARALLEL TO THE SURFACE, MODULO A RECIPROCAL
-C     LATTICE VECTOR
-C
-      RTPI=SQRT(PI)
-      KAPSQ=KAPPA*KAPPA
-C
-C     THE FACTORIAL  FUNCTION  IS TABULATED  IN FAC . THE ARRAY
-C     DLM WILL CONTAIN NON-ZERO,I.E. L+M EVEN,VALUES AS DEFINED
-C     BY KAMBE.DLM=DLM1+DLM2+DLM3.WITH LM=(00),(1-1),(11),(2-2)...
-C
-      L2MAX=LMAX+LMAX
-      LL2=L2MAX+1
-      FAC(1)=1.0_dp
-      II=L2MAX+L2MAX
-      DO 2 I=1,II
-   2  FAC(I+1)=dble(I)*FAC(I)
-      NNDLM=L2MAX*(L2MAX+3)/2+1
-      DO 3 I=1,NNDLM
-   3  DLM(I)=CZERO
-C
-C     THE FORMULA OF KAMBE FOR THE SEPARATION CONSTANT,ALPHA,IS
-C     USED,SUBJECT TO A RESTRICTION WHICH IS IMPOSED TO CONTROL
-C     LATER ROUNDING ERRORS
-C
-      TV=ABS(AR1(1)*AR2(2)-AR1(2)*AR2(1))
-      ALPHA=TV/(4.0_dp*PI)*KAPSQ
-      AL=ABS(ALPHA)
-      IF(EXP(AL)*EMACH-5.0D-5)5,5,4
-   4  AL=LOG(5.0D-5/EMACH)
-   5  ALPHA=cmplx_dp(AL,0.0_dp)
-      RTA=SQRT(ALPHA)
-C
-C     DLM1 , THE  SUM  OVER  RECIPROCAL   LATTICE  VECTORS  , IS
-C     CALCULATED FIRST. THE PREFACTOR P1 IS  TABULATED  FOR EVEN
-C     VALUES OF L+|M|,THUS LM=(00),(11),(2 0),(22),(L2MAX,L2MAX)
-C     THE  FACTORIAL  FACTOR  F1  IS SIMULTANEOUSLY TABULATED IN
-C     DENOM,FOR ALL VALUES OF N=0,(L-|M|)/2
-C
-      K=1
-      KK=1
-      AP1=-2.0_dp/TV
-      AP2=-1.0_dp
-      CF=CI/KAPPA
-      DO 8 L=1,LL2
-      AP1=AP1/2.0_dp
-      AP2=AP2+2.0_dp
-      CP=CF
-      MM=1
-      IF(MOD  (L,2))7,6,7
-   6  MM=2
-      CP=CI*CP
-   7  NN=(L-MM)/2+2
-      DO 8 M=MM,L,2
-      J1=L+M-1
-      J2=L-M+1
-      AP=AP1*SQRT(AP2*FAC(J1)*FAC(J2))
-      PREF(KK)=AP*CP
-      CP=-CP
-      KK=KK+1
-      NN=NN-1
-      DO 8 I=1,NN
-      I1=I
-      I2=NN-I+1
-      I3=NN+M-I
-      DENOM(K)=1.0_dp/(FAC(I1)*FAC(I2)*FAC(I3))
-   8  K=K+1
-C
-C     THE  RECIPROCAL  LATTICE IS  DEFINED BY  B1,B2 . THE  SUMMATION
-C     BEGINS WITH THE ORIGIN POINT OF THE LATTICE , AND  CONTINUES IN
-C     STEPS OF 8*N1 POINTS , EACH  STEP INVOLVING THE  PERIMETER OF A
-C     PARALLELOGRAM OF LATTICE POINTS ABOUT THE ORIGIN,OF SIDE 2*N1+1
-C     EACH STEP BEGINS AT LABEL 9.
-C     AKPT=THE CURRENT LATTICE VECTOR IN THE SUM
-C
-      RTV=2.0_dp*PI/TV
-      B1(1)=-AR1(2)*RTV
-      B1(2)=AR1(1)*RTV
-      B2(1)=-AR2(2)*RTV
-      B2(2)=AR2(1)*RTV
-      TEST1=1.0D6
-      II=1
-      N1=-1
-   9  N1=N1+1
-      NA=N1+N1+II
-      AN1=dble(N1)
-      AN2=-AN1-1.0_dp
-      DO 22 I1=1,NA
-      AN2=AN2+1.0_dp
-      DO 21 I2=1,4
-C     WRITE(16,307) I1,I2
-C 307 FORMAT(33X,'I1=',I2,' , I2=',I2/33X,12('='))
-      AN=AN1
-      AN1=-AN2
-      AN2=AN
-      AB1=AN1*B1(1)+AN2*B2(1)
-      AB2=AN1*B1(2)+AN2*B2(2)
-      AKPT(1)=AK(1)+AB1
-      AKPT(2)=AK(2)+AB2
-C
-C     FOR  EVERY LATTICE VECTOR OF THE SUM, THREE SHORT ARRAYS ARE
-C     INITIALISED AS BELOW. AND USED AS TABLES:
-C     XPM(M) CONTAINS VALUES OF XPK**|M|
-C     AGK(I) CONTAINS VALUES OF (AC/KAPPA)**I
-C     GKN(N) CONTAINS VALUES OF (GP/KAPPA)**(2*N-1)*GAM(N,Z)
-C     WHERE L=0,L2MAX;M=-L,L;N=0,(L-|M|)/2;I=L-2*N
-C     GAM IS THE INCOMPLETE GAMMA FUNCTION, WHICH IS CALCULATED BY
-C     RECURRENCE  FROM  THE VALUE  FOR N=0, WHICH  IN TURN CAN  BE
-C     EXPRESSED IN TERMS OF THE COMPLEX ERROR FUNCTION CERF
-C     AC=MOD(AKPT). NOTE SPECIAL ACTION IF AC=0
-C
-      ACSQ=AKPT(1)*AKPT(1)+AKPT(2)*AKPT(2)
-      GPSQ=KAPSQ-ACSQ
-      IF(ABS(GPSQ)<EMACH*EMACH)   THEN
-      WRITE(7,100)
-  100 FORMAT(13X,'FATAL ERROR FROM XMAT:'/3X,'GPSQ IS TOO SMALL.'
-     & /3X,'GIVE A SMALL BUT NONZERO VALUE FOR "EPSILON"'/3X,
-     & 'IN THE DATA STATEMENT OF THE MAIN PROGRAM.'
-     & /3X,'THIS DEFINES A SMALL IMAGINARY PART'
-     & /3X,'IN THE FREQUENCY OR WAVELENGTH VALUE.')
-      STOP
-      ENDIF
-      AC=SQRT(ACSQ)
-      GP=SQRT(GPSQ)
-      XPK=CZERO
-      GK=CZERO
-      GKK=cmplx_dp(1.0_dp,0.0_dp)
-      IF(AC-EMACH)11,11,10
-  10  XPK=cmplx_dp(AKPT(1)/AC,AKPT(2)/AC)
-      GK=AC/KAPPA
-      GKK=GPSQ/KAPSQ
-  11  XPM(1)=cmplx_dp(1.0_dp,0.0_dp)
-      AGK(1)=cmplx_dp(1.0_dp,0.0_dp)
-      DO 12 I=2,LL2
-      XPM(I)=XPM(I-1)*XPK
-  12  AGK(I)=AGK(I-1)*GK
-      CF=KAPPA/GP
-      ZZ=-ALPHA*GKK
-      CZ=SQRT(-ZZ)
-      Z=-CI*CZ
-      CX=EXP(-ZZ)
-      GAM=RTPI*CERF(CZ)
-      GKN(1)=CF*CX*GAM
-      BT=Z
-      B=0.5_dp
-      LLL=L2MAX/2+1
-      DO 13 I=2,LLL
-      BT=BT/ZZ
-      B=B-1.0_dp
-      GAM=(GAM-BT)/B
-      CF=CF*GKK
-  13  GKN(I)=CF*CX*GAM
-C
-C     THE CONTRIBUTION TO THE SUM DLM1 FOR A PARTICULAR
-C     RECIPROCAL LATTICE VECTOR IS NOW ACCUMULATED INTO
-C     THE  ELEMENTS OF DLM,NOTE SPECIAL ACTION IF  AC=0
-C
-      K=1
-      KK=1
-      DO 19 L=1,LL2
-      MM=1
-      IF(MOD  (L,2))15,14,15
-  14  MM=2
-  15  N=(L*L+MM)/2
-      NN=(L-MM)/2+2
-      DO 19 M=MM,L,2
-      ACC=CZERO
-      NN=NN-1
-      IL=L
-      DO 16 I=1,NN
-      ACC=ACC+DENOM(K)*AGK(IL)*GKN(I)
-      IL=IL-2
-  16  K=K+1
-      ACC=PREF(KK)*ACC
-      IF(AC-1.0D-6)17,17,165
- 165  DLM(N)=DLM(N)+ACC/XPM(M)
-      IF(M-1)17,18,17
-  17  NM=N-M+1
-      DLM(NM)=DLM(NM)+ACC*XPM(M)
-  18  KK=KK+1
-  19  N=N+1
-      IF(II)21,21,22
-  21  CONTINUE
-  22  II=0
-C
-C     AFTER EACH STEP OF THE SUMMATION A TEST ON THE
-C     CONVERGENCE  OF THE  ELEMENTS OF  DLM IS  MADE
-C
-      TEST2=0.0_dp
-      DO 23 I=1,NNDLM
-      DNORM=ABS(DLM(I))
-  23  TEST2=TEST2+DNORM*DNORM
-      TEST=ABS((TEST2-TEST1)/TEST1)
-      TEST1=TEST2
-      IF(TEST-0.001D0)27,27,24
-  24  IF(N1-10)9,25,25
-  25  WRITE(16,26)N1
-  26  FORMAT(29H**DLM1,S NOT CONVERGED BY N1=,I2)
-      GOTO 285
-  27  WRITE(16,28)N1
-  28  FORMAT(25H DLM1,S CONVERGED BY N1 =,I2)
-C     WRITE(16,250)DLM
-C250  FORMAT(5H0DLM1,//,45(2E13.5,/))
-C
-C     DLM2, THE SUM OVER REAL SPACE LATTICE VECTORS, BEGINS WITH
-C     THE ADJUSTMENT OF THE ARRAY PREF, TO CONTAIN VALUES OF THE
-C     PREFACTOR  'P2' FOR LM=(00),(11),(20),(22),...
-C
- 285  KK=1
-      AP1=TV/(4.0_dp*PI)
-      CF=KAPSQ/CI
-      DO 31 L=1,LL2
-      CP=CF
-      MM=1
-      IF(MOD  (L,2))30,29,30
-  29  MM=2
-      CP=-CI*CP
-  30  J1=(L-MM)/2+1
-      J2=J1+MM-1
-      IN=J1+L-2
-      AP2=((-1.0_dp)**IN)*AP1
-      DO 31 M=MM,L,2
-      AP=AP2/(FAC(J1)*FAC(J2))
-      PREF(KK)=AP*CP*PREF(KK)
-      J1=J1-1
-      J2=J2+1
-      AP2=-AP2
-      CP=-CP
-  31  KK=KK+1
-C
-C     THE SUMMATION PROCEEDS IN STEPS OF 8*N1 LATTICE POINTS
-C     AS BEFORE, BUT THIS  TIME EXCLUDING  THE ORIGIN  POINT
-C     R=THE CURRENT LATTICE VECTOR IN THE SUM
-C     AR=MOD(R)
-C
-      N1=0
-  32  N1=N1+1
-      NA=N1+N1
-      AN1=dble(N1)
-      AN2=-AN1-1.0_dp
-      DO 40 I1=1,NA
-      AN2=AN2+1.0_dp
-      DO 40 I2=1,4
-      AN=AN1
-      AN1=-AN2
-      AN2=AN
-      R(1)=AN1*AR1(1)+AN2*AR2(1)
-      R(2)=AN1*AR1(2)+AN2*AR2(2)
-      AR=SQRT(R(1)*R(1)+R(2)*R(2))
-      XPK=cmplx_dp(R(1)/AR,R(2)/AR)
-      XPM(1)=cmplx_dp(1.0_dp,0.0_dp)
-      DO 33 I=2,LL2
-  33  XPM(I)=XPM(I-1)*XPK
-      AD=AK(1)*R(1)+AK(2)*R(2)
-      SD=EXP(-AD*CI)
-C
-C     FOR EACH LATTICE VECTOR THE INTEGRAL 'U' IS OBTAINED
-C     FROM THE RECURRENCE RELATION IN L SUGGESTED BY KAMBE
-C     U1 AND U2 ARE THE  INITIAL TERMS OF THIS RECURRENCE,
-C     FOR L#-1 AND L=0, AND THEY ARE EVALUATED IN TERMS OF
-C     THE COMPLEX ERROR FUNCTION CERF
-C
-      KANT=0.5_dp*AR*KAPPA
-      KNSQ=KANT*KANT
-      Z=CI*KANT/RTA
-      ZZ=RTA-Z
-      Z=RTA+Z
-      WW=CERF(-ZZ)
-      W=CERF(Z)
-      AA=0.5_dp*RTPI*(W-WW)/CI
-      AB=0.5_dp*RTPI*(W+WW)
-      A=ALPHA-KNSQ/ALPHA
-      XPA=EXP(A)
-      U1=AA*XPA
-      U2=AB*XPA/KANT
-C
-C     THE CONTRIBUTION TO DLM2 FROM A PARTICULAR LATTICE
-C     VECTOR  IS  ACCUMULATED INTO  THE ELEMENTS OF  DLM
-C     THIS PROCEDURE INCLUDES THE TERM (KANT**L) AND THE
-C     RECURRENCE FOR THE INTEGRAL 'U'
-C
-      KK=1
-      AL=-0.5_dp
-      CP=RTA
-      CF=cmplx_dp(1.0_dp,0.0_dp)
-      DO 39 L=1,LL2
-      MM=1
-      IF(MOD  (L,2))35,34,35
-  34  MM=2
-  35  N=(L*L+MM)/2
-      DO 38 M=MM,L,2
-      ACC=PREF(KK)*U2*CF*SD
-      DLM(N)=DLM(N)+ACC/XPM(M)
-      IF(M-1)36,37,36
-  36  NM=N-M+1
-      DLM(NM)=DLM(NM)+ACC*XPM(M)
-  37  KK=KK+1
-  38  N=N+1
-      AL=AL+1.0_dp
-      CP=CP/ALPHA
-      U=(AL*U2-U1+CP*XPA)/KNSQ
-      U1=U2
-      U2=U
-  39  CF=KANT*CF
-  40  CONTINUE
-C
-C     AFTER EACH STEP OF THE SUMMATION A TEST ON THE
-C     CONVERGENCE OF THE ELEMENTS OF DLM IS MADE
-C
-      TEST2=0.0_dp
-      DO 41 I=1,NNDLM
-      DNORM=ABS(DLM(I))
-  41  TEST2=TEST2+DNORM*DNORM
-      TEST=ABS((TEST2-TEST1)/TEST1)
-      TEST1=TEST2
-      IF(TEST-0.001D0)45,45,42
-  42  IF(N1-10)32,43,43
-  43  WRITE(16,44)N1
-  44  FORMAT(31H0**DLM2,S NOT CONVERGED BY N1 =,I2)
-      GOTO 465
-  45  WRITE(16,46)N1
-  46  FORMAT(24H DLM2,S CONVERGED BY N1=,I2)
-C
-C     THE TERM DLM3 HAS A NON-ZERO CONTRIBUTION  ONLY
-C     WHEN L=M=0.IT IS EVALUATED HERE IN TERMS OF THE
-C     COMPLEX ERROR FUNCTION CERF
-C
- 465  XPA=EXP(-ALPHA)
-      RTAI=1.0_dp/(RTPI*RTA)
-      ACC=KAPPA*(CI*(XPA-CERF(RTA))-RTAI)/XPA
-      AP=-0.5_dp/RTPI
-      DLM(1)=DLM(1)+AP*ACC
-C
-C     FINALLY THE ELEMENTS OF DLM ARE MULTIPLIED BY THE
-C     FACTOR (-1.0_dp)**((M+|M|)/2)
-C
-      DO 47 L=2,LL2,2
-      N=L*L/2+1
-      DO 47 M=2,L,2
-      DLM(N)=-DLM(N)
-  47  N=N+1
-C     WRITE(16,251) DLM
-C 251 FORMAT(15H0DLM1+DLM2+DLM3,//45(2E13.5,/))
-C
-C     SUMMATION OVER THE CLEBSCH-GORDON TYPE COEFFICIENTS
-C     ELM PROCEEDS, FIRST FOR  XODD, AND THEN  FOR XEVEN.
-C     THIS GIVES THE KAMBE ELEMENTS  A(L2,M2;L3,M3) WHICH
-C     GIVE THE ELEMENTS  X(L3,M3;L2,M2) OF XODD AND XEVEN
-C
-      K=1
-      II=0
-  48  LL=LMAX+II
-      I=1
-      DO 56 IL2=1,LL
-      L2=IL2-II
-      M2=-L2+1-II
-      DO 56 I2=1,IL2
-      J=1
-      DO 55 IL3=1,LL
-      L3=IL3-II
-      M3=-L3+1-II
-      DO 55 I3=1,IL3
-      ALM=CZERO
-      LA1=MAX0(IABS(L2-L3),IABS(M2-M3))
-      LB1=L2+L3
-      N=(LA1*(LA1+2)+M2-M3+2)/2
-      NN=2*LA1+4
-      LB11=LB1+1
-      LA11=LA1+1
-      DO 49 L1=LA11,LB11,2
-      ALM=ALM+ELM(K)*DLM(N)
-      N=N+NN
-      NN=NN+4
-  49  K=K+1
-      ALM=ALM/KAPPA
-      IF(I-J)51,50,51
-  50  ALM=ALM+CI
-  51  IF(II)52,52,53
-  52  XODD(J,I)=CI*ALM
-      GOTO 54
-  53  XEVEN(J,I)=CI*ALM
-  54  M3=M3+2
-  55  J=J+1
-      M2=M2+2
-  56  I=I+1
-      IF(II)57,57,58
-  57  II=1
-      GOTO 48
-  58  CONTINUE
-      RETURN
-      END subroutine
+!
+!     ak(1)  and  ak(2)  are the x  and y components of the
+!     momentum parallel to the surface, modulo a reciprocal
+!     lattice vector
+!
+      rtpi=sqrt(pi)
+      kapsq=kappa*kappa
+!
+!     the factorial  function  is tabulated  in fac . the array
+!     dlm will contain non-zero,i.e. l+m even,values as defined
+!     by kambe.dlm=dlm1+dlm2+dlm3.with lm=(00),(1-1),(11),(2-2)...
+!
+      l2max=lmax+lmax
+      ll2=l2max+1
+      fac(1)=1.0_dp
+      ii=l2max+l2max
+      do i=1,ii
+        fac(i+1)=dble(i)*fac(i)
+      end do
+      nndlm=l2max*(l2max+3)/2+1
+      do i=1,nndlm
+        dlm(i)=czero
+      end do
+!
+!     the formula of kambe for the separation constant,alpha,is
+!     used,subject to a restriction which is imposed to control
+!     later rounding errors
+!
+      tv=abs(ar1(1)*ar2(2)-ar1(2)*ar2(1))
+      alpha=tv/(4.0_dp*pi)*kapsq
+      al=abs(alpha)
+      if(exp(al)*emach-5.0d-5 > 0) al=log(5.0d-5/emach)
+      alpha=cmplx_dp(al,0.0_dp)
+      rta=sqrt(alpha)
+!
+!     dlm1 , the  sum  over  reciprocal   lattice  vectors  , is
+!     calculated first. the prefactor p1 is  tabulated  for even
+!     values of l+|m|,thus lm=(00),(11),(2 0),(22),(l2max,l2max)
+!     the  factorial  factor  f1  is simultaneously tabulated in
+!     denom,for all values of n=0,(l-|m|)/2
+!
+      k=1
+      kk=1
+      ap1=-2.0_dp/tv
+      ap2=-1.0_dp
+      cf=ci/kappa
+      do l=1,ll2
+        ap1=ap1/2.0_dp
+        ap2=ap2+2.0_dp
+        cp=cf
+        mm=1
+        if(mod  (l,2) == 0) then
+        mm=2
+        cp=ci*cp
+        end if
+        nn=(l-mm)/2+2
+        do m=mm,l,2
+          j1=l+m-1
+          j2=l-m+1
+          ap=ap1*sqrt(ap2*fac(j1)*fac(j2))
+          pref(kk)=ap*cp
+          cp=-cp
+          kk=kk+1
+          nn=nn-1
+          do i=1,nn
+            i1=i
+            i2=nn-i+1
+            i3=nn+m-i
+            denom(k)=1.0_dp/(fac(i1)*fac(i2)*fac(i3))
+            k=k+1
+          end do
+        end do
+      end do
+!
+!     the  reciprocal  lattice is  defined by  b1,b2 . the  summation
+!     begins with the origin point of the lattice , and  continues in
+!     steps of 8*n1 points , each  step involving the  perimeter of a
+!     parallelogram of lattice points about the origin,of side 2*n1+1
+!     each step begins at label 9.
+!     akpt=the current lattice vector in the sum
+!
+      rtv=2.0_dp*pi/tv
+      b1(1)=-ar1(2)*rtv
+      b1(2)=ar1(1)*rtv
+      b2(1)=-ar2(2)*rtv
+      b2(2)=ar2(1)*rtv
+      test1=1.0d6
+      ii=1
+      n1=-1
+   9  n1=n1+1
+      na=n1+n1+ii
+      an1=dble(n1)
+      an2=-an1-1.0_dp
+      do i1=1,na
+        an2=an2+1.0_dp
+        do i2=1,4
+!     write(16,307) i1,i2
+! 307 format(33x,'i1=',i2,' , i2=',i2/33x,12('='))
+          an=an1
+          an1=-an2
+          an2=an
+          ab1=an1*b1(1)+an2*b2(1)
+          ab2=an1*b1(2)+an2*b2(2)
+          akpt(1)=ak(1)+ab1
+          akpt(2)=ak(2)+ab2
+!
+!     for  every lattice vector of the sum, three short arrays are
+!     initialised as below. and used as tables:
+!     xpm(m) contains values of xpk**|m|
+!     agk(i) contains values of (ac/kappa)**i
+!     gkn(n) contains values of (gp/kappa)**(2*n-1)*gam(n,z)
+!     where l=0,l2max;m=-l,l;n=0,(l-|m|)/2;i=l-2*n
+!     gam is the incomplete gamma function, which is calculated by
+!     recurrence  from  the value  for n=0, which  in turn can  be
+!     expressed in terms of the complex error function cerf
+!     ac=mod(akpt). note special action if ac=0
+!
+          acsq=akpt(1)*akpt(1)+akpt(2)*akpt(2)
+          gpsq=kapsq-acsq
+          if(abs(gpsq)<emach*emach)   then
+          write(7,100)
+  100     format(13x,'fatal error from xmat:'/3x,'gpsq is too small.'
+     &     /3x,'give a small but nonzero value for "epsilon"'/3x,
+     &     'in the data statement of the main program.'
+     &     /3x,'this defines a small imaginary part'
+     &     /3x,'in the frequency or wavelength value.')
+          stop
+          endif
+          ac=sqrt(acsq)
+          gp=sqrt(gpsq)
+          xpk=czero
+          gk=czero
+          gkk=cmplx_dp(1.0_dp,0.0_dp)
+          if(ac-emach)11,11,10
+  10      xpk=cmplx_dp(akpt(1)/ac,akpt(2)/ac)
+          gk=ac/kappa
+          gkk=gpsq/kapsq
+  11      xpm(1)=cmplx_dp(1.0_dp,0.0_dp)
+          agk(1)=cmplx_dp(1.0_dp,0.0_dp)
+          do i=2,ll2
+            xpm(i)=xpm(i-1)*xpk
+            agk(i)=agk(i-1)*gk
+          end do
+          cf=kappa/gp
+          zz=-alpha*gkk
+          cz=sqrt(-zz)
+          z=-ci*cz
+          cx=exp(-zz)
+          gam=rtpi*cerf(cz)
+          gkn(1)=cf*cx*gam
+          bt=z
+          b=0.5_dp
+          lll=l2max/2+1
+          do i=2,lll
+            bt=bt/zz
+            b=b-1.0_dp
+            gam=(gam-bt)/b
+            cf=cf*gkk
+            gkn(i)=cf*cx*gam
+          end do
+!
+!     the contribution to the sum dlm1 for a particular
+!     reciprocal lattice vector is now accumulated into
+!     the  elements of dlm,note special action if  ac=0
+!
+          k=1
+          kk=1
+          do l=1,ll2
+            mm=1
+            if(mod  (l,2))15,14,15
+  14        mm=2
+  15        n=(l*l+mm)/2
+            nn=(l-mm)/2+2
+            do m=mm,l,2
+              acc=czero
+              nn=nn-1
+              il=l
+              do i=1,nn
+                acc=acc+denom(k)*agk(il)*gkn(i)
+                il=il-2
+                k=k+1
+              end do
+              acc=pref(kk)*acc
+              if(ac-1.0d-6)17,17,165
+ 165          dlm(n)=dlm(n)+acc/xpm(m)
+              if(m-1)17,18,17
+  17          nm=n-m+1
+              dlm(nm)=dlm(nm)+acc*xpm(m)
+  18          kk=kk+1
+              n=n+1
+            end do
+          end do
+          if(ii > 0) exit
+        end do
+      ii=0
+      end do
+!
+!     after each step of the summation a test on the
+!     convergence  of the  elements of  dlm is  made
+!
+      test2=0.0_dp
+      do i=1,nndlm
+        dnorm=abs(dlm(i))
+        test2=test2+dnorm*dnorm
+      end do
+      test=abs((test2-test1)/test1)
+      test1=test2
+      if(test-0.001d0 > 0) then
+  24  if(n1-10)9,25,25
+  25  write(16,26)n1
+  26  format(//13x, 'dlm1,s not converged by n1=', i2)
+      else
+        write(16,28)n1
+  28    format(//13x, 'dlm1,s converged by n1=', i2)
+      end if
+!     write(16,250)dlm
+!250  format(5h0dlm1,//,45(2e13.5,/))
+!
+!     dlm2, the sum over real space lattice vectors, begins with
+!     the adjustment of the array pref, to contain values of the
+!     prefactor  'p2' for lm=(00),(11),(20),(22),...
+!
+ 285  kk=1
+      ap1=tv/(4.0_dp*pi)
+      cf=kapsq/ci
+      do l=1,ll2
+        cp=cf
+        mm=1
+        if(mod  (l,2) == 0) then
+          mm=2
+          cp=-ci*cp
+        end if
+        j1=(l-mm)/2+1
+        j2=j1+mm-1
+        in=j1+l-2
+        ap2=((-1.0_dp)**in)*ap1
+        do m=mm,l,2
+          ap=ap2/(fac(j1)*fac(j2))
+          pref(kk)=ap*cp*pref(kk)
+          j1=j1-1
+          j2=j2+1
+          ap2=-ap2
+          cp=-cp
+          kk=kk+1
+        end do
+      end do
+!
+!     the summation proceeds in steps of 8*n1 lattice points
+!     as before, but this  time excluding  the origin  point
+!     r=the current lattice vector in the sum
+!     ar=mod(r)
+!
+      n1=0
+  32  n1=n1+1
+      na=n1+n1
+      an1=dble(n1)
+      an2=-an1-1.0_dp
+      do i1=1,na
+        an2=an2+1.0_dp
+        do i2=1,4
+          an=an1
+          an1=-an2
+          an2=an
+          r(1)=an1*ar1(1)+an2*ar2(1)
+          r(2)=an1*ar1(2)+an2*ar2(2)
+          ar=sqrt(r(1)*r(1)+r(2)*r(2))
+          xpk=cmplx_dp(r(1)/ar,r(2)/ar)
+          xpm(1)=cmplx_dp(1.0_dp,0.0_dp)
+          do i=2,ll2
+            xpm(i)=xpm(i-1)*xpk
+          end do
+          ad=ak(1)*r(1)+ak(2)*r(2)
+          sd=exp(-ad*ci)
+!
+!     for each lattice vector the integral 'u' is obtained
+!     from the recurrence relation in l suggested by kambe
+!     u1 and u2 are the  initial terms of this recurrence,
+!     for l#-1 and l=0, and they are evaluated in terms of
+!     the complex error function cerf
+!
+          kant=0.5_dp*ar*kappa
+          knsq=kant*kant
+          z=ci*kant/rta
+          zz=rta-z
+          z=rta+z
+          ww=cerf(-zz)
+          w=cerf(z)
+          aa=0.5_dp*rtpi*(w-ww)/ci
+          ab=0.5_dp*rtpi*(w+ww)
+          a=alpha-knsq/alpha
+          xpa=exp(a)
+          u1=aa*xpa
+          u2=ab*xpa/kant
+!
+!     the contribution to dlm2 from a particular lattice
+!     vector  is  accumulated into  the elements of  dlm
+!     this procedure includes the term (kant**l) and the
+!     recurrence for the integral 'u'
+!
+          kk=1
+          al=-0.5_dp
+          cp=rta
+          cf=cmplx_dp(1.0_dp,0.0_dp)
+          do l=1,ll2
+            mm=1
+            if(mod  (l,2) == 0) mm=2
+            n=(l*l+mm)/2
+            do m=mm,l,2
+              acc=pref(kk)*u2*cf*sd
+              dlm(n)=dlm(n)+acc/xpm(m)
+              if(m-1 /= 0) then
+                nm=n-m+1
+                dlm(nm)=dlm(nm)+acc*xpm(m)
+              end if
+              kk=kk+1
+              n=n+1
+            end do
+            al=al+1.0_dp
+            cp=cp/alpha
+            u=(al*u2-u1+cp*xpa)/knsq
+            u1=u2
+            u2=u
+            cf=kant*cf
+          end do
+        end do
+      end do
+!
+!     after each step of the summation a test on the
+!     convergence of the elements of dlm is made
+!
+      test2=0.0_dp
+      do i=1,nndlm
+        dnorm=abs(dlm(i))
+        test2=test2+dnorm*dnorm
+      end do
+      test=abs((test2-test1)/test1)
+      test1=test2
+      if(test-0.001d0 > 0) then
+      if(n1-10) 32,43,43
+  43    write(16,44)n1
+  44    format(//3x, 'dlm2,s not converged by n1=', i2)
+      else
+        write(16,46)n1
+  46    format(//3x, 'dlm2,s converged by n1=', i2)
+      end if
+!
+!     the term dlm3 has a non-zero contribution  only
+!     when l=m=0.it is evaluated here in terms of the
+!     complex error function cerf
+!
+      xpa=exp(-alpha)
+      rtai=1.0_dp/(rtpi*rta)
+      acc=kappa*(ci*(xpa-cerf(rta))-rtai)/xpa
+      ap=-0.5_dp/rtpi
+      dlm(1)=dlm(1)+ap*acc
+!
+!     finally the elements of dlm are multiplied by the
+!     factor (-1.0_dp)**((m+|m|)/2)
+!
+      do l=2,ll2,2
+        n=l*l/2+1
+        do m=2,l,2
+          dlm(n)=-dlm(n)
+          n=n+1
+        end do
+      end do
+!     write(16,251) dlm
+! 251 format(15h0dlm1+dlm2+dlm3,//45(2e13.5,/))
+!
+!     summation over the clebsch-gordon type coefficients
+!     elm proceeds, first for  xodd, and then  for xeven.
+!     this gives the kambe elements  a(l2,m2;l3,m3) which
+!     give the elements  x(l3,m3;l2,m2) of xodd and xeven
+!
+      k=1
+      ii=0
+  48  ll=lmax+ii
+      i=1
+      do il2=1,ll
+        l2=il2-ii
+        m2=-l2+1-ii
+        do i2=1,il2
+          j=1
+          do il3=1,ll
+            l3=il3-ii
+            m3=-l3+1-ii
+            do i3=1,il3
+              alm=czero
+              la1=max0(iabs(l2-l3),iabs(m2-m3))
+              lb1=l2+l3
+              n=(la1*(la1+2)+m2-m3+2)/2
+              nn=2*la1+4
+              lb11=lb1+1
+              la11=la1+1
+              do l1=la11,lb11,2
+                alm=alm+elm(k)*dlm(n)
+                n=n+nn
+                nn=nn+4
+                k=k+1
+              end do
+              alm=alm/kappa
+              if(i-j == 0) alm=alm+ci
+              if(ii <= 0) then
+                xodd(j,i)=ci*alm
+              else
+                xeven(j,i)=ci*alm
+              end if
+              m3=m3+2
+              j=j+1
+            end do
+          end do
+          m2=m2+2
+          i=i+1
+        end do
+      end do
+      if(ii<=0) then
+        ii=1
+        goto 48
+      endif
+      return
+      end subroutine
 C=======================================================================
 C=======================================================================
 C=======================================================================
@@ -546,7 +566,7 @@ C     ------------------------------------------------------------------
      &                            GKK(2,IG1)*GKK(2,IG1))
       end do
       CALL TMTRX(RAP,EPSSPH,EPSMED,MUMED,MUSPH,TE,TH)
-      CALL XMAT(XODD,XEVEN,LMAX,KAPPA,AK,ELM,EMACH)
+      CALL XMAT(XODD,XEVEN,LMAX,KAPPA,AK,ELM,EMACH,ar1, ar2)
       CALL SETUP(LMAX,XEVEN,XODD,TE,TH,XXMAT1,XXMAT2)
       call zgetrf_wrap ( XXMAT1, int1 )
       call zgetrf_wrap ( XXMAT2, int2 )
@@ -1216,28 +1236,30 @@ C
      &           ,MUSPH(ICOMP,1),KAPPA,AK,DL(1,ICOMP,1),
      &           DR(1,ICOMP,1),G,ELM,A0,EMACH,QIR,QIIR,QIIIR,QIVR)
       IF(NPLAN(ICOMP)>=2) THEN
-         DO 17 IGK1=1,IGKMAX
-         DO 17 IGK2=1,IGKMAX
-         WIL  (IGK1,IGK2)=QIR  (IGK1,IGK2)
-         WIIL (IGK1,IGK2)=QIIR (IGK1,IGK2)
-         WIIIL(IGK1,IGK2)=QIIIR(IGK1,IGK2)
-         WIVL (IGK1,IGK2)=QIVR (IGK1,IGK2)
-   17        CONTINUE
-      DO 15 IPL=2,NPLAN(ICOMP)
-      RAP=S(ICOMP,IPL)*KAPPA0/2.D0/PI
-      CALL PCSLAB(LMAX,IGMAX,RAP,EPS1(ICOMP),EPSSPH(ICOMP,IPL),
-     &           MU1(ICOMP),MUSPH(ICOMP,IPL),KAPPA,AK,
-     &           DL(1,ICOMP,IPL),DR(1,ICOMP,IPL),G,ELM,A0,EMACH,
-     &           QIR,QIIR,QIIIR,QIVR)
-      CALL PAIR(IGKMAX,igkd,WIL,WIIL,WIIIL,WIVL,QIR,QIIR,QIIIR,QIVR)
-   15 CONTINUE
-         DO 18 IGK1=1,IGKMAX
-         DO 18 IGK2=1,IGKMAX
-         QIR  (IGK1,IGK2)=WIL  (IGK1,IGK2)
-         QIIR (IGK1,IGK2)=WIIL (IGK1,IGK2)
-         QIIIR(IGK1,IGK2)=WIIIL(IGK1,IGK2)
-         QIVR (IGK1,IGK2)=WIVL (IGK1,IGK2)
-   18        CONTINUE
+         DO IGK1=1,IGKMAX
+           DO IGK2=1,IGKMAX
+             WIL  (IGK1,IGK2)=QIR  (IGK1,IGK2)
+             WIIL (IGK1,IGK2)=QIIR (IGK1,IGK2)
+             WIIIL(IGK1,IGK2)=QIIIR(IGK1,IGK2)
+             WIVL (IGK1,IGK2)=QIVR (IGK1,IGK2)
+           end do
+         end do
+      DO IPL=2,NPLAN(ICOMP)
+        RAP=S(ICOMP,IPL)*KAPPA0/2.D0/PI
+        CALL PCSLAB(LMAX,IGMAX,RAP,EPS1(ICOMP),EPSSPH(ICOMP,IPL),
+     &             MU1(ICOMP),MUSPH(ICOMP,IPL),KAPPA,AK,
+     &             DL(1,ICOMP,IPL),DR(1,ICOMP,IPL),G,ELM,A0,EMACH,
+     &             QIR,QIIR,QIIIR,QIVR)
+        CALL PAIR(IGKMAX,igkd,WIL,WIIL,WIIIL,WIVL,QIR,QIIR,QIIIR,QIVR)
+      end do
+         DO IGK1=1,IGKMAX
+           DO IGK2=1,IGKMAX
+             QIR  (IGK1,IGK2)=WIL  (IGK1,IGK2)
+             QIIR (IGK1,IGK2)=WIIL (IGK1,IGK2)
+             QIIIR(IGK1,IGK2)=WIIIL(IGK1,IGK2)
+             QIVR (IGK1,IGK2)=WIVL (IGK1,IGK2)
+           end do
+         end do
             ENDIF
       IF(NLAYER(ICOMP)>=2) THEN
       DO 16 ILAYER=1,NLAYER(ICOMP)-1
@@ -1266,13 +1288,14 @@ C
              CALL HOSLAB(IGMAX,KAPR,(KAPR+KAPOUT)/2.D0,KAPOUT,AK,G,VEC0,
      &                   VEC0,0.D0,QIR,QIIR,QIIIR,QIVR,EMACH)
          CALL PAIR(IGKMAX,igkd,QIL,QIIL,QIIIL,QIVL,QIR,QIIR,QIIIR,QIVR)
-         DO 11 IGK1=1,IGKMAX
-         DO 11 IGK2=1,IGKMAX
-         QIR  (IGK1,IGK2)=QIL  (IGK1,IGK2)
-         QIIR (IGK1,IGK2)=QIIL (IGK1,IGK2)
-         QIIIR(IGK1,IGK2)=QIIIL(IGK1,IGK2)
-         QIVR (IGK1,IGK2)=QIVL (IGK1,IGK2)
-   11        CONTINUE
+         DO IGK1=1,IGKMAX
+           DO IGK2=1,IGKMAX
+             QIR  (IGK1,IGK2)=QIL  (IGK1,IGK2)
+             QIIR (IGK1,IGK2)=QIIL (IGK1,IGK2)
+             QIIIR(IGK1,IGK2)=QIIIL(IGK1,IGK2)
+             QIVR (IGK1,IGK2)=QIVL (IGK1,IGK2)
+           end do
+         end do
              CALL HOSLAB(IGMAX,KAPIN,(KAPL+KAPIN)/2.D0,KAPL,AK,G,VEC0,
      &                   VEC0,0.D0,QIL,QIIL,QIIIL,QIVL,EMACH)
          CALL PAIR(IGKMAX,igkd,QIL,QIIL,QIIIL,QIVL,QIR,QIIR,QIIIR,QIVR)
