@@ -3,11 +3,90 @@ module multem_blas
     use libmultem2b, only: dp, cmplx_dp
     implicit none
     private
-    public comlr2, comhes
+    public comlr2, comhes, cbabk2
 contains
     !=======================================================================
     !=======================================================================
     !=======================================================================
+    subroutine cbabk2(nm, n, low, igh, scale, m, zr, zi)
+
+        !     ------------------------------------------------------------------
+        !     this subroutine forms the eigenvectors of a complex general
+        !     matrix by back transforming those of the corresponding
+        !     balanced matrix determined by  cbal.
+        !
+        !     on input--->
+        !        nm must be set to the row dimension of two-dimensional
+        !          array parameters as declared in the calling program
+        !          dimension statement,
+        !
+        !        n is the order of the matrix,
+        !
+        !        low and igh are integers determined by  cbal,
+        !
+        !        scale contains information determining the permutations
+        !          and scaling factors used by  cbal,
+        !
+        !        m is the number of eigenvectors to be back transformed,
+        !
+        !        zr and zi contain the real and imaginary parts,
+        !          respectively, of the eigenvectors to be
+        !          back transformed in their first m columns.
+        !
+        !     on output--->
+        !        zr and zi contain the real and imaginary parts,
+        !          respectively, of the transformed eigenvectors
+        !          in their first m columns.
+        !     ------------------------------------------------------------------
+        !
+        ! ..  scalar arguments  ..
+        !
+        integer nm, n, low, igh, m
+        !
+        ! ..  array arguments  ..
+        !
+        real(dp) scale(n), zr(nm, m), zi(nm, m)
+        !
+        ! ..  local scalars  ..
+        !
+        integer i, j, k, ii
+        real(dp)s
+        !     ------------------------------------------------------------------
+        !
+        if (m==0) return
+        if (igh/=low) then
+            do i = low, igh
+                s = scale(i)
+                !     ********** left hand eigenvectors are back transformed
+                !                if the foregoing statement is replaced by
+                !                s=1.0/scale(i). **********
+                do j = 1, m
+                    zr(i, j) = zr(i, j) * s
+                    zi(i, j) = zi(i, j) * s
+                end do
+            end do
+        end if
+        !     ********** for i=low-1 step -1 until 1,
+        !                igh+1 step 1 until n do -- **********
+        do ii = 1, n
+            i = ii
+            if (i >= low .and. i <= igh) cycle
+            if (i < low) i = low - ii
+            k = scale(i)
+            if (k == i) cycle
+            !
+            do j = 1, m
+                s = zr(i, j)
+                zr(i, j) = zr(k, j)
+                zr(k, j) = s
+                s = zi(i, j)
+                zi(i, j) = zi(k, j)
+                zi(k, j) = s
+            end do
+        end do
+        !
+        return
+    end subroutine
     !=======================================================================
     subroutine comhes(nm, n, low, igh, ar, ai, int)
 
