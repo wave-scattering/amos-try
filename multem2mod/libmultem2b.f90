@@ -12,10 +12,201 @@ module libmultem2b
     complex(dp), parameter, public :: ctwo  = (2.0_dp, 0.0_dp)
     real(dp), parameter, public :: pi=4.0_dp*ATAN(1.0_dp)
     public bessel, tmtrx, sphrm4, ceven, codd, scat, hoslab, blm, elmgen, &
-           pair, cmplx_dp, cerf, lat2d, reduce, dlmkg
+           pair, cmplx_dp, cerf, lat2d, reduce, dlmkg, plw, setup
 contains
     !=======================================================================
+    subroutine setup(lmax, xeven, xodd, te, th, xxmat1, xxmat2)
+        !     ------------------------------------------------------------------
+        !     this subroutine constructs the secular matrix
+        !     ------------------------------------------------------------------
+        ! ..  scalar arguments ..
+        integer lmax
+        ! ..  array arguments ..
+        complex(dp) xeven(:, :), xodd(:, :)
+        complex(dp) xxmat2(:, :)
+        complex(dp) te(:), th(:), xxmat1(:, :)
+        ! ..  local scalars ..
+        integer ia, la, ma, lmtot, ltt, lmax1, ib, lb, mb, i, lmxod, iaod, iaev, ibod
+        integer ibev
+        real(dp)  c0, signus, up, c, b1, b2, b3, u1, u2, a, down
+        real(dp)  alpha1, alpha2, beta1, beta2
+        complex(dp) omega1, omega2, z1, z2, z3
+        !     ------------------------------------------------------------------
+        lmax1 = lmax + 1
+        lmtot = lmax1 * lmax1 - 1
+        lmxod = (lmax * lmax1) / 2
+        c0 = sqrt(8.0_dp * pi / 3.0_dp)
+        signus = 1.0_dp
+        iaod = 0
+        iaev = lmxod
+        do la = 1, lmax
+            do ma = -la, la
+                if(mod((la + ma), 2)==0) then
+                    iaev = iaev + 1
+                    ia = iaev
+                else
+                    iaod = iaod + 1
+                    ia = iaod
+                end if
+                up = dble(2 * la + 1)
+                signus = -signus
+                c = signus * c0
+                b1 = 0.0_dp
+                if(abs(ma + 1)<=(la - 1)) b1 = blm(la - 1, ma + 1, 1, -1, la, -ma, lmax)
+                b2 = 0.0_dp
+                if(abs(ma - 1)<=(la - 1)) b2 = blm(la - 1, ma - 1, 1, 1, la, -ma, lmax)
+                u1 = dble((la + ma) * (la - ma))
+                u2 = dble((2 * la - 1) * (2 * la + 1))
+                b3 = sqrt(u1 / u2)
+                alpha1 = sqrt(dble((la - ma) * (la + ma + 1))) / 2.0_dp
+                beta1 = sqrt(dble((la + ma) * (la - ma + 1))) / 2.0_dp
+                ibod = 0
+                ibev = lmxod
+                do lb = 1, lmax
+                    do mb = -lb, lb
+                        if(mod((lb + mb), 2)==0) then
+                            ibev = ibev + 1
+                            ib = ibev
+                        else
+                            ibod = ibod + 1
+                            ib = ibod
+                        end if
+                        a = dble(lb * (lb + 1) * la * (la + 1))
+                        down = sqrt(a)
+                        alpha2 = sqrt(dble((lb - mb) * (lb + mb + 1))) / 2.0_dp
+                        beta2 = sqrt(dble((lb + mb) * (lb - mb + 1))) / 2.0_dp
+                        ltt = la + ma + lb + mb
+                        if(mod(ltt, 2)/=0)           then
+                            if(mod((la + ma), 2)==0)       then
+                                z1 = ceven(lb, mb + 1, la - 1, ma + 1, xeven)
+                                z2 = ceven(lb, mb - 1, la - 1, ma - 1, xeven)
+                                z3 = codd (lb, mb, la - 1, ma, xodd)
+                                z1 = c * alpha2 * b1 * z1
+                                z2 = -c * beta2 * b2 * z2
+                                z3 = dble(mb) * b3 * z3
+                                omega2 = up * (z1 + z2 + z3) / down
+                                xxmat1(ia, ib) = -th(la + 1) * omega2
+                                xxmat2(ia, ib) = te(la + 1) * omega2
+                            else
+                                z1 = codd (lb, mb + 1, la - 1, ma + 1, xodd)
+                                z2 = codd (lb, mb - 1, la - 1, ma - 1, xodd)
+                                z3 = ceven(lb, mb, la - 1, ma, xeven)
+                                z1 = c * alpha2 * b1 * z1
+                                z2 = -c * beta2 * b2 * z2
+                                z3 = dble(mb) * b3 * z3
+                                omega2 = up * (z1 + z2 + z3) / down
+                                xxmat1(ia, ib) = te(la + 1) * omega2
+                                xxmat2(ia, ib) = -th(la + 1) * omega2
+                            end if
+                        else
+                            if(mod((la + ma), 2)==0)       then
+                                z1 = codd (lb, mb - 1, la, ma - 1, xodd)
+                                z2 = codd (lb, mb + 1, la, ma + 1, xodd)
+                                z3 = ceven(lb, mb, la, ma, xeven)
+                                z1 = 2.0_dp * beta1 * beta2 * z1
+                                z2 = 2.0_dp * alpha1 * alpha2 * z2
+                                z3 = dble(ma) * dble(mb) * z3
+                                omega1 = (z1 + z2 + z3) / down
+                                xxmat1(ia, ib) = -th(la + 1) * omega1
+                                xxmat2(ia, ib) = -te(la + 1) * omega1
+                            else
+                                z1 = ceven(lb, mb - 1, la, ma - 1, xeven)
+                                z2 = ceven(lb, mb + 1, la, ma + 1, xeven)
+                                z3 = codd (lb, mb, la, ma, xodd)
+                                z1 = 2.0_dp * beta1 * beta2 * z1
+                                z2 = 2.0_dp * alpha1 * alpha2 * z2
+                                z3 = dble(ma) * dble(mb) * z3
+                                omega1 = (z1 + z2 + z3) / down
+                                xxmat1(ia, ib) = -te(la + 1) * omega1
+                                xxmat2(ia, ib) = -th(la + 1) * omega1
+                            end if
+                        end if
+                    end do
+                end do
+            end do
+        end do
+        do i = 1, lmtot
+            xxmat1(i, i) = cone + xxmat1(i, i)
+            xxmat2(i, i) = cone + xxmat2(i, i)
+        end do
+        return
+    end subroutine
     !=======================================================================
+    subroutine plw(kappa, gk, lmax, ae, ah)
+
+        !     ------------------------------------------------------------------
+        !     this routine calculates the expansion coefficients 'ae,ah' of an
+        !     incident plane electromagnetic wave of wave vector  'kappa' with
+        !     components parallel to the surface equal to   '(gk(1),gk(2))'.
+        !     ------------------------------------------------------------------
+        ! ..  scalar arguments  ..
+        !
+        integer    lmax
+        complex(dp) kappa
+        !
+        ! ..  array arguments  ..
+        !
+        complex(dp) ae(:, :), ah(:, :), gk(:)
+        !
+        ! ..  local scalars  ..
+        !
+        integer    m, ii, l, i, k
+        real(dp)   akpar, fpi, a, signus, akg1, akg2
+        complex(dp) ct, st, cf, n1, n2, n3, cc, cc1, z1, z2, z3
+        !
+        ! ..  local arrays  ..
+        !
+        complex(dp) ylm((lmax + 1)**2)
+        !-----------------------------------------------------------------------
+        !
+        akg1 = dble(gk(1))
+        akg2 = dble(gk(2))
+        do k = 1, 2
+            ae(k, 1) = czero
+            ah(k, 1) = czero
+        end do
+        fpi = 4.0_dp * pi
+        akpar = sqrt(akg1 * akg1 + akg2 * akg2)
+        ct = gk(3) / kappa
+        st = akpar / kappa
+        cf = cone
+        if(akpar>1.d-8) cf = cmplx(akg1 / akpar, akg2 / akpar, kind = dp)
+        n1 = akg1 / kappa
+        n2 = akg2 / kappa
+        n3 = gk(3) / kappa
+        call sphrm4(ylm, ct, st, cf, lmax)
+        ii = 1
+        cc = cmplx_dp(fpi, 0.0_dp)
+        signus = -1.0_dp
+        do l = 1, lmax
+            cc = cc * ci
+            a = dble(l * (l + 1))
+            cc1 = cc / sqrt(a)
+            do m = -l, l
+                signus = -signus
+                ii = ii + 1
+                if(abs(m + 1)<=l)  then
+                    i = l * l + l - m
+                    z1 = cc1 * sqrt(dble((l - m) * (l + m + 1))) * ylm(i) / 2.0_dp
+                else
+                    z1 = czero
+                end if
+                if(abs(m - 1)<=l)  then
+                    i = l * l + l - m + 2
+                    z2 = cc1 * sqrt(dble((l + m) * (l - m + 1))) * ylm(i) / 2.0_dp
+                else
+                    z2 = czero
+                end if
+                i = l * l + l - m + 1
+                z3 = cc1 * dble(m) * ylm(i)
+                ae(1, ii) = signus * ci * (cf * z1 - conjg(cf) * z2)
+                ae(2, ii) = -signus * (ct * cf * z1 + st * z3 + ct * conjg(cf) * z2)
+                ah(1, ii) = signus * (ct * cf * z1 + st * z3 + ct * conjg(cf) * z2)
+                ah(2, ii) = signus * ci * (cf * z1 - conjg(cf) * z2)
+            end do
+        end do
+        return
+    end subroutine
     !=======================================================================
     subroutine dlmkg(lmax, a0, gk, signus, kappa, dlme, dlmh, emach)
         !     ------------------------------------------------------------------
