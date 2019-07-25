@@ -211,11 +211,12 @@ C=======================================================================
           xpk=czero
           gk=czero
           gkk=cmplx_dp(1.0_dp,0.0_dp)
-          if(ac-emach)11,11,10
-  10      xpk=cmplx_dp(akpt(1)/ac,akpt(2)/ac)
-          gk=ac/kappa
-          gkk=gpsq/kapsq
-  11      xpm(1)=cmplx_dp(1.0_dp,0.0_dp)
+          if(ac-emach > 0) then
+            xpk=cmplx_dp(akpt(1)/ac,akpt(2)/ac)
+            gk=ac/kappa
+            gkk=gpsq/kapsq
+          end if
+          xpm(1)=cmplx_dp(1.0_dp,0.0_dp)
           agk(1)=cmplx_dp(1.0_dp,0.0_dp)
           do i=2,ll2
             xpm(i)=xpm(i-1)*xpk
@@ -247,9 +248,8 @@ C=======================================================================
           kk=1
           do l=1,ll2
             mm=1
-            if(mod  (l,2))15,14,15
-  14        mm=2
-  15        n=(l*l+mm)/2
+            if(mod  (l,2) == 0) mm=2
+            n=(l*l+mm)/2
             nn=(l-mm)/2+2
             do m=mm,l,2
               acc=czero
@@ -277,7 +277,6 @@ C=======================================================================
 !
 !     after each step of the summation a test on the
 !     convergence  of the  elements of  dlm is  made
-!
       test2=0.0_dp
       do i=1,nndlm
         dnorm=abs(dlm(i))
@@ -286,7 +285,7 @@ C=======================================================================
       test=abs((test2-test1)/test1)
       test1=test2
       if(test-0.001d0 > 0) then
-  24  if(n1-10)9,25,25
+      if(n1-10)9,25,25
   25  write(16,26)n1
   26  format(//13x, 'dlm1,s not converged by n1=', i2)
       else
@@ -300,7 +299,7 @@ C=======================================================================
 !     the adjustment of the array pref, to contain values of the
 !     prefactor  'p2' for lm=(00),(11),(20),(22),...
 !
- 285  kk=1
+      kk=1
       ap1=tv/(4.0_dp*pi)
       cf=kapsq/ci
       do l=1,ll2
@@ -1056,11 +1055,11 @@ C
       STOP
       ENDIF
       READ(10,201) NPLAN(ICOMP),NLAYER(ICOMP)
-      DO 8 IPL=1,NPLAN(ICOMP)
-      READ(10,206) S(ICOMP,IPL),MUSPH(ICOMP,IPL),EPSSPH(ICOMP,IPL)
-      READ(10,*) DUMMY,(DL(I,ICOMP,IPL),I=1,3)
-      READ(10,*) DUMMY,(DR(I,ICOMP,IPL),I=1,3)
-    8 CONTINUE
+      DO IPL=1,NPLAN(ICOMP)
+        READ(10,206) S(ICOMP,IPL),MUSPH(ICOMP,IPL),EPSSPH(ICOMP,IPL)
+        READ(10,*) DUMMY,(DL(I,ICOMP,IPL),I=1,3)
+        READ(10,*) DUMMY,(DR(I,ICOMP,IPL),I=1,3)
+      end do
       WRITE(6,211)  MU1(ICOMP),( MUSPH(ICOMP,IPL),IPL=1,NPLAN(ICOMP))
       WRITE(6,220) EPS1(ICOMP),(EPSSPH(ICOMP,IPL),IPL=1,NPLAN(ICOMP))
       WRITE(6,224) (S(ICOMP,IPL),IPL=1,NPLAN(ICOMP))
@@ -1115,11 +1114,11 @@ C
       CALL LAT2D(B1,B2,RMAX,IGMAX,IGD,NT1,NT2,VECMOD)
       WRITE(6,214) B1(1),B1(2),B2(1),B2(2)
       IGKMAX=2*IGMAX
-      DO 5 IG1=1,IGMAX
-      G(1,IG1)=NT1(IG1)*B1(1)+NT2(IG1)*B2(1)
-      G(2,IG1)=NT1(IG1)*B1(2)+NT2(IG1)*B2(2)
-      WRITE(6,215) IG1,NT1(IG1),NT2(IG1),VECMOD(IG1)
-    5 CONTINUE
+      DO IG1=1,IGMAX
+        G(1,IG1)=NT1(IG1)*B1(1)+NT2(IG1)*B2(1)
+        G(2,IG1)=NT1(IG1)*B1(2)+NT2(IG1)*B2(2)
+        WRITE(6,215) IG1,NT1(IG1),NT2(IG1),VECMOD(IG1)
+      end do
       ZSTEP=(ZSUP-ZINF)/dble(NP-1)
       ZVAL=ZINF-ZSTEP
       IF(KTYPE<3) THEN
@@ -1262,9 +1261,9 @@ C
          end do
             ENDIF
       IF(NLAYER(ICOMP)>=2) THEN
-      DO 16 ILAYER=1,NLAYER(ICOMP)-1
-      CALL PAIR(IGKMAX,igkd,QIR,QIIR,QIIIR,QIVR,QIR,QIIR,QIIIR,QIVR)
-   16 CONTINUE
+      DO ILAYER=1,NLAYER(ICOMP)-1
+        CALL PAIR(IGKMAX,igkd,QIR,QIIR,QIIIR,QIVR,QIR,QIIR,QIIIR,QIVR)
+      end do
              ENDIF
                       ENDIF
       CALL PAIR(IGKMAX,igkd,QIL,QIIL,QIIIL,QIVL,QIR,QIIR,QIIIR,QIVR)
@@ -1279,10 +1278,10 @@ C
              IF(NUNIT==1) GO TO 30
          IF(ABS(MLAST-MFIRST)/=0.D0.OR.ABS(ELAST-EFIRST)/=0.D0)
      &       STOP 'IMPROPER MATCHING OF SUCCESSIVE HOST MEDIA'
-         DO 9 IU=1,NUNIT-1
+         DO IU=1,NUNIT-1
              CALL PAIR(IGKMAX,igkd,QIL,QIIL,QIIIL,QIVL,
      &                 QIL,QIIL,QIIIL,QIVL)
-    9        CONTINUE
+         end do
    30        CONTINUE
              IF(KEMB==1) THEN
              CALL HOSLAB(IGMAX,KAPR,(KAPR+KAPOUT)/2.D0,KAPOUT,AK,G,VEC0,
