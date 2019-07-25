@@ -36,78 +36,77 @@ C=======================================================================
 C=======================================================================
 C======================================================================
 C=======================================================================
-      SUBROUTINE DLMKG(LMAX,A0,GK,SIGNUS,KAPPA,DLME,DLMH,EMACH)
-C     ------------------------------------------------------------------
-C     THIS SUBROUTINE CALCULATES THE COEFFICIENTS DLM(KG)
-C     ------------------------------------------------------------------
-
-C ..  ARGUMENTS  ..
-      INTEGER    LMAX
-      REAL(dp)   A0,SIGNUS,EMACH
-      COMPLEX(dp) KAPPA
-      COMPLEX(dp) DLME(2,(lmax+1)**2),DLMH(2,(lmax+1)**2),GK(3)
-C  .. LOCAL
-      INTEGER    K,II,L,M,I
-      REAL(dp)   AKPAR,ALPHA,BETA,AKG1,AKG2
-      COMPLEX(dp) C0,CC,COEF,Z1,Z2,Z3
-      COMPLEX(dp) CT,ST,CF
-      COMPLEX(dp) YLM((lmax+1)**2)
-C     ------------------------------------------------------------------
-      AKG1=dble(GK(1))
-      AKG2=dble(GK(2))
-      DO K=1,2
-        DLME(K,1)=CZERO
-        DLMH(K,1)=CZERO
-      end do
-      IF(ABS(GK(3))<EMACH)   THEN
-      WRITE(7,101)
-      STOP
-      ENDIF
-      C0=2.0_dp*PI/(KAPPA*A0*GK(3)*SIGNUS)
-      AKPAR=SQRT(AKG1*AKG1+AKG2*AKG2)
-      CT=GK(3)/KAPPA
-      ST=AKPAR/KAPPA
-      CF=CONE
-      IF(AKPAR>1.D-8) CF=cmplx_dp(AKG1/AKPAR,AKG2/AKPAR)
-      CALL SPHRM4(YLM,CT,ST,CF,LMAX)
-      II=1
-      CC=CONE
-      DO L=1,LMAX
-        CC=CC/CI
-        COEF=C0*CC/SQRT(dble(L*(L+1)))
-        DO M=-L,L
-          II=II+1
-          ALPHA=SQRT(dble((L-M)*(L+M+1)))/2.0_dp
-          BETA =SQRT(dble((L+M)*(L-M+1)))/2.0_dp
-          if(ABS(M+1)<=L)  then
-            I=L*L+L+M+2
-            Z1=YLM(I)
-          else
-            Z1=CZERO
-          end if
-          if(ABS(M-1)<=L)  then
-            I=L*L+L+M
-            Z2=YLM(I)
-          else
-            Z2=CZERO
-          end if
-          I=L*L+L+M+1
-          Z3=YLM(I)
-          DLMH(1,II)=COEF*(BETA*CT*CF*Z2-dble(M)*ST*Z3
-     &             +ALPHA*CT*CONJG(CF)*Z1)
-          DLMH(2,II)=COEF*CI*(BETA*CF*Z2-ALPHA*CONJG(CF)*Z1)
-          DLME(1,II)=COEF*CI*(BETA*CF*Z2-ALPHA*CONJG(CF)*Z1)
-          DLME(2,II)=-COEF*(BETA*CT*CF*Z2-dble(M)*ST*Z3
-     &             +ALPHA*CT*CONJG(CF)*Z1)
-        end do
-      end do
-      RETURN
-  101 FORMAT(13X,'FATAL ERROR FROM DLMKG:'/3X,'GK(3) IS TOO SMALL.'
-     & /3X,'GIVE A SMALL BUT NONZERO VALUE FOR "EPSILON"'/3X,
-     & 'IN THE DATA STATEMENT OF THE MAIN PROGRAM.'
-     & /3X,'THIS DEFINES A SMALL IMAGINARY PART'
-     & /3X,'IN THE FREQUENCY OR WAVELENGTH VALUE.')
-      END subroutine
+!     SUBROUTINE DLMKG(LMAX,A0,GK,SIGNUS,KAPPA,DLME,DLMH,EMACH)
+!     ------------------------------------------------------------------
+!     THIS SUBROUTINE CALCULATES THE COEFFICIENTS DLM(KG)
+!     ------------------------------------------------------------------
+!! ..  ARGUMENTS  ..
+!     INTEGER    LMAX
+!     REAL(dp)   A0,SIGNUS,EMACH
+!     COMPLEX(dp) KAPPA
+!     COMPLEX(dp) DLME(2,(lmax+1)**2),DLMH(2,(lmax+1)**2),GK(3)
+!  .. LOCAL
+!     INTEGER    K,II,L,M,I
+!     REAL(dp)   AKPAR,ALPHA,BETA,AKG1,AKG2
+!     COMPLEX(dp) C0,CC,COEF,Z1,Z2,Z3
+!     COMPLEX(dp) CT,ST,CF
+!     COMPLEX(dp) YLM((lmax+1)**2)
+!     ------------------------------------------------------------------
+!     AKG1=dble(GK(1))
+!     AKG2=dble(GK(2))
+!     DO K=1,2
+!       DLME(K,1)=CZERO
+!       DLMH(K,1)=CZERO
+!     end do
+!     IF(ABS(GK(3))<EMACH)   THEN
+!     WRITE(7,101)
+!     STOP
+!     ENDIF
+!     C0=2.0_dp*PI/(KAPPA*A0*GK(3)*SIGNUS)
+!     AKPAR=SQRT(AKG1*AKG1+AKG2*AKG2)
+!     CT=GK(3)/KAPPA
+!     ST=AKPAR/KAPPA
+!     CF=CONE
+!     IF(AKPAR>1.D-8) CF=cmplx_dp(AKG1/AKPAR,AKG2/AKPAR)
+!     CALL SPHRM4(YLM,CT,ST,CF,LMAX)
+!     II=1
+!     CC=CONE
+!     DO L=1,LMAX
+!       CC=CC/CI
+!       COEF=C0*CC/SQRT(dble(L*(L+1)))
+!       DO M=-L,L
+!         II=II+1
+!         ALPHA=SQRT(dble((L-M)*(L+M+1)))/2.0_dp
+!         BETA =SQRT(dble((L+M)*(L-M+1)))/2.0_dp
+!         if(ABS(M+1)<=L)  then
+!           I=L*L+L+M+2
+!           Z1=YLM(I)
+!         else
+!           Z1=CZERO
+!         end if
+!         if(ABS(M-1)<=L)  then
+!           I=L*L+L+M
+!           Z2=YLM(I)
+!         else
+!           Z2=CZERO
+!         end if
+!         I=L*L+L+M+1
+!         Z3=YLM(I)
+!         DLMH(1,II)=COEF*(BETA*CT*CF*Z2-dble(M)*ST*Z3
+!    &             +ALPHA*CT*CONJG(CF)*Z1)
+!         DLMH(2,II)=COEF*CI*(BETA*CF*Z2-ALPHA*CONJG(CF)*Z1)
+!         DLME(1,II)=COEF*CI*(BETA*CF*Z2-ALPHA*CONJG(CF)*Z1)
+!         DLME(2,II)=-COEF*(BETA*CT*CF*Z2-dble(M)*ST*Z3
+!    &             +ALPHA*CT*CONJG(CF)*Z1)
+!       end do
+!     end do
+!     RETURN
+! 101 FORMAT(13X,'FATAL ERROR FROM DLMKG:'/3X,'GK(3) IS TOO SMALL.'
+!    & /3X,'GIVE A SMALL BUT NONZERO VALUE FOR "EPSILON"'/3X,
+!    & 'IN THE DATA STATEMENT OF THE MAIN PROGRAM.'
+!    & /3X,'THIS DEFINES A SMALL IMAGINARY PART'
+!    & /3X,'IN THE FREQUENCY OR WAVELENGTH VALUE.')
+!     END subroutine
 C=======================================================================
 C=======================================================================
 C=======================================================================

@@ -12,8 +12,82 @@ module libmultem2b
     complex(dp), parameter, public :: ctwo  = (2.0_dp, 0.0_dp)
     real(dp), parameter, public :: pi=4.0_dp*ATAN(1.0_dp)
     public bessel, tmtrx, sphrm4, ceven, codd, scat, hoslab, blm, elmgen, &
-           pair, cmplx_dp, cerf, lat2d, reduce
+           pair, cmplx_dp, cerf, lat2d, reduce, dlmkg
 contains
+    !=======================================================================
+    !=======================================================================
+    !=======================================================================
+    subroutine dlmkg(lmax, a0, gk, signus, kappa, dlme, dlmh, emach)
+        !     ------------------------------------------------------------------
+        !     this subroutine calculates the coefficients dlm(kg)
+        !     ------------------------------------------------------------------
+        ! ..  arguments  ..
+        integer    lmax
+        real(dp)   a0, signus, emach
+        complex(dp) kappa
+        complex(dp) dlme(2, (lmax + 1)**2), dlmh(2, (lmax + 1)**2), gk(3)
+        !  .. local
+        integer    k, ii, l, m, i
+        real(dp)   akpar, alpha, beta, akg1, akg2
+        complex(dp) c0, cc, coef, z1, z2, z3
+        complex(dp) ct, st, cf
+        complex(dp) ylm((lmax + 1)**2)
+        !     ------------------------------------------------------------------
+        akg1 = dble(gk(1))
+        akg2 = dble(gk(2))
+        do k = 1, 2
+            dlme(k, 1) = czero
+            dlmh(k, 1) = czero
+        end do
+        if(abs(gk(3))<emach)   then
+            write(7, 101)
+            stop
+        endif
+        c0 = 2.0_dp * pi / (kappa * a0 * gk(3) * signus)
+        akpar = sqrt(akg1 * akg1 + akg2 * akg2)
+        ct = gk(3) / kappa
+        st = akpar / kappa
+        cf = cone
+        if(akpar>1.d-8) cf = cmplx_dp(akg1 / akpar, akg2 / akpar)
+        call sphrm4(ylm, ct, st, cf, lmax)
+        ii = 1
+        cc = cone
+        do l = 1, lmax
+            cc = cc / ci
+            coef = c0 * cc / sqrt(dble(l * (l + 1)))
+            do m = -l, l
+                ii = ii + 1
+                alpha = sqrt(dble((l - m) * (l + m + 1))) / 2.0_dp
+                beta = sqrt(dble((l + m) * (l - m + 1))) / 2.0_dp
+                if(abs(m + 1)<=l)  then
+                    i = l * l + l + m + 2
+                    z1 = ylm(i)
+                else
+                    z1 = czero
+                end if
+                if(abs(m - 1)<=l)  then
+                    i = l * l + l + m
+                    z2 = ylm(i)
+                else
+                    z2 = czero
+                end if
+                i = l * l + l + m + 1
+                z3 = ylm(i)
+                dlmh(1, ii) = coef * (beta * ct * cf * z2 - dble(m) * st * z3&
+                        + alpha * ct * conjg(cf) * z1)
+                dlmh(2, ii) = coef * ci * (beta * cf * z2 - alpha * conjg(cf) * z1)
+                dlme(1, ii) = coef * ci * (beta * cf * z2 - alpha * conjg(cf) * z1)
+                dlme(2, ii) = -coef * (beta * ct * cf * z2 - dble(m) * st * z3&
+                        + alpha * ct * conjg(cf) * z1)
+            end do
+        end do
+        return
+        101 format(13x, 'fatal error from dlmkg:'/3x, 'gk(3) is too small.'&
+                /3x, 'give a small but nonzero value for "epsilon"'/3x, &
+                'in the data statement of the main program.'&
+                /3x, 'this defines a small imaginary part'&
+                /3x, 'in the frequency or wavelength value.')
+    end subroutine
     !=======================================================================
     subroutine reduce(ar1, ar2, ak, igmax, g, ig0, emach)
 
