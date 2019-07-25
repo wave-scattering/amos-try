@@ -12,9 +12,167 @@ module libmultem2b
     complex(dp), parameter, public :: ctwo  = (2.0_dp, 0.0_dp)
     real(dp), parameter, public :: pi=4.0_dp*ATAN(1.0_dp)
     public bessel, tmtrx, sphrm4, ceven, codd, scat, hoslab, blm, elmgen, &
-           pair, cmplx_dp, cerf, lat2d
+           pair, cmplx_dp, cerf, lat2d, reduce
 contains
     !=======================================================================
+    subroutine reduce(ar1, ar2, ak, igmax, g, ig0, emach)
+
+        !----------------------------------------------------------------------
+        !     given the primitive vectors ar1,ar2 of a 2d lattice (in units of
+        !     alpha), this  subroutine  reduces a wavector "ak" (in  units  of
+        !     2*pi/alpha) within the sbz by adding an appropriate  reciprocal-
+        !     lattice vector g(ig0)
+        !----------------------------------------------------------------------
+        ! ..  scalar arguments  ..
+        !
+        integer igmax, ig0
+        real(dp) emach
+        !
+        ! ..  array arguments  ..
+        !
+        real(dp) ar1(2), ar2(2), ak(2), g(:, :)
+        !
+        ! ..  local scalars  ..
+        !
+        integer i, j, n, i1, i2
+        real(dp) d, b, p, afi, ax, ay, akx, aky, fi0, am, bm, alpha, ra
+        !
+        ! ..  local arrays ..
+        !
+        real(dp) vx(6), vy(6), fi(6), x(6), y(6)
+        !----------------------------------------------------------------------
+        alpha = ar1(1)
+        ra = 2.0_dp * pi / alpha
+        d = ar2(1)
+        b = ar2(2)
+        if((dabs(d) - 0.5_dp)>emach) stop 'improper lattice vectors'
+        if((dabs(dabs(d) - 0.5_dp)<emach).and.(dabs(dabs(b) - &
+                dsqrt(3.0_dp) / 2.0_dp)>emach)) then
+            b = 2.0_dp * b           ! centred rectangular lattice
+            if((dabs(b) - 1.0_dp)<0.0_dp) then
+                vx(1) = 1.0_dp
+                vy(1) = 0.5_dp * (1.0_dp / b - b)
+                vx(2) = 0.0_dp
+                vy(2) = 0.5_dp * (1.0_dp / b + b)
+                vx(3) = -1.0_dp
+                vy(3) = vy(1)
+                vx(4) = -1.0_dp
+                vy(4) = -vy(1)
+                vx(5) = 0.0_dp
+                vy(5) = -vy(2)
+                vx(6) = 1.0_dp
+                vy(6) = -vy(1)
+            else
+                vx(1) = 0.5_dp + 0.5_dp / b / b
+                vy(1) = 0.0_dp
+                vx(2) = 0.5_dp - 0.5_dp / b / b
+                vy(2) = 1.0_dp / b
+                vx(3) = -vx(2)
+                vy(3) = vy(2)
+                vx(4) = -vx(1)
+                vy(4) = 0.0_dp
+                vx(5) = -vx(2)
+                vy(5) = -vy(2)
+                vx(6) = vx(2)
+                vy(6) = -vy(2)
+            endif
+        else             !oblique or hexagonal lattice
+            if(d>0.0_dp) then
+                p = 0.5_dp * d * (d - 1) / b / b
+                vx(1) = 0.5_dp - p
+                vy(1) = 0.5_dp * (1.0_dp - 2.0_dp * d) / b
+                vx(2) = 0.5_dp + p
+                vy(2) = 0.5_dp / b
+            else
+                p = 0.5_dp * d * (d + 1) / b / b
+                vx(1) = 0.5_dp - p
+                vy(1) = -0.5_dp * (1.0_dp + 2.0_dp * d) / b
+                vx(2) = 0.5_dp + p
+                vy(2) = -0.5_dp / b
+            endif
+            vx(3) = -vx(2)
+            vy(3) = vy(2)
+            vx(4) = -vx(1)
+            vy(4) = -vy(1)
+            vx(5) = -vx(2)
+            vy(5) = -vy(2)
+            vx(6) = vx(2)
+            vy(6) = -vy(2)
+        endif
+        n = 6
+        do i = 1, n
+            x(i) = vx(i) * ra
+            y(i) = vy(i) * ra
+        end do
+        if(dabs(d)<emach) then
+            n = 4              !rectangular or square lattice
+            if(b>0.0_dp) then
+                x(1) = vx(6) * ra
+                y(1) = vy(6) * ra
+                x(2) = vx(4) * ra
+                y(2) = vy(4) * ra
+                x(4) = vx(1) * ra
+                y(4) = vy(1) * ra
+            else
+                x(2) = vx(3) * ra
+                y(2) = vy(3) * ra
+                x(3) = vx(4) * ra
+                y(3) = vy(4) * ra
+                x(4) = vx(6) * ra
+                y(4) = vy(6) * ra
+            endif
+        endif
+        !*****vertices are arranged in ascending order of the polar angle fi
+        do i = 1, n
+            fi(i) = datan2(y(i), x(i))
+            if(fi(i)<0.0_dp) fi(i) = fi(i) + 2.0_dp * pi
+        end do
+        do j = 2, n
+            afi = fi(j)
+            ax = x(j)
+            ay = y(j)
+            do i = j - 1, 1, -1
+                if(fi(i)<=afi) goto 5
+                fi(i + 1) = fi(i)
+                x(i + 1) = x(i)
+                y(i + 1) = y(i)
+            end do
+            i = 0
+            5    fi(i + 1) = afi
+            x(i + 1) = ax
+            y(i + 1) = ay
+        end do
+        !*****"ak" is reduced within the sbz
+        ig0 = 1
+        6  continue
+        akx = ak(1) - g(1, ig0)
+        aky = ak(2) - g(2, ig0)
+        if((abs(akx)<emach).and.(abs(aky)<emach)) return
+        fi0 = datan2(aky, akx)   ! find polar angles of the wavevector
+        if(fi0<0.0_dp) fi0 = fi0 + 2.0_dp * pi
+        i1 = n
+        i = 1
+        7       continue
+        i2 = i
+        if(fi0<fi(i))  go to 8
+        i = i + 1
+        i1 = i2
+        if(i<=n) go to 7
+        i1 = n
+        i2 = 1
+        8       continue
+        am = abs(y(i2) * x(i1) - x(i2) * y(i1))
+        bm = abs((x(i1) - x(i2)) * aky + (y(i2) - y(i1)) * akx)
+        if(am>=bm) then
+            ak(1) = akx
+            ak(2) = aky
+            return
+        endif
+        ig0 = ig0 + 1
+        if(ig0>igmax) stop   'error from reduce:  insufficient nr. of&
+                reciprocal lattice vectors '
+        goto 6
+    end subroutine
     !=======================================================================
     subroutine lat2d(a, b, rmax, imax, id, nta, ntb, vecmod)
         !     --------------------------------------------------------------
