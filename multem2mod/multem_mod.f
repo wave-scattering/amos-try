@@ -115,210 +115,304 @@ C     ------------------------------------------------------------------
       END subroutine
 C=======================================================================
 C=======================================================================
-C=======================================================================
-!     SUBROUTINE ELMGEN(ELM,NELMD,LMAX)
-!!     ------------------------------------------------------------------
-!     ROUTINE TO TABULATE THE CLEBSCH-GORDON TYPE COEFFICIENTS ELM,  FOR
-!     USE WITH THE SUBROUTINE XMAT. THE NON-ZERO ELM ARE TABULATED FIRST
-!     FOR  L2,M2; AND L3,M3; ODD. THEN FOR L2,M2; AND L3,M3; EVEN, USING
-!     THE SAME SCHEME AS THAT BY WHICH THEY ARE ACCESSED IN XMAT.
+      subroutine lat2d(a,b,rmax,imax,id,nta,ntb,vecmod)
+!     --------------------------------------------------------------
+!     given a two dimensional bravais lattice with primitive vectors
+!     (a(1),a(2)) , (b(1),b(2)) , defined so that 'b' is longer than
+!     'a' and their scalar product is positive,this routine calcula-
+!     tes the 'imax' lattice vectors: nta(i) * a + ntb(i) * b,having
+!     length 'vecmod(i)' less than 'rmax'.
+!     --------------------------------------------------------------
+! ..  arguments ..
+      integer imax,id
+      real(dp) rmax
+      integer nta(id),ntb(id)
+      real(dp)a(2),b(2),vecmod(id)
+! ..  local scalars ..
+      integer i,na,nb,na0,j,nma,nmb,iord
+      real(dp)rmax2,sp,amod2,bmod2,dum,vmod2,vm
 !     ------------------------------------------------------------------
-!! ..  SCALAR ARGUMENTS  ..
-!!     INTEGER NELMD,LMAX
-!! ..  ARRAY ARGUMENTS  ..
-!!     REAL(dp) ELM(NELMD)
-!! ..  LOCAL SCALARS  ..
-!!     INTEGER K,II,LL,IL2,L2,M2,I2,IL3,L3,M3,I3,LA1,LB1,LA11,LB11,M1
-!     INTEGER L11,L1,L
-!     REAL(dp) FOURPI
+      rmax2=rmax*rmax
+!***  check if primitive vectors have positive scalar product
+      sp=a(1)*b(1)+a(2)*b(2)
+      if(sp<-1.d-06)  then
+          b(1)=-b(1)
+          b(2)=-b(2)
+          sp=-sp
+          write(6,100) a(1),a(2),b(1),b(2)
+      end if
+!***  check if 'b' is longer than 'a'
+      amod2=a(1)*a(1)+a(2)*a(2)
+      bmod2=b(1)*b(1)+b(2)*b(2)
+      if(bmod2<amod2) then
+          write(6,101)
+          do j=1,2
+            dum=a(j)
+            a(j)=b(j)
+            b(j)=dum
+          end do
+          dum=amod2
+          amod2=bmod2
+          bmod2=dum
+      endif
+!
+      i=0
+      nb=0
+      do
+        if((nb*nb*bmod2)>rmax2)  go to 8
+        na=0
+        do
+          vmod2=na*na*amod2+nb*nb*bmod2+2*na*nb*sp
+          if(vmod2>rmax2)  go to 6
+          i=i+1
+          if(i>id)  go to 13
+          nta(i)=na
+          ntb(i)=nb
+          vecmod(i)=sqrt(vmod2)
+          if(na==0.and.nb==0) go to 11
+          i=i+1
+          if(i>id) go to 13
+          nta(i)=-na
+          ntb(i)=-nb
+          vecmod(i)=sqrt(vmod2)
+   11     na=na+1
+        end do
+    6   continue
+        nb=nb+1
+      end do
+    8 continue
+!
+      na0=sp/amod2 + 1
+      nb=1
+    5 continue
+      if((nb*nb*(bmod2-sp*sp/amod2))>rmax2) go to 4
+      na=na0
+    3 continue
+      vmod2=na*na*amod2+nb*nb*bmod2-2*na*nb*sp
+      if(vmod2>rmax2) go to 2
+      i=i+1
+      if(i>id)  go to 13
+      nta(i)=na
+      ntb(i)=-nb
+      vecmod(i)=sqrt(vmod2)
+      i=i+1
+      if(i>id)  go to 13
+      nta(i)=-na
+      ntb(i)=nb
+      vecmod(i)=sqrt(vmod2)
+      na=na+1
+      go to 3
+    2 continue
+      na=na0-1
+    1 continue
+      vmod2=na*na*amod2+nb*nb*bmod2-2*na*nb*sp
+      if(vmod2>rmax2.or.na<=0)  go to 12
+      i=i+1
+      if(i>id)  go to 13
+      nta(i)=na
+      ntb(i)=-nb
+      vecmod(i)=sqrt(vmod2)
+      i=i+1
+      if(i>id) go to 13
+      nta(i)=-na
+      ntb(i)=nb
+      vecmod(i)=sqrt(vmod2)
+      na=na-1
+      go to 1
+   12 continue
+      nb=nb+1
+      go to 5
+    4 continue
+      imax=i
+!
+      do iord=1,imax
+        vm=vecmod(iord)
+        do i=imax,iord,-1
+          if(vecmod(i)>vm)  cycle
+          vm=vecmod(i)
+          vecmod(i)=vecmod(iord)
+          vecmod(iord)=vm
+          nma=nta(i)
+          nta(i)=nta(iord)
+          nta(iord)=nma
+          nmb=ntb(i)
+          ntb(i)=ntb(iord)
+          ntb(iord)=nmb
+        end do
+      end do
+!
+      return
+   13 imax=i-1
+      write(6,102) imax
+      do i=1,imax
+        write(6,103) i,nta(i),a(1),a(2),ntb(i),b(1),b(2),vecmod(i)
+      end do
+      stop
+!
+  100 format(/13x,'new primitive vectors defined to have positive scalar
+     & product'/13x,'a=(',2e14.6,')'/13x,'b=(',2e14.6,')')
+  101 format(/13x,'w a r n i n g ! !'/'interchange primitive vectors in
+     &call lat2d'/)
+  102 format(//33x,'from lat2d: maximum number of neighbours=',i4,
+     &'  exceeded'//6x,'lattice points found (non ordered)')
+  103 format(i3,3x,i5,'*(',2e14.6,') +',i5,'*(',2e14.6,')',8x,e14.6)
+!
+      end subroutine
+!     SUBROUTINE LAT2D(A,B,RMAX,IMAX,ID,NTA,NTB,VECMOD)
+!!     --------------------------------------------------------------
+!     GIVEN A TWO DIMENSIONAL BRAVAIS LATTICE WITH PRIMITIVE VECTORS
+!     (A(1),A(2)) , (B(1),B(2)) , DEFINED SO THAT 'B' IS LONGER THAN
+!     'A' AND THEIR SCALAR PRODUCT IS POSITIVE,THIS ROUTINE CALCULA-
+!     TES THE 'IMAX' LATTICE VECTORS: NTA(I) * A + NTB(I) * B,HAVING
+!     LENGTH 'VECMOD(I)' LESS THAN 'RMAX'.
+!     --------------------------------------------------------------
+!
+! ..  SCALAR ARGUMENTS ..
+!
+!     INTEGER IMAX,ID
+!     REAL(dp)RMAX
+!
+! ..  ARRAY ARGUMENTS ..
+!
+!     INTEGER NTA(ID),NTB(ID)
+!     REAL(dp)A(2),B(2),VECMOD(ID)
+!
+! ..  LOCAL SCALARS ..
+!
+!     INTEGER I,NA,NB,NA0,J,NMA,NMB,IORD
+!     REAL(dp)RMAX2,SP,AMOD2,BMOD2,DUM,VMOD2,VM
+!
 !     ------------------------------------------------------------------
-!     FOURPI=4.0_dp*PI
-!     K=1
-!     II=0
-!  1  LL=LMAX+II
-!     DO 6 IL2=1,LL
-!     L2=IL2-II
-!     M2=-L2+1-II
-!     DO 6 I2=1,IL2
-!     DO 5 IL3=1,LL
-!     L3=IL3-II
-!     M3=-L3+1-II
-!     DO 5 I3=1,IL3
-!     LA1=MAX0(IABS(L2-L3),IABS(M2-M3))
-!     LB1=L2+L3
-!     LA11=LA1+1
-!     LB11=LB1+1
-!     M1=M2-M3
-!     DO 3 L11=LA11,LB11,2
-!     L1=L11-1
-!     L=(L2-L3-L1)/2+M2
-!     ELM(K)=((-1.0_dp)**L)*FOURPI*BLM(L1,M1,L3,M3,L2,-M2,LMAX)
-!  3  K=K+1
-!  5  M3=M3+2
-!  6  M2=M2+2
-!     IF(II)7,7,8
-!  7  II=1
-!     GOTO 1
-!  8  CONTINUE
+!
+!     RMAX2=RMAX*RMAX
+!
+!***  CHECK IF PRIMITIVE VECTORS HAVE POSITIVE SCALAR PRODUCT
+!
+!     SP=A(1)*B(1)+A(2)*B(2)
+!     IF(SP<-1.D-06)  THEN
+!     B(1)=-B(1)
+!     B(2)=-B(2)
+!     SP=-SP
+!     WRITE(6,100) A(1),A(2),B(1),B(2)
+!                       END     IF
+!
+!***  CHECK IF 'B' IS LONGER THAN 'A'
+!
+!     AMOD2=A(1)*A(1)+A(2)*A(2)
+!     BMOD2=B(1)*B(1)+B(2)*B(2)
+!     IF(BMOD2<AMOD2) THEN
+!     WRITE(6,101)
+!     DO 10 J=1,2
+!     DUM=A(J)
+!     A(J)=B(J)
+!  10 B(J)=DUM
+!     DUM=AMOD2
+!     AMOD2=BMOD2
+!     BMOD2=DUM
+!                     ENDIF
+!
+!     I=0
+!     NB=0
+!   9 CONTINUE
+!     IF((NB*NB*BMOD2)>RMAX2)  GO TO 8
+!     NA=0
+!   7 CONTINUE
+!     VMOD2=NA*NA*AMOD2+NB*NB*BMOD2+2*NA*NB*SP
+!     IF(VMOD2>RMAX2)  GO TO 6
+!     I=I+1
+!     IF(I>ID)  GO TO 13
+!     NTA(I)=NA
+!     NTB(I)=NB
+!     VECMOD(I)=SQRT(VMOD2)
+!     IF(NA==0.AND.NB==0) GO TO 11
+!     I=I+1
+!     IF(I>ID) GO TO 13
+!     NTA(I)=-NA
+!     NTB(I)=-NB
+!     VECMOD(I)=SQRT(VMOD2)
+!  11 NA=NA+1
+!     GO TO 7
+!   6 CONTINUE
+!     NB=NB+1
+!     GO TO 9
+!   8 CONTINUE
+!
+!     NA0=SP/AMOD2 + 1
+!     NB=1
+!   5 CONTINUE
+!     IF((NB*NB*(BMOD2-SP*SP/AMOD2))>RMAX2) GO TO 4
+!     NA=NA0
+!   3 CONTINUE
+!     VMOD2=NA*NA*AMOD2+NB*NB*BMOD2-2*NA*NB*SP
+!     IF(VMOD2>RMAX2) GO TO 2
+!     I=I+1
+!     IF(I>ID)  GO TO 13
+!     NTA(I)=NA
+!     NTB(I)=-NB
+!     VECMOD(I)=SQRT(VMOD2)
+!     I=I+1
+!     IF(I>ID)  GO TO 13
+!     NTA(I)=-NA
+!     NTB(I)=NB
+!     VECMOD(I)=SQRT(VMOD2)
+!     NA=NA+1
+!     GO TO 3
+!   2 CONTINUE
+!     NA=NA0-1
+!   1 CONTINUE
+!     VMOD2=NA*NA*AMOD2+NB*NB*BMOD2-2*NA*NB*SP
+!     IF(VMOD2>RMAX2.OR.NA<=0)  GO TO 12
+!     I=I+1
+!     IF(I>ID)  GO TO 13
+!     NTA(I)=NA
+!     NTB(I)=-NB
+!     VECMOD(I)=SQRT(VMOD2)
+!     I=I+1
+!     IF(I>ID) GO TO 13
+!     NTA(I)=-NA
+!     NTB(I)=NB
+!     VECMOD(I)=SQRT(VMOD2)
+!     NA=NA-1
+!     GO TO 1
+!  12 CONTINUE
+!     NB=NB+1
+!     GO TO 5
+!   4 CONTINUE
+!     IMAX=I
+!
+!     DO 15 IORD=1,IMAX
+!     VM=VECMOD(IORD)
+!     DO 16 I=IMAX,IORD,-1
+!     IF(VECMOD(I)>VM)  GO TO 16
+!     VM=VECMOD(I)
+!     VECMOD(I)=VECMOD(IORD)
+!     VECMOD(IORD)=VM
+!     NMA=NTA(I)
+!     NTA(I)=NTA(IORD)
+!     NTA(IORD)=NMA
+!     NMB=NTB(I)
+!     NTB(I)=NTB(IORD)
+!     NTB(IORD)=NMB
+!  16 CONTINUE
+!  15 CONTINUE
+!
 !     RETURN
+!  13 IMAX=I-1
+!     WRITE(6,102) IMAX
+!     DO 14 I=1,IMAX
+!     WRITE(6,103) I,NTA(I),A(1),A(2),NTB(I),B(1),B(2),VECMOD(I)
+!  14 CONTINUE
+!     STOP
+!
+! 100 FORMAT(/13X,'NEW PRIMITIVE VECTORS DEFINED TO HAVE POSITIVE SCALAR
+!    & PRODUCT'/13X,'A=(',2E14.6,')'/13X,'B=(',2E14.6,')')
+! 101 FORMAT(/13X,'W A R N I N G ! !'/'INTERCHANGE PRIMITIVE VECTORS IN
+!    &CALL LAT2D'/)
+! 102 FORMAT(//33X,'FROM LAT2D: MAXIMUM NUMBER OF NEIGHBOURS=',I4,
+!    &'  EXCEEDED'//6X,'LATTICE POINTS FOUND (NON ORDERED)')
+! 103 FORMAT(I3,3X,I5,'*(',2E14.6,') +',I5,'*(',2E14.6,')',8X,E14.6)
+!
 !     END subroutine
-C=======================================================================
-      SUBROUTINE LAT2D(A,B,RMAX,IMAX,ID,NTA,NTB,VECMOD)
-
-C     --------------------------------------------------------------
-C     GIVEN A TWO DIMENSIONAL BRAVAIS LATTICE WITH PRIMITIVE VECTORS
-C     (A(1),A(2)) , (B(1),B(2)) , DEFINED SO THAT 'B' IS LONGER THAN
-C     'A' AND THEIR SCALAR PRODUCT IS POSITIVE,THIS ROUTINE CALCULA-
-C     TES THE 'IMAX' LATTICE VECTORS: NTA(I) * A + NTB(I) * B,HAVING
-C     LENGTH 'VECMOD(I)' LESS THAN 'RMAX'.
-C     --------------------------------------------------------------
-C
-C ..  SCALAR ARGUMENTS ..
-C
-      INTEGER IMAX,ID
-      REAL(dp)RMAX
-C
-C ..  ARRAY ARGUMENTS ..
-C
-      INTEGER NTA(ID),NTB(ID)
-      REAL(dp)A(2),B(2),VECMOD(ID)
-C
-C ..  LOCAL SCALARS ..
-C
-      INTEGER I,NA,NB,NA0,J,NMA,NMB,IORD
-      REAL(dp)RMAX2,SP,AMOD2,BMOD2,DUM,VMOD2,VM
-C
-C     ------------------------------------------------------------------
-C
-      RMAX2=RMAX*RMAX
-C
-C***  CHECK IF PRIMITIVE VECTORS HAVE POSITIVE SCALAR PRODUCT
-C
-      SP=A(1)*B(1)+A(2)*B(2)
-      IF(SP<-1.D-06)  THEN
-      B(1)=-B(1)
-      B(2)=-B(2)
-      SP=-SP
-      WRITE(6,100) A(1),A(2),B(1),B(2)
-                        END     IF
-C
-C***  CHECK IF 'B' IS LONGER THAN 'A'
-C
-      AMOD2=A(1)*A(1)+A(2)*A(2)
-      BMOD2=B(1)*B(1)+B(2)*B(2)
-      IF(BMOD2<AMOD2) THEN
-      WRITE(6,101)
-      DO 10 J=1,2
-      DUM=A(J)
-      A(J)=B(J)
-   10 B(J)=DUM
-      DUM=AMOD2
-      AMOD2=BMOD2
-      BMOD2=DUM
-                      ENDIF
-C
-      I=0
-      NB=0
-    9 CONTINUE
-      IF((NB*NB*BMOD2)>RMAX2)  GO TO 8
-      NA=0
-    7 CONTINUE
-      VMOD2=NA*NA*AMOD2+NB*NB*BMOD2+2*NA*NB*SP
-      IF(VMOD2>RMAX2)  GO TO 6
-      I=I+1
-      IF(I>ID)  GO TO 13
-      NTA(I)=NA
-      NTB(I)=NB
-      VECMOD(I)=SQRT(VMOD2)
-      IF(NA==0.AND.NB==0) GO TO 11
-      I=I+1
-      IF(I>ID) GO TO 13
-      NTA(I)=-NA
-      NTB(I)=-NB
-      VECMOD(I)=SQRT(VMOD2)
-   11 NA=NA+1
-      GO TO 7
-    6 CONTINUE
-      NB=NB+1
-      GO TO 9
-    8 CONTINUE
-C
-      NA0=SP/AMOD2 + 1
-      NB=1
-    5 CONTINUE
-      IF((NB*NB*(BMOD2-SP*SP/AMOD2))>RMAX2) GO TO 4
-      NA=NA0
-    3 CONTINUE
-      VMOD2=NA*NA*AMOD2+NB*NB*BMOD2-2*NA*NB*SP
-      IF(VMOD2>RMAX2) GO TO 2
-      I=I+1
-      IF(I>ID)  GO TO 13
-      NTA(I)=NA
-      NTB(I)=-NB
-      VECMOD(I)=SQRT(VMOD2)
-      I=I+1
-      IF(I>ID)  GO TO 13
-      NTA(I)=-NA
-      NTB(I)=NB
-      VECMOD(I)=SQRT(VMOD2)
-      NA=NA+1
-      GO TO 3
-    2 CONTINUE
-      NA=NA0-1
-    1 CONTINUE
-      VMOD2=NA*NA*AMOD2+NB*NB*BMOD2-2*NA*NB*SP
-      IF(VMOD2>RMAX2.OR.NA<=0)  GO TO 12
-      I=I+1
-      IF(I>ID)  GO TO 13
-      NTA(I)=NA
-      NTB(I)=-NB
-      VECMOD(I)=SQRT(VMOD2)
-      I=I+1
-      IF(I>ID) GO TO 13
-      NTA(I)=-NA
-      NTB(I)=NB
-      VECMOD(I)=SQRT(VMOD2)
-      NA=NA-1
-      GO TO 1
-   12 CONTINUE
-      NB=NB+1
-      GO TO 5
-    4 CONTINUE
-      IMAX=I
-C
-      DO 15 IORD=1,IMAX
-      VM=VECMOD(IORD)
-      DO 16 I=IMAX,IORD,-1
-      IF(VECMOD(I)>VM)  GO TO 16
-      VM=VECMOD(I)
-      VECMOD(I)=VECMOD(IORD)
-      VECMOD(IORD)=VM
-      NMA=NTA(I)
-      NTA(I)=NTA(IORD)
-      NTA(IORD)=NMA
-      NMB=NTB(I)
-      NTB(I)=NTB(IORD)
-      NTB(IORD)=NMB
-   16 CONTINUE
-   15 CONTINUE
-C
-      RETURN
-   13 IMAX=I-1
-      WRITE(6,102) IMAX
-      DO 14 I=1,IMAX
-      WRITE(6,103) I,NTA(I),A(1),A(2),NTB(I),B(1),B(2),VECMOD(I)
-   14 CONTINUE
-      STOP
-C
-  100 FORMAT(/13X,'NEW PRIMITIVE VECTORS DEFINED TO HAVE POSITIVE SCALAR
-     & PRODUCT'/13X,'A=(',2E14.6,')'/13X,'B=(',2E14.6,')')
-  101 FORMAT(/13X,'W A R N I N G ! !'/'INTERCHANGE PRIMITIVE VECTORS IN
-     &CALL LAT2D'/)
-  102 FORMAT(//33X,'FROM LAT2D: MAXIMUM NUMBER OF NEIGHBOURS=',I4,
-     &'  EXCEEDED'//6X,'LATTICE POINTS FOUND (NON ORDERED)')
-  103 FORMAT(I3,3X,I5,'*(',2E14.6,') +',I5,'*(',2E14.6,')',8X,E14.6)
-C
-      END subroutine
 C=======================================================================
       SUBROUTINE PLW(KAPPA,GK,LMAX,AE,AH)
 
@@ -1199,7 +1293,7 @@ C
 C ..  ARRAY ARGUMENTS  ..
 C
       REAL(dp)AR(NDIM,N),AI(NDIM,N),EVR(N),EVI(N)
-      complex(dp)::a(ndim, n)
+      complex(dp)::a(ndim, n), w(n), vr(ndim,n)
       REAL(dp)VECR(NDIM,N),VECI(NDIM,N)
 C
 C ..  LOCAL SCALARS  ..
@@ -1215,9 +1309,18 @@ C
       IF(NDIM<N .OR. N<1) GO TO 10
       IF(N*NDIM > 72900) GO TO 10
       a = ar + ci*ai
-      call zgebal_wrap(a,scale, low, igh)
+      call zgebal_wrap(a,w,vr, scale, low, igh)
       ar = dble(a)
       ai = aimag(a)
+!       call zgehrd_wrap(a, w, vr, scale, low, igh)
+!     ierr = 0
+!     ar = dble(a)
+!     ai = aimag(a)
+!     evr = dble(w)
+!     evi = aimag(w)
+!     vecr = dble(vr)
+!     veci = dble(vr)
+
       CALL COMHES(NDIM,N,LOW,IGH,AR,AI,INT)
       CALL COMLR2(NDIM,N,LOW,IGH,INT,AR,AI,EVR,EVI,VECR,VECI,IERR)
       IF(IERR==0) GO TO 2
@@ -1980,24 +2083,37 @@ C=======================================================================
           ar(igkmax+igk1,igkmax+igk2)=qh2(igk1,igk2)
         end do
       end do
-      call cnaa(igk2d,igk2m,ar,ai,rr,ri,vr,vi,ifail)
+!     if (.true.) then
+      if (.false.) then
+        call zgeevx_wrap (a, r2, comvec)
+        do ii=1,igk2m
+!*****  the if-structure  which follows  can be  omitted  if the accuracy
+!*****  'machep' of the subroutine comlr2 is chosen greater than 2**(-47)
+!         if((rr(ii)==0.0_dp).and.(ri(ii)==0.0_dp)) then
+!           rr(ii)=1.d-20
+!           ri(ii)=1.d-20
+!         endif
+!         ! normalized k_z
+          akz(ii)=(-ci/pi)*log(r2(ii)/eaka)
+        end do
+      else
+        call cnaa(igk2d,igk2m,ar,ai,rr,ri,vr,vi,ifail)
 
-      call zgeev_wrap (a, r2, comvec2)
-!     if(ifail/=0) then
-!       write(6,102) ifail
-!       stop
-!     endif
-      do ii=1,igk2m
-!*****the if-structure  which follows  can be  omitted  if the accuracy
-!*****'machep' of the subroutine comlr2 is chosen greater than 2**(-47)
-        if((rr(ii)==0.0_dp).and.(ri(ii)==0.0_dp)) then
-          rr(ii)=1.d-20
-          ri(ii)=1.d-20
+        if(ifail/=0) then
+          write(6,102) ifail
+          stop
         endif
-        ! normalized k_z
-        akz(ii)=(-ci/pi)*log(cmplx(rr(ii),ri(ii),kind=dp)/eaka)
-!       akz(ii)=(-ci/pi)*log(r2(ii)/eaka)
-      end do
+        do ii=1,igk2m
+!*****  the if-structure  which follows  can be  omitted  if the accuracy
+!*****  'machep' of the subroutine comlr2 is chosen greater than 2**(-47)
+          if((rr(ii)==0.0_dp).and.(ri(ii)==0.0_dp)) then
+            rr(ii)=1.d-20
+            ri(ii)=1.d-20
+          endif
+          ! normalized k_z
+          akz(ii)=(-ci/pi)*log(cmplx(rr(ii),ri(ii),kind=dp)/eaka)
+        end do
+      endif
       do lib2=1,igk2m
         do lib1=1,igk2m
           comvec(lib1,lib2)=vr(lib1,lib2)+ci*vi(lib1,lib2)
@@ -2227,11 +2343,6 @@ C*****"AK" IS REDUCED WITHIN THE SBZ
       use libmultem2a
       use libmultem2b
       IMPLICIT NONE
-!     integer, parameter:: dp=kind(0.d0)
-!     real(dp), parameter :: pi=4.0_dp*ATAN(1.0_dp)
-!     complex(dp), parameter :: czero = (0.0_dp, 0.0_dp)
-!     complex(dp), parameter :: ci    = (0.0_dp, 1.0_dp)
-!     complex(dp), parameter :: cone  = (1.0_dp, 0.0_dp)
 C     ------------------------------------------------------------------
 C     A B S T R A C T
 C     THIS PROGRAM CALCULATES EITHER THE ABSORBANCE, REFLECTIVITY  AND
