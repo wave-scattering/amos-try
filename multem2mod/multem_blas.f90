@@ -1,12 +1,223 @@
 module multem_blas
     use dense_solve
-    use libmultem2b, only: dp, cmplx_dp
+    use libmultem2b, only: dp, cmplx_dp, ci
     implicit none
     private
-    public comlr2, comhes, cbabk2
+    public comlr2, comhes, cbabk2, cnaa, zsu, zge
 contains
     !=======================================================================
+    subroutine zge(a, int, n, nc, emach)
+
+        !     ------------------------------------------------------------------
+        !     zge is a standard subroutine to perform gaussian elimination on
+        !     a nc*nc matrix 'a' prior  to inversion, details stored in 'int'
+        !     ------------------------------------------------------------------
+        !
+        ! ..  scalar arguments  ..
+        !
+        integer n, nc
+        real(dp) emach
+        !
+        ! ..  array arguments  ..
+        !
+        integer    int(nc)
+        complex(dp) a(nc, nc)
+        !
+        ! ..  local scalars  ..
+        !
+        integer    i, ii, in, j, k
+        complex(dp) yr, dum
+        !     ------------------------------------------------------------------
+        !
+        do ii = 2, n
+            i = ii - 1
+            yr = a(i, i)
+            in = i
+            do j = ii, n
+                if(abs(yr) - abs(a(j, i)) >= 0) cycle
+                yr = a(j, i)
+                in = j
+            end do
+            int(i) = in
+            if(in - i /= 0) then
+                do j = i, n
+                    dum = a(i, j)
+                    a(i, j) = a(in, j)
+                    a(in, j) = dum
+                end do
+            end if
+            if(abs(yr) - emach > 0) then
+                do j = ii, n
+                    if(abs(a(j, i)) - emach<=0) cycle
+                    a(j, i) = a(j, i) / yr
+                    do k = ii, n
+                        a(j, k) = a(j, k) - a(i, k) * a(j, i)
+                    end do
+                end do
+            end if
+        end do
+        return
+    end subroutine
     !=======================================================================
+    subroutine zsu(a, int, x, n, nc, emach)
+
+        !     ------------------------------------------------------------------
+        !     zsu  is  a standard back-substitution  subroutine  using the
+        !     output of zge to calculate  a-inverse times x, returned in x
+        !     ------------------------------------------------------------------
+        !
+        ! ..  scalar arguments  ..
+        !
+        integer n, nc
+        real(dp) emach
+        !
+        ! ..  array arguments  ..
+        !
+        integer    int(nc)
+        complex(dp) a(nc, nc), x(nc)
+        !
+        ! ..  local scalars  ..
+        !
+        integer    i, ii, in, j, ij
+        complex(dp) dum
+        !     ------------------------------------------------------------------
+        !
+        do ii = 2, n
+            i = ii - 1
+            if(int(i) - i /= 0) then
+                in = int(i)
+                dum = x(in)
+                x(in) = x(i)
+                x(i) = dum
+            end if
+            do j = ii, n
+                if(abs(a(j, i)) - emach >0) x(j) = x(j) - a(j, i) * x(i)
+            end do
+        end do
+        do ii = 1, n
+            i = n - ii + 1
+            ij = i + 1
+            if(i - n /= 0) then
+                do j = ij, n
+                    x(i) = x(i) - a(i, j) * x(j)
+                end do
+            end if
+            if(abs(a(i, i)) - emach * 1.0d-7 < 0) then
+                a(i, i) = emach * 1.0d-7 * (1.0_dp, 1.0_dp)
+            else
+                x(i) = x(i) / a(i, i)
+            endif
+
+        end do
+        return
+    end subroutine
+    !=======================================================================
+    subroutine cnaa(ndim, n, ar, ai, evr, evi, vecr, veci, ierr)
+
+        !     ------------------------------------------------------------------
+        !     'eispack'  is a  collection  of codes for  solving  the algebraic
+        !     eigenvalue  problem.  the original  algol  codes were  written by
+        !     j. h. wilkinson, et.al., and subsequently  translated to  fortran
+        !     and tested at argonne national laboratory.
+        !
+        !     this   subroutine  computes  all  eigenvalues  and  corresponding
+        !     eigenvectors  of  an  arbitrary   complex  matrix.  the matrix is
+        !     balanced by exact norm  reducing  similarity  transformations and
+        !     then  is  reduced  to  complex  hessenberg   form  by  stabilized
+        !     elementary similarity transformations. a modified lr algorithm is
+        !     used to compute the eigenvalues of the hessenberg matrix.
+        !
+        !       on input--->
+        !          ndim     must be the row dimension of the arrays ar,ai,vecr,
+        !                   and veci in the calling program dimension statement
+        !          n        is the order of the matrix. n must not exceed ndim.
+        !                   n*ndim  must not exceed 22500=150*150=53744(octal).
+        !                   n must not exceed 150.  n may be 1.
+        !          ar,ai    arrays with  exactly  ndim  rows  and  at  least  n
+        !                   columns.  the leading n by n subarrays must contain
+        !                   the real and  imaginary  parts  respectively of the
+        !                   arbitrary complex matrix whose eigensystem is to be
+        !                   computed.
+        !
+        !        on output--->
+        !          evr,evi    contain the real and imaginary parts respectively
+        !                     of the computed eigenvalues.  the eigenvalues are
+        !                     not ordered in any way.
+        !          vecr,veci  contain in the leading n by n  subarrays the real
+        !                     and imaginary parts respectively  of the computed
+        !                     eigenvectors.  the j-th columns  of vecr and veci
+        !                     contain the  eigenvector  associated  with evr(j)
+        !                     and  evi(j).  the eigenvectors are not normalized
+        !                     in any way.
+        !          ierr       is a status code.
+        !                   --normal code.
+        !                     0 means the lr iterations converged.
+        !                   --abnormal codes.
+        !                     j means the j-th eigenvalue has not been found in
+        !                     30 iterations. the first j-1 elements of evr  and
+        !                     evi contain those eigenvalues  already  found. no
+        !                     eigenvectors are computed.
+        !                    -1 means the input values of n, ndim are too large
+        !                     or inconsistent.
+        !          ar,ai      are destroyed.
+        !     ------------------------------------------------------------------
+        !
+        ! ..  scalar arguments  ..
+        !
+        integer ierr, n, ndim
+        !
+        ! ..  array arguments  ..
+        !
+        real(dp)ar(ndim, n), ai(ndim, n), evr(n), evi(n)
+        complex(dp) :: a(ndim, n), w(n), vr(ndim, n)
+        real(dp)vecr(ndim, n), veci(ndim, n)
+        !
+        ! ..  local scalars  ..
+        !
+        integer   i, ierrpi, igh, low, nmierr
+        !
+        ! ..  local arrays  ..
+        !
+        integer int(270)
+        real(dp)scale(270)
+        !     ------------------------------------------------------------------
+        !
+        if(ndim<n .or. n<1) go to 10
+        if(n * ndim > 72900) go to 10
+        a = ar + ci * ai
+        call zgebal_wrap(a, w, vr, scale, low, igh)
+        ar = dble(a)
+        ai = aimag(a)
+        !       call zgehrd_wrap(a, w, vr, scale, low, igh)
+        !     ierr = 0
+        !     ar = dble(a)
+        !     ai = aimag(a)
+        !     evr = dble(w)
+        !     evi = aimag(w)
+        !     vecr = dble(vr)
+        !     veci = dble(vr)
+
+        call comhes(ndim, n, low, igh, ar, ai, int)
+        call comlr2(ndim, n, low, igh, int, ar, ai, evr, evi, vecr, veci, ierr)
+        if(ierr==0) go to 2
+        !     call errchk(54,54hin cnaa  , some eigenvalue not found in 30 itera
+        !    1tions.)
+        if(ierr==n) go to 20
+        nmierr = n - ierr
+        do i = 1, nmierr
+            ierrpi = ierr + i
+            evr(i) = evr(ierrpi)
+            evi(i) = evi(ierrpi)
+        end do
+        go to 20
+        2    call cbabk2(ndim, n, low, igh, scale, n, vecr, veci)
+        go to 20
+        10    write(*, *)"in cnaa input dim in error or matrix is too big."
+
+        ierr = -1
+        20    if(ierr > 0) ierr = n - ierr + 1
+        return
+    end subroutine
     !=======================================================================
     subroutine cbabk2(nm, n, low, igh, scale, m, zr, zi)
 
