@@ -22,10 +22,13 @@ include_directories(${CMAKE_BINARY_DIR}/amos
 add_library(libmultem2b libmultem2b.f90)
 target_link_libraries(libmultem2b amos)
 
+add_library(multem_blas multem_blas.f90)
+target_link_libraries(multem_blas dense_solve)
+
 ADD_EXECUTABLE(${PROJECTNAME} "multem_mod.f"
         )
 target_link_libraries(${PROJECTNAME} ${BLAS_LIBRARIES}
-        dense_solve libmultem2b
+        dense_solve libmultem2b multem_blas
         errfun
         ${LAPACK_LIBRARIES} #${HDF5_Fortran_LIBRARIES}
         )

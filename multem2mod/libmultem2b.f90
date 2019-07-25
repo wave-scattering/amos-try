@@ -12,10 +12,151 @@ module libmultem2b
     complex(dp), parameter, public :: ctwo  = (2.0_dp, 0.0_dp)
     real(dp), parameter, public :: pi=4.0_dp*ATAN(1.0_dp)
     public bessel, tmtrx, sphrm4, ceven, codd, scat, hoslab, blm, elmgen, &
-           pair, cmplx_dp, cerf
+           pair, cmplx_dp, cerf, lat2d
 contains
     !=======================================================================
     !=======================================================================
+    subroutine lat2d(a, b, rmax, imax, id, nta, ntb, vecmod)
+        !     --------------------------------------------------------------
+        !     given a two dimensional bravais lattice with primitive vectors
+        !     (a(1),a(2)) , (b(1),b(2)) , defined so that 'b' is longer than
+        !     'a' and their scalar product is positive,this routine calcula-
+        !     tes the 'imax' lattice vectors: nta(i) * a + ntb(i) * b,having
+        !     length 'vecmod(i)' less than 'rmax'.
+        !     --------------------------------------------------------------
+        ! ..  arguments ..
+        integer imax, id
+        real(dp) rmax
+        integer nta(id), ntb(id)
+        real(dp)a(2), b(2), vecmod(id)
+        ! ..  local scalars ..
+        integer i, na, nb, na0, j, nma, nmb, iord
+        real(dp)rmax2, sp, amod2, bmod2, dum, vmod2, vm
+        !     ------------------------------------------------------------------
+        rmax2 = rmax * rmax
+        !***  check if primitive vectors have positive scalar product
+        sp = a(1) * b(1) + a(2) * b(2)
+        if(sp<-1.d-06)  then
+            b(1) = -b(1)
+            b(2) = -b(2)
+            sp = -sp
+            write(6, 100) a(1), a(2), b(1), b(2)
+        end if
+        !***  check if 'b' is longer than 'a'
+        amod2 = a(1) * a(1) + a(2) * a(2)
+        bmod2 = b(1) * b(1) + b(2) * b(2)
+        if(bmod2<amod2) then
+            write(6, 101)
+            do j = 1, 2
+                dum = a(j)
+                a(j) = b(j)
+                b(j) = dum
+            end do
+            dum = amod2
+            amod2 = bmod2
+            bmod2 = dum
+        endif
+        !
+        i = 0
+        nb = 0
+        do while ((nb * nb * bmod2)<=rmax2)
+            na = 0
+            do
+                vmod2 = na * na * amod2 + nb * nb * bmod2 + 2 * na * nb * sp
+                if(vmod2>rmax2) exit
+                i = i + 1
+                if(i>id)  go to 13
+                nta(i) = na
+                ntb(i) = nb
+                vecmod(i) = sqrt(vmod2)
+                if(na==0.and.nb==0) then
+                    na = na + 1
+                    cycle
+                end if
+                i = i + 1
+                if(i>id) go to 13
+                nta(i) = -na
+                ntb(i) = -nb
+                vecmod(i) = sqrt(vmod2)
+                na = na + 1
+            end do
+            nb = nb + 1
+        end do
+        !
+        na0 = sp / amod2 + 1
+        nb = 1
+        do
+            if((nb * nb * (bmod2 - sp * sp / amod2))>rmax2) exit
+            na = na0
+            do
+                vmod2 = na * na * amod2 + nb * nb * bmod2 - 2 * na * nb * sp
+                if(vmod2>rmax2) exit
+                i = i + 1
+                if(i>id)  go to 13
+                nta(i) = na
+                ntb(i) = -nb
+                vecmod(i) = sqrt(vmod2)
+                i = i + 1
+                if(i>id)  go to 13
+                nta(i) = -na
+                ntb(i) = nb
+                vecmod(i) = sqrt(vmod2)
+                na = na + 1
+            end do
+            na = na0 - 1
+
+            do
+                vmod2 = na * na * amod2 + nb * nb * bmod2 - 2 * na * nb * sp
+                if(vmod2>rmax2.or.na<=0) exit
+                i = i + 1
+                if(i>id)  go to 13
+                nta(i) = na
+                ntb(i) = -nb
+                vecmod(i) = sqrt(vmod2)
+                i = i + 1
+                if(i>id) go to 13
+                nta(i) = -na
+                ntb(i) = nb
+                vecmod(i) = sqrt(vmod2)
+                na = na - 1
+            end do
+            nb = nb + 1
+        end do
+        imax = i
+        !
+        do iord = 1, imax
+            vm = vecmod(iord)
+            do i = imax, iord, -1
+                if(vecmod(i)>vm)  cycle
+                vm = vecmod(i)
+                vecmod(i) = vecmod(iord)
+                vecmod(iord) = vm
+                nma = nta(i)
+                nta(i) = nta(iord)
+                nta(iord) = nma
+                nmb = ntb(i)
+                ntb(i) = ntb(iord)
+                ntb(iord) = nmb
+            end do
+        end do
+        !
+        return
+        13 imax = i - 1
+        write(6, 102) imax
+        do i = 1, imax
+            write(6, 103) i, nta(i), a(1), a(2), ntb(i), b(1), b(2), vecmod(i)
+        end do
+        stop
+        !
+        100 format(/13x, 'new primitive vectors defined to have positive scalar&
+                product'/13x, 'a=(', 2e14.6, ')'/13x, 'b=(', 2e14.6, ')')
+        101 format(/13x, 'w a r n i n g ! !'/'interchange primitive vectors in&
+                call lat2d'/)
+        102 format(//33x, 'from lat2d: maximum number of neighbours=', i4, &
+                '  exceeded'//6x, 'lattice points found (non ordered)')
+        103 format(i3, 3x, i5, '*(', 2e14.6, ') +', i5, '*(', 2e14.6, ')', 8x, e14.6)
+        !
+    end subroutine
     !=======================================================================
     complex(dp) function cerf(z)
         !     cerf,given complex argument z,provides the complex error function:

@@ -25,6 +25,7 @@ C=======================================================================
       module libmultem2a
       use dense_solve
       use libmultem2b
+      use multem_blas
       implicit none
 !     integer, parameter, public:: dp=kind(0.d0)
 !     real(dp), parameter :: pi=4.0_dp*ATAN(1.0_dp)
@@ -115,304 +116,6 @@ C     ------------------------------------------------------------------
       END subroutine
 C=======================================================================
 C=======================================================================
-      subroutine lat2d(a,b,rmax,imax,id,nta,ntb,vecmod)
-!     --------------------------------------------------------------
-!     given a two dimensional bravais lattice with primitive vectors
-!     (a(1),a(2)) , (b(1),b(2)) , defined so that 'b' is longer than
-!     'a' and their scalar product is positive,this routine calcula-
-!     tes the 'imax' lattice vectors: nta(i) * a + ntb(i) * b,having
-!     length 'vecmod(i)' less than 'rmax'.
-!     --------------------------------------------------------------
-! ..  arguments ..
-      integer imax,id
-      real(dp) rmax
-      integer nta(id),ntb(id)
-      real(dp)a(2),b(2),vecmod(id)
-! ..  local scalars ..
-      integer i,na,nb,na0,j,nma,nmb,iord
-      real(dp)rmax2,sp,amod2,bmod2,dum,vmod2,vm
-!     ------------------------------------------------------------------
-      rmax2=rmax*rmax
-!***  check if primitive vectors have positive scalar product
-      sp=a(1)*b(1)+a(2)*b(2)
-      if(sp<-1.d-06)  then
-          b(1)=-b(1)
-          b(2)=-b(2)
-          sp=-sp
-          write(6,100) a(1),a(2),b(1),b(2)
-      end if
-!***  check if 'b' is longer than 'a'
-      amod2=a(1)*a(1)+a(2)*a(2)
-      bmod2=b(1)*b(1)+b(2)*b(2)
-      if(bmod2<amod2) then
-          write(6,101)
-          do j=1,2
-            dum=a(j)
-            a(j)=b(j)
-            b(j)=dum
-          end do
-          dum=amod2
-          amod2=bmod2
-          bmod2=dum
-      endif
-!
-      i=0
-      nb=0
-      do
-        if((nb*nb*bmod2)>rmax2)  go to 8
-        na=0
-        do
-          vmod2=na*na*amod2+nb*nb*bmod2+2*na*nb*sp
-          if(vmod2>rmax2)  go to 6
-          i=i+1
-          if(i>id)  go to 13
-          nta(i)=na
-          ntb(i)=nb
-          vecmod(i)=sqrt(vmod2)
-          if(na==0.and.nb==0) go to 11
-          i=i+1
-          if(i>id) go to 13
-          nta(i)=-na
-          ntb(i)=-nb
-          vecmod(i)=sqrt(vmod2)
-   11     na=na+1
-        end do
-    6   continue
-        nb=nb+1
-      end do
-    8 continue
-!
-      na0=sp/amod2 + 1
-      nb=1
-    5 continue
-      if((nb*nb*(bmod2-sp*sp/amod2))>rmax2) go to 4
-      na=na0
-    3 continue
-      vmod2=na*na*amod2+nb*nb*bmod2-2*na*nb*sp
-      if(vmod2>rmax2) go to 2
-      i=i+1
-      if(i>id)  go to 13
-      nta(i)=na
-      ntb(i)=-nb
-      vecmod(i)=sqrt(vmod2)
-      i=i+1
-      if(i>id)  go to 13
-      nta(i)=-na
-      ntb(i)=nb
-      vecmod(i)=sqrt(vmod2)
-      na=na+1
-      go to 3
-    2 continue
-      na=na0-1
-    1 continue
-      vmod2=na*na*amod2+nb*nb*bmod2-2*na*nb*sp
-      if(vmod2>rmax2.or.na<=0)  go to 12
-      i=i+1
-      if(i>id)  go to 13
-      nta(i)=na
-      ntb(i)=-nb
-      vecmod(i)=sqrt(vmod2)
-      i=i+1
-      if(i>id) go to 13
-      nta(i)=-na
-      ntb(i)=nb
-      vecmod(i)=sqrt(vmod2)
-      na=na-1
-      go to 1
-   12 continue
-      nb=nb+1
-      go to 5
-    4 continue
-      imax=i
-!
-      do iord=1,imax
-        vm=vecmod(iord)
-        do i=imax,iord,-1
-          if(vecmod(i)>vm)  cycle
-          vm=vecmod(i)
-          vecmod(i)=vecmod(iord)
-          vecmod(iord)=vm
-          nma=nta(i)
-          nta(i)=nta(iord)
-          nta(iord)=nma
-          nmb=ntb(i)
-          ntb(i)=ntb(iord)
-          ntb(iord)=nmb
-        end do
-      end do
-!
-      return
-   13 imax=i-1
-      write(6,102) imax
-      do i=1,imax
-        write(6,103) i,nta(i),a(1),a(2),ntb(i),b(1),b(2),vecmod(i)
-      end do
-      stop
-!
-  100 format(/13x,'new primitive vectors defined to have positive scalar
-     & product'/13x,'a=(',2e14.6,')'/13x,'b=(',2e14.6,')')
-  101 format(/13x,'w a r n i n g ! !'/'interchange primitive vectors in
-     &call lat2d'/)
-  102 format(//33x,'from lat2d: maximum number of neighbours=',i4,
-     &'  exceeded'//6x,'lattice points found (non ordered)')
-  103 format(i3,3x,i5,'*(',2e14.6,') +',i5,'*(',2e14.6,')',8x,e14.6)
-!
-      end subroutine
-!     SUBROUTINE LAT2D(A,B,RMAX,IMAX,ID,NTA,NTB,VECMOD)
-!!     --------------------------------------------------------------
-!     GIVEN A TWO DIMENSIONAL BRAVAIS LATTICE WITH PRIMITIVE VECTORS
-!     (A(1),A(2)) , (B(1),B(2)) , DEFINED SO THAT 'B' IS LONGER THAN
-!     'A' AND THEIR SCALAR PRODUCT IS POSITIVE,THIS ROUTINE CALCULA-
-!     TES THE 'IMAX' LATTICE VECTORS: NTA(I) * A + NTB(I) * B,HAVING
-!     LENGTH 'VECMOD(I)' LESS THAN 'RMAX'.
-!     --------------------------------------------------------------
-!
-! ..  SCALAR ARGUMENTS ..
-!
-!     INTEGER IMAX,ID
-!     REAL(dp)RMAX
-!
-! ..  ARRAY ARGUMENTS ..
-!
-!     INTEGER NTA(ID),NTB(ID)
-!     REAL(dp)A(2),B(2),VECMOD(ID)
-!
-! ..  LOCAL SCALARS ..
-!
-!     INTEGER I,NA,NB,NA0,J,NMA,NMB,IORD
-!     REAL(dp)RMAX2,SP,AMOD2,BMOD2,DUM,VMOD2,VM
-!
-!     ------------------------------------------------------------------
-!
-!     RMAX2=RMAX*RMAX
-!
-!***  CHECK IF PRIMITIVE VECTORS HAVE POSITIVE SCALAR PRODUCT
-!
-!     SP=A(1)*B(1)+A(2)*B(2)
-!     IF(SP<-1.D-06)  THEN
-!     B(1)=-B(1)
-!     B(2)=-B(2)
-!     SP=-SP
-!     WRITE(6,100) A(1),A(2),B(1),B(2)
-!                       END     IF
-!
-!***  CHECK IF 'B' IS LONGER THAN 'A'
-!
-!     AMOD2=A(1)*A(1)+A(2)*A(2)
-!     BMOD2=B(1)*B(1)+B(2)*B(2)
-!     IF(BMOD2<AMOD2) THEN
-!     WRITE(6,101)
-!     DO 10 J=1,2
-!     DUM=A(J)
-!     A(J)=B(J)
-!  10 B(J)=DUM
-!     DUM=AMOD2
-!     AMOD2=BMOD2
-!     BMOD2=DUM
-!                     ENDIF
-!
-!     I=0
-!     NB=0
-!   9 CONTINUE
-!     IF((NB*NB*BMOD2)>RMAX2)  GO TO 8
-!     NA=0
-!   7 CONTINUE
-!     VMOD2=NA*NA*AMOD2+NB*NB*BMOD2+2*NA*NB*SP
-!     IF(VMOD2>RMAX2)  GO TO 6
-!     I=I+1
-!     IF(I>ID)  GO TO 13
-!     NTA(I)=NA
-!     NTB(I)=NB
-!     VECMOD(I)=SQRT(VMOD2)
-!     IF(NA==0.AND.NB==0) GO TO 11
-!     I=I+1
-!     IF(I>ID) GO TO 13
-!     NTA(I)=-NA
-!     NTB(I)=-NB
-!     VECMOD(I)=SQRT(VMOD2)
-!  11 NA=NA+1
-!     GO TO 7
-!   6 CONTINUE
-!     NB=NB+1
-!     GO TO 9
-!   8 CONTINUE
-!
-!     NA0=SP/AMOD2 + 1
-!     NB=1
-!   5 CONTINUE
-!     IF((NB*NB*(BMOD2-SP*SP/AMOD2))>RMAX2) GO TO 4
-!     NA=NA0
-!   3 CONTINUE
-!     VMOD2=NA*NA*AMOD2+NB*NB*BMOD2-2*NA*NB*SP
-!     IF(VMOD2>RMAX2) GO TO 2
-!     I=I+1
-!     IF(I>ID)  GO TO 13
-!     NTA(I)=NA
-!     NTB(I)=-NB
-!     VECMOD(I)=SQRT(VMOD2)
-!     I=I+1
-!     IF(I>ID)  GO TO 13
-!     NTA(I)=-NA
-!     NTB(I)=NB
-!     VECMOD(I)=SQRT(VMOD2)
-!     NA=NA+1
-!     GO TO 3
-!   2 CONTINUE
-!     NA=NA0-1
-!   1 CONTINUE
-!     VMOD2=NA*NA*AMOD2+NB*NB*BMOD2-2*NA*NB*SP
-!     IF(VMOD2>RMAX2.OR.NA<=0)  GO TO 12
-!     I=I+1
-!     IF(I>ID)  GO TO 13
-!     NTA(I)=NA
-!     NTB(I)=-NB
-!     VECMOD(I)=SQRT(VMOD2)
-!     I=I+1
-!     IF(I>ID) GO TO 13
-!     NTA(I)=-NA
-!     NTB(I)=NB
-!     VECMOD(I)=SQRT(VMOD2)
-!     NA=NA-1
-!     GO TO 1
-!  12 CONTINUE
-!     NB=NB+1
-!     GO TO 5
-!   4 CONTINUE
-!     IMAX=I
-!
-!     DO 15 IORD=1,IMAX
-!     VM=VECMOD(IORD)
-!     DO 16 I=IMAX,IORD,-1
-!     IF(VECMOD(I)>VM)  GO TO 16
-!     VM=VECMOD(I)
-!     VECMOD(I)=VECMOD(IORD)
-!     VECMOD(IORD)=VM
-!     NMA=NTA(I)
-!     NTA(I)=NTA(IORD)
-!     NTA(IORD)=NMA
-!     NMB=NTB(I)
-!     NTB(I)=NTB(IORD)
-!     NTB(IORD)=NMB
-!  16 CONTINUE
-!  15 CONTINUE
-!
-!     RETURN
-!  13 IMAX=I-1
-!     WRITE(6,102) IMAX
-!     DO 14 I=1,IMAX
-!     WRITE(6,103) I,NTA(I),A(1),A(2),NTB(I),B(1),B(2),VECMOD(I)
-!  14 CONTINUE
-!     STOP
-!
-! 100 FORMAT(/13X,'NEW PRIMITIVE VECTORS DEFINED TO HAVE POSITIVE SCALAR
-!    & PRODUCT'/13X,'A=(',2E14.6,')'/13X,'B=(',2E14.6,')')
-! 101 FORMAT(/13X,'W A R N I N G ! !'/'INTERCHANGE PRIMITIVE VECTORS IN
-!    &CALL LAT2D'/)
-! 102 FORMAT(//33X,'FROM LAT2D: MAXIMUM NUMBER OF NEIGHBOURS=',I4,
-!    &'  EXCEEDED'//6X,'LATTICE POINTS FOUND (NON ORDERED)')
-! 103 FORMAT(I3,3X,I5,'*(',2E14.6,') +',I5,'*(',2E14.6,')',8X,E14.6)
-!
-!     END subroutine
 C=======================================================================
       SUBROUTINE PLW(KAPPA,GK,LMAX,AE,AH)
 
@@ -1458,345 +1161,350 @@ C
   200 RETURN
       END subroutine
 C=======================================================================
-      SUBROUTINE COMLR2(NM,N,LOW,IGH,INT,HR,HI,WR,WI,ZR,ZI,IERR)
-
-C     ------------------------------------------------------------------
-C     THIS SUBROUTINE FINDS  THE  EIGENVALUES AND  EIGENVECTORS  OF  A
-C     COMPLEX UPPER HESSENBERG  MATRIX BY THE MODIFIED  LR METHOD. THE
-C     EIGENVECTORS  OF A COMPLEX  GENERAL MATRIX  CAN ALSO BE FOUND IF
-C     COMHES HAS BEEN USED TO REDUCE THIS GENERAL MATRIX TO HESSENBERG
-C     FORM.
-C
-C     ON INPUT--->
-C        NM      MUST  BE SET TO THE ROW DIMENSION  OF TWO-DIMENSIONAL
-C                ARRAY  PARAMETERS AS  DECLARED IN THE CALLING PROGRAM
-C                DIMENSION STATEMENT
-C        N       IS THE ORDER OF THE MATRIX
-C        LOW,IGH ARE INTEGERS DETERMINED BY THE  BALANCING  SUBROUTINE
-C                CBAL.  IF  CBAL  HAS NOT BEEN USED,  SET LOW=1, IGH=N
-C        INT     CONTAINS INFORMATION ON THE ROWS AND  COLUMNS  INTER-
-C                CHANGED IN THE REDUCTION BY COMHES,IF PERFORMED. ONLY
-C                ELEMENTS LOW THROUGH IGH ARE USED.IF THE EIGENVECTORS
-C                OF THE HESSENBERG MATRIX ARE DESIRED,SET INT(J)=J FOR
-C                THESE ELEMENTS
-C        HR,HI   CONTAIN THE REAL AND IMAGINARY PARTS, RESPECTIVELY,OF
-C                THE COMPLEX UPPER HESSENBERG MATRIX. THEIR LOWER TRI-
-C                ANGLES  BELOW THE SUBDIAGONAL CONTAIN THE MULTIPLIERS
-C                WHICH   WERE  USED  IN  THE  REDUCTION BY  COMHES, IF
-C                PERFORMED.  IF  THE  EIGENVECTORS  OF  THE HESSENBERG
-C                MATRIX ARE DESIRED,THESE ELEMENTS MUST BE SET TO ZERO
-C
-C      ON OUTPUT--->
-C                THE   UPPER HESSENBERG PORTIONS OF HR AND HI HAVE BEEN
-C                DESTROYED, BUT  THE LOCATION HR(1,1) CONTAINS THE NORM
-C                OF THE TRIANGULARIZED MATRIX,
-C        WR,WI   CONTAIN THE REAL AND IMAGINARY PARTS, RESPECTIVELY, OF
-C                THE   EIGENVALUES.  IF  AN  ERROR  EXIT  IS  MADE, THE
-C                EIGENVALUES SHOULD BE CORRECT FOR INDICES IERR+1,...,N
-C        ZR,ZI   CONTAIN THE REAL AND IMAGINARY PARTS, RESPECTIVELY, OF
-C                THE EIGENVECTORS.THE EIGENVECTORS ARE UNNORMALIZED. IF
-C                AN ERROR EXIT IS  MADE, NONE OF THE  EIGENVECTORS  HAS
-C                BEEN FOUND
-C        IERR    IS SET TO  ZERO FOR NORMAL RETURN,
-C          J     IF THE J-TH  EIGENVALUE HAS NOT BEEN  DETERMINED AFTER
-C                30 ITERATIONS.
-C
-C     ARITHMETIC  IS  REAL  EXCEPT  FOR THE  REPLACEMENT  OF  THE ALGOL
-C     PROCEDURE CDIV BY  COMPLEX DIVISION AND  USE OF  THE  SUBROUTINES
-C     CSQRT AND CMPLX IN COMPUTING COMPLEX SQUARE ROOTS.
-C     ------------------------------------------------------------------
-C
-C ..  SCALAR ARGUMENTS  ..
-C
-      INTEGER NM,N,LOW,IGH,IERR
-C
-C ..  ARRAY ARGUMENTS  ..
-C
-      INTEGER INT(IGH)
-      REAL(dp) HR(NM,N),HI(NM,N),WR(N),WI(N),ZR(NM,N),ZI(NM,N)
-C
-C ..  LOCAL SCALARS  ..
-C
-      INTEGER    I,J,K,L,M,EN,II,JJ,LL,MM,NN,IM1,IP1,ITS,MP1,ENM1,IEND
-      REAL(dp)   SI,SR,TI,TR,XI,XR,YI,YR,ZZI,ZZR,NORM,MACHEP
-      COMPLEX(dp) Z3
-C     ------------------------------------------------------------------
-C
-C     ********** MACHEP IS A MACHINE DEPENDENT PARAMETER SPECIFYING
-C                THE RELATIVE PRECISION OF FLOATING POINT ARITHMETIC.
-C
-      MACHEP = 2.0_dp**(-47)
-C
-      IERR = 0
-C     ********** INITIALIZE EIGENVECTOR MATRIX **********
-      DO 100 I = 1, N
-C
-         DO 100 J = 1, N
-            ZR(I,J) = 0.0_dp
-            ZI(I,J) = 0.0_dp
-            IF (I == J) ZR(I,J) = 1.0_dp
-  100 CONTINUE
-C     ********** FORM THE MATRIX OF ACCUMULATED TRANSFORMATIONS
-C                FROM THE INFORMATION LEFT BY COMHES **********
-      IEND = IGH - LOW - 1
-      IF (IEND <= 0) GO TO 180
-C     ********** FOR I=IGH-1 STEP -1 UNTIL LOW+1 DO -- **********
-      DO 160 II = 1, IEND
-         I = IGH - II
-         IP1 = I + 1
-C
-         DO 120 K = IP1, IGH
-            ZR(K,I) = HR(K,I-1)
-            ZI(K,I) = HI(K,I-1)
-  120    CONTINUE
-C
-         J = INT(I)
-         IF (I == J) GO TO 160
-C
-         DO 140 K = I, IGH
-            ZR(I,K) = ZR(J,K)
-            ZI(I,K) = ZI(J,K)
-            ZR(J,K) = 0.0_dp
-            ZI(J,K) = 0.0_dp
-  140    CONTINUE
-C
-         ZR(J,I) = 1.0_dp
-  160 CONTINUE
-C     ********** STORE ROOTS ISOLATED BY CBAL **********
-  180 DO 200 I = 1, N
-         IF (I >= LOW .AND. I <= IGH) GO TO 200
-         WR(I) = HR(I,I)
-         WI(I) = HI(I,I)
-  200 CONTINUE
-C
-      EN = IGH
-      TR = 0.0_dp
-      TI = 0.0_dp
-C     ********** SEARCH FOR NEXT EIGENVALUE **********
-  220 IF (EN < LOW) GO TO 680
-      ITS = 0
-      ENM1 = EN - 1
-C     ********** LOOK FOR SINGLE SMALL SUB-DIAGONAL ELEMENT
-C                FOR L=EN STEP -1 UNTIL LOW DO -- **********
-  240 DO 260 LL = LOW, EN
-         L = EN + LOW - LL
-         IF (L == LOW) GO TO 300
-         IF (ABS(HR(L,L-1)) + ABS(HI(L,L-1)) <=
-     X      MACHEP * (ABS(HR(L-1,L-1)) + ABS(HI(L-1,L-1))
-     X             + ABS(HR(L,L)) + ABS(HI(L,L)))) GO TO 300
-  260 CONTINUE
-C     ********** FORM SHIFT **********
-  300 IF (L == EN) GO TO 660
-      IF (ITS == 30) GO TO 1000
-      IF (ITS == 10 .OR. ITS == 20) GO TO 320
-      SR = HR(EN,EN)
-      SI = HI(EN,EN)
-      XR = HR(ENM1,EN) * HR(EN,ENM1) - HI(ENM1,EN) * HI(EN,ENM1)
-      XI = HR(ENM1,EN) * HI(EN,ENM1) + HI(ENM1,EN) * HR(EN,ENM1)
-      IF (XR == 0.0_dp .AND. XI == 0.0_dp) GO TO 340
-      YR = (HR(ENM1,ENM1) - SR) / 2.0_dp
-      YI = (HI(ENM1,ENM1) - SI) / 2.0_dp
-      Z3 = SQRT(cmplx_dp(YR**2-YI**2+XR,2.0_dp*YR*YI+XI))
-      ZZR = dble(Z3)
-      ZZI = aimag(Z3)
-      IF (YR * ZZR + YI * ZZI >= 0.0_dp) GO TO 310
-      ZZR = -ZZR
-      ZZI = -ZZI
-  310 Z3 = cmplx_dp(XR,XI) / cmplx_dp(YR+ZZR,YI+ZZI)
-      SR = SR - dble(Z3)
-      SI = SI - aimag(Z3)
-      GO TO 340
-C     ********** FORM EXCEPTIONAL SHIFT **********
-  320 SR = ABS(HR(EN,ENM1)) + ABS(HR(ENM1,EN-2))
-      SI = ABS(HI(EN,ENM1)) + ABS(HI(ENM1,EN-2))
-C
-  340 DO 360 I = LOW, EN
-         HR(I,I) = HR(I,I) - SR
-         HI(I,I) = HI(I,I) - SI
-  360 CONTINUE
-C
-      TR = TR + SR
-      TI = TI + SI
-      ITS = ITS + 1
-C     ********** LOOK FOR TWO CONSECUTIVE SMALL
-C                SUB-DIAGONAL ELEMENTS **********
-      XR = ABS(HR(ENM1,ENM1)) + ABS(HI(ENM1,ENM1))
-      YR = ABS(HR(EN,ENM1)) + ABS(HI(EN,ENM1))
-      ZZR = ABS(HR(EN,EN)) + ABS(HI(EN,EN))
-C     ********** FOR M=EN-1 STEP -1 UNTIL L DO -- **********
-      DO 380 MM = L, ENM1
-         M = ENM1 + L - MM
-         IF (M == L) GO TO 420
-         YI = YR
-         YR = ABS(HR(M,M-1)) + ABS(HI(M,M-1))
-         XI = ZZR
-         ZZR = XR
-         XR = ABS(HR(M-1,M-1)) + ABS(HI(M-1,M-1))
-         IF (YR <= MACHEP * ZZR / YI * (ZZR + XR + XI)) GO TO 420
-  380 CONTINUE
-C     ********** TRIANGULAR DECOMPOSITION H=L*R **********
-  420 MP1 = M + 1
-C
-      DO 520 I = MP1, EN
-         IM1 = I - 1
-         XR = HR(IM1,IM1)
-         XI = HI(IM1,IM1)
-         YR = HR(I,IM1)
-         YI = HI(I,IM1)
-         IF (ABS(XR) + ABS(XI) >= ABS(YR) + ABS(YI)) GO TO 460
-C     ********** INTERCHANGE ROWS OF HR AND HI **********
-         DO 440 J = IM1, N
-            ZZR = HR(IM1,J)
-            HR(IM1,J) = HR(I,J)
-            HR(I,J) = ZZR
-            ZZI = HI(IM1,J)
-            HI(IM1,J) = HI(I,J)
-            HI(I,J) = ZZI
-  440    CONTINUE
-C
-         Z3 = cmplx_dp(XR,XI) / cmplx_dp(YR,YI)
-         WR(I) = 1.0_dp
-         GO TO 480
-  460    Z3 = cmplx_dp(YR,YI) / cmplx_dp(XR,XI)
-         WR(I) = -1.0_dp
-  480    ZZR = dble(Z3)
-         ZZI = aimag(Z3)
-         HR(I,IM1) = ZZR
-         HI(I,IM1) = ZZI
-C
-         DO 500 J = I, N
-            HR(I,J) = HR(I,J) - ZZR * HR(IM1,J) + ZZI * HI(IM1,J)
-            HI(I,J) = HI(I,J) - ZZR * HI(IM1,J) - ZZI * HR(IM1,J)
-  500    CONTINUE
-C
-  520 CONTINUE
-C     ********** COMPOSITION R*L=H **********
-      DO 640 J = MP1, EN
-         XR = HR(J,J-1)
-         XI = HI(J,J-1)
-         HR(J,J-1) = 0.0_dp
-         HI(J,J-1) = 0.0_dp
-C     ********** INTERCHANGE COLUMNS OF HR, HI, ZR, AND ZI,
-C                IF NECESSARY **********
-         IF (WR(J) <= 0.0_dp) GO TO 580
-C
-         DO 540 I = 1, J
-            ZZR = HR(I,J-1)
-            HR(I,J-1) = HR(I,J)
-            HR(I,J) = ZZR
-            ZZI = HI(I,J-1)
-            HI(I,J-1) = HI(I,J)
-            HI(I,J) = ZZI
-  540    CONTINUE
-C
-         DO 560 I = LOW, IGH
-            ZZR = ZR(I,J-1)
-            ZR(I,J-1) = ZR(I,J)
-            ZR(I,J) = ZZR
-            ZZI = ZI(I,J-1)
-            ZI(I,J-1) = ZI(I,J)
-            ZI(I,J) = ZZI
-  560    CONTINUE
-C
-  580    DO 600 I = 1, J
-            HR(I,J-1) = HR(I,J-1) + XR * HR(I,J) - XI * HI(I,J)
-            HI(I,J-1) = HI(I,J-1) + XR * HI(I,J) + XI * HR(I,J)
-  600    CONTINUE
-C     ********** ACCUMULATE TRANSFORMATIONS **********
-         DO 620 I = LOW, IGH
-            ZR(I,J-1) = ZR(I,J-1) + XR * ZR(I,J) - XI * ZI(I,J)
-            ZI(I,J-1) = ZI(I,J-1) + XR * ZI(I,J) + XI * ZR(I,J)
-  620    CONTINUE
-C
-  640 CONTINUE
-C
-      GO TO 240
-C     ********** A ROOT FOUND **********
-  660 HR(EN,EN) = HR(EN,EN) + TR
-      WR(EN) = HR(EN,EN)
-      HI(EN,EN) = HI(EN,EN) + TI
-      WI(EN) = HI(EN,EN)
-      EN = ENM1
-      GO TO 220
-C     ********** ALL ROOTS FOUND.  BACKSUBSTITUTE TO FIND
-C                VECTORS OF UPPER TRIANGULAR FORM **********
-  680 NORM = 0.0_dp
-C
-      DO 720 I = 1, N
-C
-         DO 720 J = I, N
-            NORM = NORM + ABS(HR(I,J)) + ABS(HI(I,J))
-  720 CONTINUE
-C
-      HR(1,1) = NORM
-      IF (N == 1 .OR. NORM == 0.0_dp) GO TO 1001
-C     ********** FOR EN=N STEP -1 UNTIL 2 DO -- **********
-      DO 800 NN = 2, N
-         EN = N + 2 - NN
-         XR = WR(EN)
-         XI = WI(EN)
-         ENM1 = EN - 1
-C     ********** FOR I=EN-1 STEP -1 UNTIL 1 DO -- **********
-         DO 780 II = 1, ENM1
-            I = EN - II
-            ZZR = HR(I,EN)
-            ZZI = HI(I,EN)
-            IF (I == ENM1) GO TO 760
-            IP1 = I + 1
-C
-            DO 740 J = IP1, ENM1
-               ZZR = ZZR + HR(I,J) * HR(J,EN) - HI(I,J) * HI(J,EN)
-               ZZI = ZZI + HR(I,J) * HI(J,EN) + HI(I,J) * HR(J,EN)
-  740       CONTINUE
-C
-  760       YR = XR - WR(I)
-            YI = XI - WI(I)
-            IF (YR == 0.0_dp .AND. YI == 0.0_dp) YR = MACHEP * NORM
-            Z3 = cmplx_dp(ZZR,ZZI) / cmplx_dp(YR,YI)
-            HR(I,EN) = dble(Z3)
-            HI(I,EN) = aimag(Z3)
-  780    CONTINUE
-C
-  800 CONTINUE
-C     ********** END BACKSUBSTITUTION **********
-      ENM1 = N - 1
-C     ********** VECTORS OF ISOLATED ROOTS **********
-      DO 840 I = 1, ENM1
-         IF (I >= LOW .AND. I <= IGH) GO TO 840
-         IP1 = I + 1
-C
-         DO 820 J = IP1, N
-            ZR(I,J) = HR(I,J)
-            ZI(I,J) = HI(I,J)
-  820    CONTINUE
-C
-  840 CONTINUE
-C     ********** MULTIPLY BY TRANSFORMATION MATRIX TO GIVE
-C                VECTORS OF ORIGINAL FULL MATRIX.
-C                FOR J=N STEP -1 UNTIL LOW+1 DO -- **********
-      DO 880 JJ = LOW, ENM1
-         J = N + LOW - JJ
-         M = MIN0(J-1,IGH)
-C
-         DO 880 I = LOW, IGH
-            ZZR = ZR(I,J)
-            ZZI = ZI(I,J)
-C
-            DO 860 K = LOW, M
-               ZZR = ZZR + ZR(I,K) * HR(K,J) - ZI(I,K) * HI(K,J)
-               ZZI = ZZI + ZR(I,K) * HI(K,J) + ZI(I,K) * HR(K,J)
-  860       CONTINUE
-C
-            ZR(I,J) = ZZR
-            ZI(I,J) = ZZI
-  880 CONTINUE
-C
-      GO TO 1001
-C     ********** SET ERROR -- NO CONVERGENCE TO AN
-C                EIGENVALUE AFTER 30 ITERATIONS **********
- 1000 IERR = EN
- 1001 RETURN
-      END subroutine
+!     subroutine comlr2(nm,n,low,igh,int,hr,hi,wr,wi,zr,zi,ierr)
+!!     ------------------------------------------------------------------
+!     this subroutine finds  the  eigenvalues and  eigenvectors  of  a
+!     complex upper hessenberg  matrix by the modified  lr method. the
+!     eigenvectors  of a complex  general matrix  can also be found if
+!     comhes has been used to reduce this general matrix to hessenberg
+!     form.
+!
+!     on input--->
+!        nm      must  be set to the row dimension  of two-dimensional
+!                array  parameters as  declared in the calling program
+!                dimension statement
+!        n       is the order of the matrix
+!        low,igh are integers determined by the  balancing  subroutine
+!                cbal.  if  cbal  has not been used,  set low=1, igh=n
+!        int     contains information on the rows and  columns  inter-
+!                changed in the reduction by comhes,if performed. only
+!                elements low through igh are used.if the eigenvectors
+!                of the hessenberg matrix are desired,set int(j)=j for
+!                these elements
+!        hr,hi   contain the real and imaginary parts, respectively,of
+!                the complex upper hessenberg matrix. their lower tri-
+!                angles  below the subdiagonal contain the multipliers
+!                which   were  used  in  the  reduction by  comhes, if
+!                performed.  if  the  eigenvectors  of  the hessenberg
+!                matrix are desired,these elements must be set to zero
+!
+!      on output--->
+!                the   upper hessenberg portions of hr and hi have been
+!                destroyed, but  the location hr(1,1) contains the norm
+!                of the triangularized matrix,
+!        wr,wi   contain the real and imaginary parts, respectively, of
+!                the   eigenvalues.  if  an  error  exit  is  made, the
+!                eigenvalues should be correct for indices ierr+1,...,n
+!        zr,zi   contain the real and imaginary parts, respectively, of
+!                the eigenvectors.the eigenvectors are unnormalized. if
+!                an error exit is  made, none of the  eigenvectors  has
+!                been found
+!        ierr    is set to  zero for normal return,
+!          j     if the j-th  eigenvalue has not been  determined after
+!                30 iterations.
+!
+!     arithmetic  is  real  except  for the  replacement  of  the algol
+!     procedure cdiv by  complex division and  use of  the  subroutines
+!     csqrt and cmplx in computing complex square roots.
+!     ------------------------------------------------------------------
+!
+! ..  scalar arguments  ..
+!
+!     integer nm,n,low,igh,ierr
+!
+! ..  array arguments  ..
+!
+!     integer int(igh)
+!     real(dp) hr(nm,n),hi(nm,n),wr(n),wi(n),zr(nm,n),zi(nm,n)
+!
+! ..  local scalars  ..
+!
+!     integer    i,j,k,l,m,en,ii,jj,ll,mm,nn,im1,ip1,its,mp1,enm1,iend
+!     real(dp)   si,sr,ti,tr,xi,xr,yi,yr,zzi,zzr,norm,machep
+!     complex(dp) z3
+!     ------------------------------------------------------------------
+!
+!     ********** machep is a machine dependent parameter specifying
+!                the relative precision of floating point arithmetic.
+!
+!     machep = 2.0_dp**(-47)
+!
+!     ierr = 0
+!     ********** initialize eigenvector matrix **********
+!     do i = 1, n
+!
+!       do j = 1, n
+!               zr(i,j) = 0.0_dp
+!               zi(i,j) = 0.0_dp
+!               if (i == j) zr(i,j) = 1.0_dp
+!       end do
+!     end do
+!     ********** form the matrix of accumulated transformations
+!                from the information left by comhes **********
+!     iend = igh - low - 1
+!     if (iend <= 0) go to 180
+!     ********** for i=igh-1 step -1 until low+1 do -- **********
+!     do ii = 1, iend
+!          i = igh - ii
+!          ip1 = i + 1
+!
+!       do k = ip1, igh
+!               zr(k,i) = hr(k,i-1)
+!               zi(k,i) = hi(k,i-1)
+!       end do
+!
+!          j = int(i)
+!          if (i == j) go to 160
+!
+!       do k = i, igh
+!               zr(i,k) = zr(j,k)
+!               zi(i,k) = zi(j,k)
+!               zr(j,k) = 0.0_dp
+!               zi(j,k) = 0.0_dp
+!       end do
+!
+!          zr(j,i) = 1.0_dp
+! 160 continue
+!     end do
+!     ********** store roots isolated by cbal **********
+! 180 do i = 1, n
+!          if (i >= low .and. i <= igh) go to 200
+!          wr(i) = hr(i,i)
+!          wi(i) = hi(i,i)
+! 200 continue
+!     end do
+!
+!     en = igh
+!     tr = 0.0_dp
+!     ti = 0.0_dp
+!     ********** search for next eigenvalue **********
+! 220 if (en < low) go to 680
+!     its = 0
+!     enm1 = en - 1
+!     ********** look for single small sub-diagonal element
+!                for l=en step -1 until low do -- **********
+! 240 do ll = low, en
+!          l = en + low - ll
+!          if (l == low) go to 300
+!          if (abs(hr(l,l-1)) + abs(hi(l,l-1)) <=
+!    x        machep * (abs(hr(l-1,l-1)) + abs(hi(l-1,l-1))
+!    x               + abs(hr(l,l)) + abs(hi(l,l)))) go to 300
+!     end do
+!     ********** form shift **********
+! 300 if (l == en) go to 660
+!     if (its == 30) go to 1000
+!     if (its == 10 .or. its == 20) go to 320
+!     sr = hr(en,en)
+!     si = hi(en,en)
+!     xr = hr(enm1,en) * hr(en,enm1) - hi(enm1,en) * hi(en,enm1)
+!     xi = hr(enm1,en) * hi(en,enm1) + hi(enm1,en) * hr(en,enm1)
+!     if (xr == 0.0_dp .and. xi == 0.0_dp) go to 340
+!     yr = (hr(enm1,enm1) - sr) / 2.0_dp
+!     yi = (hi(enm1,enm1) - si) / 2.0_dp
+!     z3 = sqrt(cmplx_dp(yr**2-yi**2+xr,2.0_dp*yr*yi+xi))
+!     zzr = dble(z3)
+!     zzi = aimag(z3)
+!     if (yr * zzr + yi * zzi >= 0.0_dp) go to 310
+!     zzr = -zzr
+!     zzi = -zzi
+! 310 z3 = cmplx_dp(xr,xi) / cmplx_dp(yr+zzr,yi+zzi)
+!     sr = sr - dble(z3)
+!     si = si - aimag(z3)
+!     go to 340
+!     ********** form exceptional shift **********
+! 320 sr = abs(hr(en,enm1)) + abs(hr(enm1,en-2))
+!     si = abs(hi(en,enm1)) + abs(hi(enm1,en-2))
+!
+! 340 do i = low, en
+!          hr(i,i) = hr(i,i) - sr
+!          hi(i,i) = hi(i,i) - si
+!     end do
+!
+!     tr = tr + sr
+!     ti = ti + si
+!     its = its + 1
+!     ********** look for two consecutive small
+!                sub-diagonal elements **********
+!     xr = abs(hr(enm1,enm1)) + abs(hi(enm1,enm1))
+!     yr = abs(hr(en,enm1)) + abs(hi(en,enm1))
+!     zzr = abs(hr(en,en)) + abs(hi(en,en))
+!     ********** for m=en-1 step -1 until l do -- **********
+!     do mm = l, enm1
+!          m = enm1 + l - mm
+!          if (m == l) go to 420
+!          yi = yr
+!          yr = abs(hr(m,m-1)) + abs(hi(m,m-1))
+!          xi = zzr
+!          zzr = xr
+!          xr = abs(hr(m-1,m-1)) + abs(hi(m-1,m-1))
+!          if (yr <= machep * zzr / yi * (zzr + xr + xi)) go to 420
+!     end do
+!     ********** triangular decomposition h=l*r **********
+! 420 mp1 = m + 1
+!
+!     do i = mp1, en
+!          im1 = i - 1
+!          xr = hr(im1,im1)
+!          xi = hi(im1,im1)
+!          yr = hr(i,im1)
+!          yi = hi(i,im1)
+!          if (abs(xr) + abs(xi) >= abs(yr) + abs(yi)) go to 460
+!     ********** interchange rows of hr and hi **********
+!       do j = im1, n
+!               zzr = hr(im1,j)
+!               hr(im1,j) = hr(i,j)
+!               hr(i,j) = zzr
+!               zzi = hi(im1,j)
+!               hi(im1,j) = hi(i,j)
+!               hi(i,j) = zzi
+!       end do
+!
+!          z3 = cmplx_dp(xr,xi) / cmplx_dp(yr,yi)
+!          wr(i) = 1.0_dp
+!          go to 480
+! 460      z3 = cmplx_dp(yr,yi) / cmplx_dp(xr,xi)
+!          wr(i) = -1.0_dp
+! 480      zzr = dble(z3)
+!          zzi = aimag(z3)
+!          hr(i,im1) = zzr
+!          hi(i,im1) = zzi
+!
+!       do j = i, n
+!               hr(i,j) = hr(i,j) - zzr * hr(im1,j) + zzi * hi(im1,j)
+!               hi(i,j) = hi(i,j) - zzr * hi(im1,j) - zzi * hr(im1,j)
+!       end do
+!
+!     end do
+!     ********** composition r*l=h **********
+!     do j = mp1, en
+!          xr = hr(j,j-1)
+!          xi = hi(j,j-1)
+!          hr(j,j-1) = 0.0_dp
+!          hi(j,j-1) = 0.0_dp
+!     ********** interchange columns of hr, hi, zr, and zi,
+!                if necessary **********
+!       if (wr(j) <= 0.0_dp) go to 580
+!
+!       do i = 1, j
+!               zzr = hr(i,j-1)
+!               hr(i,j-1) = hr(i,j)
+!               hr(i,j) = zzr
+!               zzi = hi(i,j-1)
+!               hi(i,j-1) = hi(i,j)
+!               hi(i,j) = zzi
+!       end do
+!
+!       do i = low, igh
+!               zzr = zr(i,j-1)
+!               zr(i,j-1) = zr(i,j)
+!               zr(i,j) = zzr
+!               zzi = zi(i,j-1)
+!               zi(i,j-1) = zi(i,j)
+!               zi(i,j) = zzi
+!       end do
+!
+! 580   do i = 1, j
+!               hr(i,j-1) = hr(i,j-1) + xr * hr(i,j) - xi * hi(i,j)
+!               hi(i,j-1) = hi(i,j-1) + xr * hi(i,j) + xi * hr(i,j)
+!       end do
+!     ********** accumulate transformations **********
+!       do i = low, igh
+!               zr(i,j-1) = zr(i,j-1) + xr * zr(i,j) - xi * zi(i,j)
+!               zi(i,j-1) = zi(i,j-1) + xr * zi(i,j) + xi * zr(i,j)
+!       end do
+!
+!     end do
+!
+!     go to 240
+!     ********** a root found **********
+! 660 hr(en,en) = hr(en,en) + tr
+!     wr(en) = hr(en,en)
+!     hi(en,en) = hi(en,en) + ti
+!     wi(en) = hi(en,en)
+!     en = enm1
+!     go to 220
+!     ********** all roots found.  backsubstitute to find
+!                vectors of upper triangular form **********
+! 680 norm = 0.0_dp
+!
+!     do i = 1, n
+!
+!       do j = i, n
+!               norm = norm + abs(hr(i,j)) + abs(hi(i,j))
+!       end do
+!     end do
+!
+!     hr(1,1) = norm
+!     if (n == 1 .or. norm == 0.0_dp) go to 1001
+!     ********** for en=n step -1 until 2 do -- **********
+!     do nn = 2, n
+!          en = n + 2 - nn
+!          xr = wr(en)
+!          xi = wi(en)
+!          enm1 = en - 1
+!     ********** for i=en-1 step -1 until 1 do -- **********
+!       do ii = 1, enm1
+!               i = en - ii
+!               zzr = hr(i,en)
+!               zzi = hi(i,en)
+!               if (i == enm1) go to 760
+!               ip1 = i + 1
+!
+!         do j = ip1, enm1
+!                    zzr = zzr + hr(i,j) * hr(j,en) - hi(i,j) * hi(j,en)
+!                    zzi = zzi + hr(i,j) * hi(j,en) + hi(i,j) * hr(j,en)
+!         end do
+!
+! 760           yr = xr - wr(i)
+!               yi = xi - wi(i)
+!               if (yr == 0.0_dp .and. yi == 0.0_dp) yr = machep * norm
+!               z3 = cmplx_dp(zzr,zzi) / cmplx_dp(yr,yi)
+!               hr(i,en) = dble(z3)
+!               hi(i,en) = aimag(z3)
+!       end do
+!
+!     end do
+!     ********** end backsubstitution **********
+!     enm1 = n - 1
+!     ********** vectors of isolated roots **********
+!     do i = 1, enm1
+!          if (i >= low .and. i <= igh) go to 840
+!          ip1 = i + 1
+!
+!       do j = ip1, n
+!               zr(i,j) = hr(i,j)
+!               zi(i,j) = hi(i,j)
+!       end do
+!
+! 840 continue
+!     end do
+!     ********** multiply by transformation matrix to give
+!                vectors of original full matrix.
+!                for j=n step -1 until low+1 do -- **********
+!     do jj = low, enm1
+!          j = n + low - jj
+!          m = min0(j-1,igh)
+!
+!       do i = low, igh
+!               zzr = zr(i,j)
+!               zzi = zi(i,j)
+!
+!         do k = low, m
+!                    zzr = zzr + zr(i,k) * hr(k,j) - zi(i,k) * hi(k,j)
+!                    zzi = zzi + zr(i,k) * hi(k,j) + zi(i,k) * hr(k,j)
+!         end do
+!
+!               zr(i,j) = zzr
+!               zi(i,j) = zzi
+!       end do
+!     end do
+!
+!     go to 1001
+!     ********** set error -- no convergence to an
+!                eigenvalue after 30 iterations **********
+!1000 ierr = en
+!1001 return
+!     end subroutine
 C=======================================================================
 !=======================================================================
 C=======================================================================
