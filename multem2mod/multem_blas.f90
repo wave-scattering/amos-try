@@ -3,9 +3,129 @@ module multem_blas
     use libmultem2b, only: dp, cmplx_dp
     implicit none
     private
-    public comlr2
+    public comlr2, comhes
 contains
     !=======================================================================
+    !=======================================================================
+    !=======================================================================
+    !=======================================================================
+    subroutine comhes(nm, n, low, igh, ar, ai, int)
+
+        !     ------------------------------------------------------------------
+        !     given a  complex  general  matrix, this  subroutine  reduces  a
+        !     submatrix situated in rows and columns low through igh to upper
+        !     hessenberg form by stabilized elementary similarity transforms.
+        !
+        !     on input--->
+        !        nm       must be set to the row dimension of two-dimensional
+        !                 array parameters as declared in the calling program
+        !                 dimension statement
+        !        n        is the order of the matrix
+        !        low,igh  are integers determined by the balancing subroutine
+        !                 cbal. if  cbal  has not been used, set low=1, igh=n
+        !        ar,ai    contain the real and imaginary parts, respectively,
+        !                 of the complex input matrix.
+        !
+        !     on output--->
+        !        ar,ai    contain the real and imaginary parts, respectively,
+        !                 of the hessenberg matrix.the multipliers which were
+        !                 used in the  reduction  are stored in the remaining
+        !                 triangles under the hessenberg matrix,
+        !        int      contains information on the rows and columns inter-
+        !                 changed in the reduction. only elements low through
+        !                 igh are used.
+        !
+        !     arithmetic is real except for the replacement of the algol
+        !     procedure cdiv by complex division using subroutine cmplx.
+        !     ------------------------------------------------------------------
+        !
+        ! ..  scalar arguments  ..
+        !
+        integer nm, n, low, igh
+        !
+        ! ..  array arguments  ..
+        !
+        integer int(igh)
+        real(dp)ar(nm, n), ai(nm, n)
+        !
+        ! ..  local scalars  ..
+        !
+        integer    i, j, m, la, kp1, mm1, mp1
+        real(dp)   xr, xi, yr, yi
+        complex(dp) z3
+        !     ------------------------------------------------------------------
+        !
+        la = igh - 1
+        kp1 = low + 1
+        if (la < kp1) go to 200
+        !
+        do m = kp1, la
+            mm1 = m - 1
+            xr = 0.0_dp
+            xi = 0.0_dp
+            i = m
+            !
+            do j = m, igh
+                if (abs(ar(j, mm1)) + abs(ai(j, mm1))&
+                        <= abs(xr) + abs(xi)) go to 100
+                xr = ar(j, mm1)
+                xi = ai(j, mm1)
+                i = j
+                100    continue
+            end do
+            !
+            int(m) = i
+            if (i == m) go to 130
+            !     ********** interchange rows and columns of ar and ai **********
+            do j = mm1, n
+                yr = ar(i, j)
+                ar(i, j) = ar(m, j)
+                ar(m, j) = yr
+                yi = ai(i, j)
+                ai(i, j) = ai(m, j)
+                ai(m, j) = yi
+            end do
+            !
+            do j = 1, igh
+                yr = ar(j, i)
+                ar(j, i) = ar(j, m)
+                ar(j, m) = yr
+                yi = ai(j, i)
+                ai(j, i) = ai(j, m)
+                ai(j, m) = yi
+            end do
+            !     ********** end interchange **********
+            130      if (xr == 0.0_dp .and. xi == 0.0_dp) go to 180
+            mp1 = m + 1
+            !
+            do i = mp1, igh
+                yr = ar(i, mm1)
+                yi = ai(i, mm1)
+                if (yr == 0.0_dp .and. yi == 0.0_dp) go to 160
+                z3 = cmplx_dp(yr, yi) / cmplx_dp(xr, xi)
+                yr = dble(z3)
+                yi = aimag (z3)
+                ar(i, mm1) = yr
+                ai(i, mm1) = yi
+                !
+                do j = m, n
+                    ar(i, j) = ar(i, j) - yr * ar(m, j) + yi * ai(m, j)
+                    ai(i, j) = ai(i, j) - yr * ai(m, j) - yi * ar(m, j)
+                end do
+                !
+                do j = 1, igh
+                    ar(j, m) = ar(j, m) + yr * ar(j, i) - yi * ai(j, i)
+                    ai(j, m) = ai(j, m) + yr * ai(j, i) + yi * ar(j, i)
+                end do
+                !
+                160    continue
+            end do
+            !
+            180 continue
+        end do
+        !
+        200 return
+    end subroutine
     !=======================================================================
     subroutine comlr2(nm, n, low, igh, int, hr, hi, wr, wi, zr, zi, ierr)
 
