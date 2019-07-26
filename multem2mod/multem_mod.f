@@ -30,7 +30,6 @@ C=======================================================================
       private
       public cerf, ceven, codd, band, scat, pcslab,
      & reduce, lat2d
-      real(dp), parameter, private :: pi=4.0_dp*ATAN(1.0_dp)
 
       contains
 C=======================================================================
@@ -736,7 +735,7 @@ C=======================================================================
       real(dp)   akzrep(igk2d),akzimp(igk2d),akzren(igk2d),akzimn(igk2d)
       complex(dp) qh1(igkd,igkd),qh2(igkd,igkd),akz(igk2d)
       complex(dp) comvec(igk2d,igk2d)
-      complex(dp) comvec2(igk2d,igk2d)
+!     complex(dp) comvec2(igk2d,igk2d)
 !     ------------------------------------------------------------------
       igkmax=2*igmax
       igk2m=2*igkmax
@@ -787,7 +786,7 @@ C=======================================================================
           a(igk1,igk2) = qi(igk1,igk2)
           a(igk1,igkmax+igk2) = qii(igk1,igk2)
           a(igkmax+igk1,igk2) = qh1(igk1,igk2)
-          ar(igkmax+igk1,igkmax+igk2)=qh2(igk1,igk2)
+          a(igkmax+igk1,igkmax+igk2)=qh2(igk1,igk2)
         end do
       end do
 !     if (.true.) then
@@ -964,9 +963,6 @@ C     ------------------------------------------------------------------
 C
 C ..  PARAMETER STATEMENTS ..
 C
-      real(dp) pi
-      parameter (pi=4.0_dp*ATAN(1.0_dp))
-
       INTEGER   LMAXD,IGD,IGKD,NELMD,NCOMPD,NPLAND
       PARAMETER (LMAXD=14,IGD=21,IGKD=2*IGD,
      & NELMD=165152,NCOMPD=8,NPLAND=4)
@@ -1023,8 +1019,7 @@ C
      &                   STOP 'ILLEGAL INPUT VALUE OF NCOMP'
       IF(NUNIT<=0)           STOP 'ILLEGAL INPUT VALUE OF NUNIT'
       READ(10,202) ALPHA,ALPHAP,FAB,RMAX
-      ! for some reason fab*pi/180 lead`s to a CLion warning, so replace pi with the value
-      FAB = FAB*3.141592653589793238512808959406_dp/180.0_dp
+      FAB = FAB*pi/180.0_dp
       READ(10,203) NP,ZINF,ZSUP
       IF(NP<=1)                  STOP 'ILLEGAL INPUT VALUE OF  NP '
               IF(KTYPE>=2) THEN
