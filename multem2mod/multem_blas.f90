@@ -484,7 +484,7 @@ contains
         !     ********** machep is a machine dependent parameter specifying
         !                the relative precision of floating point arithmetic.
         !
-        machep = 2.0_dp**(-47)
+        machep = 2.0_dp**(-47)  !TODO: convergence constant in comlr2()
         !
         ierr = 0
         !     ********** initialize eigenvector matrix **********
