@@ -26,7 +26,7 @@ add_library(libmultem2b libmultem2b.f90)
 target_link_libraries(libmultem2b amos dense_solve multem_blas errfun)
 
 
-ADD_EXECUTABLE(${PROJECTNAME} "multem_mod.f"
+ADD_EXECUTABLE(${PROJECTNAME} "multem_mod.f90"
         )
 target_link_libraries(${PROJECTNAME} ${BLAS_LIBRARIES}
         dense_solve libmultem2b multem_blas
