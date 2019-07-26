@@ -1,22 +1,395 @@
 module libmultem2b
     use dense_solve
+    use multem_blas
     use amos
     use errfun, only: erf_pop
 
     implicit none
     private
     integer, parameter, public:: dp=kind(0.0D0)
-    complex(dp), parameter, public :: czero = (0.0_dp, 0.0_dp)
     complex(dp), parameter, public :: ci    = (0.0_dp, 1.0_dp)
+    complex(dp), parameter, public :: czero = (0.0_dp, 0.0_dp)
     complex(dp), parameter, public :: cone  = (1.0_dp, 0.0_dp)
     complex(dp), parameter, public :: ctwo  = (2.0_dp, 0.0_dp)
     real(dp), parameter, public :: pi=4.0_dp*ATAN(1.0_dp)
     public bessel, tmtrx, sphrm4, ceven, codd, scat, hoslab, blm, elmgen, &
-           pair, cmplx_dp, cerf, lat2d, reduce, dlmkg, plw, setup, xmat
+           pair, cmplx_dp, cerf, lat2d, reduce, dlmkg, plw, setup, xmat, &
+           pcslab, band
 contains
     !=======================================================================
     !=======================================================================
+    subroutine band(igmax, zval, emach, ak, g, al, kapl, kapr, &
+            qi, qii, qiii, qiv)
+        !!     ------------------------------------------------------------------
+        !     this subroutine calculates the complex photonic band structure of
+        !     an infinite crystal. it  provides the  propagating and evanescent
+        !     eigenmodes of the em field in the given crystal, corresponding to
+        !     "ak" and a given frequency.
+        !     ------------------------------------------------------------------
+        !
+        ! ..  parameter statements ..
+        !
+        integer   igd, igkd, igk2d
+        parameter(igd = 21, igkd = 2 * igd, igk2d = 2 * igkd)
+
+        ! ..  scalar arguments  ..
+
+        integer    igmax
+        real(dp)   zval, emach
+        complex(dp) kapl, kapr
+
+        ! ..  array arguments ..
+
+        real(dp)   ak(2), g(2, igd), al(3)
+        complex(dp) qi(igkd, igkd), qii(igkd, igkd)
+        complex(dp) qiii(igkd, igkd), qiv(igkd, igkd)
+
+        ! ..  scalar variables ..
+
+        integer    ii, i, igk1, igk2, igkmax, j
+        integer    kd, lib1, lib2, lu, lp, ln, ifail, igk3, igk2m
+        real(dp)   aka, bkzre, bkzim
+        complex(dp) eaka
+        !
+        ! ..  array variables ..
+
+        integer    int(igkd)
+        real(dp)   ar(igk2d, igk2d), ai(igk2d, igk2d)
+        complex(dp) :: a(igk2d, igk2d)
+        real(dp)   rr(igk2d), ri(igk2d), vr(igk2d, igk2d), vi(igk2d, igk2d)
+        complex(dp) :: r2(igk2d)
+        real(dp)   akzap(igk2d), akzip(igk2d)
+        real(dp)   akzrep(igk2d), akzimp(igk2d), akzren(igk2d), akzimn(igk2d)
+        complex(dp) qh1(igkd, igkd), qh2(igkd, igkd), akz(igk2d)
+        complex(dp) comvec(igk2d, igk2d)
+        !     complex(dp) comvec2(igk2d,igk2d)
+        !     ------------------------------------------------------------------
+        igkmax = 2 * igmax
+        igk2m = 2 * igkmax
+        aka = ak(1) * al(1) + ak(2) * al(2)
+        eaka = exp(ci * aka)
+        do igk1 = 1, igkmax
+            do igk2 = 1, igkmax
+                qh1(igk1, igk2) = czero
+                qh2(igk1, igk2) = czero
+            end do
+        end do
+        do igk1 = 1, igkmax
+            qh2(igk1, igk1) = cone
+            do igk2 = 1, igkmax
+                do igk3 = 1, igkmax
+                    qh1(igk1, igk2) = qh1(igk1, igk2) - qiii(igk1, igk3) * qi (igk3, igk2)
+                    qh2(igk1, igk2) = qh2(igk1, igk2) - qiii(igk1, igk3) * qii(igk3, igk2)
+                end do
+            end do
+        end do
+
+        !     call zgetrf_wrap(qiv, int)
+        !     do igk2=1,igkmax
+        !     call zgetrs_wrap(qiv, qh1(:,igk2), int)
+        !     call zgetrs_wrap(qiv, qh2(:,igk2), int)
+        !     end do
+
+        call zge(qiv, int, igkmax, igkd, emach)
+        do igk2 = 1, igkmax
+            call zsu(qiv, int, qh1(1, igk2), igkmax, igkd, emach)
+            call zsu(qiv, int, qh2(1, igk2), igkmax, igkd, emach)
+        end do
+
+        do igk1 = 1, igkmax
+            do igk2 = 1, igkmax
+                ar(igk1, igk2) = dble(qi(igk1, igk2))
+                ai(igk1, igk2) = aimag(qi(igk1, igk2))
+                ar(igk1, igkmax + igk2) = dble(qii(igk1, igk2))
+                ai(igk1, igkmax + igk2) = aimag(qii(igk1, igk2))
+                ar(igkmax + igk1, igk2) = dble(qh1(igk1, igk2))
+                ai(igkmax + igk1, igk2) = aimag(qh1(igk1, igk2))
+                ar(igkmax + igk1, igkmax + igk2) = dble(qh2(igk1, igk2))
+                ai(igkmax + igk1, igkmax + igk2) = aimag(qh2(igk1, igk2))
+            end do
+        end do
+        do igk1 = 1, igkmax
+            do igk2 = 1, igkmax
+                a(igk1, igk2) = qi(igk1, igk2)
+                a(igk1, igkmax + igk2) = qii(igk1, igk2)
+                a(igkmax + igk1, igk2) = qh1(igk1, igk2)
+                a(igkmax + igk1, igkmax + igk2) = qh2(igk1, igk2)
+            end do
+        end do
+        !     if (.true.) then
+        if (.false.) then
+            call zgeevx_wrap (a, r2, comvec)
+            do ii = 1, igk2m
+                !*****  the if-structure  which follows  can be  omitted  if the accuracy
+                !*****  'machep' of the subroutine comlr2 is chosen greater than 2**(-47)
+                !         if((rr(ii)==0.0_dp).and.(ri(ii)==0.0_dp)) then
+                !           rr(ii)=1.d-20
+                !           ri(ii)=1.d-20
+                !         endif
+                !         ! normalized k_z
+                akz(ii) = (-ci / pi) * log(r2(ii) / eaka)
+            end do
+        else
+            call cnaa(igk2d, igk2m, ar, ai, rr, ri, vr, vi, ifail)
+
+            if(ifail/=0) then
+                write(6, 102) ifail
+                stop
+            endif
+            do ii = 1, igk2m
+                !*****  the if-structure  which follows  can be  omitted  if the accuracy
+                !*****  'machep' of the subroutine comlr2 is chosen greater than 2**(-47)
+                if((rr(ii)==0.0_dp).and.(ri(ii)==0.0_dp)) then
+                    rr(ii) = 1.d-20
+                    ri(ii) = 1.d-20
+                endif
+                !         ! normalized k_z
+                akz(ii) = (-ci / pi) * log(cmplx(rr(ii), ri(ii), kind = dp) / eaka)
+            end do
+        endif
+        do lib2 = 1, igk2m
+            do lib1 = 1, igk2m
+                comvec(lib1, lib2) = vr(lib1, lib2) + ci * vi(lib1, lib2)
+            end do
+        end do
+        lu = 1
+        lp = 1
+        ln = 1
+        do kd = 1, igk2m
+            !*****warning!! the appropriate limits for aimag(akz(kd))
+            !*****depend strongly on igmax.
+            if(aimag(akz(kd))>0.0_dp) then
+                akzrep(lp) = dble(akz(kd))
+                akzimp(lp) = aimag(akz(kd))
+                lp = lp + 1
+            else
+                akzren(ln) = dble(akz(kd))
+                akzimn(ln) = aimag(akz(kd))
+                ln = ln + 1
+            endif
+            if(abs(aimag(akz(kd)))>1.0d-2) cycle
+            akzap(lu) = dble(akz(kd))
+            akzip(lu) = aimag(akz(kd))
+            lu = lu + 1
+        end do
+
+        if (lu<1.1d0) then
+            do j = 2, lp - 1
+                bkzim = akzimp(j)
+                bkzre = akzrep(j)
+                do i = j - 1, 1, -1
+                    if(akzimp(i)<=bkzim) go to 15
+                    akzimp(i + 1) = akzimp(i)
+                    akzrep(i + 1) = akzrep(i)
+                end do
+                i = 0
+                15     akzimp(i + 1) = bkzim
+                akzrep(i + 1) = bkzre
+            end do
+            do j = 2, ln - 1
+                bkzim = akzimn(j)
+                bkzre = akzren(j)
+                do i = j - 1, 1, -1
+                    if(akzimn(i)<=bkzim) go to 18
+                    akzimn(i + 1) = akzimn(i)
+                    akzren(i + 1) = akzren(i)
+                end do
+                i = 0
+                18     akzimn(i + 1) = bkzim
+                akzren(i + 1) = bkzre
+            end do
+            write(6, 101)  zval, akzrep(1), akzren(ln - 1)
+            write(6, 103)  akzimp(1), akzimn(ln - 1)
+            write(9, 101)  zval, akzrep(1), akzren(ln - 1)
+            write(9, 103)  akzimp(1), akzimn(ln - 1)
+        else
+            write(6, 101)  zval, (akzap(i), i = 1, lu - 1)
+            write(9, 101)  zval, (akzap(i), i = 1, lu - 1)
+        end if
+        return
+        101 format(e10.4, 3x, 10(e10.4, 1x))
+        102 format(//13x, 'error in cnaa   ifail = ', i2)
+        103 format(13x, 10(e10.4, 1x))
+    end subroutine
     !=======================================================================
+    subroutine pcslab(lmax, igmax, rap, epsmed, epssph, mumed, musph, kappa, &
+            ak, dl, dr, g, elm, a0, emach, qi, qii, qiii, qiv, ar1, ar2)
+
+        !     ------------------------------------------------------------------
+        !     this subroutine computes the transmission/reflection matrices for
+        !     a plane of spheres embedded in a homogeneous host medium.
+        !     ------------------------------------------------------------------
+        !
+        ! ..  parameter statements ..
+        !
+        integer   igd, nelmd
+        parameter (igd = 21, nelmd = 165152)
+        !
+        ! ..  scalar arguments ..
+        !
+        integer    lmax, igmax
+        real(dp)     a0, emach
+        complex(dp) epsmed, epssph, mumed, musph, kappa, rap
+
+        !
+        ! ..  array arguments ..
+        !
+        real(dp)     ak(2), dl(3), dr(3), g(2, igd), elm(nelmd)
+        complex(dp) qi(:, :), qii(:, :), qiii(:, :)
+        complex(dp) qiv(:, :)
+        real(dp)     ar1(2), ar2(2)
+        !
+        ! ..  local scalars  ..
+        !
+
+        integer    lmtot, l, m, ii, igk1, igk2, lmax1, igkmax
+        integer    ig1, ig2, isign1, isign2, k1, k2
+        integer    lmxod, iev, iod
+        real(dp)     sign1, sign2, signus
+        complex(dp) cqi, cqii, cqiii, cqiv
+        !
+        ! ..  local arrays  ..
+        !
+        integer :: int1((lmax + 1)**2 - 1), int2((lmax + 1)**2 - 1)
+        complex(dp) ae(2, (lmax + 1)**2), ah(2, (lmax + 1)**2), gkk(3, igd)
+        complex(dp) gk(3), lame(2), lamh(2)
+        complex(dp) xeven(((lmax + 1) * (lmax + 2)) / 2, ((lmax + 1) * (lmax + 2)) / 2), &
+                xodd((lmax * (lmax + 1)) / 2, (lmax * (lmax + 1)) / 2)
+        complex(dp) :: te(lmax + 1), th(lmax + 1)
+        complex(dp) bmel1((lmax + 1)**2 - 1), bmel2((lmax + 1)**2 - 1)
+        complex(dp) xxmat1((lmax + 1)**2 - 1, (lmax + 1)**2 - 1), &
+                xxmat2((lmax + 1)**2 - 1, (lmax + 1)**2 - 1)
+        complex(dp) dlme(2, (lmax + 1)**2), dlmh(2, (lmax + 1)**2)
+        !     ------------------------------------------------------------------
+        igkmax = 2 * igmax
+        lmax1 = lmax + 1
+        lmtot = lmax1 * lmax1 - 1
+        lmxod = (lmax * lmax1) / 2
+        do ig1 = 1, igmax
+            gkk(1, ig1) = cmplx((ak(1) + g(1, ig1)), 0.0_dp, kind = dp)
+            gkk(2, ig1) = cmplx((ak(2) + g(2, ig1)), 0.0_dp, kind = dp)
+            gkk(3, ig1) = sqrt(kappa * kappa - gkk(1, ig1) * gkk(1, ig1) - &
+                    gkk(2, ig1) * gkk(2, ig1))
+        end do
+        call tmtrx(rap, epssph, epsmed, mumed, musph, te, th)
+        call xmat(xodd, xeven, lmax, kappa, ak, elm, emach, ar1, ar2)
+        call setup(lmax, xeven, xodd, te, th, xxmat1, xxmat2)
+        call zgetrf_wrap (xxmat1, int1)
+        call zgetrf_wrap (xxmat2, int2)
+        isign2 = 1
+        sign2 = 3.0_dp - 2.0_dp * isign2
+        igk2 = 0
+        do ig2 = 1, igmax
+            gk(1) = gkk(1, ig2)
+            gk(2) = gkk(2, ig2)
+            gk(3) = sign2 * gkk(3, ig2)
+            call plw(kappa, gk, lmax, ae, ah)
+            do k2 = 1, 2
+                igk2 = igk2 + 1
+                ii = 0
+                iev = lmxod
+                iod = 0
+                do l = 1, lmax
+                    do m = -l, l
+                        ii = ii + 1
+                        if(mod((l + m), 2)==0)  then
+                            iev = iev + 1
+                            bmel1(iev) = th(l + 1) * ah(k2, ii + 1)
+                            bmel2(iev) = te(l + 1) * ae(k2, ii + 1)
+                        else
+                            iod = iod + 1
+                            bmel1(iod) = te(l + 1) * ae(k2, ii + 1)
+                            bmel2(iod) = th(l + 1) * ah(k2, ii + 1)
+                        end if
+                    end do
+                end do
+
+                call zgetrs_wrap(xxmat1, bmel1, int1)
+                call zgetrs_wrap(xxmat2, bmel2, int2)
+                do isign1 = 1, 2
+                    sign1 = 3.0_dp - 2.0_dp * isign1
+                    igk1 = 0
+                    do ig1 = 1, igmax
+                        gk(1) = gkk(1, ig1)
+                        gk(2) = gkk(2, ig1)
+                        gk(3) = sign1 * gkk(3, ig1)
+                        call dlmkg(lmax, a0, gk, sign1, kappa, dlme, dlmh, emach)
+                        do k1 = 1, 2
+                            lame(k1) = czero;      lamh(k1) = czero
+                            ii = 0; iod = 0
+                            iev = lmxod
+                            do l = 1, lmax
+                                do m = -l, l
+                                    ii = ii + 1
+                                    if(mod((l + m), 2) == 0)  then
+                                        iev = iev + 1
+                                        lame(k1) = lame(k1) + dlme(k1, ii + 1) * bmel2(iev)
+                                        lamh(k1) = lamh(k1) + dlmh(k1, ii + 1) * bmel1(iev)
+                                    else
+                                        iod = iod + 1
+                                        lame(k1) = lame(k1) + dlme(k1, ii + 1) * bmel1(iod)
+                                        lamh(k1) = lamh(k1) + dlmh(k1, ii + 1) * bmel2(iod)
+                                    end if
+                                end do
+                            end do
+                        end do
+                        do k1 = 1, 2
+                            igk1 = igk1 + 1
+                            if(isign1==1) qi  (igk1, igk2) = lamh(k1) + lame(k1)
+                            if(isign1==2) qiii(igk1, igk2) = lamh(k1) + lame(k1)
+                        end do
+                    end do
+                end do
+            end do
+        end do
+
+        igk2 = 0
+        do ig2 = 1, igmax
+            do k2 = 1, 2
+                igk2 = igk2 + 1
+                igk1 = 0
+                do ig1 = 1, igmax
+                    do k1 = 1, 2
+                        igk1 = igk1 + 1
+                        signus = 1.0_dp
+                        if(k2/=k1) signus = -1.0_dp
+                        qii(igk1, igk2) = signus * qiii(igk1, igk2)
+                        qiv(igk1, igk2) = signus * qi  (igk1, igk2)
+                    end do
+                end do
+            end do
+        end do
+
+        do igk1 = 1, igkmax
+            qi (igk1, igk1) = cone + qi (igk1, igk1)
+            qiv(igk1, igk1) = cone + qiv(igk1, igk1)
+        end do
+
+        igk2 = 0
+        do ig2 = 1, igmax
+            do ig1 = 1, igmax
+                cqi = exp(ci * (gkk(1, ig1) * dr(1) + gkk(2, ig1) * dr(2) + gkk(3, ig1) * dr(3) + &
+                        gkk(1, ig2) * dl(1) + gkk(2, ig2) * dl(2) + gkk(3, ig2) * dl(3)))
+                cqii = exp(ci * ((gkk(1, ig1) - gkk(1, ig2)) * dr(1) + (gkk(2, ig1)&
+                        - gkk(2, ig2)) * dr(2) + (gkk(3, ig1) + gkk(3, ig2)) * dr(3)))
+                cqiii = exp(-ci * ((gkk(1, ig1) - gkk(1, ig2)) * dl(1) + (gkk(2, ig1)&
+                        - gkk(2, ig2)) * dl(2) - (gkk(3, ig1) + gkk(3, ig2)) * dl(3)))
+                cqiv = exp(-ci * (gkk(1, ig1) * dl(1) + gkk(2, ig1) * dl(2) - gkk(3, ig1) * dl(3) + &
+                        gkk(1, ig2) * dr(1) + gkk(2, ig2) * dr(2) - gkk(3, ig2) * dr(3)))
+                do k2 = 1, 2
+                    igk2 = (ig2 - 1) * 2 + k2
+                    do k1 = 1, 2
+                        igk1 = (ig1 - 1) * 2 + k1
+                        qi  (igk1, igk2) = cqi * qi  (igk1, igk2)
+                        qii (igk1, igk2) = cqii * qii (igk1, igk2)
+                        qiii(igk1, igk2) = cqiii * qiii(igk1, igk2)
+                        qiv (igk1, igk2) = cqiv * qiv (igk1, igk2)
+                    end do
+                end do
+            end do
+        end do
+        return
+    end subroutine
     !=======================================================================
     subroutine xmat(xodd, xeven, lmax, kappa, ak, elm, emach, ar1, ar2)
         !     ------------------------------------------------------------------
@@ -55,13 +428,7 @@ contains
         complex(dp) gkn(lmax + 1), agk(2 * lmax + 1), xpm(2 * lmax + 1), &
                 pref((lmax + 1)**2)
         complex(dp) dlm((lmax + 1) * (2 * lmax + 1))
-        !
-        ! ..  arrays in common  ..
-        !
-        !      common/x1/ar1,ar2
         !----------------------------------------------------------------------
-
-        !
         !     ak(1)  and  ak(2)  are the x  and y components of the
         !     momentum parallel to the surface, modulo a reciprocal
         !     lattice vector
@@ -908,7 +1275,7 @@ contains
         endif
         ig0 = ig0 + 1
         if(ig0>igmax) stop   'error from reduce:  insufficient nr. of&
-                reciprocal lattice vectors '
+                &reciprocal lattice vectors '
         goto 6
     end subroutine
     !=======================================================================
@@ -1045,9 +1412,9 @@ contains
         stop
         !
         100 format(/13x, 'new primitive vectors defined to have positive scalar&
-                product'/13x, 'a=(', 2e14.6, ')'/13x, 'b=(', 2e14.6, ')')
+                &product'/13x, 'a=(', 2e14.6, ')'/13x, 'b=(', 2e14.6, ')')
         101 format(/13x, 'w a r n i n g ! !'/'interchange primitive vectors in&
-                call lat2d'/)
+                &call lat2d'/)
         102 format(//33x, 'from lat2d: maximum number of neighbours=', i4, &
                 '  exceeded'//6x, 'lattice points found (non ordered)')
         103 format(i3, 3x, i5, '*(', 2e14.6, ') +', i5, '*(', 2e14.6, ')', 8x, e14.6)

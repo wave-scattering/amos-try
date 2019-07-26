@@ -1,10 +1,17 @@
 module multem_blas
     use dense_solve
-    use libmultem2b, only: dp, cmplx_dp, ci
     implicit none
     private
+    integer, parameter, private:: dp=kind(0.0D0)
+    complex(dp), parameter, private :: ci    = (0.0_dp, 1.0_dp)
     public comlr2, comhes, cbabk2, cnaa, zsu, zge
+
 contains
+    !=======================================================================
+    complex(dp) function cmplx_dp(re, im)
+        real(dp), intent(in) :: re, im
+        cmplx_dp = cmplx(re,im, kind=dp)
+    end function cmplx_dp
     !=======================================================================
     subroutine zge(a, int, n, nc, emach)
 
