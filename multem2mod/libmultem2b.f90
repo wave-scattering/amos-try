@@ -17,27 +17,65 @@ module libmultem2b
            pcslab, band, main_evaluate
 contains
     !=======================================================================
+    integer function  get_elm_size(lmax)
+        integer lmax
+        integer k, ii, ll, il2, l2, m2, i2, il3, l3, m3, i3, la1, lb1, la11, lb11, m1
+        integer l11, l1, l
+        !     ------------------------------------------------------------------
+        k = 1
+        ii = 0
+        do ii = 0, 1
+            ll = lmax + ii
+            do il2 = 1, ll
+                l2 = il2 - ii
+                m2 = -l2 + 1 - ii
+                do i2 = 1, il2
+                    do il3 = 1, ll
+                        l3 = il3 - ii
+                        m3 = -l3 + 1 - ii
+                        do i3 = 1, il3
+                            la1 = max0(iabs(l2 - l3), iabs(m2 - m3))
+                            lb1 = l2 + l3
+                            la11 = la1 + 1
+                            lb11 = lb1 + 1
+                            m1 = m2 - m3
+                            do l11 = la11, lb11, 2
+                                l1 = l11 - 1
+                                l = (l2 - l3 - l1) / 2 + m2
+                                k = k + 1
+                            end do
+                            m3 = m3 + 2
+                        end do
+                    end do
+                    m2 = m2 + 2
+                end do
+            end do
+        end do
+        get_elm_size = k-1
+        return
+    end function
+    !=======================================================================
     subroutine main_evaluate(ncompd, npland, lmax, i, ktype, kscan, ncomp, np,&
             nunit, icomp, kemb,  ipl, alpha, rmax, zinf, zsup, fab, alphap, theta,&
-            fi, fein, muembl, epsembl, muembr, epsembr, d2, d1, polar, &
+            fi, fein, d2, d1, polar, &
             it, nlayer, nplan, dl, dr, s, al, d, aq, eps2, eps3, mu1, mu2, mu3,&
             eps1, musph, epssph)
-        integer   lmaxd, igd, igkd, nelmd, ncompd, npland
-        parameter (lmaxd = 14, igd = 21, igkd = 2 * igd, &
-                nelmd = 165152)
+        integer   igd, igkd, nelmd, ncompd, npland
+        parameter (igd = 21, igkd = 2 * igd)
         integer      lmax, i, igkmax, igk1, igk2, igmax, ktype, kscan, ncomp, ig1
         integer      n, np, ig0, nunit, icomp, kemb, iu, ipl, ilayer
         real(dp)     alpha, emach, epsilon
         real(dp)     a0, ra0, rmax, akxy
         real(dp)     zval, zstep, zinf, zsup, fab, alphap, theta, fi, fein
-        complex(dp)   kappa, kappa0, akzin, muembl, epsembl
-        complex(dp)   muembr, epsembr, d2, kapout
+        complex(dp)   kappa, kappa0, akzin
+        complex(dp)   d2, kapout
         complex(dp)   kappal, kappar, kappasl, d1, kapin, kapl, kapr
         complex(dp)   mlast, elast, mfirst, efirst, rap
         character(2)  polar
         integer    nt1(igd), nt2(igd), it(ncompd)
         integer    nlayer(ncompd), nplan(ncompd)
-        real(dp)   elm(nelmd), ak(2), vecmod(igd), dl(3, ncompd, npland)
+        real(dp), allocatable ::   elm(:)
+        real(dp) ak(2), vecmod(igd), dl(3, ncompd, npland)
         real(dp)   dr(3, ncompd, npland), g(2, igd), b1(2), b2(2)
         real(dp)   s(ncompd, npland), al(3), d(ncompd), vec0(3), aq(2)
         complex(dp) qil  (igkd, igkd), qiil(igkd, igkd), qiiil(igkd, igkd)
@@ -51,7 +89,8 @@ contains
         data emach/1.d-8/, epsilon/0.d0/
         data eincid/igkd*(0.d0, 0.d0)/, vec0/3*0.d0/
         !     ------------------------------------------------------------------
-
+        nelmd = get_elm_size(lmax)
+        allocate(elm(1:nelmd))
         call elmgen(elm, nelmd, lmax)
         !
         !****** define the 2d direct and reciprocal-lattice vectors ******

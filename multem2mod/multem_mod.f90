@@ -210,7 +210,7 @@ program multem
     endif
     call main_evaluate(ncompd, npland, lmax, i, ktype, kscan, ncomp, np,&
             nunit, icomp, kemb,  ipl, alpha, rmax, zinf, zsup, fab, alphap, theta,&
-            fi, fein, muembl, epsembl, muembr, epsembr, d2, d1, polar, &
+            fi, fein, d2, d1, polar, &
             it, nlayer, nplan, dl, dr, s, al, d, aq, eps2, eps3, mu1, mu2, mu3,&
             eps1, musph, epssph)
     stop
