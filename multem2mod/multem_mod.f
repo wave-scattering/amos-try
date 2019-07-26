@@ -30,6 +30,8 @@ C=======================================================================
       private
       public cerf, ceven, codd, band, scat, pcslab,
      & reduce, lat2d
+      real(dp), parameter, private :: pi=4.0_dp*ATAN(1.0_dp)
+
       contains
 C=======================================================================
 C======================================================================
@@ -167,7 +169,8 @@ C=======================================================================
       test1=1.0d6
       ii=1
       n1=-1
-   9  n1=n1+1
+      do
+      n1=n1+1
       na=n1+n1+ii
       an1=dble(n1)
       an2=-an1-1.0_dp
@@ -261,12 +264,12 @@ C=======================================================================
                 k=k+1
               end do
               acc=pref(kk)*acc
-              if(ac-1.0d-6)17,17,165
- 165          dlm(n)=dlm(n)+acc/xpm(m)
-              if(m-1)17,18,17
-  17          nm=n-m+1
-              dlm(nm)=dlm(nm)+acc*xpm(m)
-  18          kk=kk+1
+              if(ac-1.0d-6 > 0) dlm(n)=dlm(n)+acc/xpm(m)
+              if((ac-1.0d-6 <= 0) .or. (m-1 /= 0)) then
+                nm=n-m+1
+                dlm(nm)=dlm(nm)+acc*xpm(m)
+              end if
+              kk=kk+1
               n=n+1
             end do
           end do
@@ -284,9 +287,11 @@ C=======================================================================
       end do
       test=abs((test2-test1)/test1)
       test1=test2
-      if(test-0.001d0 > 0) then
-      if(n1-10)9,25,25
-  25  write(16,26)n1
+      if(test-0.001d0 <= 0) exit ! TODO: convergence constant
+      if(n1-10 >= 0) exit
+      end do
+      if(test-0.001d0 > 0) then ! TODO: convergence constant
+      write(16,26)n1
   26  format(//13x, 'dlm1,s not converged by n1=', i2)
       else
         write(16,28)n1
@@ -330,7 +335,8 @@ C=======================================================================
 !     ar=mod(r)
 !
       n1=0
-  32  n1=n1+1
+      do
+      n1=n1+1
       na=n1+n1
       an1=dble(n1)
       an2=-an1-1.0_dp
@@ -414,9 +420,11 @@ C=======================================================================
       end do
       test=abs((test2-test1)/test1)
       test1=test2
-      if(test-0.001d0 > 0) then
-      if(n1-10) 32,43,43
-  43    write(16,44)n1
+      if(test-0.001d0 <= 0) exit ! TODO: convergence constant
+      if(n1-10>=0) exit
+      end do
+      if(test-0.001d0 > 0) then ! TODO: convergence constant
+        write(16,44)n1
   44    format(//3x, 'dlm2,s not converged by n1=', i2)
       else
         write(16,46)n1
@@ -956,6 +964,9 @@ C     ------------------------------------------------------------------
 C
 C ..  PARAMETER STATEMENTS ..
 C
+      real(dp) pi
+      parameter (pi=4.0_dp*ATAN(1.0_dp))
+
       INTEGER   LMAXD,IGD,IGKD,NELMD,NCOMPD,NPLAND
       PARAMETER (LMAXD=14,IGD=21,IGKD=2*IGD,
      & NELMD=165152,NCOMPD=8,NPLAND=4)
@@ -1012,7 +1023,8 @@ C
      &                   STOP 'ILLEGAL INPUT VALUE OF NCOMP'
       IF(NUNIT<=0)           STOP 'ILLEGAL INPUT VALUE OF NUNIT'
       READ(10,202) ALPHA,ALPHAP,FAB,RMAX
-      FAB=FAB*PI/180.D0
+      ! for some reason fab*pi/180 lead`s to a CLion warning, so replace pi with the value
+      FAB = FAB*3.141592653589793238512808959406_dp/180.0_dp
       READ(10,203) NP,ZINF,ZSUP
       IF(NP<=1)                  STOP 'ILLEGAL INPUT VALUE OF  NP '
               IF(KTYPE>=2) THEN
@@ -1034,38 +1046,38 @@ C
       THETA=THETA*PI/180.D0
       FI=FI*PI/180.D0
                              ENDIF
-      DO 3 ICOMP=1,NCOMP
-      READ(10,201) IT(ICOMP)
-      IF(IT(ICOMP)<=0.OR.IT(ICOMP)>2)
-     &                    STOP 'ILLEGAL COMPONENT TYPE'
-      WRITE(6,209) ICOMP,TEXT1(IT(ICOMP))
-      IF(IT(ICOMP)==1) THEN
-      READ(10,204) D(ICOMP)
-      READ(10,205) MU1(ICOMP),EPS1(ICOMP),MU2(ICOMP),EPS2(ICOMP),
-     &             MU3(ICOMP),EPS3(ICOMP)
-      WRITE(6,210) MU1(ICOMP),MU2(ICOMP),MU3(ICOMP),EPS1(ICOMP),
-     &             EPS2(ICOMP),EPS3(ICOMP)
-      READ(10,*) DUMMY,(DL(I,ICOMP,1),I=1,3)
-      READ(10,*) DUMMY,(DR(I,ICOMP,1),I=1,3)
-                      ELSE
-      READ(10,205) MU1(ICOMP),EPS1(ICOMP)
-      IF(dble(MU1(ICOMP))<=0.D0.OR.dble(EPS1(ICOMP))<=0.D0)
-     &THEN
-      WRITE(6,226)
-      STOP
-      ENDIF
-      READ(10,201) NPLAN(ICOMP),NLAYER(ICOMP)
-      DO IPL=1,NPLAN(ICOMP)
-        READ(10,206) S(ICOMP,IPL),MUSPH(ICOMP,IPL),EPSSPH(ICOMP,IPL)
-        READ(10,*) DUMMY,(DL(I,ICOMP,IPL),I=1,3)
-        READ(10,*) DUMMY,(DR(I,ICOMP,IPL),I=1,3)
+      DO ICOMP=1,NCOMP
+        READ(10,201) IT(ICOMP)
+        IF(IT(ICOMP)<=0.OR.IT(ICOMP)>2)
+     &                      STOP 'ILLEGAL COMPONENT TYPE'
+        WRITE(6,209) ICOMP,TEXT1(IT(ICOMP))
+        IF(IT(ICOMP)==1) THEN
+        READ(10,204) D(ICOMP)
+        READ(10,205) MU1(ICOMP),EPS1(ICOMP),MU2(ICOMP),EPS2(ICOMP),
+     &               MU3(ICOMP),EPS3(ICOMP)
+        WRITE(6,210) MU1(ICOMP),MU2(ICOMP),MU3(ICOMP),EPS1(ICOMP),
+     &               EPS2(ICOMP),EPS3(ICOMP)
+        READ(10,*) DUMMY,(DL(I,ICOMP,1),I=1,3)
+        READ(10,*) DUMMY,(DR(I,ICOMP,1),I=1,3)
+                        ELSE
+        READ(10,205) MU1(ICOMP),EPS1(ICOMP)
+        IF(dble(MU1(ICOMP))<=0.D0.OR.dble(EPS1(ICOMP))<=0.D0)
+     &  THEN
+        WRITE(6,226)
+        STOP
+        ENDIF
+        READ(10,201) NPLAN(ICOMP),NLAYER(ICOMP)
+        DO IPL=1,NPLAN(ICOMP)
+          READ(10,206) S(ICOMP,IPL),MUSPH(ICOMP,IPL),EPSSPH(ICOMP,IPL)
+          READ(10,*) DUMMY,(DL(I,ICOMP,IPL),I=1,3)
+          READ(10,*) DUMMY,(DR(I,ICOMP,IPL),I=1,3)
+        end do
+        WRITE(6,211)  MU1(ICOMP),( MUSPH(ICOMP,IPL),IPL=1,NPLAN(ICOMP))
+        WRITE(6,220) EPS1(ICOMP),(EPSSPH(ICOMP,IPL),IPL=1,NPLAN(ICOMP))
+        WRITE(6,224) (S(ICOMP,IPL),IPL=1,NPLAN(ICOMP))
+        WRITE(6,212) 2**(NLAYER(ICOMP)-1)
+                ENDIF
       end do
-      WRITE(6,211)  MU1(ICOMP),( MUSPH(ICOMP,IPL),IPL=1,NPLAN(ICOMP))
-      WRITE(6,220) EPS1(ICOMP),(EPSSPH(ICOMP,IPL),IPL=1,NPLAN(ICOMP))
-      WRITE(6,224) (S(ICOMP,IPL),IPL=1,NPLAN(ICOMP))
-      WRITE(6,212) 2**(NLAYER(ICOMP)-1)
-              ENDIF
-    3 CONTINUE
                          D1=SQRT(MU1(1)    *EPS1(1))
                          D2=SQRT(MU1(NCOMP)*EPS1(NCOMP))
       IF(IT(NCOMP)==1) D2=SQRT(MU3(NCOMP)*EPS3(NCOMP))
@@ -1145,9 +1157,9 @@ C
                                              IF(KTYPE==1) THEN
                            AK(1)=dble(KAPIN)*SIN(THETA)*COS(FI)
                            AK(2)=dble(KAPIN)*SIN(THETA)*SIN(FI)
-               DO 50 I=1,IGKMAX
+               DO I=1,IGKMAX
                EINCID(I)=CZERO
-  50                       CONTINUE
+               end do
                                 ELSE
                            AK(1)=AQ(1)
                AK(2)=AQ(2)
@@ -1162,9 +1174,9 @@ C
       EIN(2)=cmplx_dp(SIN(FEIN),0.D0)
                         END IF
       CALL REDUCE(AR1,AR2,AK,IGMAX,G,IG0,EMACH)   !"AK" IN SBZ*******
-      DO 2 I=1,2
-      EINCID(2*IG0-2+I)=EIN(I)
-    2 CONTINUE
+      DO I=1,2
+        EINCID(2*IG0-2+I)=EIN(I)
+      end do
                      ELSE
       CALL REDUCE(AR1,AR2,AK,IGMAX,G,IG0,EMACH)   !"AK" IN SBZ*******
              ENDIF
@@ -1196,22 +1208,22 @@ C
      &           KAPPA,AK,DL(1,1,1),DR(1,1,1),G,ELM,A0,EMACH,
      &         QIL,QIIL,QIIIL,QIVL)
       IF(NPLAN(1)>=2) THEN
-      DO 13 IPL=2,NPLAN(1)
-      RAP=S(1,IPL)*KAPPA0/2.D0/PI
-      CALL PCSLAB(LMAX,IGMAX,RAP,EPS1(1),EPSSPH(1,IPL),MU1(1),
-     &           MUSPH(1,IPL),KAPPA,AK,DL(1,1,IPL),DR(1,1,IPL),
-     &           G,ELM,A0,EMACH, QIR,QIIR,QIIIR,QIVR)
-      CALL PAIR(IGKMAX,igkd,QIL,QIIL,QIIIL,QIVL,QIR,QIIR,QIIIR,QIVR)
-   13 CONTINUE
+      DO IPL=2,NPLAN(1)
+        RAP=S(1,IPL)*KAPPA0/2.D0/PI
+        CALL PCSLAB(LMAX,IGMAX,RAP,EPS1(1),EPSSPH(1,IPL),MU1(1),
+     &             MUSPH(1,IPL),KAPPA,AK,DL(1,1,IPL),DR(1,1,IPL),
+     &             G,ELM,A0,EMACH, QIR,QIIR,QIIIR,QIVR)
+        CALL PAIR(IGKMAX,igkd,QIL,QIIL,QIIIL,QIVL,QIR,QIIR,QIIIR,QIVR)
+      end do
             ENDIF
       IF(NLAYER(1)>=2) THEN
-      DO 14 ILAYER=1,NLAYER(1)-1
-      CALL PAIR(IGKMAX,igkd,QIL,QIIL,QIIIL,QIVL,QIL,QIIL,QIIIL,QIVL)
-   14 CONTINUE
+      DO ILAYER=1,NLAYER(1)-1
+        CALL PAIR(IGKMAX,igkd,QIL,QIIL,QIIIL,QIVL,QIL,QIIL,QIIIL,QIVL)
+      end do
              ENDIF
                       ENDIF
                                                     IF(NCOMP>=2) THEN
-      DO 4 ICOMP=2,NCOMP
+      DO ICOMP=2,NCOMP
       IF(IT(ICOMP)==1) THEN
       KAPPAL =SQRT(MU1(ICOMP)*EPS1(ICOMP))*KAPPA0
       KAPPASL=SQRT(MU2(ICOMP)*EPS2(ICOMP))*KAPPA0
@@ -1267,7 +1279,7 @@ C
              ENDIF
                       ENDIF
       CALL PAIR(IGKMAX,igkd,QIL,QIIL,QIIIL,QIVL,QIR,QIIR,QIIIR,QIVR)
-    4 CONTINUE
+      end do
                                                                    ENDIF
       IF(KTYPE<3) THEN
 C

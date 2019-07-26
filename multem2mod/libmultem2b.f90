@@ -10,7 +10,7 @@ module libmultem2b
     complex(dp), parameter, public :: ci    = (0.0_dp, 1.0_dp)
     complex(dp), parameter, public :: cone  = (1.0_dp, 0.0_dp)
     complex(dp), parameter, public :: ctwo  = (2.0_dp, 0.0_dp)
-    real(dp), parameter, public :: pi=4.0_dp*ATAN(1.0_dp)
+    real(dp), parameter, private :: pi=4.0_dp*ATAN(1.0_dp)
     public bessel, tmtrx, sphrm4, ceven, codd, scat, hoslab, blm, elmgen, &
            pair, cmplx_dp, cerf, lat2d, reduce, dlmkg, plw, setup
 contains
