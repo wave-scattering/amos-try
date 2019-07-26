@@ -18,8 +18,7 @@ module libmultem2b
 contains
     !=======================================================================
     !=======================================================================
-    subroutine band(igmax, zval, emach, ak, g, al, kapl, kapr, &
-            qi, qii, qiii, qiv)
+    subroutine band(igmax, zval, emach, ak, al, qi, qii, qiii, qiv)
         !!     ------------------------------------------------------------------
         !     this subroutine calculates the complex photonic band structure of
         !     an infinite crystal. it  provides the  propagating and evanescent
@@ -32,26 +31,17 @@ contains
         integer   igd, igkd, igk2d
         parameter(igd = 21, igkd = 2 * igd, igk2d = 2 * igkd)
 
-        ! ..  scalar arguments  ..
-
+        ! ..  arguments  ..
         integer    igmax
         real(dp)   zval, emach
-        complex(dp) kapl, kapr
-
-        ! ..  array arguments ..
-
-        real(dp)   ak(2), g(2, igd), al(3)
+        real(dp)   ak(2), al(3)
         complex(dp) qi(igkd, igkd), qii(igkd, igkd)
         complex(dp) qiii(igkd, igkd), qiv(igkd, igkd)
-
-        ! ..  scalar variables ..
-
+        ! ..  variables ..
         integer    ii, i, igk1, igk2, igkmax, j
         integer    kd, lib1, lib2, lu, lp, ln, ifail, igk3, igk2m
         real(dp)   aka, bkzre, bkzim
         complex(dp) eaka
-        !
-        ! ..  array variables ..
 
         integer    int(igkd)
         real(dp)   ar(igk2d, igk2d), ai(igk2d, igk2d)
@@ -62,7 +52,6 @@ contains
         real(dp)   akzrep(igk2d), akzimp(igk2d), akzren(igk2d), akzimn(igk2d)
         complex(dp) qh1(igkd, igkd), qh2(igkd, igkd), akz(igk2d)
         complex(dp) comvec(igk2d, igk2d)
-        !     complex(dp) comvec2(igk2d,igk2d)
         !     ------------------------------------------------------------------
         igkmax = 2 * igmax
         igk2m = 2 * igkmax

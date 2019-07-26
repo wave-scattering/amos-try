@@ -23,491 +23,492 @@
 !CCCCCCCC-----------> HERE STARTS THE FORTRAN SOURCE CODE
 !=======================================================================
 
-PROGRAM MULTEM
+program multem
     use libmultem2b
-    IMPLICIT NONE
+    implicit none
     !     ------------------------------------------------------------------
     !     A B S T R A C T
-    !     THIS PROGRAM CALCULATES EITHER THE ABSORBANCE, REFLECTIVITY  AND
-    !     TRANSMITTANCE  OF   LIGHT  BY  A   FINITE  SLAB   CONSISTING  OF
-    !     HOMOGENEOUS   PLATES AND   MULTILAYERS  OF  SPHERICAL  PARTICLES
-    !     ARRANGED IN  A TWO-DIMENSIONAL  BRAVAIS LATTICE, OR THE  COMPLEX
-    !     PHOTONIC  BAND STRUCTURE OF SUCH AN INFINITE PERIODIC STRUCTURE.
+    !     this program calculates either the absorbance, reflectivity  and
+    !     transmittance  of   light  by  a   finite  slab   consisting  of
+    !     homogeneous   plates and   multilayers  of  spherical  particles
+    !     arranged in  a two-dimensional  bravais lattice, or the  complex
+    !     photonic  band structure of such an infinite periodic structure.
     !
     !     D E S C R I P T I O N    O F    I N P U T    D A T A
-    !     KTYPE=     1: THE DIRECTION OF AN INCIDENT  EM WAVE IS SPECIFIED
-    !                   BY THE POLAR ANGLES OF INCIDENCE "THETA" AND "FI".
-    !                   THE PROGRAM CALCULATES THE TRANSMISSION,REFLECTION
-    !                   AND  ABSORPTION   COEFFICIENTS OF  A  FINITE  SLAB
-    !                2: THE DIRECTION OF  AN INCIDENT EM WAVE IS SPECIFIED
-    !                   BY THE COMPONENTS  OF THE WAVEVECTOR  PARALLEL  TO
-    !                   THE  INTERFACES OF THE STRUCTURE:
-    !                   AQ(1) AND AQ(2) (AND THE  FREQUENCY). THE
-    !                   PROGRAM  CALCULATES  THE TRANSMISSION, REFLECTION,
-    !                   ABSORPTION COEFFICIENTS OF A FINITE SLAB
-    !                3: THE PROGRAM CALCULATES  THE PHOTONIC  COMPLEX BAND
-    !                   STRUCTURE OF SUCH  AN INFINITE PERIODIC  STRUCTURE
-    !                   FOR A  WAVEVECTOR WITH COMPONENTS PARALLEL TO  THE
-    !                   INTERFACES OF THE STRUCTURE: AQ(1) AND AQ(2)
-    !     KSCAN=     1: SCANNING OVER FREQUENCIES
-    !                2: SCANNING OVER WAVELENGTHS
-    !     KEMB        : INDICATES THE PRESENCE (=1) OR ABSENCE (=0) OF A
-    !                   DIFFERENT EMBEDDING MEDIUM
-    !     LMAX        : CUTOFF IN SPHERICAL WAVES EXPANSIONS
-    !     NCOMP       : NUMBER OF DIFFERENT COMPONENTS IN THE UNIT SLICE.
-    !                   THEIR TYPE IS SPECIFIED  BY THE INTEGER ARRAY
-    !                   IT(ICOMP)
-    !     IT=        1: HOMOGENEOUS PLATE OF THICKNESS "D"
-    !                2: MULTILAYER  OF SPHERICAL  PARTICLES ARRANGED IN  A
-    !                   2D  BRAVAIS LATTICE.EACH LAYER CONSISTS OF "NPLAN"
-    !                   NON-PRIMITIVE  PLANES OF SPHERES WITH THE SAME 2-D
-    !                   PERIODICITY. THE NUMBER OF UNIT LAYERS IS EQUAL TO
-    !                   2**(NLAYER-1).
-    !     DL, DR      : POSITION VECTORS INDICATING THE ORIGIN ON THE LEFT
-    !                   AND ON THE RIGHT OF THE  UNIT,  RESPECTIVELY. BOTH
-    !                   ARE DIRECTED FROM LEFT TO RIGHT.
-    !     AL          : PRIMITIVE  TRANSLATION  VECTOR  OF THE  UNIT SLICE
-    !                   (EFFECTIVE ONLY FOR BAND STRUCTURE CALCULATION).IT
-    !                   IS GIVEN IN PROGRAM UNITS.
-    !     NUNIT       : SPECIFIES THE NUMBER OF UNIT SLICES (2**(NUNIT-1))
-    !                   OF THE SAMPLE
-    !     ALPHA,ALPHAP: LENGTH OF PRIMITIVE VECTORS OF THE TWO-DIMENSIONAL
-    !                   LATTICE. IN PROGRAM UNITS THE SIZE OF ALPHA SERVES
-    !                   AS  THE UNIT LENGTH.  THUS  ALPHA MUST BE EQUAL TO
-    !                   1.D0
-    !     FAB         : ANGLE (IN DEG) BETWEEN ALPHA AND ALPHAP
-    !     RMAX        : UPPER LIMIT FOR THE LENGTH OF  RECIPROCAL  LATTICE
-    !                   VECTORS (IN UNITS OF 1/ALPHA) WHICH  MUST BE TAKEN
-    !                   INTO ACCOUNT
-    !     ZINF,ZSUP   : MINIMUM  AND  MAXIMUM  VALUES  OF  FREQUENCY   (IN
-    !                   PROGRAM UNITS: OMEGA*ALPHA/C), OR  WAVELENGTH  (IN
-    !                   PROGRAM UNITS: LAMDA/ALPHA  ),  ACCORDING  TO  THE
-    !                   VALUE OF KSCAN. C AND LAMDA REFER TO VACUUM
-    !     NP          : NUMBER OF EQUALLY SPACED POINTS BETWEEN ZINF, ZSUP
-    !     POLAR       : POLARIZATION ('S ' OR  'P ') OF THE INCIDENT LIGHT
-    !     AQ(1,2)     : WAVEVECTOR COMPONENTS PARALLEL  TO THE  INTERFACES
-    !                   OF THE STRUCTURE (XY-PLANE) IN UNITS OF 2*PI/ALPHA
-    !     THETA,FI    : POLAR ANGLES OF INCIDENCE (IN DEG) OF THE INCIDENT
-    !                   LIGHT
-    !     FEIN        : ANGLE  (IN DEG) SPECIFYING  THE DIRECTION  OF  THE
-    !                   POLARIZATION  VECTOR  FOR  NORMAL  INCIDENCE.  NOT
-    !                   EFFECTIVE OTHERWISE
-    !     EPS*,MU*    : RELATIVE DIELECTRIC FUNCTIONS AND MAGNETIC PERMEA-
-    !                   BILITIES OF THE VARIOUS MEDIA
+    !     ktype=     1: the direction of an incident  em wave is specified
+    !                   by the polar angles of incidence "theta" and "fi".
+    !                   the program calculates the transmission,reflection
+    !                   and  absorption   coefficients of  a  finite  slab
+    !                2: the direction of  an incident em wave is specified
+    !                   by the components  of the wavevector  parallel  to
+    !                   the  interfaces of the structure:
+    !                   aq(1) and aq(2) (and the  frequency). the
+    !                   program  calculates  the transmission, reflection,
+    !                   absorption coefficients of a finite slab
+    !                3: the program calculates  the photonic  complex band
+    !                   structure of such  an infinite periodic  structure
+    !                   for a  wavevector with components parallel to  the
+    !                   interfaces of the structure: aq(1) and aq(2)
+    !     kscan=     1: scanning over frequencies
+    !                2: scanning over wavelengths
+    !     kemb        : indicates the presence (=1) or absence (=0) of a
+    !                   different embedding medium
+    !     lmax        : cutoff in spherical waves expansions
+    !     ncomp       : number of different components in the unit slice.
+    !                   their type is specified  by the integer array
+    !                   it(icomp)
+    !     it=        1: homogeneous plate of thickness "d"
+    !                2: multilayer  of spherical  particles arranged in  a
+    !                   2d  bravais lattice.each layer consists of "nplan"
+    !                   non-primitive  planes of spheres with the same 2-d
+    !                   periodicity. the number of unit layers is equal to
+    !                   2**(nlayer-1).
+    !     dl, dr      : position vectors indicating the origin on the left
+    !                   and on the right of the  unit,  respectively. both
+    !                   are directed from left to right.
+    !     al          : primitive  translation  vector  of the  unit slice
+    !                   (effective only for band structure calculation).it
+    !                   is given in program units.
+    !     nunit       : specifies the number of unit slices (2**(nunit-1))
+    !                   of the sample
+    !     alpha,alphap: length of primitive vectors of the two-dimensional
+    !                   lattice. in program units the size of alpha serves
+    !                   as  the unit length.  thus  alpha must be equal to
+    !                   1.d0
+    !     fab         : angle (in deg) between alpha and alphap
+    !     rmax        : upper limit for the length of  reciprocal  lattice
+    !                   vectors (in units of 1/alpha) which  must be taken
+    !                   into account
+    !     zinf,zsup   : minimum  and  maximum  values  of  frequency   (in
+    !                   program units: omega*alpha/c), or  wavelength  (in
+    !                   program units: lamda/alpha  ),  according  to  the
+    !                   value of kscan. c and lamda refer to vacuum
+    !     np          : number of equally spaced points between zinf, zsup
+    !     polar       : polarization ('s ' or  'p ') of the incident light
+    !     aq(1,2)     : wavevector components parallel  to the  interfaces
+    !                   of the structure (xy-plane) in units of 2*pi/alpha
+    !     theta,fi    : polar angles of incidence (in deg) of the incident
+    !                   light
+    !     fein        : angle  (in deg) specifying  the direction  of  the
+    !                   polarization  vector  for  normal  incidence.  not
+    !                   effective otherwise
+    !     eps*,mu*    : relative dielectric functions and magnetic permea-
+    !                   bilities of the various media
     !     ------------------------------------------------------------------
     !
-    ! ..  PARAMETER STATEMENTS ..
+    ! ..  parameter statements ..
     !
-    INTEGER   LMAXD, IGD, IGKD, NELMD, NCOMPD, NPLAND
-    PARAMETER (LMAXD = 14, IGD = 21, IGKD = 2 * IGD, &
-            NELMD = 165152, NCOMPD = 8, NPLAND = 4)
+    integer   lmaxd, igd, igkd, nelmd, ncompd, npland
+    parameter (lmaxd = 14, igd = 21, igkd = 2 * igd, &
+            nelmd = 165152, ncompd = 8, npland = 4)
     !
-    ! ..  SCALAR VARIABLES ..
+    ! ..  scalar variables ..
     !
-    INTEGER      LMAX, I, IGKMAX, IGK1, IGK2, IGMAX, KTYPE, KSCAN, NCOMP, IG1
-    INTEGER      N, NP, IG0, NUNIT, ICOMP, KEMB, IU, IPL, ILAYER
-    REAL(dp)     ALPHA, EMACH, EPSILON
-    REAL(dp)     A0, RA0, RMAX, AKXY
-    REAL(dp)     ZVAL, ZSTEP, ZINF, ZSUP, FAB, ALPHAP, THETA, FI, FEIN
-    COMPLEX(dp)   KAPPA, KAPPA0, AKZIN, MUEMBL, EPSEMBL
-    COMPLEX(dp)   MUEMBR, EPSEMBR, D2, KAPOUT
-    COMPLEX(dp)   KAPPAL, KAPPAR, KAPPASL, D1, KAPIN, KAPL, KAPR
-    COMPLEX(dp)   MLAST, ELAST, MFIRST, EFIRST, RAP
-    CHARACTER(2)  POLAR
-    CHARACTER(17) TEXT1(2)
-    CHARACTER(5)  DUMMY
+    integer      lmax, i, igkmax, igk1, igk2, igmax, ktype, kscan, ncomp, ig1
+    integer      n, np, ig0, nunit, icomp, kemb, iu, ipl, ilayer
+    real(dp)     alpha, emach, epsilon
+    real(dp)     a0, ra0, rmax, akxy
+    real(dp)     zval, zstep, zinf, zsup, fab, alphap, theta, fi, fein
+    complex(dp)   kappa, kappa0, akzin, muembl, epsembl
+    complex(dp)   muembr, epsembr, d2, kapout
+    complex(dp)   kappal, kappar, kappasl, d1, kapin, kapl, kapr
+    complex(dp)   mlast, elast, mfirst, efirst, rap
+    character(2)  polar
+    character(17) text1(2)
+    character(5)  dummy
     !
-    ! ..  ARRAY VARIABLES ..
+    ! ..  array variables ..
     !
-    INTEGER    NT1(IGD), NT2(IGD), IT(NCOMPD)
-    INTEGER    NLAYER(NCOMPD), NPLAN(NCOMPD)
-    REAL(dp)   ELM(NELMD), AK(2), VECMOD(IGD), DL(3, NCOMPD, NPLAND)
-    REAL(dp)   DR(3, NCOMPD, NPLAND), G(2, IGD), B1(2), B2(2)
-    REAL(dp)   S(NCOMPD, NPLAND), AL(3), D(NCOMPD), VEC0(3), AQ(2)
-    COMPLEX(dp) QIL  (IGKD, IGKD), QIIL(IGKD, IGKD), QIIIL(IGKD, IGKD)
-    COMPLEX(dp) QIVL (IGKD, IGKD), QIR (IGKD, IGKD), QIIR (IGKD, IGKD)
-    COMPLEX(dp) QIIIR(IGKD, IGKD), QIVR(IGKD, IGKD), WIVL (IGKD, IGKD)
-    COMPLEX(dp) WIL  (IGKD, IGKD), WIIL(IGKD, IGKD), WIIIL(IGKD, IGKD)
-    COMPLEX(dp) EINCID(IGKD), EIN(2), EPS2(NCOMPD), EPS3(NCOMPD)
-    COMPLEX(dp) MU1(NCOMPD), MU2(NCOMPD), MU3(NCOMPD), EPS1(NCOMPD)
-    COMPLEX(dp) MUSPH(NCOMPD, NPLAND), EPSSPH(NCOMPD, NPLAND)
+    integer    nt1(igd), nt2(igd), it(ncompd)
+    integer    nlayer(ncompd), nplan(ncompd)
+    real(dp)   elm(nelmd), ak(2), vecmod(igd), dl(3, ncompd, npland)
+    real(dp)   dr(3, ncompd, npland), g(2, igd), b1(2), b2(2)
+    real(dp)   s(ncompd, npland), al(3), d(ncompd), vec0(3), aq(2)
+    complex(dp) qil  (igkd, igkd), qiil(igkd, igkd), qiiil(igkd, igkd)
+    complex(dp) qivl (igkd, igkd), qir (igkd, igkd), qiir (igkd, igkd)
+    complex(dp) qiiir(igkd, igkd), qivr(igkd, igkd), wivl (igkd, igkd)
+    complex(dp) wil  (igkd, igkd), wiil(igkd, igkd), wiiil(igkd, igkd)
+    complex(dp) eincid(igkd), ein(2), eps2(ncompd), eps3(ncompd)
+    complex(dp) mu1(ncompd), mu2(ncompd), mu3(ncompd), eps1(ncompd)
+    complex(dp) musph(ncompd, npland), epssph(ncompd, npland)
     !
-    ! ..  COMMON BLOCKS ..
+    ! ..  common blocks ..
     !
-    REAL(dp)   AR1(2), AR2(2)
-    !      COMMON/X1/AR1,AR2
+    real(dp)   ar1(2), ar2(2)
+    !      common/x1/ar1,ar2
     !
-    ! ..  DATA STATEMENTS ..
+    ! ..  data statements ..
     !
-    DATA EMACH/1.D-8/, EPSILON/0.D0/
-    DATA EINCID/IGKD*(0.D0, 0.D0)/, VEC0/3*0.D0/
-    DATA TEXT1/'HOMOGENEOUS PLATE', 'PHOTONIC CRYSTAL'/
+    data emach/1.d-8/, epsilon/0.d0/
+    data eincid/igkd*(0.d0, 0.d0)/, vec0/3*0.d0/
+    data text1/'homogeneous plate', 'photonic crystal'/
     !     ------------------------------------------------------------------
     !
-    READ(10, 200) KTYPE, KSCAN, KEMB, LMAX, NCOMP, NUNIT
-    IF(KTYPE<=0.OR.KTYPE>=4) STOP 'ILLEGAL INPUT VALUE OF KTYPE'
-    IF(KSCAN<=0.OR.KSCAN>=3) STOP 'ILLEGAL INPUT VALUE OF KSCAN'
-    IF(KEMB<0.OR.KEMB>=2)   STOP 'ILLEGAL INPUT VALUE OF KEMB '
-    IF(LMAX<=0.OR.LMAX>LMAXD.OR.LMAX>14)&
-            STOP 'LMAX<=0.OR.LMAX>MIN0(14,LMAXD)'
-    IF(NCOMP<=0.OR.NCOMP>NCOMPD)&
-            STOP 'ILLEGAL INPUT VALUE OF NCOMP'
-    IF(NUNIT<=0)           STOP 'ILLEGAL INPUT VALUE OF NUNIT'
-    READ(10, 202) ALPHA, ALPHAP, FAB, RMAX
-    FAB = FAB * pi / 180.0_dp
-    READ(10, 203) NP, ZINF, ZSUP
-    IF(NP<=1)                  STOP 'ILLEGAL INPUT VALUE OF  NP '
-    IF(KTYPE>=2) THEN
-        READ(10, 204) AQ(1), AQ(2), POLAR, FEIN
-        FEIN = FEIN * PI / 180.D0
-        AQ(1) = 2.D0 * PI * AQ(1)
-        AQ(2) = 2.D0 * PI * AQ(2)
-        IF(KTYPE<3) THEN
-            WRITE(6, 222)
-        ELSE
-            WRITE(6, 223)
-        ENDIF
-        IF(KTYPE==2) WRITE(6, 207) AQ(1), AQ(2), POLAR
-        IF(KTYPE==3) WRITE(6, 225) AQ(1), AQ(2)
-    ELSE
-        READ(10, 204) THETA, FI, POLAR, FEIN
-        WRITE(6, 208) THETA, FI, POLAR
-        FEIN = FEIN * PI / 180.D0
-        THETA = THETA * PI / 180.D0
-        FI = FI * PI / 180.D0
-    ENDIF
-    DO ICOMP = 1, NCOMP
-        READ(10, 201) IT(ICOMP)
-        IF(IT(ICOMP)<=0.OR.IT(ICOMP)>2)&
-                STOP 'ILLEGAL COMPONENT TYPE'
-        WRITE(6, 209) ICOMP, TEXT1(IT(ICOMP))
-        IF(IT(ICOMP)==1) THEN
-            READ(10, 204) D(ICOMP)
-            READ(10, 205) MU1(ICOMP), EPS1(ICOMP), MU2(ICOMP), EPS2(ICOMP), &
-                    MU3(ICOMP), EPS3(ICOMP)
-            WRITE(6, 210) MU1(ICOMP), MU2(ICOMP), MU3(ICOMP), EPS1(ICOMP), &
-                    EPS2(ICOMP), EPS3(ICOMP)
-            READ(10, *) DUMMY, (DL(I, ICOMP, 1), I = 1, 3)
-            READ(10, *) DUMMY, (DR(I, ICOMP, 1), I = 1, 3)
-        ELSE
-            READ(10, 205) MU1(ICOMP), EPS1(ICOMP)
-            IF(dble(MU1(ICOMP))<=0.D0.OR.dble(EPS1(ICOMP))<=0.D0)&
-                    THEN
-                WRITE(6, 226)
-                STOP
-            ENDIF
-            READ(10, 201) NPLAN(ICOMP), NLAYER(ICOMP)
-            DO IPL = 1, NPLAN(ICOMP)
-                READ(10, 206) S(ICOMP, IPL), MUSPH(ICOMP, IPL), EPSSPH(ICOMP, IPL)
-                READ(10, *) DUMMY, (DL(I, ICOMP, IPL), I = 1, 3)
-                READ(10, *) DUMMY, (DR(I, ICOMP, IPL), I = 1, 3)
+    read(10, 200) ktype, kscan, kemb, lmax, ncomp, nunit
+    if(ktype<=0.or.ktype>=4) stop 'illegal input value of ktype'
+    if(kscan<=0.or.kscan>=3) stop 'illegal input value of kscan'
+    if(kemb<0.or.kemb>=2)   stop 'illegal input value of kemb '
+    if(lmax<=0.or.lmax>lmaxd.or.lmax>14)&
+            stop 'lmax<=0.or.lmax>min0(14,lmaxd)'
+    if(ncomp<=0.or.ncomp>ncompd)&
+            stop 'illegal input value of ncomp'
+    if(nunit<=0)           stop 'illegal input value of nunit'
+    read(10, 202) alpha, alphap, fab, rmax
+    fab = fab * pi / 180.0_dp
+    read(10, 203) np, zinf, zsup
+    if(np<=1)                  stop 'illegal input value of  np '
+    if(ktype>=2) then
+        read(10, 204) aq(1), aq(2), polar, fein
+        fein = fein * pi / 180.d0
+        aq(1) = 2.d0 * pi * aq(1)
+        aq(2) = 2.d0 * pi * aq(2)
+        if(ktype<3) then
+            write(6, 222)
+        else
+            write(6, 223)
+        endif
+        if(ktype==2) write(6, 207) aq(1), aq(2), polar
+        if(ktype==3) write(6, 225) aq(1), aq(2)
+    else
+        read(10, 204) theta, fi, polar, fein
+        write(6, 208) theta, fi, polar
+        fein = fein * pi / 180.d0
+        theta = theta * pi / 180.d0
+        fi = fi * pi / 180.d0
+    endif
+    do icomp = 1, ncomp
+        read(10, 201) it(icomp)
+        if(it(icomp)<=0.or.it(icomp)>2)&
+                stop 'illegal component type'
+        write(6, 209) icomp, text1(it(icomp))
+        if(it(icomp)==1) then
+            read(10, 204) d(icomp)
+            read(10, 205) mu1(icomp), eps1(icomp), mu2(icomp), eps2(icomp), &
+                    mu3(icomp), eps3(icomp)
+            write(6, 210) mu1(icomp), mu2(icomp), mu3(icomp), eps1(icomp), &
+                    eps2(icomp), eps3(icomp)
+            read(10, *) dummy, (dl(i, icomp, 1), i = 1, 3)
+            read(10, *) dummy, (dr(i, icomp, 1), i = 1, 3)
+        else
+            read(10, 205) mu1(icomp), eps1(icomp)
+            if(dble(mu1(icomp))<=0.d0.or.dble(eps1(icomp))<=0.d0)&
+                    then
+                write(6, 226)
+                stop
+            endif
+            read(10, 201) nplan(icomp), nlayer(icomp)
+            do ipl = 1, nplan(icomp)
+                read(10, 206) s(icomp, ipl), musph(icomp, ipl), epssph(icomp, ipl)
+                read(10, *) dummy, (dl(i, icomp, ipl), i = 1, 3)
+                read(10, *) dummy, (dr(i, icomp, ipl), i = 1, 3)
             end do
-            WRITE(6, 211)  MU1(ICOMP), (MUSPH(ICOMP, IPL), IPL = 1, NPLAN(ICOMP))
-            WRITE(6, 220) EPS1(ICOMP), (EPSSPH(ICOMP, IPL), IPL = 1, NPLAN(ICOMP))
-            WRITE(6, 224) (S(ICOMP, IPL), IPL = 1, NPLAN(ICOMP))
-            WRITE(6, 212) 2**(NLAYER(ICOMP) - 1)
-        ENDIF
+            write(6, 211)  mu1(icomp), (musph(icomp, ipl), ipl = 1, nplan(icomp))
+            write(6, 220) eps1(icomp), (epssph(icomp, ipl), ipl = 1, nplan(icomp))
+            write(6, 224) (s(icomp, ipl), ipl = 1, nplan(icomp))
+            write(6, 212) 2**(nlayer(icomp) - 1)
+        endif
     end do
-    D1 = SQRT(MU1(1) * EPS1(1))
-    D2 = SQRT(MU1(NCOMP) * EPS1(NCOMP))
-    IF(IT(NCOMP)==1) D2 = SQRT(MU3(NCOMP) * EPS3(NCOMP))
-    IF(aimag(D1)/=0.D0) THEN
-        WRITE(6, 227)
-        STOP
-    ENDIF
-    IF(aimag(D2)/=0.D0) THEN
-        WRITE(6, 228)
-        STOP
-    ENDIF
-    IF(KTYPE/=3) THEN
-        WRITE(6, 221) 2**(NUNIT - 1)
-        IF(KEMB==1) THEN
-            READ(10, 205) MUEMBL, EPSEMBL
-            READ(10, 205) MUEMBR, EPSEMBR
-            D1 = SQRT(MUEMBL * EPSEMBL)
-            D2 = SQRT(MUEMBR * EPSEMBR)
-            IF(aimag(D1)/=0.D0) THEN
-                WRITE(6, 227)
-                STOP
-            ENDIF
-            IF(aimag(D2)/=0.D0) THEN
-                WRITE(6, 228)
-                STOP
-            ENDIF
-        ENDIF
-    ELSE
-        READ(10, *) DUMMY, (AL(I), I = 1, 3)
-    ENDIF
-    CALL ELMGEN(ELM, NELMD, LMAX)
+
+    d1 = sqrt(mu1(1) * eps1(1))
+    d2 = sqrt(mu1(ncomp) * eps1(ncomp))
+    if(it(ncomp)==1) d2 = sqrt(mu3(ncomp) * eps3(ncomp))
+    if(aimag(d1)/=0.d0) then
+        write(6, 227)
+        stop
+    endif
+    if(aimag(d2)/=0.d0) then
+        write(6, 228)
+        stop
+    endif
+    if(ktype/=3) then
+        write(6, 221) 2**(nunit - 1)
+        if(kemb==1) then
+            read(10, 205) muembl, epsembl
+            read(10, 205) muembr, epsembr
+            d1 = sqrt(muembl * epsembl)
+            d2 = sqrt(muembr * epsembr)
+            if(aimag(d1)/=0.d0) then
+                write(6, 227)
+                stop
+            endif
+            if(aimag(d2)/=0.d0) then
+                write(6, 228)
+                stop
+            endif
+        endif
+    else
+        read(10, *) dummy, (al(i), i = 1, 3)
+    endif
+    call elmgen(elm, nelmd, lmax)
     !
-    !****** DEFINE THE 2D DIRECT AND RECIPROCAL-LATTICE VECTORS ******
+    !****** define the 2d direct and reciprocal-lattice vectors ******
     !
-    AR1(1) = ALPHA
-    AR1(2) = 0.D0
-    AR2(1) = ALPHAP * COS(FAB)
-    AR2(2) = ALPHAP * SIN(FAB)
-    WRITE(6, 213) AR1(1), AR1(2), AR2(1), AR2(2)
-    A0 = ABS(AR1(1) * AR2(2) - AR1(2) * AR2(1))
-    RA0 = 2.D0 * PI / A0
-    B1(1) = -AR1(2) * RA0
-    B1(2) = AR1(1) * RA0
-    B2(1) = -AR2(2) * RA0
-    B2(2) = AR2(1) * RA0
-    CALL LAT2D(B1, B2, RMAX, IGMAX, IGD, NT1, NT2, VECMOD)
-    WRITE(6, 214) B1(1), B1(2), B2(1), B2(2)
-    IGKMAX = 2 * IGMAX
-    DO IG1 = 1, IGMAX
-        G(1, IG1) = NT1(IG1) * B1(1) + NT2(IG1) * B2(1)
-        G(2, IG1) = NT1(IG1) * B1(2) + NT2(IG1) * B2(2)
-        WRITE(6, 215) IG1, NT1(IG1), NT2(IG1), VECMOD(IG1)
+    ar1(1) = alpha
+    ar1(2) = 0.d0
+    ar2(1) = alphap * cos(fab)
+    ar2(2) = alphap * sin(fab)
+    write(6, 213) ar1(1), ar1(2), ar2(1), ar2(2)
+    a0 = abs(ar1(1) * ar2(2) - ar1(2) * ar2(1))
+    ra0 = 2.d0 * pi / a0
+    b1(1) = -ar1(2) * ra0
+    b1(2) = ar1(1) * ra0
+    b2(1) = -ar2(2) * ra0
+    b2(2) = ar2(1) * ra0
+    call lat2d(b1, b2, rmax, igmax, igd, nt1, nt2, vecmod)
+    write(6, 214) b1(1), b1(2), b2(1), b2(2)
+    igkmax = 2 * igmax
+    do ig1 = 1, igmax
+        g(1, ig1) = nt1(ig1) * b1(1) + nt2(ig1) * b2(1)
+        g(2, ig1) = nt1(ig1) * b1(2) + nt2(ig1) * b2(2)
+        write(6, 215) ig1, nt1(ig1), nt2(ig1), vecmod(ig1)
     end do
-    ZSTEP = (ZSUP - ZINF) / dble(NP - 1)
-    ZVAL = ZINF - ZSTEP
-    IF(KTYPE<3) THEN
-        IF(KSCAN==1) WRITE(6, 216)
-        IF(KSCAN==2) WRITE(6, 217)
-        IF(POLAR/='S '.AND.POLAR/='P ') STOP 'ILLEGAL POLARIZATION'
-    ELSE
-        IF(KSCAN==1) WRITE(6, 218)
-        IF(KSCAN==2) WRITE(6, 219)
-    ENDIF
-    IF(POLAR=='P ') THEN
-        EIN(1) = CONE
-        EIN(2) = CZERO
-    ELSE
-        EIN(1) = CZERO
-        EIN(2) = CONE
-    END IF
-    DO 1 N = 1, NP   !****** SCANNING OVER FREQUENCIES/WAVELENGTHS ******
-        ZVAL = ZVAL + ZSTEP
-        IF(KSCAN==1) KAPPA0 = cmplx_dp(ZVAL, EPSILON)
-        IF(KSCAN==2) KAPPA0 = cmplx_dp(2.D0 * PI / ZVAL, EPSILON)
-        KAPIN = KAPPA0 * D1
-        KAPOUT = KAPPA0 * D2
-        IF(KTYPE==1) THEN
-            AK(1) = dble(KAPIN) * SIN(THETA) * COS(FI)
-            AK(2) = dble(KAPIN) * SIN(THETA) * SIN(FI)
-            DO I = 1, IGKMAX
-                EINCID(I) = CZERO
+    zstep = (zsup - zinf) / dble(np - 1)
+    zval = zinf - zstep
+    if(ktype<3) then
+        if(kscan==1) write(6, 216)
+        if(kscan==2) write(6, 217)
+        if(polar/='s '.and.polar/='p ') stop 'illegal polarization'
+    else
+        if(kscan==1) write(6, 218)
+        if(kscan==2) write(6, 219)
+    endif
+    if(polar=='p ') then
+        ein(1) = cone
+        ein(2) = czero
+    else
+        ein(1) = czero
+        ein(2) = cone
+    end if
+    do n = 1, np   !****** scanning over frequencies/wavelengths ******
+        zval = zval + zstep
+        if(kscan==1) kappa0 = cmplx_dp(zval, epsilon)
+        if(kscan==2) kappa0 = cmplx_dp(2.d0 * pi / zval, epsilon)
+        kapin = kappa0 * d1
+        kapout = kappa0 * d2
+        if(ktype==1) then
+            ak(1) = dble(kapin) * sin(theta) * cos(fi)
+            ak(2) = dble(kapin) * sin(theta) * sin(fi)
+            do i = 1, igkmax
+                eincid(i) = czero
             end do
-        ELSE
-            AK(1) = AQ(1)
-            AK(2) = AQ(2)
-        ENDIF
-        IF(KTYPE/=3) THEN !DEFINE THE POLARIZATION VECTOR FROM "AK"*****
-            AKXY = AK(1) * AK(1) + AK(2) * AK(2)
-            AKZIN = SQRT(KAPIN * KAPIN - AKXY)
-            IF(dble(AKZIN)<EMACH)      STOP 'IMPROPER INCIDENT WAVE'
-            AKXY = SQRT(AKXY)
-            IF(AKXY<EMACH) THEN
-                EIN(1) = cmplx_dp(COS(FEIN), 0.D0)
-                EIN(2) = cmplx_dp(SIN(FEIN), 0.D0)
-            END IF
-            CALL REDUCE(AR1, AR2, AK, IGMAX, G, IG0, EMACH)   !"AK" IN SBZ*******
-            DO I = 1, 2
-                EINCID(2 * IG0 - 2 + I) = EIN(I)
+        else
+            ak(1) = aq(1)
+            ak(2) = aq(2)
+        endif
+        if(ktype/=3) then !define the polarization vector from "ak"*****
+            akxy = ak(1) * ak(1) + ak(2) * ak(2)
+            akzin = sqrt(kapin * kapin - akxy)
+            if(dble(akzin)<emach)      stop 'improper incident wave'
+            akxy = sqrt(akxy)
+            if(akxy<emach) then
+                ein(1) = cmplx_dp(cos(fein), 0.d0)
+                ein(2) = cmplx_dp(sin(fein), 0.d0)
+            end if
+            call reduce(ar1, ar2, ak, igmax, g, ig0, emach)   !"ak" in sbz*******
+            do i = 1, 2
+                eincid(2 * ig0 - 2 + i) = ein(i)
             end do
-        ELSE
-            CALL REDUCE(AR1, AR2, AK, IGMAX, G, IG0, EMACH)   !"AK" IN SBZ*******
-        ENDIF
+        else
+            call reduce(ar1, ar2, ak, igmax, g, ig0, emach)   !"ak" in sbz*******
+        endif
         !
-        !****** CONSTRUCT THE TRANSFER MATRIX OF THE UNIT SLICE ******
+        !****** construct the transfer matrix of the unit slice ******
         !
-        IF(IT(1)==1) THEN
-            KAPPAL = SQRT(MU1(1) * EPS1(1)) * KAPPA0
-            KAPPASL = SQRT(MU2(1) * EPS2(1)) * KAPPA0
-            KAPPAR = SQRT(MU3(1) * EPS3(1)) * KAPPA0
-            KAPL = KAPPAL
-            KAPR = KAPPAR
-            MLAST = MU3(1)
-            ELAST = EPS3(1)
-            MFIRST = MU1(1)
-            EFIRST = EPS1(1)
-            CALL HOSLAB(IGMAX, KAPPAL, KAPPASL, KAPPAR, AK, G, DL(1, 1, 1), &
-                    DR(1, 1, 1), D(1), QIL, QIIL, QIIIL, QIVL, EMACH)
-        ELSE
-            KAPPA = SQRT(MU1(1) * EPS1(1)) * KAPPA0
-            KAPL = KAPPA
-            KAPR = KAPPA
-            MLAST = MU1(1)
-            ELAST = EPS1(1)
-            MFIRST = MU1(1)
-            EFIRST = EPS1(1)
-            RAP = S(1, 1) * KAPPA0 / 2.D0 / PI
-            CALL PCSLAB(LMAX, IGMAX, RAP, EPS1(1), EPSSPH(1, 1), MU1(1), MUSPH(1, 1), &
-                    KAPPA, AK, DL(1, 1, 1), DR(1, 1, 1), G, ELM, A0, EMACH, &
-                    QIL, QIIL, QIIIL, QIVL, ar1, ar2)
-            IF(NPLAN(1)>=2) THEN
-                DO IPL = 2, NPLAN(1)
-                    RAP = S(1, IPL) * KAPPA0 / 2.D0 / PI
-                    CALL PCSLAB(LMAX, IGMAX, RAP, EPS1(1), EPSSPH(1, IPL), MU1(1), &
-                            MUSPH(1, IPL), KAPPA, AK, DL(1, 1, IPL), DR(1, 1, IPL), &
-                            G, ELM, A0, EMACH, QIR, QIIR, QIIIR, QIVR, ar1, ar2)
-                    CALL PAIR(IGKMAX, igkd, QIL, QIIL, QIIIL, QIVL, QIR, QIIR, QIIIR, QIVR)
+        if(it(1)==1) then
+            kappal = sqrt(mu1(1) * eps1(1)) * kappa0
+            kappasl = sqrt(mu2(1) * eps2(1)) * kappa0
+            kappar = sqrt(mu3(1) * eps3(1)) * kappa0
+            kapl = kappal
+            kapr = kappar
+            mlast = mu3(1)
+            elast = eps3(1)
+            mfirst = mu1(1)
+            efirst = eps1(1)
+            call hoslab(igmax, kappal, kappasl, kappar, ak, g, dl(1, 1, 1), &
+                    dr(1, 1, 1), d(1), qil, qiil, qiiil, qivl, emach)
+        else
+            kappa = sqrt(mu1(1) * eps1(1)) * kappa0
+            kapl = kappa
+            kapr = kappa
+            mlast = mu1(1)
+            elast = eps1(1)
+            mfirst = mu1(1)
+            efirst = eps1(1)
+            rap = s(1, 1) * kappa0 / 2.d0 / pi
+            call pcslab(lmax, igmax, rap, eps1(1), epssph(1, 1), mu1(1), musph(1, 1), &
+                    kappa, ak, dl(1, 1, 1), dr(1, 1, 1), g, elm, a0, emach, &
+                    qil, qiil, qiiil, qivl, ar1, ar2)
+            if(nplan(1)>=2) then
+                do ipl = 2, nplan(1)
+                    rap = s(1, ipl) * kappa0 / 2.d0 / pi
+                    call pcslab(lmax, igmax, rap, eps1(1), epssph(1, ipl), mu1(1), &
+                            musph(1, ipl), kappa, ak, dl(1, 1, ipl), dr(1, 1, ipl), &
+                            g, elm, a0, emach, qir, qiir, qiiir, qivr, ar1, ar2)
+                    call pair(igkmax, igkd, qil, qiil, qiiil, qivl, qir, qiir, qiiir, qivr)
                 end do
-            ENDIF
-            IF(NLAYER(1)>=2) THEN
-                DO ILAYER = 1, NLAYER(1) - 1
-                    CALL PAIR(IGKMAX, igkd, QIL, QIIL, QIIIL, QIVL, QIL, QIIL, QIIIL, QIVL)
+            endif
+            if(nlayer(1)>=2) then
+                do ilayer = 1, nlayer(1) - 1
+                    call pair(igkmax, igkd, qil, qiil, qiiil, qivl, qil, qiil, qiiil, qivl)
                 end do
-            ENDIF
-        ENDIF
-        IF(NCOMP>=2) THEN
-            DO ICOMP = 2, NCOMP
-                IF(IT(ICOMP)==1) THEN
-                    KAPPAL = SQRT(MU1(ICOMP) * EPS1(ICOMP)) * KAPPA0
-                    KAPPASL = SQRT(MU2(ICOMP) * EPS2(ICOMP)) * KAPPA0
-                    KAPPAR = SQRT(MU3(ICOMP) * EPS3(ICOMP)) * KAPPA0
-                    KAPR = KAPPAR
-                    IF(ABS(MU1(ICOMP) - MLAST)/=0.D0.OR.ABS(EPS1(ICOMP) - ELAST)/=&
-                            0.D0) STOP 'IMPROPER MATCHING OF SUCCESSIVE HOST MEDIA'
-                    MLAST = MU3(ICOMP)
-                    ELAST = EPS3(ICOMP)
-                    CALL HOSLAB(IGMAX, KAPPAL, KAPPASL, KAPPAR, AK, G, DL(1, ICOMP, 1), &
-                            DR(1, ICOMP, 1), D(ICOMP), QIR, QIIR, QIIIR, QIVR, EMACH)
-                ELSE
-                    KAPPA = SQRT(MU1(ICOMP) * EPS1(ICOMP)) * KAPPA0
-                    KAPR = KAPPA
-                    IF(ABS(MU1(ICOMP) - MLAST)/=0.D0.OR.ABS(EPS1(ICOMP) - ELAST)/=&
-                            0.D0) STOP 'IMPROPER MATCHING OF SUCCESSIVE HOST MEDIA'
-                    MLAST = MU1(ICOMP)
-                    ELAST = EPS1(ICOMP)
-                    RAP = S(ICOMP, 1) * KAPPA0 / 2.D0 / PI
-                    CALL PCSLAB(LMAX, IGMAX, RAP, EPS1(ICOMP), EPSSPH(ICOMP, 1), MU1(ICOMP)&
-                            , MUSPH(ICOMP, 1), KAPPA, AK, DL(1, ICOMP, 1), &
-                            DR(1, ICOMP, 1), G, ELM, A0, EMACH, QIR, QIIR, QIIIR, QIVR, &
+            endif
+        endif
+        if(ncomp>=2) then
+            do icomp = 2, ncomp
+                if(it(icomp)==1) then
+                    kappal = sqrt(mu1(icomp) * eps1(icomp)) * kappa0
+                    kappasl = sqrt(mu2(icomp) * eps2(icomp)) * kappa0
+                    kappar = sqrt(mu3(icomp) * eps3(icomp)) * kappa0
+                    kapr = kappar
+                    if(abs(mu1(icomp) - mlast)/=0.d0.or.abs(eps1(icomp) - elast)/=&
+                            0.d0) stop 'improper matching of successive host media'
+                    mlast = mu3(icomp)
+                    elast = eps3(icomp)
+                    call hoslab(igmax, kappal, kappasl, kappar, ak, g, dl(1, icomp, 1), &
+                            dr(1, icomp, 1), d(icomp), qir, qiir, qiiir, qivr, emach)
+                else
+                    kappa = sqrt(mu1(icomp) * eps1(icomp)) * kappa0
+                    kapr = kappa
+                    if(abs(mu1(icomp) - mlast)/=0.d0.or.abs(eps1(icomp) - elast)/=&
+                            0.d0) stop 'improper matching of successive host media'
+                    mlast = mu1(icomp)
+                    elast = eps1(icomp)
+                    rap = s(icomp, 1) * kappa0 / 2.d0 / pi
+                    call pcslab(lmax, igmax, rap, eps1(icomp), epssph(icomp, 1), mu1(icomp)&
+                            , musph(icomp, 1), kappa, ak, dl(1, icomp, 1), &
+                            dr(1, icomp, 1), g, elm, a0, emach, qir, qiir, qiiir, qivr, &
                             ar1, ar2)
-                    IF(NPLAN(ICOMP)>=2) THEN
-                        DO IGK1 = 1, IGKMAX
-                            DO IGK2 = 1, IGKMAX
-                                WIL  (IGK1, IGK2) = QIR  (IGK1, IGK2)
-                                WIIL (IGK1, IGK2) = QIIR (IGK1, IGK2)
-                                WIIIL(IGK1, IGK2) = QIIIR(IGK1, IGK2)
-                                WIVL (IGK1, IGK2) = QIVR (IGK1, IGK2)
+                    if(nplan(icomp)>=2) then
+                        do igk1 = 1, igkmax
+                            do igk2 = 1, igkmax
+                                wil  (igk1, igk2) = qir  (igk1, igk2)
+                                wiil (igk1, igk2) = qiir (igk1, igk2)
+                                wiiil(igk1, igk2) = qiiir(igk1, igk2)
+                                wivl (igk1, igk2) = qivr (igk1, igk2)
                             end do
                         end do
-                        DO IPL = 2, NPLAN(ICOMP)
-                            RAP = S(ICOMP, IPL) * KAPPA0 / 2.D0 / PI
-                            CALL PCSLAB(LMAX, IGMAX, RAP, EPS1(ICOMP), EPSSPH(ICOMP, IPL), &
-                                    MU1(ICOMP), MUSPH(ICOMP, IPL), KAPPA, AK, &
-                                    DL(1, ICOMP, IPL), DR(1, ICOMP, IPL), G, ELM, A0, EMACH, &
-                                    QIR, QIIR, QIIIR, QIVR, ar1, ar2)
-                            CALL PAIR(IGKMAX, igkd, WIL, WIIL, WIIIL, WIVL, QIR, QIIR, QIIIR, QIVR)
+                        do ipl = 2, nplan(icomp)
+                            rap = s(icomp, ipl) * kappa0 / 2.d0 / pi
+                            call pcslab(lmax, igmax, rap, eps1(icomp), epssph(icomp, ipl), &
+                                    mu1(icomp), musph(icomp, ipl), kappa, ak, &
+                                    dl(1, icomp, ipl), dr(1, icomp, ipl), g, elm, a0, emach, &
+                                    qir, qiir, qiiir, qivr, ar1, ar2)
+                            call pair(igkmax, igkd, wil, wiil, wiiil, wivl, qir, qiir, qiiir, qivr)
                         end do
-                        DO IGK1 = 1, IGKMAX
-                            DO IGK2 = 1, IGKMAX
-                                QIR  (IGK1, IGK2) = WIL  (IGK1, IGK2)
-                                QIIR (IGK1, IGK2) = WIIL (IGK1, IGK2)
-                                QIIIR(IGK1, IGK2) = WIIIL(IGK1, IGK2)
-                                QIVR (IGK1, IGK2) = WIVL (IGK1, IGK2)
+                        do igk1 = 1, igkmax
+                            do igk2 = 1, igkmax
+                                qir  (igk1, igk2) = wil  (igk1, igk2)
+                                qiir (igk1, igk2) = wiil (igk1, igk2)
+                                qiiir(igk1, igk2) = wiiil(igk1, igk2)
+                                qivr (igk1, igk2) = wivl (igk1, igk2)
                             end do
                         end do
-                    ENDIF
-                    IF(NLAYER(ICOMP)>=2) THEN
-                        DO ILAYER = 1, NLAYER(ICOMP) - 1
-                            CALL PAIR(IGKMAX, igkd, QIR, QIIR, QIIIR, QIVR, QIR, QIIR, QIIIR, QIVR)
+                    endif
+                    if(nlayer(icomp)>=2) then
+                        do ilayer = 1, nlayer(icomp) - 1
+                            call pair(igkmax, igkd, qir, qiir, qiiir, qivr, qir, qiir, qiiir, qivr)
                         end do
-                    ENDIF
-                ENDIF
-                CALL PAIR(IGKMAX, igkd, QIL, QIIL, QIIIL, QIVL, QIR, QIIR, QIIIR, QIVR)
+                    endif
+                endif
+                call pair(igkmax, igkd, qil, qiil, qiiil, qivl, qir, qiir, qiiir, qivr)
             end do
-        ENDIF
-        IF(KTYPE<3) THEN
+        endif
+        if(ktype<3) then
             !
-            !****** THE UNIT SLICE IS DEFINED. THIS CAN BE REPEATED BY THE ******
-            !****** DOUBLING-LAYER  TECHNIQUE, INTERFACES CAN BE ADDED AND ******
-            !****** REFLECTIVITY/TRANSMITTANCE/ABSORBANCE ARE CALCULATED.  ******
+            !****** the unit slice is defined. this can be repeated by the ******
+            !****** doubling-layer  technique, interfaces can be added and ******
+            !****** reflectivity/transmittance/absorbance are calculated.  ******
             !
-            IF(NUNIT==1) GO TO 30
-            IF(ABS(MLAST - MFIRST)/=0.D0.OR.ABS(ELAST - EFIRST)/=0.D0)&
-                    STOP 'IMPROPER MATCHING OF SUCCESSIVE HOST MEDIA'
-            DO IU = 1, NUNIT - 1
-                CALL PAIR(IGKMAX, igkd, QIL, QIIL, QIIIL, QIVL, &
-                        QIL, QIIL, QIIIL, QIVL)
-            end do
-            30        CONTINUE
-            IF(KEMB==1) THEN
-                CALL HOSLAB(IGMAX, KAPR, (KAPR + KAPOUT) / 2.D0, KAPOUT, AK, G, VEC0, &
-                        VEC0, 0.D0, QIR, QIIR, QIIIR, QIVR, EMACH)
-                CALL PAIR(IGKMAX, igkd, QIL, QIIL, QIIIL, QIVL, QIR, QIIR, QIIIR, QIVR)
-                DO IGK1 = 1, IGKMAX
-                    DO IGK2 = 1, IGKMAX
-                        QIR  (IGK1, IGK2) = QIL  (IGK1, IGK2)
-                        QIIR (IGK1, IGK2) = QIIL (IGK1, IGK2)
-                        QIIIR(IGK1, IGK2) = QIIIL(IGK1, IGK2)
-                        QIVR (IGK1, IGK2) = QIVL (IGK1, IGK2)
+            if(nunit/=1) then
+                if(abs(mlast - mfirst)/=0.d0.or.abs(elast - efirst)/=0.d0)&
+                        stop 'improper matching of successive host media'
+                do iu = 1, nunit - 1
+                    call pair(igkmax, igkd, qil, qiil, qiiil, qivl, &
+                            qil, qiil, qiiil, qivl)
+                end do
+            end if
+            if(kemb==1) then
+                call hoslab(igmax, kapr, (kapr + kapout) / 2.d0, kapout, ak, g, vec0, &
+                        vec0, 0.d0, qir, qiir, qiiir, qivr, emach)
+                call pair(igkmax, igkd, qil, qiil, qiiil, qivl, qir, qiir, qiiir, qivr)
+                do igk1 = 1, igkmax
+                    do igk2 = 1, igkmax
+                        qir  (igk1, igk2) = qil  (igk1, igk2)
+                        qiir (igk1, igk2) = qiil (igk1, igk2)
+                        qiiir(igk1, igk2) = qiiil(igk1, igk2)
+                        qivr (igk1, igk2) = qivl (igk1, igk2)
                     end do
                 end do
-                CALL HOSLAB(IGMAX, KAPIN, (KAPL + KAPIN) / 2.D0, KAPL, AK, G, VEC0, &
-                        VEC0, 0.D0, QIL, QIIL, QIIIL, QIVL, EMACH)
-                CALL PAIR(IGKMAX, igkd, QIL, QIIL, QIIIL, QIVL, QIR, QIIR, QIIIR, QIVR)
-            ENDIF
-            CALL SCAT(IGMAX, ZVAL, AK, G, dble(KAPIN), dble(KAPOUT), &
-                    EINCID, QIL, QIIIL)
-        ELSE
+                call hoslab(igmax, kapin, (kapl + kapin) / 2.d0, kapl, ak, g, vec0, &
+                        vec0, 0.d0, qil, qiil, qiiil, qivl, emach)
+                call pair(igkmax, igkd, qil, qiil, qiiil, qivl, qir, qiir, qiiir, qivr)
+            endif
+            call scat(igmax, zval, ak, g, dble(kapin), dble(kapout), &
+                    eincid, qil, qiiil)
+        else
             !
-            !****** ALTERNATIVELY, CALCULATE COMPLEX PHOTONIC BAND STRUCTURE ******
+            !****** alternatively, calculate complex photonic band structure ******
             !
-            IF(ABS(MLAST - MFIRST)/=0.D0.OR.ABS(ELAST - EFIRST)/=0.D0)&
-                    STOP 'IMPROPER MATCHING OF SUCCESSIVE HOST MEDIA'
-            CALL BAND(IGMAX, ZVAL, EMACH, AK, G, AL, KAPL, KAPR, QIL, QIIL, QIIIL, QIVL)
-        ENDIF
-    1 CONTINUE
-    STOP
-    200 FORMAT(///, 6(10X, I2))
-    201 FORMAT(6(10X, I2))
-    202 FORMAT(4(8X, F12.6))
-    203 FORMAT(6X, I4, 2(8X, F13.8))
-    204 FORMAT(2(15X, F13.8), 10X, A2, 10X, F7.2///)
-    205 FORMAT(2(12X, 2F13.8))
-    206 FORMAT(10X, F13.8, 2(12X, 2F13.8))
-    207 FORMAT(3X, 'K_PARALLEL=', 2F12.6, 5X, A2, 'POLARIZATION')
-    208 FORMAT(3X, 'ANGLES OF INCIDENCE (IN RAD):  THETA=', F7.2, 3X, 'FI=', &
-            F7.2, 5X, A2, 'POLARIZATION')
-    209 FORMAT(3X, 'COMPONENT NR.', I2, 3X, 'TYPE:', 2X, A17)
-    210 FORMAT(3X, 'MU :', 2F10.5, ' | ', 2F10.5, ' | ', 2F10.5/&
-            3X, 'EPS:', 2F10.5, ' | ', 2F10.5, ' | ', 2F10.5)
-    211 FORMAT(3X, 'MU :', 2F10.5, ' | ', 4(3X, 2F10.5))
-    212 FORMAT(29X, I6, ' UNIT LAYERS')
-    213 FORMAT(/13X, 'PRIMITIVE LATTICE VECTORS'/13X, 'AR1 = (', 2F12.4, ')'/&
-            13X, 'AR2 = (', 2F12.4, ')')
-    214 FORMAT(13X, 'UNIT VECTORS IN RECIPROCAL SPACE:'/13X, 'B1  = (', &
-            2F12.4, ')'/13X, 'B2  = (', 2F12.4, ')'//3X, 'RECIPROCAL VECTORS', 5X, &
-            'LENGTH')
-    215 FORMAT(I3, 4X, 2I5, 5X, E14.6)
-    216 FORMAT(//4X, 'FREQUENCY   TRANSMITTANCE  REFLECTANCE   ABSORBANCE'&
+            if(abs(mlast - mfirst)/=0.d0.or.abs(elast - efirst)/=0.d0)&
+                    stop 'improper matching of successive host media'
+            call band(igmax, zval, emach, ak, al, qil, qiil, qiiil, qivl)
+        endif
+    end do
+    stop
+    200 format(///, 6(10x, i2))
+    201 format(6(10x, i2))
+    202 format(4(8x, f12.6))
+    203 format(6x, i4, 2(8x, f13.8))
+    204 format(2(15x, f13.8), 10x, a2, 10x, f7.2///)
+    205 format(2(12x, 2f13.8))
+    206 format(10x, f13.8, 2(12x, 2f13.8))
+    207 format(3x, 'k_parallel=', 2f12.6, 5x, a2, 'polarization')
+    208 format(3x, 'angles of incidence (in rad):  theta=', f7.2, 3x, 'fi=', &
+            f7.2, 5x, a2, 'polarization')
+    209 format(3x, 'component nr.', i2, 3x, 'type:', 2x, a17)
+    210 format(3x, 'mu :', 2f10.5, ' | ', 2f10.5, ' | ', 2f10.5/&
+            3x, 'eps:', 2f10.5, ' | ', 2f10.5, ' | ', 2f10.5)
+    211 format(3x, 'mu :', 2f10.5, ' | ', 4(3x, 2f10.5))
+    212 format(29x, i6, ' unit layers')
+    213 format(/13x, 'primitive lattice vectors'/13x, 'ar1 = (', 2f12.4, ')'/&
+            13x, 'ar2 = (', 2f12.4, ')')
+    214 format(13x, 'unit vectors in reciprocal space:'/13x, 'b1  = (', &
+            2f12.4, ')'/13x, 'b2  = (', 2f12.4, ')'//3x, 'reciprocal vectors', 5x, &
+            'length')
+    215 format(i3, 4x, 2i5, 5x, e14.6)
+    216 format(//4x, 'frequency   transmittance  reflectance   absorbance'&
             /60('-'))
-    217 FORMAT(//4X, 'WAVELENGTH  TRANSMITTANCE  REFLECTANCE   ABSORBANCE'&
+    217 format(//4x, 'wavelength  transmittance  reflectance   absorbance'&
             /60('-'))
-    218 FORMAT(//1X, 'FREQUENCY', 7X, 'NORMALIZED K_Z'/&
-            1X, 9('-'), 7X, 14('-'))
-    219 FORMAT(//3X, 'WAVELENGTH VERSUS NORMALIZED K_Z'/3X, 32('-'))
-    220 FORMAT(3X, 'EPS:', 2F10.5, ' | ', 4(3X, 2F10.5))
-    221 FORMAT(3X, 'THE SAMPLE CONSISTS OF ', I6, ' UNIT SLICES')
-    222 FORMAT(5X, '****************************************************'/&
-            5X, '*** OUTPUT: TRANSMITTANCE/REFLECTANCE/ABSORBANCE ***'/&
-            5X, '****************************************************')
-    223 FORMAT(5X, '****************************************************'/&
-            5X, '************** OUTPUT: BAND STRUCTURE **************'/&
-            5X, '****************************************************')
-    224 FORMAT(3X, '  S:', 23X, 4(3X, F10.5, 10X))
-    225 FORMAT(3X, 'K_PARALLEL=', 2F12.6)
-    226 FORMAT(5X, '----------------------------------'/&
-            5X, 'ILLEGAL INPUT: SPHERES EMBEDDED IN'/&
-            5X, 'A  MEDIUM  OF NEGATIVE  DIELECTRIC'/&
-            5X, 'CONSTANT. THE EWALD  SUMMATION  IN'/&
-            5X, 'SUBROUTINE XMAT DOES NOT CONVERGE.'/&
-            5X, 'DIRECT - SPACE SUMMATION IS NEEDED'/&
-            5X, 'INSTEAD.'/&
-            5X, '----------------------------------')
-    227 FORMAT(5X, '----------------------------------'/&
-            5X, 'ILLEGAL INPUT:SEMI-INFINITE MEDIUM'/&
-            5X, 'OF COMPLEX REFRACTIVE INDEX ON THE'/&
-            5X, 'LEFT SIDE OF THE SLAB.'/&
-            5X, '----------------------------------')
-    228 FORMAT(5X, '----------------------------------'/&
-            5X, 'ILLEGAL INPUT:SEMI-INFINITE MEDIUM'/&
-            5X, 'OF COMPLEX REFRACTIVE INDEX ON THE'/&
-            5X, 'RIGHT SIDE OF THE SLAB.'/&
-            5X, '----------------------------------')
+    218 format(//1x, 'frequency', 7x, 'normalized k_z'/&
+            1x, 9('-'), 7x, 14('-'))
+    219 format(//3x, 'wavelength versus normalized k_z'/3x, 32('-'))
+    220 format(3x, 'eps:', 2f10.5, ' | ', 4(3x, 2f10.5))
+    221 format(3x, 'the sample consists of ', i6, ' unit slices')
+    222 format(5x, '****************************************************'/&
+            5x, '*** output: transmittance/reflectance/absorbance ***'/&
+            5x, '****************************************************')
+    223 format(5x, '****************************************************'/&
+            5x, '************** output: band structure **************'/&
+            5x, '****************************************************')
+    224 format(3x, '  s:', 23x, 4(3x, f10.5, 10x))
+    225 format(3x, 'k_parallel=', 2f12.6)
+    226 format(5x, '----------------------------------'/&
+            5x, 'illegal input: spheres embedded in'/&
+            5x, 'a  medium  of negative  dielectric'/&
+            5x, 'constant. the ewald  summation  in'/&
+            5x, 'subroutine xmat does not converge.'/&
+            5x, 'direct - space summation is needed'/&
+            5x, 'instead.'/&
+            5x, '----------------------------------')
+    227 format(5x, '----------------------------------'/&
+            5x, 'illegal input:semi-infinite medium'/&
+            5x, 'of complex refractive index on the'/&
+            5x, 'left side of the slab.'/&
+            5x, '----------------------------------')
+    228 format(5x, '----------------------------------'/&
+            5x, 'illegal input:semi-infinite medium'/&
+            5x, 'of complex refractive index on the'/&
+            5x, 'right side of the slab.'/&
+            5x, '----------------------------------')
 end program
