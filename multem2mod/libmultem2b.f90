@@ -12,10 +12,50 @@ module libmultem2b
     complex(dp), parameter, public :: cone  = (1.0_dp, 0.0_dp)
     complex(dp), parameter, public :: ctwo  = (2.0_dp, 0.0_dp)
     real(dp), parameter, public :: pi=4.0_dp*ATAN(1.0_dp)
-    public bessel, tmtrx, sphrm4, ceven, codd, scat, hoslab, blm, elmgen, &
-           pair, cmplx_dp, cerf, lat2d, reduce, dlmkg, plw, setup, xmat, &
-           pcslab, band, main_evaluate
+    public main_evaluate
 contains
+    !=======================================================================
+    integer function  get_dlm_prefactor_size(lmax) !ndend
+        ! ..  scalar arguments  ..
+        integer    lmax
+        ! ..  local scalars  ..
+        integer    l2max, ll2, ii, i, nndlm, k, kk, l, mm, nn, m, j1, j2, i1, i2, i3, n1
+        integer    na, lll, n, il, nm, in, l2, il2, m2, il3, l3, m3, la1, lb1, la11, lb11
+        integer    ll, j, l1
+        !----------------------------------------------------------------------
+        l2max = lmax + lmax
+        ll2 = l2max + 1
+        k = 1
+!        kk = 1
+!        ap1 = -2.0_dp / tv
+!        ap2 = -1.0_dp
+!        cf = ci / kappa
+        do l = 1, ll2
+!            ap1 = ap1 / 2.0_dp
+!            ap2 = ap2 + 2.0_dp
+!            cp = cf
+            mm = 1
+            if(mod  (l, 2) == 0) then
+                mm = 2
+!                cp = ci * cp
+            end if
+            nn = (l - mm) / 2 + 2
+            do m = mm, l, 2
+                j1 = l + m - 1
+                j2 = l - m + 1
+!               cp = -cp
+                nn = nn - 1
+                do i = 1, nn
+                    i1 = i
+                    i2 = nn - i + 1
+                    i3 = nn + m - i
+                    k = k + 1
+                end do
+            end do
+        end do
+        get_dlm_prefactor_size = k-1
+        return
+    end function
     !=======================================================================
     integer function  get_elm_size(lmax)
         integer lmax
@@ -515,8 +555,8 @@ contains
         !
         ! ..  parameter statements ..
         !
-        integer   igd, nelmd
-        parameter (igd = 21, nelmd = 165152)
+        integer   igd
+        parameter (igd = 21)
         !
         ! ..  scalar arguments ..
         !
@@ -527,14 +567,14 @@ contains
         !
         ! ..  array arguments ..
         !
-        real(dp)     ak(2), dl(3), dr(3), g(2, igd), elm(nelmd)
+        real(dp)     ak(2), dl(3), dr(3), g(2, igd), elm(:)
         complex(dp) qi(:, :), qii(:, :), qiii(:, :)
         complex(dp) qiv(:, :)
         real(dp)     ar1(2), ar2(2)
         !
         ! ..  local scalars  ..
         !
-
+        integer   ndend
         integer    lmtot, l, m, ii, igk1, igk2, lmax1, igkmax
         integer    ig1, ig2, isign1, isign2, k1, k2
         integer    lmxod, iev, iod
@@ -565,7 +605,8 @@ contains
                     gkk(2, ig1) * gkk(2, ig1))
         end do
         call tmtrx(rap, epssph, epsmed, mumed, musph, te, th)
-        call xmat(xodd, xeven, lmax, kappa, ak, elm, emach, ar1, ar2)
+        ndend = get_dlm_prefactor_size(lmax)
+        call xmat(xodd, xeven, lmax, kappa, ak, elm, emach, ar1, ar2, ndend)
         call setup(lmax, xeven, xodd, te, th, xxmat1, xxmat2)
         call zgetrf_wrap (xxmat1, int1)
         call zgetrf_wrap (xxmat2, int2)
@@ -684,7 +725,7 @@ contains
         return
     end subroutine
     !=======================================================================
-    subroutine xmat(xodd, xeven, lmax, kappa, ak, elm, emach, ar1, ar2)
+    subroutine xmat(xodd, xeven, lmax, kappa, ak, elm, emach, ar1, ar2, ndend)
         !     ------------------------------------------------------------------
         !     xmat calculates the matrix describing multiple scatering  within
         !     a  layer, returning  it as :  xodd,  corresponding  to  odd  l+m,
@@ -696,7 +737,6 @@ contains
         !     ------------------------------------------------------------------
         ! ..  parameter statements  ..
         integer   ndend
-        parameter (ndend = 1240)
         ! ..  scalar arguments  ..
         integer    lmax
         real(dp)   emach

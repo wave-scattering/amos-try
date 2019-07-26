@@ -58,7 +58,7 @@ def eval(i):
 if __name__ == "__main__":
     plt.figure(figsize=(11,6))
     npts = 204
-    lmax=4
+    lmax=16
     r_ratio = 0.47050000
     # from_k = 3.7128
     # to_k = 3.7129
