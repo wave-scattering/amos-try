@@ -2,16 +2,16 @@ module libmultem2b
     use dense_solve
     use multem_blas
     use amos
-    use errfun, only: erf_pop
+    use errfun, only : erf_pop
 
     implicit none
     private
-    integer, parameter, public:: dp=kind(0.0D0)
-    complex(dp), parameter, public :: ci    = (0.0_dp, 1.0_dp)
+    integer, parameter, public :: dp = kind(0.0D0)
+    complex(dp), parameter, public :: ci = (0.0_dp, 1.0_dp)
     complex(dp), parameter, public :: czero = (0.0_dp, 0.0_dp)
-    complex(dp), parameter, public :: cone  = (1.0_dp, 0.0_dp)
-    complex(dp), parameter, public :: ctwo  = (2.0_dp, 0.0_dp)
-    real(dp), parameter, public :: pi=4.0_dp*ATAN(1.0_dp)
+    complex(dp), parameter, public :: cone = (1.0_dp, 0.0_dp)
+    complex(dp), parameter, public :: ctwo = (2.0_dp, 0.0_dp)
+    real(dp), parameter, public :: pi = 4.0_dp * ATAN(1.0_dp)
     public main_evaluate
 contains
     !=======================================================================
@@ -19,31 +19,29 @@ contains
         ! ..  scalar arguments  ..
         integer    lmax
         ! ..  local scalars  ..
-        integer    l2max, ll2, ii, i, nndlm, k, kk, l, mm, nn, m, j1, j2, i1, i2, i3, n1
-        integer    na, lll, n, il, nm, in, l2, il2, m2, il3, l3, m3, la1, lb1, la11, lb11
-        integer    ll, j, l1
+        integer    l2max, ll2, i, k, l, mm, nn, m, j1, j2, i1, i2, i3
         !----------------------------------------------------------------------
         l2max = lmax + lmax
         ll2 = l2max + 1
         k = 1
-!        kk = 1
-!        ap1 = -2.0_dp / tv
-!        ap2 = -1.0_dp
-!        cf = ci / kappa
+        !        kk = 1
+        !        ap1 = -2.0_dp / tv
+        !        ap2 = -1.0_dp
+        !        cf = ci / kappa
         do l = 1, ll2
-!            ap1 = ap1 / 2.0_dp
-!            ap2 = ap2 + 2.0_dp
-!            cp = cf
+            !            ap1 = ap1 / 2.0_dp
+            !            ap2 = ap2 + 2.0_dp
+            !            cp = cf
             mm = 1
             if(mod  (l, 2) == 0) then
                 mm = 2
-!                cp = ci * cp
+                !                cp = ci * cp
             end if
             nn = (l - mm) / 2 + 2
             do m = mm, l, 2
                 j1 = l + m - 1
                 j2 = l - m + 1
-!               cp = -cp
+                !               cp = -cp
                 nn = nn - 1
                 do i = 1, nn
                     i1 = i
@@ -53,7 +51,7 @@ contains
                 end do
             end do
         end do
-        get_dlm_prefactor_size = k-1
+        get_dlm_prefactor_size = k - 1
         return
     end function
     !=======================================================================
@@ -91,14 +89,14 @@ contains
                 end do
             end do
         end do
-        get_elm_size = k-1
+        get_elm_size = k - 1
         return
     end function
     !=======================================================================
-    subroutine main_evaluate(ncompd, npland, lmax, i, ktype, kscan, ncomp, np,&
-            nunit, icomp, kemb,  ipl, alpha, rmax, zinf, zsup, fab, alphap, theta,&
+    subroutine main_evaluate(ncompd, npland, lmax, i, ktype, kscan, ncomp, np, &
+            nunit, icomp, kemb, ipl, alpha, rmax, zinf, zsup, fab, alphap, theta, &
             fi, fein, d2, d1, polar, &
-            it, nlayer, nplan, dl, dr, s, al, d, aq, eps2, eps3, mu1, mu2, mu3,&
+            it, nlayer, nplan, dl, dr, s, al, d, aq, eps2, eps3, mu1, mu2, mu3, &
             eps1, musph, epssph)
         integer   igd, igkd, nelmd, ncompd, npland
         parameter (igd = 21, igkd = 2 * igd)
@@ -114,7 +112,7 @@ contains
         character(2)  polar
         integer    nt1(igd), nt2(igd), it(ncompd)
         integer    nlayer(ncompd), nplan(ncompd)
-        real(dp), allocatable ::   elm(:)
+        real(dp), allocatable :: elm(:)
         real(dp) ak(2), vecmod(igd), dl(3, ncompd, npland)
         real(dp)   dr(3, ncompd, npland), g(2, igd), b1(2), b2(2)
         real(dp)   s(ncompd, npland), al(3), d(ncompd), vec0(3), aq(2)
@@ -1612,7 +1610,11 @@ contains
         goto 6
     end subroutine
     !=======================================================================
-    subroutine lat2d(a, b, rmax, imax, id, nta, ntb, vecmod)
+    subroutine lat2d_cycle(a, b, rmax, imax, id, nta, ntb, vecmod)
+
+    end subroutine
+    !=======================================================================
+    subroutine lat2d(a, b, rmax, imax, id, nta, ntb, vecmod, ierr)
         !     --------------------------------------------------------------
         !     given a two dimensional bravais lattice with primitive vectors
         !     (a(1),a(2)) , (b(1),b(2)) , defined so that 'b' is longer than
@@ -1621,7 +1623,7 @@ contains
         !     length 'vecmod(i)' less than 'rmax'.
         !     --------------------------------------------------------------
         ! ..  arguments ..
-        integer imax, id
+        integer imax, id, ierr
         real(dp) rmax
         integer nta(id), ntb(id)
         real(dp)a(2), b(2), vecmod(id)
@@ -1629,6 +1631,7 @@ contains
         integer i, na, nb, na0, j, nma, nmb, iord
         real(dp)rmax2, sp, amod2, bmod2, dum, vmod2, vm
         !     ------------------------------------------------------------------
+        ierr = 0
         rmax2 = rmax * rmax
         !***  check if primitive vectors have positive scalar product
         sp = a(1) * b(1) + a(2) * b(2)
@@ -1661,7 +1664,10 @@ contains
                 vmod2 = na * na * amod2 + nb * nb * bmod2 + 2 * na * nb * sp
                 if(vmod2>rmax2) exit
                 i = i + 1
-                if(i>id)  go to 13
+                if(i>id) then
+                    ierr = 1
+                    return
+                end if
                 nta(i) = na
                 ntb(i) = nb
                 vecmod(i) = sqrt(vmod2)
@@ -1670,7 +1676,10 @@ contains
                     cycle
                 end if
                 i = i + 1
-                if(i>id) go to 13
+                if(i>id) then
+                    ierr = 1
+                    return
+                end if
                 nta(i) = -na
                 ntb(i) = -nb
                 vecmod(i) = sqrt(vmod2)
@@ -1688,12 +1697,18 @@ contains
                 vmod2 = na * na * amod2 + nb * nb * bmod2 - 2 * na * nb * sp
                 if(vmod2>rmax2) exit
                 i = i + 1
-                if(i>id)  go to 13
+                if(i>id) then
+                    ierr = 1
+                    return
+                end if
                 nta(i) = na
                 ntb(i) = -nb
                 vecmod(i) = sqrt(vmod2)
                 i = i + 1
-                if(i>id)  go to 13
+                if(i>id) then
+                    ierr = 1
+                    return
+                end if
                 nta(i) = -na
                 ntb(i) = nb
                 vecmod(i) = sqrt(vmod2)
@@ -1705,12 +1720,19 @@ contains
                 vmod2 = na * na * amod2 + nb * nb * bmod2 - 2 * na * nb * sp
                 if(vmod2>rmax2.or.na<=0) exit
                 i = i + 1
-                if(i>id)  go to 13
+                if(i>id) then
+                    ierr = 1
+                    return
+                end if
+
                 nta(i) = na
                 ntb(i) = -nb
                 vecmod(i) = sqrt(vmod2)
                 i = i + 1
-                if(i>id) go to 13
+                if(i>id) then
+                    ierr = 1
+                    return
+                end if
                 nta(i) = -na
                 ntb(i) = nb
                 vecmod(i) = sqrt(vmod2)
@@ -1757,14 +1779,14 @@ contains
     complex(dp) function cerf(z)
         !     cerf,given complex argument z,provides the complex error function:
         !     w(z)=exp(-z**2)*(1.0-erf(-i*z))
-        complex(dp), intent(in):: z
-        cerf=exp(-z**2)*(1.0-erf_pop(-ci*z))
+        complex(dp), intent(in) :: z
+        cerf = exp(-z**2) * (1.0 - erf_pop(-ci * z))
         return
     end function
     !=======================================================================
     complex(dp) function cmplx_dp(re, im)
         real(dp), intent(in) :: re, im
-        cmplx_dp = cmplx(re,im, kind=dp)
+        cmplx_dp = cmplx(re, im, kind = dp)
     end function cmplx_dp
     !=======================================================================
     subroutine pair(igkmax, igkd, qil, qiil, qiiil, qivl, qir, qiir, qiiir, qivr)
@@ -1956,11 +1978,11 @@ contains
         end do
 
         if(m1 + m2 + m3 /= 0) then
-           blm = 0.0_dp
-           return
+            blm = 0.0_dp
+            return
         end if
         if ((l1 - lmax - lmax > 0).or.(l2 - lmax >0).or.(l3 - lmax >0) &
-           .or.(l1 - iabs(m1)<0).or.(l2 - iabs(m2)<0).or.(l3 - iabs(m3)<0)) then
+                .or.(l1 - iabs(m1)<0).or.(l2 - iabs(m2)<0).or.(l3 - iabs(m3)<0)) then
             stop 'invalid arguments for blm'
         end if
         if(mod  (l1 + l2 + l3, 2) /= 0) then
@@ -1996,8 +2018,8 @@ contains
             nm3 = ntemp
         end if
         if(nl3 - iabs(nl2 - nl1) < 0) then
-                blm = 0.0_dp
-                return
+            blm = 0.0_dp
+            return
         end if
         !
         !     calculation of factor  'a'.
@@ -2210,115 +2232,115 @@ contains
         101 format(5e14.6)
     end subroutine
     !=======================================================================
-    complex(dp) function codd(l,m,l1,m1,xodd)
-        integer, intent(in) ::l,m,l1,m1
-        complex(dp), intent(in) :: xodd(:,:)
-        integer i,j
+    complex(dp) function codd(l, m, l1, m1, xodd)
+        integer, intent(in) :: l, m, l1, m1
+        complex(dp), intent(in) :: xodd(:, :)
+        integer i, j
         !     ------------------------------------------------------------------
         if(abs(m)<=l.and.abs(m1)<=l1) then
-            i=(l*l+m+1)/2
-            j=(l1*l1+m1+1)/2
-            codd=xodd(i,j)
+            i = (l * l + m + 1) / 2
+            j = (l1 * l1 + m1 + 1) / 2
+            codd = xodd(i, j)
         else
-            codd=czero
+            codd = czero
         end if
         return
     end function
     !=======================================================================
-    complex(dp) function ceven(l,m,l1,m1,xeven)
-        integer l,m,l1,m1
-        complex(dp) xeven(:,:)
-        integer i,j
+    complex(dp) function ceven(l, m, l1, m1, xeven)
+        integer l, m, l1, m1
+        complex(dp) xeven(:, :)
+        integer i, j
         !     ------------------------------------------------------------------
         if(abs(m)<=l.and.abs(m1)<=l1) then
-            i=(l*l+2*l+m+2)/2
-            j=(l1*l1+2*l1+m1+2)/2
-            ceven=xeven(i,j)
+            i = (l * l + 2 * l + m + 2) / 2
+            j = (l1 * l1 + 2 * l1 + m1 + 2) / 2
+            ceven = xeven(i, j)
         else
-            ceven=czero
+            ceven = czero
         end if
         return
     end function
     !=======================================================================
-    subroutine sphrm4(ylm,ct,st,cf,lmax)
+    subroutine sphrm4(ylm, ct, st, cf, lmax)
         !     -----------------------------------------------------------------
         !     given  ct=cos(theta),  st=sin(theta),  and cf=exp(i*fi), this
         !     subroutine  calculates  all the  ylm(theta,fi) up to  l=lmax.
         !     subscripts are ordered thus:(l,m)=(0,0),(1,-1),(1,0),(1,1)...
         !     -----------------------------------------------------------------
         integer    lmax
-        complex(dp) ct,st,cf
+        complex(dp) ct, st, cf
         complex(dp) ylm(:)
         ! ..  local
-        integer    l,ll,lm,lm2,lm3,ln,lo,lp,lq,m
-        real(dp)   a,asg,b,cl,cm
-        complex(dp) sf,sa
-        real(dp)   fac1(lmax+1),fac3(lmax+1),fac2((lmax+1)**2)
+        integer    l, ll, lm, lm2, lm3, ln, lo, lp, lq, m
+        real(dp)   a, asg, b, cl, cm
+        complex(dp) sf, sa
+        real(dp)   fac1(lmax + 1), fac3(lmax + 1), fac2((lmax + 1)**2)
         !-----------------------------------------------------------------------
-        lm=0
-        cl=0.0_dp
-        a=1.0_dp
-        b=1.0_dp
-        asg=1.0_dp
-        ll=lmax+1
+        lm = 0
+        cl = 0.0_dp
+        a = 1.0_dp
+        b = 1.0_dp
+        asg = 1.0_dp
+        ll = lmax + 1
         !****** multiplicative factors required ******
-        do l=1,ll
-            fac1(l)=asg*sqrt((2.0_dp*cl+1.0_dp)*a/(4.0_dp*pi*b*b))
-            fac3(l)=sqrt(2.0_dp*cl)
-            cm=-cl
-            ln=l+l-1
-            do m=1,ln
-                lo=lm+m
-                fac2(lo)=sqrt((cl+1.0_dp+cm)*(cl+1.0_dp-cm) &
-                        & /((2.0_dp*cl+3.0_dp)*(2.0_dp*cl+1.0_dp)))
-                cm=cm+1.0_dp
+        do l = 1, ll
+            fac1(l) = asg * sqrt((2.0_dp * cl + 1.0_dp) * a / (4.0_dp * pi * b * b))
+            fac3(l) = sqrt(2.0_dp * cl)
+            cm = -cl
+            ln = l + l - 1
+            do m = 1, ln
+                lo = lm + m
+                fac2(lo) = sqrt((cl + 1.0_dp + cm) * (cl + 1.0_dp - cm) &
+                        & / ((2.0_dp * cl + 3.0_dp) * (2.0_dp * cl + 1.0_dp)))
+                cm = cm + 1.0_dp
             end do
-            cl=cl+1.0_dp
-            a=a*2.0_dp*cl*(2.0_dp*cl-1.0_dp)/4.0_dp
-            b=b*cl
-            asg=-asg
-            lm=lm+ln
+            cl = cl + 1.0_dp
+            a = a * 2.0_dp * cl * (2.0_dp * cl - 1.0_dp) / 4.0_dp
+            b = b * cl
+            asg = -asg
+            lm = lm + ln
         end do
         !****** first all the ylm for m=+-l and m=+-(l-1) are ******
         !****** calculated by explicit formulae               ******
-        lm=1
-        cl=1.0_dp
-        asg=-1.0_dp
-        sf=cf
-        sa= cmplx(1.0_dp,0.0_dp, kind=dp)
-        ylm(1)=cmplx(fac1(1),0.0_dp, kind=dp)
-        do l=1,lmax
-            ln=lm+l+l+1
-            ylm(ln)=fac1(l+1)*sa*sf*st
-            ylm(lm+1)=asg*fac1(l+1)*sa*st/sf
-            ylm(ln-1)=-fac3(l+1)*fac1(l+1)*sa*sf*ct/cf
-            ylm(lm+2)=asg*fac3(l+1)*fac1(l+1)*sa*ct*cf/sf
-            sa=st*sa
-            sf=sf*cf
-            cl=cl+1.0_dp
-            asg=-asg
-            lm=ln
+        lm = 1
+        cl = 1.0_dp
+        asg = -1.0_dp
+        sf = cf
+        sa = cmplx(1.0_dp, 0.0_dp, kind = dp)
+        ylm(1) = cmplx(fac1(1), 0.0_dp, kind = dp)
+        do l = 1, lmax
+            ln = lm + l + l + 1
+            ylm(ln) = fac1(l + 1) * sa * sf * st
+            ylm(lm + 1) = asg * fac1(l + 1) * sa * st / sf
+            ylm(ln - 1) = -fac3(l + 1) * fac1(l + 1) * sa * sf * ct / cf
+            ylm(lm + 2) = asg * fac3(l + 1) * fac1(l + 1) * sa * ct * cf / sf
+            sa = st * sa
+            sf = sf * cf
+            cl = cl + 1.0_dp
+            asg = -asg
+            lm = ln
         end do
         !****** using ylm and yl(m-1) in a recurence relation ******
         !****** yl(m+1) is calculated                         ******
-        lm=1
-        ll=lmax-1
-        do l=1,ll
-            ln=l+l-1
-            lm2=lm+ln+4
-            lm3=lm-ln
-            do m=1,ln
-                lo=lm2+m
-                lp=lm3+m
-                lq=lm+m+1
-                ylm(lo)=-(fac2(lp)*ylm(lp)-ct*ylm(lq))/fac2(lq)
+        lm = 1
+        ll = lmax - 1
+        do l = 1, ll
+            ln = l + l - 1
+            lm2 = lm + ln + 4
+            lm3 = lm - ln
+            do m = 1, ln
+                lo = lm2 + m
+                lp = lm3 + m
+                lq = lm + m + 1
+                ylm(lo) = -(fac2(lp) * ylm(lp) - ct * ylm(lq)) / fac2(lq)
             end do
-            lm=lm+l+l+1
+            lm = lm + l + l + 1
         end do
         return
     end subroutine
     !=======================================================================
-    subroutine bessel(BJ,Y,H,arg)
+    subroutine bessel(BJ, Y, H, arg)
         !     ------------------------------------------------------------------
         !     THIS  SUBROUTINE COMPUTES THE  SPHERICAL BESSEL FUNCTIONS OF
         !     FIRST, SECOND  AND  THIRD  KIND  using Amos lib
@@ -2342,34 +2364,34 @@ contains
         !     THE BESSEL FUNCTIONS OF 3RD KIND ARE DEFINED AS: H(L)=BJ(L)+I*Y(L)
         !     ------------------------------------------------------------------
         complex(dp), intent(in) :: arg
-        complex(dp), intent(out) :: BJ(:),H(:),Y(:)
+        complex(dp), intent(out) :: BJ(:), H(:), Y(:)
         ! local
-        integer      :: lmax1
+        integer :: lmax1
         INTEGER KODE, N, NZ, IERR
-        real(dp)     :: zr, zi, FNU
+        real(dp) :: zr, zi, FNU
         real(dp), allocatable :: cyr(:), cyi(:), cwrkr(:), cwrki(:)
-        complex(dp),allocatable :: cy(:)
+        complex(dp), allocatable :: cy(:)
         !-----------------------------------------------------------------------
         lmax1 = size(BJ) ! to store from l=0 to l=lmax
         if (size(BJ)/=size(Y) .or. size(BJ)/=size(H)) stop 1
         allocate(cy(1:lmax1)); allocate(cyr(1:lmax1)); allocate(cyi(1:lmax1))
         allocate(cwrki(1:lmax1));  allocate(cwrkr(1:lmax1))
         zr = real(arg); zi = aimag(arg)
-        FNU = 0.5_dp;   KODE=1;   N=lmax1
+        FNU = 0.5_dp;   KODE = 1;   N = lmax1
         call ZBESJ(zr, zi, FNU, KODE, N, CYR, CYI, NZ, IERR)
         if (IERR /= 0) stop 1
         ! Convert to spherical function
-        cy = (cyr+ ci*cyi)*sqrt(pi/2.0_dp/arg)
+        cy = (cyr + ci * cyi) * sqrt(pi / 2.0_dp / arg)
         BJ = cy
-        cwrkr=0.0_dp; cwrki=0.0_dp
+        cwrkr = 0.0_dp; cwrki = 0.0_dp
         call ZBESY(zr, zi, FNU, KODE, N, CYR, CYI, NZ, cwrkr, cwrki, IERR)
         if (IERR /= 0) stop 1
-        cy = (cyr+ ci*cyi)*sqrt(pi/2.0_dp/arg)
+        cy = (cyr + ci * cyi) * sqrt(pi / 2.0_dp / arg)
         Y = cy
-        H=BJ+ci*Y
+        H = BJ + ci * Y
     end subroutine
     !=======================================================================
-    subroutine tmtrx(rap,epssph,epsmed,mumed,musph,TE,TH)
+    subroutine tmtrx(rap, epssph, epsmed, mumed, musph, TE, TH)
         !     ------------------------------------------------------------------
         !     THIS SUBROUTINE  CALCULATES  THE  T-MATRIX FOR THE SCATTERING
         !     OF ELECTROMAGNETIC  FIELD  OF  WAVE-LENGHT LAMDA  BY A SINGLE
@@ -2378,32 +2400,32 @@ contains
         !     EPSMED : COMPLEX RELATIVE DIELECTRIC CONSTANT OF THE MEDIUM.
         !     LMAX   : MAXIMUM ANGULAR MOMENTUM from TE(0..LMAX) and TH
         !     ------------------------------------------------------------------
-        complex(dp), intent(in) :: EPSSPH,EPSMED,MUSPH,MUMED,RAP
-        complex(dp), intent(out) :: TE(:),TH(:)
+        complex(dp), intent(in) :: EPSSPH, EPSMED, MUSPH, MUMED, RAP
+        complex(dp), intent(out) :: TE(:), TH(:)
         ! local
-        INTEGER  ::  l1, lmax, lmax1, b_size
-        complex(dp) :: C1,C2,C3,C4,C5,C6,AN,AJ,BN,BJ,ARG,ARGM,XISQ,XISQM,AR
-        complex(dp), allocatable:: J(:),Y(:),H(:),JM(:),YM(:),HM(:)
+        INTEGER :: l1, lmax, lmax1, b_size
+        complex(dp) :: C1, C2, C3, C4, C5, C6, AN, AJ, BN, BJ, ARG, ARGM, XISQ, XISQM, AR
+        complex(dp), allocatable :: J(:), Y(:), H(:), JM(:), YM(:), HM(:)
         !-----------------------------------------------------------------------
         lmax1 = size(TE)
         ! to evaluate TE(0..lmax) we need one more oder in Bessel functions
-        b_size = lmax1+1
+        b_size = lmax1 + 1
         allocate(J (1:b_size)); allocate(Y (1:b_size)); allocate(H (1:b_size))
         allocate(JM(1:b_size)); allocate(YM(1:b_size)); allocate(HM(1:b_size))
-        lmax = lmax1-1
-        ar=2.0_dp*pi*rap
-        xisq =sqrt(epsmed*mumed);  arg =xisq *ar
-        xisqm=sqrt(epssph*musph);  argm=xisqm*ar
-        call bessel(J,Y,H,arg);  call bessel(JM,YM,HM,argm)
-        c1=epssph-epsmed;   c2=epsmed*argm;   c3=-epssph*arg
-        c4= musph -mumed;   c5= mumed*argm;   c6= -musph*arg
-        do  L1=1,LMAX1
-            an=C1*L1*JM(L1)*Y(L1)+C2*JM(L1+1)*Y(L1)+C3*JM(L1)*Y(L1+1)
-            aj=C1*L1*JM(L1)*J(L1)+C2*JM(L1+1)*J(L1)+C3*JM(L1)*J(L1+1)
-            bn=C4*L1*JM(L1)*Y(L1)+C5*JM(L1+1)*Y(L1)+C6*JM(L1)*Y(L1+1)
-            bj=C4*L1*JM(L1)*J(L1)+C5*JM(L1+1)*J(L1)+C6*JM(L1)*J(L1+1)
-            TE(L1)=-aj/(aj+ci*an)
-            TH(L1)=-bj/(bj+ci*bn)
+        lmax = lmax1 - 1
+        ar = 2.0_dp * pi * rap
+        xisq = sqrt(epsmed * mumed);  arg = xisq * ar
+        xisqm = sqrt(epssph * musph);  argm = xisqm * ar
+        call bessel(J, Y, H, arg);  call bessel(JM, YM, HM, argm)
+        c1 = epssph - epsmed;   c2 = epsmed * argm;   c3 = -epssph * arg
+        c4 = musph - mumed;   c5 = mumed * argm;   c6 = -musph * arg
+        do  L1 = 1, LMAX1
+            an = C1 * L1 * JM(L1) * Y(L1) + C2 * JM(L1 + 1) * Y(L1) + C3 * JM(L1) * Y(L1 + 1)
+            aj = C1 * L1 * JM(L1) * J(L1) + C2 * JM(L1 + 1) * J(L1) + C3 * JM(L1) * J(L1 + 1)
+            bn = C4 * L1 * JM(L1) * Y(L1) + C5 * JM(L1 + 1) * Y(L1) + C6 * JM(L1) * Y(L1 + 1)
+            bj = C4 * L1 * JM(L1) * J(L1) + C5 * JM(L1 + 1) * J(L1) + C6 * JM(L1) * J(L1 + 1)
+            TE(L1) = -aj / (aj + ci * an)
+            TH(L1) = -bj / (bj + ci * bn)
         end do
         return
     end subroutine
