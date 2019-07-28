@@ -270,12 +270,12 @@ contains
                         call pcslab(lmax, igmax, rap, eps1(1), epssph(1, ipl), mu1(1), &
                                 musph(1, ipl), kappa, ak, dl(1, 1, ipl), dr(1, 1, ipl), &
                                 g, elm, a0, emach, qir, qiir, qiiir, qivr, ar1, ar2)
-                        call pair(igkmax, igkd, qil, qiil, qiiil, qivl, qir, qiir, qiiir, qivr)
+                        call pair(igkmax, qil, qiil, qiiil, qivl, qir, qiir, qiiir, qivr)
                     end do
                 endif
                 if(nlayer(1)>=2) then
                     do ilayer = 1, nlayer(1) - 1
-                        call pair(igkmax, igkd, qil, qiil, qiiil, qivl, qil, qiil, qiiil, qivl)
+                        call pair(igkmax, qil, qiil, qiiil, qivl, qil, qiil, qiiil, qivl)
                     end do
                 endif
             endif
@@ -319,7 +319,7 @@ contains
                                         mu1(icomp), musph(icomp, ipl), kappa, ak, &
                                         dl(1, icomp, ipl), dr(1, icomp, ipl), g, elm, a0, emach, &
                                         qir, qiir, qiiir, qivr, ar1, ar2)
-                                call pair(igkmax, igkd, wil, wiil, wiiil, wivl, qir, qiir, qiiir, qivr)
+                                call pair(igkmax, wil, wiil, wiiil, wivl, qir, qiir, qiiir, qivr)
                             end do
                             do igk1 = 1, igkmax
                                 do igk2 = 1, igkmax
@@ -332,11 +332,11 @@ contains
                         endif
                         if(nlayer(icomp)>=2) then
                             do ilayer = 1, nlayer(icomp) - 1
-                                call pair(igkmax, igkd, qir, qiir, qiiir, qivr, qir, qiir, qiiir, qivr)
+                                call pair(igkmax, qir, qiir, qiiir, qivr, qir, qiir, qiiir, qivr)
                             end do
                         endif
                     endif
-                    call pair(igkmax, igkd, qil, qiil, qiiil, qivl, qir, qiir, qiiir, qivr)
+                    call pair(igkmax, qil, qiil, qiiil, qivl, qir, qiir, qiiir, qivr)
                 end do
             endif
             if(ktype<3) then
@@ -349,14 +349,14 @@ contains
                     if(abs(mlast - mfirst)/=0.d0.or.abs(elast - efirst)/=0.d0)&
                             stop 'improper matching of successive host media'
                     do iu = 1, nunit - 1
-                        call pair(igkmax, igkd, qil, qiil, qiiil, qivl, &
+                        call pair(igkmax, qil, qiil, qiiil, qivl, &
                                 qil, qiil, qiiil, qivl)
                     end do
                 end if
                 if(kemb==1) then
                     call hoslab(igmax, kapr, (kapr + kapout) / 2.d0, kapout, ak, g, vec0, &
                             vec0, 0.d0, qir, qiir, qiiir, qivr, emach)
-                    call pair(igkmax, igkd, qil, qiil, qiiil, qivl, qir, qiir, qiiir, qivr)
+                    call pair(igkmax, qil, qiil, qiiil, qivl, qir, qiir, qiiir, qivr)
                     do igk1 = 1, igkmax
                         do igk2 = 1, igkmax
                             qir  (igk1, igk2) = qil  (igk1, igk2)
@@ -367,7 +367,7 @@ contains
                     end do
                     call hoslab(igmax, kapin, (kapl + kapin) / 2.d0, kapl, ak, g, vec0, &
                             vec0, 0.d0, qil, qiil, qiiil, qivl, emach)
-                    call pair(igkmax, igkd, qil, qiil, qiiil, qivl, qir, qiir, qiiir, qivr)
+                    call pair(igkmax, qil, qiil, qiiil, qivl, qir, qiir, qiiir, qivr)
                 endif
                 call scat(igmax, zval, ak, g, dble(kapin), dble(kapout), &
                         eincid, qil, qiiil)
@@ -1645,33 +1645,6 @@ contains
                 &reciprocal lattice vectors '
         goto 6
     end subroutine
-!    !=======================================================================
-!    subroutine lat2d_cycle(a, b, rmax, imax)
-!        integer imax, id, ierr
-!        real(dp) rmax
-!!        integer nt1(id), nt2(id)
-!        real(dp) a(2), b(2)
-!!        real(dp) vecmod(id)
-!        !------------------------------------------------------------------
-!        id = 5
-!        allocate(nt1(1:id))
-!        allocate(nt2(1:id))
-!        allocate(vecmod(1:id))
-!        call lat2d(a, b, rmax, imax, id, nt1, nt2, vecmod, ierr)
-!        do while (ierr /= 0 .and. id <1000)
-!            id = id*3
-!            deallocate(nt1)
-!            deallocate(nt2)
-!            deallocate(vecmod)
-!            allocate(nt1(1:id))
-!            allocate(nt2(1:id))
-!            allocate(vecmod(1:id))
-!            call lat2d(a, b, rmax, imax, id, nt1, nt2, vecmod, ierr)
-!        end do
-!        if (ierr /= 0) stop 'rmax is too large in lat2d()'
-!        write(6,*) imax
-!        return
-!    end subroutine
     !=======================================================================
     subroutine lat2d(a, b, rmax, imax, id, nta, ntb, vecmod, ierr)
         !     --------------------------------------------------------------
@@ -1843,7 +1816,7 @@ contains
         return
     end function cmplx_dp
     !=======================================================================
-    subroutine pair(igkmax, igkd, qil, qiil, qiiil, qivl, qir, qiir, qiiir, qivr)
+    subroutine pair(igkmax, qil, qiil, qiiil, qivl, qir, qiir, qiiir, qivr)
 
         !     ------------------------------------------------------------------
         !     this subroutine calculates scattering q-matrices for a  double
