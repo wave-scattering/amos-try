@@ -97,7 +97,7 @@ contains
             fi, fein, d2, d1, polar, &
             it, nlayer, nplan, dl, dr, s, al, d, aq, eps2, eps3, mu1, mu2, mu3, &
             eps1, musph, epssph)
-        integer   igd, igkd, nelmd, ncompd, npland
+        integer   igd, nelmd, ncompd, npland
         integer, allocatable ::    nt1(:), nt2(:)
         real(dp), allocatable ::   vecmod(:)
 
@@ -403,35 +403,31 @@ contains
         !     eigenmodes of the em field in the given crystal, corresponding to
         !     "ak" and a given frequency.
         !     ------------------------------------------------------------------
-        !
-        ! ..  parameter statements ..
-        !
-        integer   igd, igkd, igk2d
-        parameter(igd = 21, igkd = 2 * igd, igk2d = 2 * igkd)
 
         ! ..  arguments  ..
-        integer    igmax
+        integer    igmax, igkd
         real(dp)   zval, emach
         real(dp)   ak(2), al(3)
-        complex(dp) qi(igkd, igkd), qii(igkd, igkd)
-        complex(dp) qiii(igkd, igkd), qiv(igkd, igkd)
+        complex(dp) qi(igmax*2, igmax*2), qii(igmax*2, igmax*2)
+        complex(dp) qiii(igmax*2, igmax*2), qiv(igmax*2, igmax*2)
         ! ..  variables ..
         integer    ii, i, igk1, igk2, igkmax, j
         integer    kd, lib1, lib2, lu, lp, ln, ifail, igk3, igk2m
         real(dp)   aka, bkzre, bkzim
         complex(dp) eaka
 
-        integer    int(igkd)
-        real(dp)   ar(igk2d, igk2d), ai(igk2d, igk2d)
-        complex(dp) :: a(igk2d, igk2d)
-        real(dp)   rr(igk2d), ri(igk2d), vr(igk2d, igk2d), vi(igk2d, igk2d)
-        complex(dp) :: r2(igk2d)
-        real(dp)   akzap(igk2d), akzip(igk2d)
-        real(dp)   akzrep(igk2d), akzimp(igk2d), akzren(igk2d), akzimn(igk2d)
-        complex(dp) qh1(igkd, igkd), qh2(igkd, igkd), akz(igk2d)
-        complex(dp) comvec(igk2d, igk2d)
+        integer    int(igmax*2)
+        real(dp)   ar(igmax*4, igmax*4), ai(igmax*4, igmax*4)
+        complex(dp) :: a(igmax*4, igmax*4)
+        real(dp)   rr(igmax*4), ri(igmax*4), vr(igmax*4, igmax*4), vi(igmax*4, igmax*4)
+        complex(dp) :: r2(igmax*4)
+        real(dp)   akzap(igmax*4), akzip(igmax*4)
+        real(dp)   akzrep(igmax*4), akzimp(igmax*4), akzren(igmax*4), akzimn(igmax*4)
+        complex(dp) qh1(igmax*2, igmax*2), qh2(igmax*2, igmax*2), akz(igmax*4)
+        complex(dp) comvec(igmax*4, igmax*4)
         !     ------------------------------------------------------------------
         igkmax = 2 * igmax
+        igkd = igkmax
         igk2m = 2 * igkmax
         aka = ak(1) * al(1) + ak(2) * al(2)
         eaka = exp(ci * aka)
@@ -497,7 +493,7 @@ contains
                 akz(ii) = (-ci / pi) * log(r2(ii) / eaka)
             end do
         else
-            call cnaa(igk2d, igk2m, ar, ai, rr, ri, vr, vi, ifail)
+            call cnaa(igk2m, igk2m, ar, ai, rr, ri, vr, vi, ifail)
 
             if(ifail/=0) then
                 write(6, 102) ifail
@@ -1826,7 +1822,6 @@ contains
         ! ..  scalar arguments  ..
         integer igkmax
         ! ..  array arguments  ..
-        integer   igkd
         complex(dp) qil (:, :), qiil(:, :), qiiil(:, :)
         complex(dp) qivl(:, :)
         complex(dp) qir (:, :), qiir(:, :), qiiir(:, :)
