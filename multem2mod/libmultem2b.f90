@@ -117,7 +117,6 @@ contains
         real(dp) ak(2), dl(3, ncompd, npland)
         real(dp)   dr(3, ncompd, npland), b1(2), b2(2)
         real(dp)   s(ncompd, npland), al(3), d(ncompd), vec0(3), aq(2)
-!        parameter (igd = 21, igkd = 2 * igd)
         complex(dp), allocatable:: qil  (:, :), qiil(:, :), qiiil(:, :)
         complex(dp), allocatable:: qivl (:, :), qir (:, :), qiir (:, :)
         complex(dp), allocatable:: qiiir(:, :), qivr(:, :), wivl (:, :)
@@ -582,12 +581,6 @@ contains
         !     this subroutine computes the transmission/reflection matrices for
         !     a plane of spheres embedded in a homogeneous host medium.
         !     ------------------------------------------------------------------
-        !
-        ! ..  parameter statements ..
-        !
-!        integer   igd
-!        parameter (igd = 21)
-        !
         ! ..  scalar arguments ..
         !
         integer    lmax, igmax
