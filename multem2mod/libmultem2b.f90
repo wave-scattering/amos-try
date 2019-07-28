@@ -5,7 +5,6 @@ module libmultem2b
     use errfun, only : erf_pop
 
     implicit none
-    private
     integer, parameter, public :: dp = kind(0.0D0)
     complex(dp), parameter, public :: ci = (0.0_dp, 1.0_dp)
     complex(dp), parameter, public :: czero = (0.0_dp, 0.0_dp)
@@ -99,9 +98,11 @@ contains
             it, nlayer, nplan, dl, dr, s, al, d, aq, eps2, eps3, mu1, mu2, mu3, &
             eps1, musph, epssph)
         integer   igd, igkd, nelmd, ncompd, npland
-        parameter (igd = 21, igkd = 2 * igd)
+        integer, allocatable ::    nt1(:), nt2(:)
+        real(dp), allocatable ::   vecmod(:)
+
         integer      lmax, i, igkmax, igk1, igk2, igmax, ktype, kscan, ncomp, ig1
-        integer      n, np, ig0, nunit, icomp, kemb, iu, ipl, ilayer
+        integer      n, np, ig0, nunit, icomp, kemb, iu, ipl, ilayer, ierr
         real(dp)     alpha, emach, epsilon
         real(dp)     a0, ra0, rmax, akxy
         real(dp)     zval, zstep, zinf, zsup, fab, alphap, theta, fi, fein
@@ -110,22 +111,24 @@ contains
         complex(dp)   kappal, kappar, kappasl, d1, kapin, kapl, kapr
         complex(dp)   mlast, elast, mfirst, efirst, rap
         character(2)  polar
-        integer    nt1(igd), nt2(igd), it(ncompd)
+        integer    it(ncompd)
         integer    nlayer(ncompd), nplan(ncompd)
-        real(dp), allocatable :: elm(:)
-        real(dp) ak(2), vecmod(igd), dl(3, ncompd, npland)
-        real(dp)   dr(3, ncompd, npland), g(2, igd), b1(2), b2(2)
+        real(dp), allocatable :: elm(:), g(:, :)
+        real(dp) ak(2), dl(3, ncompd, npland)
+        real(dp)   dr(3, ncompd, npland), b1(2), b2(2)
         real(dp)   s(ncompd, npland), al(3), d(ncompd), vec0(3), aq(2)
-        complex(dp) qil  (igkd, igkd), qiil(igkd, igkd), qiiil(igkd, igkd)
-        complex(dp) qivl (igkd, igkd), qir (igkd, igkd), qiir (igkd, igkd)
-        complex(dp) qiiir(igkd, igkd), qivr(igkd, igkd), wivl (igkd, igkd)
-        complex(dp) wil  (igkd, igkd), wiil(igkd, igkd), wiiil(igkd, igkd)
-        complex(dp) eincid(igkd), ein(2), eps2(ncompd), eps3(ncompd)
+!        parameter (igd = 21, igkd = 2 * igd)
+        complex(dp), allocatable:: qil  (:, :), qiil(:, :), qiiil(:, :)
+        complex(dp), allocatable:: qivl (:, :), qir (:, :), qiir (:, :)
+        complex(dp), allocatable:: qiiir(:, :), qivr(:, :), wivl (:, :)
+        complex(dp), allocatable:: wil  (:, :), wiil(:, :), wiiil(:, :)
+        complex(dp), allocatable:: eincid(:)
+        complex(dp) ein(2), eps2(ncompd), eps3(ncompd)
         complex(dp) mu1(ncompd), mu2(ncompd), mu3(ncompd), eps1(ncompd)
         complex(dp) musph(ncompd, npland), epssph(ncompd, npland)
         real(dp)   ar1(2), ar2(2)
         data emach/1.d-8/, epsilon/0.d0/
-        data eincid/igkd*(0.d0, 0.d0)/, vec0/3*0.d0/
+        data vec0/3*0.d0/
         !     ------------------------------------------------------------------
         nelmd = get_elm_size(lmax)
         allocate(elm(1:nelmd))
@@ -144,7 +147,40 @@ contains
         b1(2) = ar1(1) * ra0
         b2(1) = -ar2(2) * ra0
         b2(2) = ar2(1) * ra0
-        call lat2d(b1, b2, rmax, igmax, igd, nt1, nt2, vecmod)
+
+        igd = 5
+        allocate(nt1(1:igd))
+        allocate(nt2(1:igd))
+        allocate(vecmod(1:igd))
+        call lat2d(b1, b2, rmax, igmax, igd, nt1, nt2, vecmod, ierr)
+        do while (ierr /= 0 .and. igd <1000)
+            igd = igd*3
+            deallocate(nt1)
+            deallocate(nt2)
+            deallocate(vecmod)
+            allocate(nt1(1:igd))
+            allocate(nt2(1:igd))
+            allocate(vecmod(1:igd))
+            call lat2d(b1, b2, rmax, igmax, igd, nt1, nt2, vecmod, ierr)
+        end do
+        if (ierr /= 0) stop 'rmax is too large in lat2d()'
+
+        allocate(qil  (1:2*igmax, 1:2*igmax))
+        allocate(qiil(1:2*igmax, 1:2*igmax))
+        allocate(qiiil(1:2*igmax, 1:2*igmax))
+        allocate(qivl (1:2*igmax, 1:2*igmax))
+        allocate(qir (1:2*igmax, 1:2*igmax))
+        allocate(qiir (1:2*igmax, 1:2*igmax))
+        allocate(qiiir(1:2*igmax, 1:2*igmax))
+        allocate(qivr(1:2*igmax, 1:2*igmax))
+        allocate(wivl (1:2*igmax, 1:2*igmax))
+        allocate(wil  (1:2*igmax, 1:2*igmax))
+        allocate(wiil(1:2*igmax, 1:2*igmax))
+        allocate(wiiil(1:2*igmax, 1:2*igmax))
+        allocate(eincid(1:2*igmax))
+        eincid = czero
+        allocate(g(1:2,1:igmax))
+
         write(6, 214) b1(1), b1(2), b2(1), b2(2)
         igkmax = 2 * igmax
         do ig1 = 1, igmax
@@ -553,8 +589,8 @@ contains
         !
         ! ..  parameter statements ..
         !
-        integer   igd
-        parameter (igd = 21)
+!        integer   igd
+!        parameter (igd = 21)
         !
         ! ..  scalar arguments ..
         !
@@ -565,7 +601,7 @@ contains
         !
         ! ..  array arguments ..
         !
-        real(dp)     ak(2), dl(3), dr(3), g(2, igd), elm(:)
+        real(dp)     ak(2), dl(3), dr(3), g(2, igmax), elm(:)
         complex(dp) qi(:, :), qii(:, :), qiii(:, :)
         complex(dp) qiv(:, :)
         real(dp)     ar1(2), ar2(2)
@@ -582,7 +618,7 @@ contains
         ! ..  local arrays  ..
         !
         integer :: int1((lmax + 1)**2 - 1), int2((lmax + 1)**2 - 1)
-        complex(dp) ae(2, (lmax + 1)**2), ah(2, (lmax + 1)**2), gkk(3, igd)
+        complex(dp) ae(2, (lmax + 1)**2), ah(2, (lmax + 1)**2), gkk(3, igmax)
         complex(dp) gk(3), lame(2), lamh(2)
         complex(dp) xeven(((lmax + 1) * (lmax + 2)) / 2, ((lmax + 1) * (lmax + 2)) / 2), &
                 xodd((lmax * (lmax + 1)) / 2, (lmax * (lmax + 1)) / 2)
@@ -1609,10 +1645,33 @@ contains
                 &reciprocal lattice vectors '
         goto 6
     end subroutine
-    !=======================================================================
-    subroutine lat2d_cycle(a, b, rmax, imax, id, nta, ntb, vecmod)
-
-    end subroutine
+!    !=======================================================================
+!    subroutine lat2d_cycle(a, b, rmax, imax)
+!        integer imax, id, ierr
+!        real(dp) rmax
+!!        integer nt1(id), nt2(id)
+!        real(dp) a(2), b(2)
+!!        real(dp) vecmod(id)
+!        !------------------------------------------------------------------
+!        id = 5
+!        allocate(nt1(1:id))
+!        allocate(nt2(1:id))
+!        allocate(vecmod(1:id))
+!        call lat2d(a, b, rmax, imax, id, nt1, nt2, vecmod, ierr)
+!        do while (ierr /= 0 .and. id <1000)
+!            id = id*3
+!            deallocate(nt1)
+!            deallocate(nt2)
+!            deallocate(vecmod)
+!            allocate(nt1(1:id))
+!            allocate(nt2(1:id))
+!            allocate(vecmod(1:id))
+!            call lat2d(a, b, rmax, imax, id, nt1, nt2, vecmod, ierr)
+!        end do
+!        if (ierr /= 0) stop 'rmax is too large in lat2d()'
+!        write(6,*) imax
+!        return
+!    end subroutine
     !=======================================================================
     subroutine lat2d(a, b, rmax, imax, id, nta, ntb, vecmod, ierr)
         !     --------------------------------------------------------------
@@ -1625,12 +1684,12 @@ contains
         ! ..  arguments ..
         integer imax, id, ierr
         real(dp) rmax
-        integer nta(id), ntb(id)
-        real(dp)a(2), b(2), vecmod(id)
+        integer nta(:), ntb(:)
+        real(dp)a(2), b(2), vecmod(:)
         ! ..  local scalars ..
         integer i, na, nb, na0, j, nma, nmb, iord
         real(dp)rmax2, sp, amod2, bmod2, dum, vmod2, vm
-        !     ------------------------------------------------------------------
+        !------------------------------------------------------------------
         ierr = 0
         rmax2 = rmax * rmax
         !***  check if primitive vectors have positive scalar product
@@ -1759,12 +1818,6 @@ contains
         end do
         !
         return
-        13 imax = i - 1
-        write(6, 102) imax
-        do i = 1, imax
-            write(6, 103) i, nta(i), a(1), a(2), ntb(i), b(1), b(2), vecmod(i)
-        end do
-        stop
         !
         100 format(/13x, 'new primitive vectors defined to have positive scalar&
                 &product'/13x, 'a=(', 2e14.6, ')'/13x, 'b=(', 2e14.6, ')')
@@ -1787,6 +1840,7 @@ contains
     complex(dp) function cmplx_dp(re, im)
         real(dp), intent(in) :: re, im
         cmplx_dp = cmplx(re, im, kind = dp)
+        return
     end function cmplx_dp
     !=======================================================================
     subroutine pair(igkmax, igkd, qil, qiil, qiiil, qivl, qir, qiir, qiiir, qivr)
@@ -1808,9 +1862,9 @@ contains
         ! ..  local
         integer    igk1, igk2, igk3
         real(dp)   emach
-        integer    int(igkd), jnt(igkd)
-        complex(dp) qinv1(igkd, igkd), qinv2(igkd, igkd), w1(igkd, igkd)
-        complex(dp) w2(igkd, igkd), w3(igkd, igkd), w4(igkd, igkd)
+        integer    int(igkmax), jnt(igkmax)
+        complex(dp) qinv1(igkmax, igkmax), qinv2(igkmax, igkmax), w1(igkmax, igkmax)
+        complex(dp) w2(igkmax, igkmax), w3(igkmax, igkmax), w4(igkmax, igkmax)
         !
         data emach/1.d-8/
         !-----------------------------------------------------------------------

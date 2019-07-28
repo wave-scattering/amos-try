@@ -14,7 +14,7 @@ def create_input(npts,ak1, ak2, zinf, zsup, polar, lmax, r_ratio):
            '           ********INPUT FILE FOR TRANSMISSION*********\n'
            '           ********************************************\n'
            '   KTYPE = 2   KSCAN = 1   KEMB  = 0    LMAX ='+'%2i'%(lmax)+'   NCOMP = 1   NUNIT = 1\n'
-           ' ALPHA =    1.000000  BETA =    1.000000   FAB =   60.000000  RMAX =   16.000000\n'
+           ' ALPHA =    1.000000  BETA =    1.000000   FAB =   60.000000  RMAX =   20.000000\n'
            '  NP ='+'%4i'%(npts)+'  ZINF =  '+
            '%11.8f'%(zinf)
            +'  ZSUP =  '+'%12.9f'%(zsup)+'\n'
@@ -58,7 +58,7 @@ def eval(i):
 if __name__ == "__main__":
     plt.figure(figsize=(11,6))
     npts = 204
-    lmax=16
+    lmax=4
     r_ratio = 0.47050000
     # from_k = 3.7128
     # to_k = 3.7129
