@@ -45,6 +45,7 @@ add_subdirectory(amos)
 add_subdirectory(try-zbesj)
 add_subdirectory(lapack_wrapper)
 add_subdirectory(errfun)
+add_subdirectory(errfun_test)
 
 set(common "-std=f2003")
 
