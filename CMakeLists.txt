@@ -47,7 +47,7 @@ add_subdirectory(lapack_wrapper)
 add_subdirectory(errfun)
 add_subdirectory(errfun_test)
 
-set(common "-std=f2003")
+set(common "-std=f2008")
 
 set(CMAKE_BUILD_TYPE Debug
         CACHE STRING "Build type (Debug, Release)" FORCE)
