@@ -7,10 +7,10 @@ program errfun_test
             cone = cmplx( 1.0_dp, 0.0_dp, kind=dp ),                            &
             ci = cmplx( 0.0_dp, 1.0_dp, kind=dp ),                            &
             czero = cmplx( 0.0_dp, 0.0_dp, kind=dp )
-    real(dp), parameter:: emach = 1.0d-8, step = 0.3
+    real(dp), parameter:: emach = 1.0d-8, step = 1.0_dp
     integer i, j
-    integer, parameter:: total =15
-    real(dp), parameter:: start = -step*total, stop = step*total
+    integer, parameter:: total =100
+    real(dp), parameter:: start = -step*total, stop = -start
     real(dp) x,y, z_abs
     !=======================================================================
 
@@ -20,7 +20,7 @@ program errfun_test
             z_res_lib = cerf_lib(z_arg, emach)
             z_res_multem2 = cerf_multem2(z_arg,emach)
             z_abs = dble(abs(z_res_lib/z_res_multem2 -1.0_dp))
-            if (z_abs > emach*10) then
+            if (z_abs > emach*5) then
                 write(*,*) "arg", z_arg,"result: z_lib", z_res_lib, "z_old",z_res_multem2
                 write(*,*) "z_lib/z_old - 1.0 = ", z_res_lib/z_res_multem2 -1.0_dp, "  arg:", x, y, "abs:", z_abs
 
@@ -36,8 +36,11 @@ contains
         complex(dp), intent(in) :: z
         real(dp) emach
 !        cerf_lib = exp(-z**2) * (1.0 - erf_zag(-ci * z, emach))
-        cerf_lib = exp(-z**2) * (1.0 - erf_pop(-ci * z))
+!        cerf_lib = exp(-z**2) * (1.0 - erf_pop(-ci * z))
 !        cerf_lib = exp(-z**2) * (1.0 - erf(-ci * z))
+         cerf_lib = wpop(z)
+!         cerf_lib = wzag(z,emach)
+
         return
     end function
     !=======================================================================
