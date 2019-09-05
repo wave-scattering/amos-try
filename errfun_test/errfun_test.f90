@@ -36,8 +36,8 @@ contains
         complex(dp), intent(in) :: z
         real(dp) emach
 !        cerf_lib = exp(-z**2) * (1.0 - erf_zag(-ci * z, emach))
-!        cerf_lib = exp(-z**2) * (1.0 - erf_pop(-ci * z))
-        cerf_lib = exp(-z**2) * (1.0 - erf(-ci * z))
+        cerf_lib = exp(-z**2) * (1.0 - erf_pop(-ci * z))
+!        cerf_lib = exp(-z**2) * (1.0 - erf(-ci * z))
         return
     end function
     !=======================================================================
