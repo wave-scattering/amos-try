@@ -1,4 +1,4 @@
-project(amos)
+project(amos Fortran)
 
 set(SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/amos.f90

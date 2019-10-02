@@ -1,4 +1,4 @@
-project(dense_solve)
+project(dense_solve Fortran)
 set(SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/dense_solve.f90
 )

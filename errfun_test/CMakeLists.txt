@@ -2,6 +2,8 @@
 
 
 SET (PROJECTNAME "errfun_test")
+PROJECT (${PROJECTNAME} Fortran)
+
 
 include_directories(${CMAKE_BINARY_DIR}/errfun
         )

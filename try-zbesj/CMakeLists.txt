@@ -1,4 +1,4 @@
-project(try-besj)
+project(try-besj Fortran)
 
 ADD_EXECUTABLE(besj-f77 test-besj.f)
 target_link_libraries(besj-f77 amos)
