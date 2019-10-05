@@ -1,4 +1,6 @@
-project(dense_solve Fortran)
+project(dense_solve Fortran C)
+FIND_PACKAGE(LAPACK REQUIRED)
+
 set(SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/dense_solve.f90
 )

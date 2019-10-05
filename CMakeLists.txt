@@ -1,11 +1,10 @@
 cmake_minimum_required(VERSION 3.0.2)
 
+# apt install libblas-dev liblapack-dev
 SET (PROJECTNAME "top-besj")
 PROJECT (${PROJECTNAME} Fortran)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-# apt install libblas-dev liblapack-dev
-FIND_PACKAGE(LAPACK REQUIRED)
 
 # Make sure that CMAKE_BUILD_TYPE is either Debug or Release:
 if (NOT CMAKE_BUILD_TYPE)
