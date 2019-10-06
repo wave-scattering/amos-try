@@ -3,7 +3,7 @@
            ********************************************
    KTYPE = 3   KSCAN = 1   KEMB  = 1    LMAX = 4   NCOMP = 4   NUNIT = 6
  ALPHA =    1.000000  BETA =    1.000000   FAB =   90.000000  RMAX =   16.000000
-  NP =  27  ZINF =   0.80000000  ZSUP =   1.050000000
+  NP =  20  ZINF =   1.469923168  ZSUP =   3.322821292
   THETA/AK(1) =   0.00000000     FI/AK(2) =   0.00000000   POLAR =S     FEIN =   0.00
 
 Give information for the "NCOMP" components 
