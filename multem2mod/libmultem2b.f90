@@ -884,14 +884,13 @@ contains
 
     !--------/---------/---------/---------/---------/---------/---------/--
     !                             DLM1
-    !DLM1, the sum over reciprocal lattice  vectors, is
+    !DLM1, the sum over reciprocal lattice vectors, is
     !calculated first.
     !
-    !The prefactors PREF aretabulated  for even
-    !values of l+|m|, thus
+    !The prefactors PREF are tabulated for even values of l+|m|, thus
     !lm=(00), (11), (20), (22), (l2max,l2max)=(2*LMAX,2*LMAX)
     !
-    !The  factorial  factors F1 are tabulated in
+    !The factorial factors F1 are tabulated in
     !denom,for all values of n=0,...,(l-|m|)/2
     !--------/---------/---------/---------/---------/---------/---------/--
     ! Lattice vectors independent part
@@ -942,10 +941,10 @@ contains
         !--------/---------/---------/---------/---------/---------/---------/--
         ! Lattice vectors dependent part
         !
-        ! The reciprocal  lattice defined by  b1, b2.
+        ! The reciprocal lattice defined by b1, b2.
         ! The summation
-        !     begins with the origin point of the lattice, and  continues in
-        !     steps of 8*n1 points , each  step involving the  perimeter of a
+        !     begins with the origin point of the lattice, and continues in
+        !     steps of 8*n1 points, each step involving the  perimeter of a
         !     parallelogram of lattice points about the origin,of side 2*n1+1
         !     each step begins at label 9.
         !     akpt=the current lattice vector in the sum
@@ -1013,20 +1012,20 @@ contains
             !
             ! in the resulting summation!!!
             !--------/---------/---------/---------/---------/---------/---------/--
-            !     for  every lattice vector of the sum, three short arrays are
-            !     initialised as below. and used as tables:
-            !     xpm(m) contains values of xpk**|m|
-            !     agk(i) contains values of (ac/kappa)**i
-            !     gkn(n) contains values of (gp/kappa)**(2*n-1)*gam(n,z)
-            !     where l=0,l2max;m=-l,l;n=0,(l-|m|)/2;i=l-2*n
-            !     gam is the incomplete gamma function, which is calculated by
-            !     recurrence  from  the value  for n=0, which  in turn can  be
-            !     expressed in terms of the complex error function cerf
-            !     ac=mod(akpt). note special action if ac=0
+            ! for  every lattice vector of the sum, three short arrays are
+            ! initialised as below. and used as tables:
+            ! xpm(m) contains values of xpk**|m|
+            ! agk(i) contains values of (ac/kappa)**i
+            ! gkn(n) contains values of (gp/kappa)**(2*n-1)*gam(n,z)
+            ! where l=0,l2max;m=-l,l;n=0,(l-|m|)/2;i=l-2*n
+            ! gam is the incomplete gamma function, which is calculated by
+            ! recurrence  from  the value  for n=0, which  in turn can  be
+            ! expressed in terms of the complex error function cerf
+            ! ac=mod(akpt). note special action if ac=0
             !
                     acsq = akpt(1) * akpt(1) + akpt(2) * akpt(2)
                     gpsq = kapsq - acsq
-                    if(abs(gpsq)<emach * emach)   then
+                    if(abs(gpsq)<emach * emach) then
                         write(7, 100)
                         100     format(13x, 'fatal error from xmat:'/3x, 'gpsq is too small.'&
                                 /3x, 'give a small but nonzero value for "epsilon"'/3x, &
@@ -1088,9 +1087,9 @@ contains
         !--------/---------/---------/---------/---------/---------/---------/--
         !                         DLM1 term
         !--------/---------/---------/---------/---------/---------/---------/--
-        !     the contribution to the sum dlm1 for a particular
-        !     reciprocal lattice vector is now accumulated into
-        !     the  elements of dlm,note special action if  ac=0
+        !  the contribution to the sum dlm1 for a particular
+        !  reciprocal lattice vector is now accumulated into
+        !  the elements of dlm,note special action if  ac=0
         !
                     k = 1
                     kk = 1
@@ -1133,9 +1132,9 @@ contains
                 ii = 0      !from now on, the "do i1"-loop is performed fully
             end do
         !
-        !     After each step of the summation a test on the
-        !     convergence  of the  elements of  dlm is  made.
-        !   The measure of convergence is taken to be the usual vector norm
+        !  After each step of the summation a test on the
+        !  convergence of the  elements of dlm is made.
+        !  The measure of convergence is taken to be the usual vector norm
         !                   \sum_I |DLM(I))|**2
         !  The measure of convergence is controlled by parameters QP and QT
         !  The summation is enforced to run over at least IENF shells
@@ -1168,13 +1167,13 @@ contains
     !--------/---------/---------/---------/---------/---------/---------/--
     !                         DLM2 term
     !--------/---------/---------/---------/---------/---------/---------/--
-    !     dlm2, the sum over real space lattice vectors, begins with
-    !     the adjustment of the array pref, to contain values of the
-    !     prefactor  'p2' for lm=(00),(11),(20),(22),...
+    ! dlm2, the sum over real space lattice vectors, begins with
+    ! the adjustment of the array pref, to contain values of the
+    ! prefactor  'p2' for lm=(00),(11),(20),(22),...
     !
-    !     The direct lattice vector R=0 is excluded from the summation.
-    !     Therefore there is no need to enforce a single passage of "do I2"
-    !     loop as was the case of dual lattice summation
+    ! The direct lattice vector R=0 is excluded from the summation.
+    ! Therefore there is no need to enforce a single passage of "do I2"
+    ! loop as was the case of dual lattice summation
         kk = 1
         ap1 = tv / (4.0_dp * pi)
         cf = kapsq / ci
@@ -1203,10 +1202,10 @@ contains
             end do
         end do
         !
-        !     the summation proceeds in steps of 8*n1 lattice points
-        !     as before, but this  time excluding  the origin  point
-        !     r=the current lattice vector in the sum
-        !     ar=mod(r)
+        ! the summation proceeds in steps of 8*n1 lattice points
+        ! as before, but this time excluding the origin  point
+        ! r=the current lattice vector in the sum
+        ! ar=mod(r)
         !
         n1 = 0
         do
@@ -1231,11 +1230,11 @@ contains
                     ad = ak(1) * r(1) + ak(2) * r(2)
                     sd = exp(-ad * ci)
                     !
-                    !     for each lattice vector the integral 'u' is obtained
-                    !     from the recurrence relation in l suggested by kambe
-                    !     u1 and u2 are the  initial terms of this recurrence,
-                    !     for l#-1 and l=0, and they are evaluated in terms of
-                    !     the complex error function cerf
+                    ! for each lattice vector the integral 'u' is obtained
+                    ! from the recurrence relation in l suggested by kambe
+                    ! u1 and u2 are the  initial terms of this recurrence,
+                    ! for l#-1 and l=0, and they are evaluated in terms of
+                    ! the complex error function cerf
                     !
                     kant = 0.5_dp * ar * kappa
                     knsq = kant * kant
@@ -1251,10 +1250,10 @@ contains
                     u1 = aa * xpa
                     u2 = ab * xpa / kant
                     !
-                    !     the contribution to dlm2 from a particular lattice
-                    !     vector  is  accumulated into  the elements of  dlm
-                    !     this procedure includes the term (kant**l) and the
-                    !     recurrence for the integral 'u'
+                    ! the contribution to dlm2 from a particular lattice
+                    ! vector  is  accumulated into  the elements of  dlm
+                    ! this procedure includes the term (kant**l) and the
+                    ! recurrence for the integral 'u'
                     !
                     kk = 1
                     al = -0.5_dp
@@ -1284,8 +1283,8 @@ contains
                 end do
             end do
             !
-            !     After each step of the summation a test on the
-            !     convergence of the elements of dlm is made.
+            ! After each step of the summation a test on the
+            ! convergence of the elements of dlm is made.
             !  The measure of convergence is taken to be the usual vector norm
             !                   \sum_I |DLM(I))|**2
             !  The measure of convergence is controlled by parameters QP and QT
@@ -1316,9 +1315,9 @@ contains
     !--------/---------/---------/---------/---------/---------/---------/--
     !                         DLM3 term
     !--------/---------/---------/---------/---------/---------/---------/--
-    !     the term dlm3 has a non-zero contribution  only
-    !     when l=m=0.it is evaluated here in terms of the
-    !     complex error function cerf
+    !  the term dlm3 has a non-zero contribution  only
+    !  when l=m=0.it is evaluated here in terms of the
+    !  complex error function cerf
     !
         xpa = exp(-alpha)
         rtai = 1.0_dp / (rtpi * rta)
@@ -1328,8 +1327,8 @@ contains
 
     !--------/---------/---------/---------/---------/---------/---------/--
     !                          RESCALING
-    !     finally the elements of dlm are multiplied by the
-    !     factor (-1.0_dp)**((m+|m|)/2)
+    !  finally the elements of dlm are multiplied by the
+    !  factor (-1.0_dp)**((m+|m|)/2)
     !
         do l = 2, ll2, 2
             n = l * l / 2 + 1
@@ -1341,10 +1340,10 @@ contains
         !     write(16,251) dlm
         ! 251 format(15h0dlm1+dlm2+dlm3,//45(2e13.5,/))
         !--------/---------/---------/---------/---------/---------/---------/--
-        !     summation over the clebsch-gordon type coefficients
-        !     elm proceeds, first for  xodd, and then  for xeven.
-        !     this gives the kambe elements  a(l2,m2;l3,m3) which
-        !     give the elements  x(l3,m3;l2,m2) of xodd and xeven
+        ! summation over the clebsch-gordon type coefficients
+        ! elm proceeds, first for  xodd, and then  for xeven.
+        ! this gives the kambe elements  a(l2,m2;l3,m3) which
+        ! give the elements  x(l3,m3;l2,m2) of xodd and xeven
         !
         k = 1
         ii = 0
@@ -1395,9 +1394,9 @@ contains
     end subroutine
     !=======================================================================
     subroutine setup(lmax, xeven, xodd, te, th, xxmat1, xxmat2)
-        !     ------------------------------------------------------------------
-        !     this subroutine constructs the secular matrix
-        !     ------------------------------------------------------------------
+        ! ------------------------------------------------------------------
+        ! this subroutine constructs the secular matrix
+        ! ------------------------------------------------------------------
         ! ..  scalar arguments ..
         integer lmax
         ! ..  array arguments ..
