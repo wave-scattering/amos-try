@@ -885,23 +885,22 @@ contains
         alpha = cmplx_dp(al, 0.0_dp)
         rta = sqrt(alpha)
 
-        !--------/---------/---------/---------/---------/---------/---------/--
-        !                             DLM1
-        !DLM1, the  sum  over  reciprocal   lattice  vectors  , is
-        !calculated first.
-        !
-        !The prefactors PREF aretabulated  for even
-        !values of l+|m|, thus
-        !lm=(00), (11), (20), (22), (l2max,l2max)=(2*LMAX,2*LMAX)
-        !
-        !The  factorial  factors F1 are tabulated in
-        !denom,for all values of n=0,...,(l-|m|)/2
-        !
-        !--------/---------/---------/---------/---------/---------/---------/--
-        ! Lattice vectors independent part
-        ! Determining the arrays
-        ! PREF(KK)=AP*CP comprising the i**(1+|m|) prefactor
-        ! DENOM(K)
+    !--------/---------/---------/---------/---------/---------/---------/--
+    !                             DLM1
+    !DLM1, the sum over reciprocal lattice  vectors, is
+    !calculated first.
+    !
+    !The prefactors PREF aretabulated  for even
+    !values of l+|m|, thus
+    !lm=(00), (11), (20), (22), (l2max,l2max)=(2*LMAX,2*LMAX)
+    !
+    !The  factorial  factors F1 are tabulated in
+    !denom,for all values of n=0,...,(l-|m|)/2
+    !--------/---------/---------/---------/---------/---------/---------/--
+    ! Lattice vectors independent part
+    ! Determining the arrays
+    ! PREF(KK)=AP*CP comprising the i**(1+|m|) prefactor
+    ! DENOM(K)
 
         k = 1
         kk = 1
@@ -1002,29 +1001,29 @@ contains
                     akpt(1) = ak(1) + ab1
                     akpt(2) = ak(2) + ab2
 
-                    ! For a square lattice one has the primitive basis vectors:
-                    !
-                    ! B2=(6.28318530717958; 3.6275987284684272)
-                    ! B1=(0;7.2551974569368678)
-                    !
-                    ! Check that there is:
-                    !
-                    !       AKPT(1)=AK(1)\pm B1
-                    !       AKPT(2)=AK(2)\pm AB2
-                    !
-                    ! in the resulting summation!!!
-                    !--------/---------/---------/---------/---------/---------/---------/--
-                    !     for  every lattice vector of the sum, three short arrays are
-                    !     initialised as below. and used as tables:
-                    !     xpm(m) contains values of xpk**|m|
-                    !     agk(i) contains values of (ac/kappa)**i
-                    !     gkn(n) contains values of (gp/kappa)**(2*n-1)*gam(n,z)
-                    !     where l=0,l2max;m=-l,l;n=0,(l-|m|)/2;i=l-2*n
-                    !     gam is the incomplete gamma function, which is calculated by
-                    !     recurrence  from  the value  for n=0, which  in turn can  be
-                    !     expressed in terms of the complex error function cerf
-                    !     ac=mod(akpt). note special action if ac=0
-                    !
+            ! For a square lattice one has the primitive basis vectors:
+            !
+            ! B2=(6.28318530717958; 3.6275987284684272)
+            ! B1=(0;7.2551974569368678)
+            !
+            ! Check that there is:
+            !
+            !       AKPT(1)=AK(1)\pm B1
+            !       AKPT(2)=AK(2)\pm AB2
+            !
+            ! in the resulting summation!!!
+            !--------/---------/---------/---------/---------/---------/---------/--
+            !     for  every lattice vector of the sum, three short arrays are
+            !     initialised as below. and used as tables:
+            !     xpm(m) contains values of xpk**|m|
+            !     agk(i) contains values of (ac/kappa)**i
+            !     gkn(n) contains values of (gp/kappa)**(2*n-1)*gam(n,z)
+            !     where l=0,l2max;m=-l,l;n=0,(l-|m|)/2;i=l-2*n
+            !     gam is the incomplete gamma function, which is calculated by
+            !     recurrence  from  the value  for n=0, which  in turn can  be
+            !     expressed in terms of the complex error function cerf
+            !     ac=mod(akpt). note special action if ac=0
+            !
                     acsq = akpt(1) * akpt(1) + akpt(2) * akpt(2)
                     gpsq = kapsq - acsq
                     if(abs(gpsq)<emach * emach)   then
@@ -1059,11 +1058,11 @@ contains
                                                           !for I=1=lm=(0,0)
                     end do
 
-                    !--------/---------/---------/---------/---------/---------/---------/--
-                    ! Initialize gamfn(0) for recurrence [Eq. (42) of Ka2; JPA39 eq. 88]
-                    ! beginning with b=-1/2
-                    ! Results stored in array GKN(I)
-                    !--------/---------/---------/---------/---------/---------/---------/--
+            !--------/---------/---------/---------/---------/---------/---------/--
+            ! Initialize gamfn(0) for recurrence [Eq. (42) of Ka2; JPA39 eq. 88]
+            ! beginning with b=-1/2
+            ! Results stored in array GKN(I)
+            !--------/---------/---------/---------/---------/---------/---------/--
 
                     cf = kappa / gp                      !\sigma/K_\perp
                     zz = -alpha * gkk                    !-ALPHA*K_\perp^2/\sigma^2
@@ -1086,13 +1085,13 @@ contains
                         gkn(i) = cf * cx * gam
                     end do
 
-                    !--------/---------/---------/---------/---------/---------/---------/--
-                    !                         DLM1 term
-                    !--------/---------/---------/---------/---------/---------/---------/--
-                    !     the contribution to the sum dlm1 for a particular
-                    !     reciprocal lattice vector is now accumulated into
-                    !     the  elements of dlm,note special action if  ac=0
-                    !
+        !--------/---------/---------/---------/---------/---------/---------/--
+        !                         DLM1 term
+        !--------/---------/---------/---------/---------/---------/---------/--
+        !     the contribution to the sum dlm1 for a particular
+        !     reciprocal lattice vector is now accumulated into
+        !     the  elements of dlm,note special action if  ac=0
+        !
                     k = 1
                     kk = 1
 
@@ -1114,10 +1113,10 @@ contains
 
                             acc = pref(kk) * acc
 
-                            ! PREF(KK)=AP*CP where AP=AP1*SQRT(AP2*FAC(J1)*FAC(J2)),
-                            ! CP=CI/KAPPA, +/- 1/KAPPA,
-                            ! AP1=-1.d0/(TV*2.0D0**(l-1)) with TV being unit cell area, and
-                            ! AP2=2*L-1, J1=L+M-1, J2=L-M+1
+                    ! PREF(KK)=AP*CP where AP=AP1*SQRT(AP2*FAC(J1)*FAC(J2)),
+                    ! CP=CI/KAPPA, +/- 1/KAPPA,
+                    ! AP1=-1.d0/(TV*2.0D0**(l-1)) with TV being unit cell area, and
+                    ! AP2=2*L-1, J1=L+M-1, J2=L-M+1
 
                             if(ac - 1.0d-6 > 0) dlm(n) = dlm(n) + acc / xpm(m)    !XPM(M)= e**(i*|m|*phi)
                             if((ac - 1.0d-6 <= 0) .or. (m - 1 /= 0)) then
@@ -1164,16 +1163,16 @@ contains
         end if
         !     write(16,250) dlm
         !250  format(5h0dlm1,//,45(2e13.5,/))
-        !--------/---------/---------/---------/---------/---------/---------/--
-        !                         DLM2 term
-        !--------/---------/---------/---------/---------/---------/---------/--
-        !     dlm2, the sum over real space lattice vectors, begins with
-        !     the adjustment of the array pref, to contain values of the
-        !     prefactor  'p2' for lm=(00),(11),(20),(22),...
-        !
-        !     The direct lattice vector R=0 is excluded from the summation.
-        !     Therefore there is no need to enforce a single passage of "do I2"
-        !     loop as was the case of dual lattice summation
+    !--------/---------/---------/---------/---------/---------/---------/--
+    !                         DLM2 term
+    !--------/---------/---------/---------/---------/---------/---------/--
+    !     dlm2, the sum over real space lattice vectors, begins with
+    !     the adjustment of the array pref, to contain values of the
+    !     prefactor  'p2' for lm=(00),(11),(20),(22),...
+    !
+    !     The direct lattice vector R=0 is excluded from the summation.
+    !     Therefore there is no need to enforce a single passage of "do I2"
+    !     loop as was the case of dual lattice summation
         kk = 1
         ap1 = tv / (4.0_dp * pi)
         cf = kapsq / ci
@@ -1312,24 +1311,24 @@ contains
             write(16, 46) n1
             46    format(//3x, 'dlm2,s converged by n1=', i2)
         end if
-        !--------/---------/---------/---------/---------/---------/---------/--
-        !                         DLM3 term
-        !--------/---------/---------/---------/---------/---------/---------/--
-        !     the term dlm3 has a non-zero contribution  only
-        !     when l=m=0.it is evaluated here in terms of the
-        !     complex error function cerf
-        !
+    !--------/---------/---------/---------/---------/---------/---------/--
+    !                         DLM3 term
+    !--------/---------/---------/---------/---------/---------/---------/--
+    !     the term dlm3 has a non-zero contribution  only
+    !     when l=m=0.it is evaluated here in terms of the
+    !     complex error function cerf
+    !
         xpa = exp(-alpha)
         rtai = 1.0_dp / (rtpi * rta)
         acc = kappa * (ci * (xpa - cerf(rta)) - rtai) / xpa
         ap = -0.5_dp / rtpi
         dlm(1) = dlm(1) + ap * acc
 
-        !--------/---------/---------/---------/---------/---------/---------/--
-        !                          RESCALLING
-        !     finally the elements of dlm are multiplied by the
-        !     factor (-1.0_dp)**((m+|m|)/2)
-        !
+    !--------/---------/---------/---------/---------/---------/---------/--
+    !                          RESCALLING
+    !     finally the elements of dlm are multiplied by the
+    !     factor (-1.0_dp)**((m+|m|)/2)
+    !
         do l = 2, ll2, 2
             n = l * l / 2 + 1
             do m = 2, l, 2
