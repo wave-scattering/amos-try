@@ -1134,8 +1134,13 @@ contains
                 ii = 0      !from now on, the "do 21"-loop is performed fully
             end do
             !
-            !     after each step of the summation a test on the
-            !     convergence  of the  elements of  dlm is  made
+            !     After each step of the summation a test on the
+            !     convergence  of the  elements of  dlm is  made.
+            !   The measure of convergence is taken to be the usual vector norm
+            !                   \sum_I |DLM(I))|**2
+            !  The measure of convergence is controlled by parameters QP and QT
+            !  The summation is enforced to run over at least IENF shells
+
             test2 = 0.0_dp
 
             do i = 1, nndlm
@@ -1278,14 +1283,19 @@ contains
                 end do
             end do
             !
-            !     after each step of the summation a test on the
-            !     convergence of the elements of dlm is made
+            !     After each step of the summation a test on the
+            !     convergence of the elements of dlm is made.
+            !  The measure of convergence is taken to be the usual vector norm
+            !                   \sum_I |DLM(I))|**2
+            !  The measure of convergence is controlled by parameters QP and QT
+            !  The summation is enforced to run over at least IENF shells
             !
             test2 = 0.0_dp
             do i = 1, nndlm
                 dnorm = abs(dlm(i))
-                test2 = test2 + dnorm * dnorm
+                test2 = test2 + dnorm * dnorm    !=\sum_I |DLM(I))|**2
             end do
+
             test = abs((test2 - test1) / test1)
             test1 = test2
             if ((n1>ienf).and.(test - qp <= 0)) exit ! TODO: convergence constant
