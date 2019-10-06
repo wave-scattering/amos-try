@@ -187,8 +187,10 @@ contains
             g(2, ig1) = nt1(ig1) * b1(2) + nt2(ig1) * b2(2)
             write(6, 215) ig1, nt1(ig1), nt2(ig1), vecmod(ig1)
         end do
+
         zstep = (zsup - zinf) / dble(np - 1)
         zval = zinf - zstep
+
         if(ktype<3) then
             if(kscan==1) write(6, 216)
             if(kscan==2) write(6, 217)
@@ -204,6 +206,7 @@ contains
             ein(1) = czero
             ein(2) = cone
         end if
+
         do n = 1, np   !****** scanning over frequencies/wavelengths ******
             zval = zval + zstep
             if(kscan==1) kappa0 = cmplx_dp(zval, epsilon)
@@ -757,13 +760,72 @@ contains
         !     the  program  assumes  that  the  layer is a bravais lattice. the
         !     summation over the lattice follows the ewald method  suggested by
         !     kambe. emach is the machine accuracy.
-        !     ------------------------------------------------------------------
+
+        !     CALCULATES NON-ZERO ELEMENTS OF THE ARRAY DLM
+        !     I.E., FOR L+M EVEN. VALUES AS DEFINED BY KAMBE.
+        !                     DLM=DLM1+DLM2+DLM3,
+        !     WITH LM=(00),(1-1),(11),(2-2)...
+        !     THE PROGRAM ASSUMES THAT THE LAYER IS A BRAVAIS LATTICE. THE
+        !     SUMMATION OVER THE LATTICE FOLLOWS THE EWALD METHOD SUGGESTED BY
+        !     KAMBE.
+        !
+        !     LMAXD       : INTERNAL CUTOFF IN SPHERICAL WAVES EXPANSIONS
+        !     LMAX        : THE ACTUAL CUTOFF IN SPHERICAL WAVES EXPANSIONS
+        !     AK          : the Bloch vector PARALLEL
+        !                   TO THE SURFACE, REDUCED TO THE 1ST BRILLOUIN ZONE
+        !
+        !     ALPHA ... dynamically assigned Ewald parameter
+        !     XPM(M) CONTAINS VALUES OF XPK**|M|=e^(i*|m|*\phi)
+        !     AGK(I) CONTAINS VALUES OF (AC/KAPPA)**I
+        !     GKN(N) CONTAINS VALUES OF (GP/KAPPA)**(2*N-1)*GAM(N,Z)
+        !     DENOM(K)=1.0D0/(FAC(I1)*FAC(I2)*FAC(I3))
+        !                where I1=I, I2=NN-I+1, I3=NN+M-I
+        !                not the same as denom1(iden) in dlmsf2in3!!!
+        !
+        !   The number of summation shells in the Kambe summation
+        !   is limited by summation loop variable N1 to <=10.
+        !   Yet it exits summation once convergence bounds are satisfied.
+        !   The measure of convergence is taken to be the usual vector norm
+        !                   \sum_I |DLM(I))|**2
+        !   The measure of convergence is controlled by parameters QP and QT
+        !   The summation is enforced to run over at least IENF shells
+        !
+        !     EMACH/1.D-8/ IS AN OLD MACHINE ACCURACY - TODO
+        !     PI/3.14159265358979D0 - TODO
+        !     AN,AN1,AN2 cuold be integers  - TODO
+        !     Check obsolete IF(AC-1.0D-6) etc - TODO
+        !
+        !     Following Kambe, the Faddeeva complex error function is used
+        !     to generate the values of incomplete gamma function of complex
+        !     argument in DL1 contribution
+        !
+        !     Initially the summation follows Kambe convention of spherical
+        !     harmonics with e.g. i**(1+|m|) prefactor of DL1
+        !
+        !     At the very end FACTOR (-1.0D0)**((M+|M|)/2)=i**(M+|M|) is added after
+        !     all three contributions DLM1, DLM2, DLM3 are summed up together!!!
+        !     Thereby the prefactor i**(1+abs(m)) of DL1 is converted into
+        !
+        !               i**(1+|m|+M+|M|)=(-1)**m i**(1+M)= i**(1-M)
+        !
+        !     Does the latter returns back to the Condon-Shortley convention
+        !     of spherical harmonics???
+        !--------/---------/---------/---------/---------/---------/---------/--
         ! ..  parameter statements  ..
         integer   ndend
         ! ..  scalar arguments  ..
         integer    lmax
         real(dp)   emach
         complex(dp) kappa
+
+        integer, parameter :: ienf=4  !enforces the shell summation to take
+        !into account at least ienf number
+        !of shells
+        real(dp), parameter :: QT=1.d8     !initial values of test1;
+        !default was 1.0D6
+        real(dp), parameter :: QP=1.d-6    !required summation precision;
+        !default was 1.0D-3
+
         ! ..  array arguments  ..
         real(dp)  ar1(2), ar2(2)
         real(dp)   ak(2), elm(:)
@@ -789,7 +851,7 @@ contains
         !     momentum parallel to the surface, modulo a reciprocal
         !     lattice vector
         !
-        rtpi = sqrt(pi)
+        rtpi = sqrt(pi)        !where comes pi here from???
         kapsq = kappa * kappa
         !
         !     the factorial  function  is tabulated  in fac . the array
@@ -800,97 +862,158 @@ contains
         ll2 = l2max + 1
         fac(1) = 1.0_dp
         ii = l2max + l2max
+
         do i = 1, ii
-            fac(i + 1) = dble(i) * fac(i)
+            fac(i+1) = dble(i) * fac(i)
         end do
         nndlm = l2max * (l2max + 3) / 2 + 1
-        do i = 1, nndlm
-            dlm(i) = czero
-        end do
+
+        !do i = 1, nndlm
+            dlm = czero
+        !end do
         !
-        !     the formula of kambe for the separation constant,alpha,is
-        !     used,subject to a restriction which is imposed to control
-        !     later rounding errors
+        !                  E W A L D    P A R A M E T E R
+        !   the formula of kambe for the separation constant, alpha, is
+        !   used, subject to a restriction which is imposed to control
+        !   later rounding errors
         !
         tv = abs(ar1(1) * ar2(2) - ar1(2) * ar2(1))
         alpha = tv / (4.0_dp * pi) * kapsq
-        al = abs(alpha)
+        al = abs(alpha)     !Ewald parameter used by Kambe and Pendry
+
         if(exp(al) * emach - 5.0d-5 > 0) al = log(5.0d-5 / emach)
         alpha = cmplx_dp(al, 0.0_dp)
         rta = sqrt(alpha)
+
+        !--------/---------/---------/---------/---------/---------/---------/--
+        !                             DLM1
+        !DLM1, the  sum  over  reciprocal   lattice  vectors  , is
+        !calculated first.
         !
-        !     dlm1 , the  sum  over  reciprocal   lattice  vectors  , is
-        !     calculated first. the prefactor p1 is  tabulated  for even
-        !     values of l+|m|,thus lm=(00),(11),(2 0),(22),(l2max,l2max)
-        !     the  factorial  factor  f1  is simultaneously tabulated in
-        !     denom,for all values of n=0,(l-|m|)/2
+        !The prefactors PREF aretabulated  for even
+        !values of l+|m|, thus
+        !lm=(00), (11), (20), (22), (l2max,l2max)=(2*LMAX,2*LMAX)
         !
+        !The  factorial  factors F1 are tabulated in
+        !denom,for all values of n=0,...,(l-|m|)/2
+        !
+        !--------/---------/---------/---------/---------/---------/---------/--
+        ! Lattice vectors independent part
+        ! Determining the arrays
+        ! PREF(KK)=AP*CP comprising the i**(1+|m|) prefactor
+        ! DENOM(K)
+
         k = 1
         kk = 1
         ap1 = -2.0_dp / tv
         ap2 = -1.0_dp
         cf = ci / kappa
-        do l = 1, ll2
-            ap1 = ap1 / 2.0_dp
-            ap2 = ap2 + 2.0_dp
-            cp = cf
+
+        do l = 1, ll2              !LL2=2*LMAX+1
+            ap1 = ap1 / 2.0_dp     !=-1.d0/(TV*2.0D0**(l-1))
+            ap2 = ap2 + 2.0_dp     !=2*L-1
+            cp = cf                !hides i**(1+|m|) prefactor
             mm = 1
             if(mod  (l, 2) == 0) then
                 mm = 2
                 cp = ci * cp
             end if
-            nn = (l - mm) / 2 + 2
-            do m = mm, l, 2
-                j1 = l + m - 1
-                j2 = l - m + 1
+            nn = (l - mm) / 2 + 2       !L-MM even here
+
+            do m = mm, l, 2            !MM=1 or 2 depending on L odd/even
+                j1 = l + m - 1            !=1 for L=M=1
+                j2 = l - m + 1            !=1 for L=M=1
+
                 ap = ap1 * sqrt(ap2 * fac(j1) * fac(j2))
-                pref(kk) = ap * cp
-                cp = -cp
+                pref(kk) = ap * cp      !comprises i**(1+|m|) prefactor
+
+                cp = -cp              !because loop step=2, mere sign change
                 kk = kk + 1
-                nn = nn - 1
-                do i = 1, nn
+                nn = nn - 1           !=(L-MM)/2+1
+
+                do i = 1, nn          !n-summation for DL1 in JPA39 eq 85
                     i1 = i
-                    i2 = nn - i + 1
+                    i2 = nn - i + 1   !I2=I3=(L-MM)/2+1  for M=I=1
                     i3 = nn + m - i
+
                     denom(k) = 1.0_dp / (fac(i1) * fac(i2) * fac(i3))
+
                     k = k + 1
                 end do
             end do
         end do
+
+        !--------/---------/---------/---------/---------/---------/---------/--
+        ! Lattice vectors dependent part
         !
-        !     the  reciprocal  lattice is  defined by  b1,b2 . the  summation
-        !     begins with the origin point of the lattice , and  continues in
+        ! The reciprocal  lattice defined by  b1, b2.
+        ! The summation
+        !     begins with the origin point of the lattice, and  continues in
         !     steps of 8*n1 points , each  step involving the  perimeter of a
         !     parallelogram of lattice points about the origin,of side 2*n1+1
         !     each step begins at label 9.
         !     akpt=the current lattice vector in the sum
         !
-        rtv = 2.0_dp * pi / tv
+        rtv = 2.0_dp * pi / tv    !Brillouin zone volume
+
+        !reciprocal lattice basis vectors:
         b1(1) = -ar1(2) * rtv
         b1(2) = ar1(1) * rtv
         b2(1) = -ar2(2) * rtv
         b2(2) = ar2(1) * rtv
-        test1 = 1.0d6
+
+        ! convergence parameter:
+        test1=qt    !default was 1.0D6
+
+        ! the dual lattice summation includes the vector \vg==0. In this case
+        ! there is only a single passage of the "do 21" loop controlled by
+        ! the initial setting of the variable II=1 at the loop end:
         ii = 1
+
+        ! Setting counter N1 for the reciprocal lattice summation:
         n1 = -1
         do
-            n1 = n1 + 1
-            na = n1 + n1 + ii
-            an1 = dble(n1)
-            an2 = -an1 - 1.0_dp
+            n1 = n1 + 1       !begins dual lattice summation for a given lm with N1=0
+                              !N1 labels summation shells
+
+            na = n1 + n1 + ii      !beginning from NA=1
+            an1 = dble(n1)         !beginning from AN1=0
+            an2 = -an1 - 1.0_dp    !beginning from AN2=-1
             do i1 = 1, na
-                an2 = an2 + 1.0_dp
+                an2 = an2 + 1.0_dp    !beginning from AN2=0
+
+                ! Generate 4 different (AN1,AN2) ---> (-AN2,AN1)
+                ! Does not make sense if AN1=AN2=0. Therefore, in the latter
+                ! case, there is only a single loop passage controlled by the initial
+                ! setting of the variable II=1 at the loop end
+
                 do i2 = 1, 4
                     !     write(16,307) i1,i2
                     ! 307 format(33x,'i1=',i2,' , i2=',i2/33x,12('='))
                     an = an1
                     an1 = -an2
                     an2 = an
+
+                    !Set dual lattice vector \vg:
                     ab1 = an1 * b1(1) + an2 * b2(1)
                     ab2 = an1 * b1(2) + an2 * b2(2)
+
+                    !Set \vK_parallel:
                     akpt(1) = ak(1) + ab1
                     akpt(2) = ak(2) + ab2
+
+                    ! For a square lattice one has the primitive basis vectors:
                     !
+                    ! B2=(6.28318530717958; 3.6275987284684272)
+                    ! B1=(0;7.2551974569368678)
+                    !
+                    ! Check that there is:
+                    !
+                    !       AKPT(1)=AK(1)\pm B1
+                    !       AKPT(2)=AK(2)\pm AB2
+                    !
+                    ! in the resulting summation!!!
+                    !--------/---------/---------/---------/---------/---------/---------/--
                     !     for  every lattice vector of the sum, three short arrays are
                     !     initialised as below. and used as tables:
                     !     xpm(m) contains values of xpk**|m|
@@ -913,32 +1036,48 @@ contains
                                 /3x, 'in the frequency or wavelength value.')
                         stop
                     endif
-                    ac = sqrt(acsq)
-                    gp = sqrt(gpsq)
+
+                    !Faddeeva function part:
+                    ac = sqrt(acsq)       !K_\parallel; always real number
+                    gp = sqrt(gpsq)       !K_\perp; complex in general
+
                     xpk = czero
                     gk = czero
                     gkk = cmplx_dp(1.0_dp, 0.0_dp)
+
                     if(ac - emach > 0) then
-                        xpk = cmplx_dp(akpt(1) / ac, akpt(2) / ac)
-                        gk = ac / kappa
-                        gkk = gpsq / kapsq
+                        xpk = cmplx_dp(akpt(1) / ac, akpt(2) / ac)    !\vphi=\vK_parallel/K_\parallel
+                        gk = ac / kappa                               !K_\parallel/\sigma
+                        gkk = gpsq / kapsq                            !K_\perp^2/\sigma^2
                     end if
                     xpm(1) = cmplx_dp(1.0_dp, 0.0_dp)
                     agk(1) = cmplx_dp(1.0_dp, 0.0_dp)
+
                     do i = 2, ll2
-                        xpm(i) = xpm(i - 1) * xpk
-                        agk(i) = agk(i - 1) * gk
+                        xpm(i) = xpm(i - 1) * xpk         !XPK**(I-1)= e**(i*|m|*phi)
+                        agk(i) = agk(i - 1) * gk          !AGK**(I-1)=(K_\perp/\sigma)^(2*|m|)
+                                                          !for I=1=lm=(0,0)
                     end do
-                    cf = kappa / gp
-                    zz = -alpha * gkk
+
+                    !--------/---------/---------/---------/---------/---------/---------/--
+                    ! Initialize gamfn(0) for recurrence [Eq. (42) of Ka2; JPA39 eq. 88]
+                    ! beginning with b=-1/2
+                    ! Results stored in array GKN(I)
+                    !--------/---------/---------/---------/---------/---------/---------/--
+
+                    cf = kappa / gp                      !\sigma/K_\perp
+                    zz = -alpha * gkk                    !-ALPHA*K_\perp^2/\sigma^2
                     cz = sqrt(-zz)
                     z = -ci * cz
                     cx = exp(-zz)
                     gam = rtpi * cerf(cz)
                     gkn(1) = cf * cx * gam
                     bt = z
+
                     b = 0.5_dp
                     lll = l2max / 2 + 1
+
+                    ! recurrence [Eq. (42) of Ka2; JPA39 eq. 88]
                     do i = 2, lll
                         bt = bt / zz
                         b = b - 1.0_dp
@@ -946,71 +1085,96 @@ contains
                         cf = cf * gkk
                         gkn(i) = cf * cx * gam
                     end do
-                    !
+
+                    !--------/---------/---------/---------/---------/---------/---------/--
+                    !                         DLM1 term
+                    !--------/---------/---------/---------/---------/---------/---------/--
                     !     the contribution to the sum dlm1 for a particular
                     !     reciprocal lattice vector is now accumulated into
                     !     the  elements of dlm,note special action if  ac=0
                     !
                     k = 1
                     kk = 1
+
                     do l = 1, ll2
                         mm = 1
                         if(mod  (l, 2) == 0) mm = 2
                         n = (l * l + mm) / 2
                         nn = (l - mm) / 2 + 2
-                        do m = mm, l, 2
+                        do m = mm, l, 2          !MM=1 or 2 depending on L odd/even
                             acc = czero
                             nn = nn - 1
                             il = l
-                            do i = 1, nn
+
+                            do i = 1, nn           !=(L-MM)/2+1
                                 acc = acc + denom(k) * agk(il) * gkn(i)
                                 il = il - 2
                                 k = k + 1
                             end do
+
                             acc = pref(kk) * acc
-                            if(ac - 1.0d-6 > 0) dlm(n) = dlm(n) + acc / xpm(m)
+
+                            ! PREF(KK)=AP*CP where AP=AP1*SQRT(AP2*FAC(J1)*FAC(J2)),
+                            ! CP=CI/KAPPA, +/- 1/KAPPA,
+                            ! AP1=-1.d0/(TV*2.0D0**(l-1)) with TV being unit cell area, and
+                            ! AP2=2*L-1, J1=L+M-1, J2=L-M+1
+
+                            if(ac - 1.0d-6 > 0) dlm(n) = dlm(n) + acc / xpm(m)    !XPM(M)= e**(i*|m|*phi)
                             if((ac - 1.0d-6 <= 0) .or. (m - 1 /= 0)) then
                                 nm = n - m + 1
-                                dlm(nm) = dlm(nm) + acc * xpm(m)
+                                dlm(nm) = dlm(nm) + acc * xpm(m)        !XPM(M)= e**(i*|m|*phi)
                             end if
                             kk = kk + 1
                             n = n + 1
                         end do
                     end do
-                    if(ii > 0) exit
+                    if(ii > 0) exit  !II=1 exits the "do I2"-loop and goes straight to II=0
+                                     !in the "do I1"-loop
                 end do
-                ii = 0
+                ii = 0      !from now on, the "do 21"-loop is performed fully
             end do
             !
             !     after each step of the summation a test on the
             !     convergence  of the  elements of  dlm is  made
             test2 = 0.0_dp
+
             do i = 1, nndlm
                 dnorm = abs(dlm(i))
-                test2 = test2 + dnorm * dnorm
+                test2 = test2 + dnorm * dnorm    !=\sum_I |DLM(I))|**2
             end do
+
             test = abs((test2 - test1) / test1)
             test1 = test2
-            if(test - 0.001d0 <= 0) exit ! TODO: convergence constant
+            if ((n1>ienf).and.(test - qp <= 0)) exit ! TODO: convergence constant
             if(n1 - 10 >= 0) exit
         end do
-        if(test - 0.001d0 > 0) then ! TODO: convergence constant
-            write(16, 26)n1
+        if(test - qp > 0) then ! TODO: convergence constant
+            !unsuccessful exit-even if not converged continues to DLM2-summation:
+            write(16, 26) n1
             26  format(//13x, 'dlm1,s not converged by n1=', i2)
         else
-            write(16, 28)n1
+            !successful exit:
+            write(16, 28) n1
             28    format(//13x, 'dlm1,s converged by n1=', i2)
         end if
-        !     write(16,250)dlm
+        !     write(16,250) dlm
         !250  format(5h0dlm1,//,45(2e13.5,/))
-        !
+        !--------/---------/---------/---------/---------/---------/---------/--
+        !                         DLM2 term
+        !--------/---------/---------/---------/---------/---------/---------/--
         !     dlm2, the sum over real space lattice vectors, begins with
         !     the adjustment of the array pref, to contain values of the
         !     prefactor  'p2' for lm=(00),(11),(20),(22),...
         !
+        !     The direct lattice vector R=0 is excluded from the summation.
+        !     Therefore there is no need to enforce a single passage of "do I2"
+        !     loop as was the case of dual lattice summation
         kk = 1
         ap1 = tv / (4.0_dp * pi)
         cf = kapsq / ci
+        ! convergence parameter:
+        test1=qt   !default was 1.0D6
+
         do l = 1, ll2
             cp = cf
             mm = 1
@@ -1124,17 +1288,23 @@ contains
             end do
             test = abs((test2 - test1) / test1)
             test1 = test2
-            if(test - 0.001d0 <= 0) exit ! TODO: convergence constant
+            if ((n1>ienf).and.(test - qp <= 0)) exit ! TODO: convergence constant
             if(n1 - 10>=0) exit
         end do
-        if(test - 0.001d0 > 0) then ! TODO: convergence constant
-            write(16, 44)n1
+        if(test - qp > 0) then ! TODO: convergence constant
+
+            !unsuccessful exit-even if not converged continues to DLM3-summation:
+            write(16, 44) n1
             44    format(//3x, 'dlm2,s not converged by n1=', i2)
         else
-            write(16, 46)n1
+
+            !successful exit:
+            write(16, 46) n1
             46    format(//3x, 'dlm2,s converged by n1=', i2)
         end if
-        !
+        !--------/---------/---------/---------/---------/---------/---------/--
+        !                         DLM3 term
+        !--------/---------/---------/---------/---------/---------/---------/--
         !     the term dlm3 has a non-zero contribution  only
         !     when l=m=0.it is evaluated here in terms of the
         !     complex error function cerf
@@ -1144,7 +1314,9 @@ contains
         acc = kappa * (ci * (xpa - cerf(rta)) - rtai) / xpa
         ap = -0.5_dp / rtpi
         dlm(1) = dlm(1) + ap * acc
-        !
+
+        !--------/---------/---------/---------/---------/---------/---------/--
+        !                          RESCALLING
         !     finally the elements of dlm are multiplied by the
         !     factor (-1.0_dp)**((m+|m|)/2)
         !
@@ -1157,7 +1329,7 @@ contains
         end do
         !     write(16,251) dlm
         ! 251 format(15h0dlm1+dlm2+dlm3,//45(2e13.5,/))
-        !
+        !--------/---------/---------/---------/---------/---------/---------/--
         !     summation over the clebsch-gordon type coefficients
         !     elm proceeds, first for  xodd, and then  for xeven.
         !     this gives the kambe elements  a(l2,m2;l3,m3) which
