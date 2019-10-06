@@ -847,16 +847,13 @@ contains
                 pref((lmax + 1)**2)
         complex(dp) dlm((lmax + 1) * (2 * lmax + 1))
         !----------------------------------------------------------------------
-        !     ak(1)  and  ak(2)  are the x  and y components of the
-        !     momentum parallel to the surface, modulo a reciprocal
-        !     lattice vector
         !
-        rtpi = sqrt(pi)        !where comes pi here from???
+        rtpi = sqrt(pi)    !pi comes from the module libmultem2b
+                           !public declaration:
+                           !real(dp), parameter, public:: pi=4.0_dp*ATAN(1.0_dp)
         kapsq = kappa * kappa
         !
-        !     the factorial  function  is tabulated  in fac . the array
-        !     dlm will contain non-zero,i.e. l+m even,values as defined
-        !     by kambe.dlm=dlm1+dlm2+dlm3.with lm=(00),(1-1),(11),(2-2)...
+        !the factorial function is tabulated in fac:
         !
         l2max = lmax + lmax
         ll2 = l2max + 1
@@ -997,7 +994,10 @@ contains
                     ab1 = an1 * b1(1) + an2 * b2(1)
                     ab2 = an1 * b1(2) + an2 * b2(2)
 
-                    !Set \vK_parallel:
+        !Set \vK_parallel:
+        !  ak(1) and ak(2) are the x and y components of the
+        !  Bloch momentum parallel to the surface, modulo a reciprocal
+        !  lattice vector, i.e. REDUCED TO THE 1ST BRILLOUIN ZONE
                     akpt(1) = ak(1) + ab1
                     akpt(2) = ak(2) + ab2
 
@@ -1058,11 +1058,11 @@ contains
                                                           !for I=1=lm=(0,0)
                     end do
 
-            !--------/---------/---------/---------/---------/---------/---------/--
-            ! Initialize gamfn(0) for recurrence [Eq. (42) of Ka2; JPA39 eq. 88]
-            ! beginning with b=-1/2
-            ! Results stored in array GKN(I)
-            !--------/---------/---------/---------/---------/---------/---------/--
+        !--------/---------/---------/---------/---------/---------/---------/--
+        ! Initialize gamfn(0) for recurrence [Eq. (42) of Ka2; JPA39 eq. 88]
+        ! beginning with b=-1/2
+        ! Results stored in array GKN(I)
+        !--------/---------/---------/---------/---------/---------/---------/--
 
                     cf = kappa / gp                      !\sigma/K_\perp
                     zz = -alpha * gkk                    !-ALPHA*K_\perp^2/\sigma^2
@@ -1127,18 +1127,18 @@ contains
                             n = n + 1
                         end do
                     end do
-                    if(ii > 0) exit  !II=1 exits the "do I2"-loop and goes straight to II=0
+                    if(ii > 0) exit  !II=1 exits the "do i2"-loop and goes straight to II=0
                                      !in the "do I1"-loop
                 end do
-                ii = 0      !from now on, the "do 21"-loop is performed fully
+                ii = 0      !from now on, the "do i1"-loop is performed fully
             end do
-            !
-            !     After each step of the summation a test on the
-            !     convergence  of the  elements of  dlm is  made.
-            !   The measure of convergence is taken to be the usual vector norm
-            !                   \sum_I |DLM(I))|**2
-            !  The measure of convergence is controlled by parameters QP and QT
-            !  The summation is enforced to run over at least IENF shells
+        !
+        !     After each step of the summation a test on the
+        !     convergence  of the  elements of  dlm is  made.
+        !   The measure of convergence is taken to be the usual vector norm
+        !                   \sum_I |DLM(I))|**2
+        !  The measure of convergence is controlled by parameters QP and QT
+        !  The summation is enforced to run over at least IENF shells
 
             test2 = 0.0_dp
 
@@ -1152,12 +1152,14 @@ contains
             if ((n1>ienf).and.(test - qp <= 0)) exit ! TODO: convergence constant
             if(n1 - 10 >= 0) exit
         end do
+
         if(test - qp > 0) then ! TODO: convergence constant
-            !unsuccessful exit-even if not converged continues to DLM2-summation:
+        !unsuccessful exit-even if not converged
+        !continues further to the DLM2-summation:
             write(16, 26) n1
             26  format(//13x, 'dlm1,s not converged by n1=', i2)
         else
-            !successful exit:
+        !successful exit:
             write(16, 28) n1
             28    format(//13x, 'dlm1,s converged by n1=', i2)
         end if
@@ -1300,14 +1302,14 @@ contains
             if ((n1>ienf).and.(test - qp <= 0)) exit ! TODO: convergence constant
             if(n1 - 10>=0) exit
         end do
-        if(test - qp > 0) then ! TODO: convergence constant
 
-            !unsuccessful exit-even if not converged continues to DLM3-summation:
+        if(test - qp > 0) then ! TODO: convergence constant
+        !unsuccessful exit-even if not converged
+        !continues further to the DLM3-summation:
             write(16, 44) n1
             44    format(//3x, 'dlm2,s not converged by n1=', i2)
         else
-
-            !successful exit:
+        !successful exit:
             write(16, 46) n1
             46    format(//3x, 'dlm2,s converged by n1=', i2)
         end if
@@ -1325,7 +1327,7 @@ contains
         dlm(1) = dlm(1) + ap * acc
 
     !--------/---------/---------/---------/---------/---------/---------/--
-    !                          RESCALLING
+    !                          RESCALING
     !     finally the elements of dlm are multiplied by the
     !     factor (-1.0_dp)**((m+|m|)/2)
     !
