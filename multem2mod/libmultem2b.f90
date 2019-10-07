@@ -1156,6 +1156,7 @@ contains
         !unsuccessful exit-even if not converged
         !continues further to the DLM2-summation:
             write(16, 26) n1
+            stop 1
             26  format(//13x, 'dlm1,s not converged by n1=', i2)
         else
         !successful exit:
@@ -1306,6 +1307,7 @@ contains
         !unsuccessful exit-even if not converged
         !continues further to the DLM3-summation:
             write(16, 44) n1
+            stop 1
             44    format(//3x, 'dlm2,s not converged by n1=', i2)
         else
         !successful exit:
@@ -2542,6 +2544,9 @@ contains
         !     ------------------------------------------------------------------
         !     THIS  SUBROUTINE COMPUTES THE  SPHERICAL BESSEL FUNCTIONS OF
         !     FIRST, SECOND  AND  THIRD  KIND  using Amos lib
+        !
+        !     It returns the result in array format, convinient for usage
+        !     in Multem.
         !
         !     2019.07.17 Change to use Amos lib
         !
