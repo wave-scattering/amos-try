@@ -354,7 +354,9 @@ C--------/---------/---------/---------/---------/---------/---------/--
 
       Open(unit = 90,file = 'epsWater.txt', status = 'unknown')
 *
-      read(5,*) NP
+!     read(5,*) NP
+      NP=-2
+      write(6,*)'Auto-select: -2 (cylinder)'
 cz      NP=-1                      !temporarily
 *
       NPP=NP
@@ -475,16 +477,24 @@ C--------/---------/---------/---------/---------/---------/---------/--
       else if (NP.eq.-2) then
 *
       write(6,*)'Read cylinder maximal r/l'
-      read(5,*) rl_max
+!     read(5,*) rl_max
+      rl_max = 0.75
+      write(6,*)'Auto-set cylinder maximal r/l',rl_max
 
       write(6,*)'Read cylinder minimal r/l'
-      read(5,*) rl_min
+!     read(5,*) rl_min
+      rl_min = 0.45
+      write(6,*)'Auto-set cylinder minimal r/l', rl_min
 
       write(6,*)'Read amount of steps in length'
-      read(5,*) ndefp
+!     read(5,*) ndefp
+      ndefp = 20
+      write(6,*)'Auto-set amount of steps in length',ndefp
 
       write(6,*)'Read cylinder radius'
-      read(5,*) rsnm
+!     read(5,*) rsnm
+      rsnm = 0.5
+      write(6,*)'Auto-set cylinder radius',rsnm
 
        rsnm =  rsnm*2
 
@@ -607,7 +617,10 @@ C      BETA=0.D0
       Write(6,*)'ALPHA and BETA - Euler angles (in degrees) specifying
      &    the orientation  of the scattering particle relative to the
      & laboratory reference  frame'
-      READ(5,*)  ALPHA, BETA
+!     READ(5,*)  ALPHA, BETA
+      ALPHA = 90.D0
+      BETA = 0.D0
+      write(6,*)'Auto-set ALPHA and BETA',ALPHA,BETA
 
 
 
@@ -632,11 +645,17 @@ C      PHI - azimuth angle of the scattered beam in degrees
       if (.not.ynintens) then
       write(6,*)'Specify (theta,phi) angles of the incident beam
      1             (in degrees)'
-      read(5,*) THET0,PHI0
+!     read(5,*) THET0,PHI0
+      THET0 =90.D0
+      PHI0 = 0.D0
+      write(6,*)'Auto-set...'
 *
       write(6,*)'Specify (theta,phi) angles of the scattered beam
      1             (in degrees)'
-      read(5,*) THET,PHI
+!     read(5,*) THET,PHI
+      THET = 90.D0
+      PHI = 0.D0
+      write(6,*)'Auto-set...'
 *
       else if (ynintens) then
       write(6,*)'PHI angle of incidence of the incident plane wave
@@ -863,7 +882,10 @@ c      rff(1)=0.75d0
       end if
 C--------/---------/---------/---------/---------/---------/---------/--
 
-      read(5,*) x_min
+!     read(5,*) x_min
+      x_min = 0.45D0
+      write(6,*)'Auto-set x_min', x_min
+
       lambda = 2 *pi * rsnm/x_min
 cv      lambda=633.d0                      !JAP89_5776 for gold ellipsod
 c      lambda=354.d0                      !JAP89_5776 for silver sphere
@@ -903,11 +925,17 @@ c       write(6,*)'Equiv. size parameter x=2*pi*rs*n_0/lambda=',xs
 *
       if (.not.ynintens) then
       write(6,*)'Scan up to x-parameter (in nm)'
-      read(5,*) x_max
+!     read(5,*) x_max
+      x_max = 0.55D0
+      write(6,*)'Auto-set x_max', x_max
+
       enw = 2*pi*rsnm/x_max
 c      enw=500
       write(6,*)'Amount of scanning steps'
-      read(5,*) nstep
+!     read(5,*) nstep
+      nstep = 30
+      write(6,*)'Auto-set nstep',nstep
+
 c      xstep=5
       end if
 *
