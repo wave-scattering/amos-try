@@ -12231,7 +12231,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
      *        DJI(NPNG2,NPN1),DDR(NPNG2),DRR(NPNG2),
      *        D1(NPNG2,NPN1),D2(NPNG2,NPN1),D3(NPNG2,NPN1),
      *        DRI(NPNG2),RR(NPNG2),
-     *        DV1(NPN1),DDV1(NPN1),DV2(NPN1),
+     *        DV1(NPN3),DDV1(NPN3),DV2(NPN3),
      *        DD1,DD2,DD3
 
       REAL*8  R11(NPN1,NPN1),R12(NPN1,NPN1),
