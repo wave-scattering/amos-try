@@ -31,12 +31,12 @@ c particle diel. constant= (2.10250000000000,0.000000000000000E+000)
 c background dielectric constant ZEPS0= (1.00000000000000,0.000000000000000E+000)
 C
 C==========================
-C	Room for improvement:
-C		1) it would be more resonable to replace rev by the
-C		   size parameter k*rev
-C		2)
-C		3)
-C		4)
+C      Room for improvement:
+C            1) it would be more resonable to replace rev by the
+C               size parameter k*rev
+C            2)
+C            3)
+C            4)
 C--------/---------/---------/---------/---------/---------/---------/--
 C  This routines calculates the single particle scattering properties
 C  (including coated particles)
@@ -143,16 +143,16 @@ c particle (core) dielectric constant (depending whether lcs=1 or lcs=2)
 c
       PARAMETER (CCEPS=(80.0d0,0.0000000d0))
 C      PARAMETER (CCEPS=(1.45D0,0.0d0)**2)    !SiO2
-c	PARAMETER (CCEPS=(1.2D0,0.01d0)**2)    !to test lisac
-c	PARAMETER (CCEPS=(-70.720839d0,7.05596d0))   !-70.720839,7.05596   Au for 1319nm
-c	PARAMETER (CCEPS=(-10.84D0,0.762d0))   !JAP89_5774   ellipsoid for ld=633
-c	PARAMETER (CCEPS=(-2.03D0,0.602d0))    !JAP89_5774   sphere for ld=354
+c      PARAMETER (CCEPS=(1.2D0,0.01d0)**2)    !to test lisac
+c      PARAMETER (CCEPS=(-70.720839d0,7.05596d0))   !-70.720839,7.05596   Au for 1319nm
+c      PARAMETER (CCEPS=(-10.84D0,0.762d0))   !JAP89_5774   ellipsoid for ld=633
+c      PARAMETER (CCEPS=(-2.03D0,0.602d0))    !JAP89_5774   sphere for ld=354
 C >>>     SPHERE (OUTER SHELL SCATTERER) PERMITTIVITY                  <<<
 *  n(silica)=1.45  <--->    EPS(1)=2.1025D0
 *  n(ZnS)=2.       <--->    EPS(1)=4.D0
       PARAMETER (CSEPS=(1.005d0,0.d0)**2)
 c      PARAMETER (CSEPS=(1.05d0,0.d0)**2)    !to test lisac
-c	PARAMETER (CSEPS=(-10.84D0,0.762d0))    !JAP89_5774
+c      PARAMETER (CSEPS=(-10.84D0,0.762d0))    !JAP89_5774
 
 * material code number
 c   NMAT=0             dispersionless dielectric
@@ -239,7 +239,7 @@ c Declarations:
 * transfers logical ynoptth from the main to TMTAXSP
 *
       COMMON /DIELF/ zeps0v
-	  COMMON /REVF/ revf
+        COMMON /REVF/ revf
 *
 * transfers ZEPS0,REV from the main to AMPL
 *
@@ -325,7 +325,7 @@ CCCCCCCCCCCCCCCCCC    Assignement of common variables CCCCCCCCCCC
 *
       ynperfconv=ynperfcon
       yncv=ync
-	  zeps0v=zeps0
+        zeps0v=zeps0
 
 * Preinitialization necessary since below rsnm,rev, and defp (all
 * feeded in evanesc) are not always specified:
@@ -350,12 +350,12 @@ C--------/---------/---------/---------/---------/---------/---------/--
       write(6,*)'sphere cut by a plane on its bottom: type -5'
       write(6,*)'upwardly oriented cone: type -6'
       write(6,*)'conus on a finite cylinder: type -7'
-	write(6,*)'intensity around homogeneous/coated sphere: type -50'
+      write(6,*)'intensity around homogeneous/coated sphere: type -50'
 
       Open(unit = 90,file = 'epsWater.txt', status = 'unknown')
 *
       read(5,*) NP
-cz	NP=-1                      !temporarily
+cz      NP=-1                      !temporarily
 *
       NPP=NP
 C
@@ -418,14 +418,14 @@ C--------/---------/---------/---------/---------/---------/---------/--
 *
       else if (NP.eq.-50) then
 
-	if(.not.ynintens) then
+      if(.not.ynintens) then
       write(6,*)'NP.eq.-50 option is only for intensity calculation!!!'
       stop
       end if
 
       write(6,*)'The (coated) sphere radius in your units'
       read(5,*) rsnm
-	rev=rsnm
+      rev=rsnm
 *
       else if (NP.eq.-1) then
 
@@ -433,13 +433,13 @@ C--------/---------/---------/---------/---------/---------/---------/--
      1   the ROTATIONAL AXIS z-axis in your units
      2  (in nm if dispersive data used)'
       read(5,*) hlength
-cz	hlength=63.3d0
+cz      hlength=63.3d0
 
       write(6,*)'The half-length of the spheroid along the
      1  HORIZONTAL AXIS (in theta=pi/2 plane) in your units
      2 (in nm if dispersive data used)'
       read(5,*) rsnm
-cz	rsnm=21.1d0
+cz      rsnm=21.1d0
 *
 C     NP=-1 - DEFP = the ratio of the horizontal to rotational axes. DEFP is
 C             larger than 1 for oblate spheroids and smaller than 1 for
@@ -449,23 +449,23 @@ C             prolate spheroids.
 *                                    !in the denominator
 *
       rev=rsnm/DEFP**(1.D0/3.D0)     !=equal-volume-sphere radius
-				     !Room for improvement here - it would be
-	                             !more resonable to replace rev
-			             !by the size parameter k*rev
+                             !Room for improvement here - it would be
+                                   !more resonable to replace rev
+                               !by the size parameter k*rev
 *
-	if (lcs.gt.1) then
+      if (lcs.gt.1) then
 
       write(6,*)'The ratio of the inner to outer spheroid half-length
      1  along the HORIZONTAL AXIS'
       read(5,*) revin
 
-	if (revin.ge.1) then
-     	write(6,*)'The ratio cannot be greater or equal 1'
-	stop
-	end if
+      if (revin.ge.1) then
+           write(6,*)'The ratio cannot be greater or equal 1'
+      stop
+      end if
 
-	revin=rev*revin
-	end if               !lcs.gt.1
+      revin=rev*revin
+      end if               !lcs.gt.1
 
 *
       RAT=1.D0
@@ -570,7 +570,7 @@ cc      read(5,*) rev
 cc      rev=300.d0                         !feeded as REV to RSP* routines
 *
       AXI=rev
-	revf=rev
+      revf=rev
 *
 C  Equivalent equal-(volume/surface-area)-sphere radius
 *
@@ -611,7 +611,7 @@ C      BETA=0.D0
 
 
 
-	if((ALPHA.eq.0).and.(BETA.eq.0))
+      if((ALPHA.eq.0).and.(BETA.eq.0))
      & write(6,*)'Laboratory frame coincides with particle frame'
 
 * DDELT - the desired absolute accuracy of computing the
@@ -643,7 +643,7 @@ C      PHI - azimuth angle of the scattered beam in degrees
      &  is for intensity calculations set to zero'
       write(6,*)'Specify Theta angle of incidence (in degrees)'
       read(5,*) THET0
-cz	THET0=90.d0
+cz      THET0=90.d0
       PHI0=0.d0
       THETV=THET0
       end if
@@ -671,7 +671,7 @@ cc      PHI=128.D0
       stop
       end if
 
-	  IF ((NP.EQ.-4).or.(NP.EQ.-5)) THEN
+        IF ((NP.EQ.-4).or.(NP.EQ.-5)) THEN
       if ((defp.le.0).or.(defp.ge.2)) then
       write(6,*)'DEFP has to be >0 and <2'
       stop
@@ -700,12 +700,12 @@ C  different NDGS-values are recommended.
          NDGS=16
       ELSE IF (NP.EQ.-6) THEN
          NDGS=16
-	ELSE IF ((NP.EQ.-1).and.(max(defp,1.d0/defp).gt.1.5d0)) THEN !spheroids
+      ELSE IF ((NP.EQ.-1).and.(max(defp,1.d0/defp).gt.1.5d0)) THEN !spheroids
          if (ynintens) then
-	      NDGS=min(40.d0,14*max(defp,1.d0/defp))
-	   else
+            NDGS=min(40.d0,14*max(defp,1.d0/defp))
+         else
             NDGS=min(16.d0,4*max(defp,1.d0/defp))
-	   end if
+         end if
       ELSE
          NDGS=4
       END IF
@@ -865,8 +865,8 @@ C--------/---------/---------/---------/---------/---------/---------/--
 
       read(5,*) x_min
       lambda = 2 *pi * rsnm/x_min
-cv	lambda=633.d0                      !JAP89_5776 for gold ellipsod
-c	lambda=354.d0                      !JAP89_5776 for silver sphere
+cv      lambda=633.d0                      !JAP89_5776 for gold ellipsod
+c      lambda=354.d0                      !JAP89_5776 for silver sphere
 cc      lambda=500d0
 
 *
@@ -937,11 +937,11 @@ C--------/---------/---------/---------/---------/---------/---------/--
       write(nout,*)'#Equiv.-volume-sphere radius in nm=', rev
       write(nout,*)
       write(NOUT,*)'#Angular momentum cut-off LMAX=',LMAX
-	  write(NOUT,*)'#In the number ND=NDGS*LMAX of GIP points,
+        write(NOUT,*)'#In the number ND=NDGS*LMAX of GIP points,
      & NDGS=',NDGS
-	  write(NOUT,*)'#DEFP=',DEFP
+        write(NOUT,*)'#DEFP=',DEFP
       write(nout,*)'#Material number =',NMAT
-	  if (ynbrug) write(nout,*)'#Bruggeman approximation performed'
+        if (ynbrug) write(nout,*)'#Bruggeman approximation performed'
       if (ync .eq.'n') then
         write(nout,*)'#Homogeneous particle'
       else if (ync.eq.'y') then
@@ -972,12 +972,12 @@ C--------/---------/---------/---------/---------/---------/---------/--
       write(nout+1,*)
       write(nout+1,*)'#Equiv.-volume-sphere radius in nm=', rev
       write(nout+1,*)
-	  write(NOUT+1,*)'#Angular momentum cut-off LMAX=',LMAX
-	  write(NOUT+1,*)'#In the number ND=NDGS*LMAX of GIP points,
+        write(NOUT+1,*)'#Angular momentum cut-off LMAX=',LMAX
+        write(NOUT+1,*)'#In the number ND=NDGS*LMAX of GIP points,
      & NDGS=',NDGS
-	  write(NOUT+1,*)'#DEFP=',DEFP
+        write(NOUT+1,*)'#DEFP=',DEFP
       write(nout+1,*)'#Material number =',NMAT
-	  if (ynbrug) write(nout+1,*)'#Bruggeman approximation performed'
+        if (ynbrug) write(nout+1,*)'#Bruggeman approximation performed'
       if (ync .eq.'n') then
         write(nout+1,*)'#Homogeneous particle'
       else if (ync.eq.'y') then
@@ -1009,12 +1009,12 @@ C--------/---------/---------/---------/---------/---------/---------/--
       write(nout+2,*)
       write(nout+2,*)'#Equiv.-volume-sphere radius in nm=', rev
       write(nout+2,*)
-	  write(NOUT+2,*)'#Angular momentum cut-off LMAX=',LMAX
-	  write(NOUT+2,*)'#In the number ND=NDGS*LMAX of GIP points,
+        write(NOUT+2,*)'#Angular momentum cut-off LMAX=',LMAX
+        write(NOUT+2,*)'#In the number ND=NDGS*LMAX of GIP points,
      & NDGS=',NDGS
-	  write(NOUT+2,*)'#DEFP=',DEFP
+        write(NOUT+2,*)'#DEFP=',DEFP
       write(nout+2,*)'#Material number =',NMAT
-	  if (ynbrug) write(nout+2,*)'#Bruggeman approximation performed'
+        if (ynbrug) write(nout+2,*)'#Bruggeman approximation performed'
 
       if (ync .eq.'n') then
         write(nout+2,*)'#Homogeneous particle'
@@ -1047,12 +1047,12 @@ C--------/---------/---------/---------/---------/---------/---------/--
       write(NOUT+3,*)
       write(NOUT+3,*)'#Equiv.-volume-sphere radius in nm=', rev
       write(NOUT+3,*)
-	  write(NOUT+3,*)'#Angular momentum cut-off LMAX=',LMAX
-	  write(NOUT+3,*)'#In the number ND=NDGS*LMAX of GIP points,
+        write(NOUT+3,*)'#Angular momentum cut-off LMAX=',LMAX
+        write(NOUT+3,*)'#In the number ND=NDGS*LMAX of GIP points,
      & NDGS=',NDGS
-	  write(NOUT+3,*)'#DEFP=',DEFP
+        write(NOUT+3,*)'#DEFP=',DEFP
       write(NOUT+3,*)'#Material number =',NMAT
-	  if (ynbrug) write(NOUT+3,*)'#Bruggeman approximation performed'
+        if (ynbrug) write(NOUT+3,*)'#Bruggeman approximation performed'
       if (ync .eq.'n') then
         write(NOUT+3,*)'#Homogeneous particle'
       else if (ync.eq.'y') then
@@ -1083,12 +1083,12 @@ C--------/---------/---------/---------/---------/---------/---------/--
      & (coated) particle'
       write(nout+5,*)'#Equiv.-volume-sphere radius in nm=', rev
       write(nout+5,*)
-	  write(NOUT+5,*)'#Angular momentum cut-off LMAX=',LMAX
-	  write(NOUT+5,*)'#In the number ND=NDGS*LMAX of GIP points,
+        write(NOUT+5,*)'#Angular momentum cut-off LMAX=',LMAX
+        write(NOUT+5,*)'#In the number ND=NDGS*LMAX of GIP points,
      & NDGS=',NDGS
-	  write(NOUT+5,*)'#DEFP=',DEFP
+        write(NOUT+5,*)'#DEFP=',DEFP
       write(nout+5,*)'#Material number =',NMAT
-	  if (ynbrug) write(nout+5,*)'#Bruggeman approximation performed'
+        if (ynbrug) write(nout+5,*)'#Bruggeman approximation performed'
       if (ync .eq.'n') then
         write(nout+5,*)'#Homogeneous particle'
       else if (ync.eq.'y') then
@@ -1107,7 +1107,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
      &  write(nout+5,*)'#coating diel. const.=',zeps(lcs)
 C--------/---------/---------/---------/---------/---------/---------/--
       end if
-	  WRITE(NOUT+5,*)'#In columns:'
+        WRITE(NOUT+5,*)'#In columns:'
       WRITE(NOUT+5,*)'#Vacuum lambda_0, albedo, and tcs-(acs+tsc)'
       write(nout+5,*)
 
@@ -1117,10 +1117,10 @@ C--------/---------/---------/---------/---------/---------/---------/--
      & single (coated) particle'
       write(nout+6,*)'#Equiv.-volume-sphere radius in nm=', rev
       write(nout+6,*)
-	  write(NOUT+6,*)'#Angular momentum cut-off LMAX=',LMAX
-	  write(NOUT+6,*)'#In the number ND=NDGS*LMAX of GIP points,
+        write(NOUT+6,*)'#Angular momentum cut-off LMAX=',LMAX
+        write(NOUT+6,*)'#In the number ND=NDGS*LMAX of GIP points,
      & NDGS=',NDGS
-	  write(NOUT+6,*)'#DEFP=',DEFP
+        write(NOUT+6,*)'#DEFP=',DEFP
       write(nout+6,*)'#Material number =',NMAT
       if (ync .eq.'n') then
         write(nout+6,*)'#Homogeneous particle'
@@ -1149,12 +1149,12 @@ C--------/---------/---------/---------/---------/---------/---------/--
      & single (coated) particle'
       write(nout+7,*)'#Equiv.-volume-sphere radius in nm=', rev
       write(nout+7,*)
-	  write(NOUT+7,*)'#Angular momentum cut-off LMAX=',LMAX
-	  write(NOUT+7,*)'#In the number ND=NDGS*LMAX of GIP points,
+        write(NOUT+7,*)'#Angular momentum cut-off LMAX=',LMAX
+        write(NOUT+7,*)'#In the number ND=NDGS*LMAX of GIP points,
      & NDGS=',NDGS
-	  write(NOUT+7,*)'#DEFP=',DEFP
+        write(NOUT+7,*)'#DEFP=',DEFP
       write(nout+7,*)'#Material number =',NMAT
-	  if (ynbrug) write(nout+7,*)'#Bruggeman approximation performed'
+        if (ynbrug) write(nout+7,*)'#Bruggeman approximation performed'
       if (ync .eq.'n') then
         write(nout+7,*)'#Homogeneous particle'
       else if (ync.eq.'y') then
@@ -1173,7 +1173,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
      &  write(nout+7,*)'#coating diel. const.=',zeps(lcs)
 C--------/---------/---------/---------/---------/---------/---------/--
       end if
-	  WRITE(NOUT+7,*)'#In columns:'
+        WRITE(NOUT+7,*)'#In columns:'
       WRITE(NOUT+7,*)'#Vacuum lambda_0 and quadrupole extinction'
       write(nout+7,*)
 C--------/---------/---------/---------/---------/---------/---------/--
@@ -1183,12 +1183,12 @@ C--------/---------/---------/---------/---------/---------/---------/--
       write(nout+10,*)
       write(nout+10,*)'#Equiv.-volume-sphere radius in nm=', rev
       write(nout+10,*)
-	  write(NOUT+10,*)'#Angular momentum cut-off LMAX=',LMAX
-	  write(NOUT+10,*)'#In the number ND=NDGS*LMAX of GIP points,
+        write(NOUT+10,*)'#Angular momentum cut-off LMAX=',LMAX
+        write(NOUT+10,*)'#In the number ND=NDGS*LMAX of GIP points,
      & NDGS=',NDGS
-	  write(NOUT+10,*)'#DEFP=',DEFP
+        write(NOUT+10,*)'#DEFP=',DEFP
       write(nout+10,*)'#Material number =',NMAT
-	  if (ynbrug) write(nout+10,*)'#Bruggeman approximation performed'
+        if (ynbrug) write(nout+10,*)'#Bruggeman approximation performed'
       WRITE(NOUT+10,1005) THET0,THET,PHI0,PHI,ALPHA,BETA
       write(nout+10,*)
 
@@ -1199,33 +1199,33 @@ C--------/---------/---------/---------/---------/---------/---------/--
       write(nout+12,*)
       write(nout+12,*)'#Equiv.-volume-sphere radius in nm=', rev
       write(nout+12,*)
-	  write(NOUT+12,*)'#Angular momentum cut-off LMAX=',LMAX
-	  write(NOUT+12,*)'#In the number ND=NDGS*LMAX of GIP points,
+        write(NOUT+12,*)'#Angular momentum cut-off LMAX=',LMAX
+        write(NOUT+12,*)'#In the number ND=NDGS*LMAX of GIP points,
      & NDGS=',NDGS
-	  write(NOUT+12,*)'#DEFP=',DEFP
+        write(NOUT+12,*)'#DEFP=',DEFP
       write(nout+12,*)'#Material number =',NMAT
-	  if (ynbrug) write(nout+12,*)'#Bruggeman approximation performed'
+        if (ynbrug) write(nout+12,*)'#Bruggeman approximation performed'
       WRITE(NOUT+12,1005) THET0,THET,PHI0,PHI,ALPHA,BETA
       WRITE(NOUT+12,*)'#In columns:'
       WRITE(NOUT+12,*)'#   Vacuum lambda_0, ReVV, ImVV, ReVH, ImVH'
-	  WRITE(NOUT+12,*)'#   Vacuum lambda_0, ReHV, ImHV, ReHH, ImHH'
+        WRITE(NOUT+12,*)'#   Vacuum lambda_0, ReHV, ImHV, ReHH, ImHH'
       write(nout+12,*)
 C--------/---------/---------/---------/---------/---------/---------/--
       OPEN(UNIT=NOUT+13,FILE='axs-intv.dat')
       rewind(NOUT+13)
       write(nout+13,*)'Intensity in theta for
-     &	(un)correlated light source'
+     &      (un)correlated light source'
       write(nout+13,*)
       write(nout+13,*)'#Equiv.-volume-sphere radius in nm=', rev
       write(nout+13,*)
-	  write(NOUT+13,*)'#Angular momentum cut-off LMAX=',LMAX
-	  write(NOUT+13,*)'#In the number ND=NDGS*LMAX of GIP points,
+        write(NOUT+13,*)'#Angular momentum cut-off LMAX=',LMAX
+        write(NOUT+13,*)'#In the number ND=NDGS*LMAX of GIP points,
      & NDGS=',NDGS
-	  write(NOUT+13,*)'#DEFP=',DEFP
+        write(NOUT+13,*)'#DEFP=',DEFP
       write(nout+13,*)'#Material number =',NMAT
-	  if (ynbrug) write(nout+13,*)'#Bruggeman approximation performed'
+        if (ynbrug) write(nout+13,*)'#Bruggeman approximation performed'
       WRITE(NOUT+13,1005) THET0,THET,PHI0,PHI,ALPHA,BETA
-	  write(nout+13,*)'#host dielectric constant=', zeps(lcs+1)
+        write(nout+13,*)'#host dielectric constant=', zeps(lcs+1)
       if (nmat.ge.1) write(nout,*)'#Dispersive layer number=', ilcs
       if ((lcs.eq.1).and.(nmat.eq.0))
      & write(nout+13,*)'#sphere diel. const.=', zeps(1)
@@ -1238,7 +1238,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
 C--------/---------/---------/---------/---------/---------/---------/--
       end if
       WRITE(NOUT+13,*)'#In columns:'
-	  WRITE(NOUT+13,*)'#Vacuum lambda_0,|VV|**2+|VH|**2,|VV+VH|**2'
+        WRITE(NOUT+13,*)'#Vacuum lambda_0,|VV|**2+|VH|**2,|VV+VH|**2'
       write(nout+13,*)
 
 C--------/---------/---------/---------/---------/---------/---------/--
@@ -1249,14 +1249,14 @@ C--------/---------/---------/---------/---------/---------/---------/--
       write(nout+14,*)
       write(nout+14,*)'#Equiv.-volume-sphere radius in nm=', rev
       write(nout+14,*)
-	  write(NOUT+14,*)'#Angular momentum cut-off LMAX=',LMAX
-	  write(NOUT+14,*)'#In the number ND=NDGS*LMAX of GIP points,
+        write(NOUT+14,*)'#Angular momentum cut-off LMAX=',LMAX
+        write(NOUT+14,*)'#In the number ND=NDGS*LMAX of GIP points,
      & NDGS=',NDGS
-	  write(NOUT+14,*)'#DEFP=',DEFP
+        write(NOUT+14,*)'#DEFP=',DEFP
       write(nout+14,*)'#Material number =',NMAT
-	  if (ynbrug) write(nout+14,*)'#Bruggeman approximation performed'
+        if (ynbrug) write(nout+14,*)'#Bruggeman approximation performed'
       WRITE(NOUT+14,1005) THET0,THET,PHI0,PHI,ALPHA,BETA
-	  write(nout+14,*)'#host dielectric constant=', zeps(lcs+1)
+        write(nout+14,*)'#host dielectric constant=', zeps(lcs+1)
       if (nmat.ge.1) write(nout,*)'#Dispersive layer number=', ilcs
       if ((lcs.eq.1).and.(nmat.eq.0))
      & write(nout+14,*)'#sphere diel. const.=', zeps(1)
@@ -1289,7 +1289,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
 *
       if (nmat.le.1) then
 
-	  go to 2         !no reading of material data
+        go to 2         !no reading of material data
 
       else if (nmat.eq.2) then            ! silver data
 
@@ -1351,7 +1351,7 @@ cc      else if (nmat.eq.4) then
       else if (nmat.eq.8) then        ! Silicon data
 
 c     OPEN(UNIT=30,FILE='sieps.dat')  !Silicon data in nm
-	  OPEN(UNIT=30,FILE='Sidat.dat')   !Silicon data in nm for larger interval
+        OPEN(UNIT=30,FILE='Sidat.dat')   !Silicon data in nm for larger interval
       write(6,*)'Silicon particles'
       rewind(30)
         do ieps=1, nfin
@@ -1367,7 +1367,7 @@ c          ceps1(ieps) = CMPLX(ceps1real(ieps), ceps1imag(ieps))
        else if (nmat.eq.9) then        ! Water data
 
 
-	   OPEN(UNIT=30,FILE='measured_Water_dispersion_T=24.txt')   !Water in GHz
+         OPEN(UNIT=30,FILE='measured_Water_dispersion_T=24.txt')   !Water in GHz
       write(6,*)'Water particles'
       rewind(30)
         do ieps=1, nfin
@@ -1429,7 +1429,7 @@ cc      xs=RMUF*omega*dble(sqrt(zeps0))  !Equiv. size parameter
         zeps1=1.d0-omxp**2/(1.d0+ci*plasma/(144.d0*omega))
       go to 5
 *
-	  ELSE IF (nmat.eq.4) then             !Material decision IF - ZnS
+        ELSE IF (nmat.eq.4) then             !Material decision IF - ZnS
 *
        filfrac=0.62d0         ! filfrac of ZnS in ZnS core
        call  znsrefind(LAMBDA,FILFRAC,zeps1)
@@ -1587,20 +1587,20 @@ cc      write(6,*)'LAMBDA in AXSPARTCL=', LAMBDA
 *
       if ((np.eq.-1).and.(lcs.gt.1)) then
 
-	  revinl=revin*2.d0*pi*sqrt(zeps0)/lambda
+        revinl=revin*2.d0*pi*sqrt(zeps0)/lambda
 
-	  revl=rev*2.d0*pi*sqrt(zeps0)/lambda
+        revl=rev*2.d0*pi*sqrt(zeps0)/lambda
 
 ctest
-cc	defpp=0.5
-cc	revinl=0.5
-cc	revl=10.d0
+cc      defpp=0.5
+cc      revinl=0.5
+cc      revl=10.d0
 ctest
       if (yncheck) then
-	  ide=2
-	  else
-	  ide=4
-	  end if
+        ide=2
+        else
+        ide=4
+        end if
 
       call lisac(ide,lcs,lmax,lmax,ndgs*lmax,lambda,defpp,
      & revinl/revl,revl,zeps)
@@ -1630,11 +1630,11 @@ cc      write(6,*)'tsc=', tsc
 * <<<
       close(nout)
       close(nout+1)
-	  close(nout+2)
-	  close(nout+3)
+        close(nout+2)
+        close(nout+3)
       close(nout+5)
-	  close(nout+6)
-	  close(nout+7)
+        close(nout+6)
+        close(nout+7)
       close(nout+10)
       close(nout+12)
       close(nout+13)
@@ -1659,12 +1659,12 @@ cc      write(6,*)'tsc=', tsc
       if (ync.eq.'y') write(6,*)'core radius/particle radius =',
      & rff(1)
       write(6,*)
-	  write(6,*)'OA scattering cs versus wavelength in axs-scs.dat'
+        write(6,*)'OA scattering cs versus wavelength in axs-scs.dat'
       write(6,*)'OA Extinction versus wavelength in axs-oavext.dat'
       write(6,*)'OA Absorption versus wavelength in axs-abs.dat'
-	  write(6,*)'OA Albedo versus wavelength in axs-albedo.dat'
-	  write(6,*)'  [3rd column displays qext-(qsca +qabs)]  '
-	  write(6,*)'Extinction versus wavelength in axs-ext.dat'
+        write(6,*)'OA Albedo versus wavelength in axs-albedo.dat'
+        write(6,*)'  [3rd column displays qext-(qsca +qabs)]  '
+        write(6,*)'Extinction versus wavelength in axs-ext.dat'
       write(6,*)'Phase matrix vs wavelength in axsphmat.dat'
       write(6,*)'Amplitude matrix vs wavelength in axsampmat.dat'
       write(6,*)'OA Dipole extinction in axs-dipolext.dat'
@@ -1683,10 +1683,10 @@ C--------/---------/---------/---------/---------/---------/---------/--
       write(NOUTI,*)
       write(NOUTI,*)'#Equiv.-volume-sphere radius in nm=', rev
       write(NOUTI,*)
-	  write(NOUTI,*)'#Angular momentum cut-off LMAX=',LMAX
-	  write(NOUTI,*)'#In the number ND=NDGS*LMAX of GIP points,
+        write(NOUTI,*)'#Angular momentum cut-off LMAX=',LMAX
+        write(NOUTI,*)'#In the number ND=NDGS*LMAX of GIP points,
      & NDGS=',NDGS
-	  write(NOUTI,*)'#DEFP=',DEFP
+        write(NOUTI,*)'#DEFP=',DEFP
       write(NOUTI,*)'#Material number =',NMAT
       if (ync .eq.'n') then
         write(NOUTI,*)'#Homogeneous particle'
@@ -1705,16 +1705,16 @@ C--------/---------/---------/---------/---------/---------/---------/--
       WRITE(NOUTI,*)'#phi,cos(theta),r(theta), and |E| in columns'
       write(NOUTI,*)
 
-	  OPEN(UNIT=NOUTI+1,FILE='elfcomp.dat')
+        OPEN(UNIT=NOUTI+1,FILE='elfcomp.dat')
       rewind(NOUTI+1)
       WRITE(NOUTI+1,*)'#Total electric field components around a tip'
       write(NOUTI+1,*)
       write(NOUTI+1,*)'#Equiv.-volume-sphere radius in nm=', rev
       write(NOUTI+1,*)
       write(NOUTI+1,*)'#Angular momentum cut-off LMAX=',LMAX
-	  write(NOUTI+1,*)'#In the number ND=NDGS*LMAX of GIP points,
+        write(NOUTI+1,*)'#In the number ND=NDGS*LMAX of GIP points,
      & NDGS=',NDGS
-	  write(NOUTI+1,*)'#DEFP=',DEFP
+        write(NOUTI+1,*)'#DEFP=',DEFP
       write(NOUTI+1,*)'#Material number =',NMAT
       if (ync .eq.'n') then
         write(NOUTI+1,*)'#Homogeneous particle'
@@ -1734,16 +1734,16 @@ C--------/---------/---------/---------/---------/---------/---------/--
      & in columns'
       write(NOUTI+1,*)
 *
-	  OPEN(UNIT=NOUTI+2,FILE='elfscat.dat')
+        OPEN(UNIT=NOUTI+2,FILE='elfscat.dat')
       rewind(NOUTI+2)
       WRITE(NOUTI+2,*)'#Scattered E-field components around a tip'
       write(NOUTI+2,*)
       write(NOUTI+2,*)'#Equiv.-volume-sphere radius in nm=', rev
       write(NOUTI+2,*)
       write(NOUTI+2,*)'#Angular momentum cut-off LMAX=',LMAX
-	  write(NOUTI+2,*)'#In the number ND=NDGS*LMAX of GIP points,
+        write(NOUTI+2,*)'#In the number ND=NDGS*LMAX of GIP points,
      & NDGS=',NDGS
-	  write(NOUTI+2,*)'#DEFP=',DEFP
+        write(NOUTI+2,*)'#DEFP=',DEFP
       write(NOUTI+2,*)'#Material number =',NMAT
       if (ync .eq.'n') then
         write(NOUTI+2,*)'#Homogeneous particle'
@@ -6214,22 +6214,22 @@ C   CEXT ... extinction cross section for a fixed particle orientation
 C--------/---------/---------/---------/---------/---------/---------/--
 C      IMPLICIT NONE
       INTEGER NOUT,NPN1,NPN4,NPN6
-	  INTEGER SU,SUP,ST,ST1,ST2
-	  logical ynmishch
+        INTEGER SU,SUP,ST,ST1,ST2
+        logical ynmishch
 
 * number of the output unit
       PARAMETER (NOUT=35)
 * Either Mischenko:
-	  Parameter (NPN1=100, NPN4=NPN1, NPN6=NPN4+1)
+        Parameter (NPN1=100, NPN4=NPN1, NPN6=NPN4+1)
 * or Bohren:
-	  PARAMETER (SU=50,SUP=0,ST=SU+SUP,ST1=ST+1,ST2=ST+ST)
+        PARAMETER (SU=50,SUP=0,ST=SU+SUP,ST1=ST+1,ST2=ST+ST)
 * If routine is to be used with Mischenko convention, ynnmishch=.true.,
 *  otherwise ynnmishch=.false.
-	  PARAMETER (ynmishch=.false.)
+        PARAMETER (ynmishch=.false.)
 
-	  INTEGER NMAX,NMIN,M,M1,N,NN
+        INTEGER NMAX,NMIN,M,M1,N,NN
       REAL*8 DLAM,DK,LAMBDA,KEX,FAC,CEXT
-	  REAL*8 TP,TP1,PP,PP1,FC,FS,REV,PIN,PIN2,PI,THETP,PHIP,THETP1,
+        REAL*8 TP,TP1,PP,PP1,FC,FS,REV,PIN,PIN2,PI,THETP,PHIP,THETP1,
      & PHIP1,EPS,DNN,RN,DCTH0,DCTH,PH,DV1NN,DV2NN,DV1N,DV2N,D11,D12,
      & D21,D22
       REAL*8 DV1(NPN6),DV2(NPN6),DV01(NPN6),DV02(NPN6)
@@ -6240,7 +6240,7 @@ C      IMPLICIT NONE
      &     TI11(NPN6,NPN4,NPN4),TI12(NPN6,NPN4,NPN4),
      &     TI21(NPN6,NPN4,NPN4),TI22(NPN6,NPN4,NPN4)
 * or Bohren:
-	  COMPLEX*16 CT(ST2,ST2,ST1)
+        COMPLEX*16 CT(ST2,ST2,ST1)
 *
       COMPLEX*16 CN,CN1,CN2,CI,VV,VH,HV,HH,ZEPS0,CT11,CT12,CT21,CT22,
      & CAL(NPN4,NPN4)
@@ -6281,7 +6281,7 @@ C for allowability
       PHIP1=PP1*PI
 * initialization of the vacuum wavelength LAMBDA
 
-	  LAMBDA=DLAM*SQRT(ZEPS0)         !vacuum wavelength
+        LAMBDA=DLAM*SQRT(ZEPS0)         !vacuum wavelength
 
       EPS=1D-7
       IF (THETP.LT.PIN2) THETP=THETP+EPS
@@ -6349,9 +6349,9 @@ C Main summation loop:
                CT22=DCMPLX(TR22(M1,N,NN),TI22(M1,N,NN))
          else
 * In Barber's notation:
-	         CT11=CT(N,NN,M1)
+               CT11=CT(N,NN,M1)
                CT22=CT(N+NMAX,NN+NMAX,M1)
-	   end if
+         end if
 
                IF (M.EQ.0) THEN   !T^{21}=T^{12}=0 in particle frame
 
@@ -6368,9 +6368,9 @@ C Main summation loop:
                   CT21=DCMPLX(TR21(M1,N,NN),TI21(M1,N,NN))
                   else
 * In Barber's notation:
-	            CT12=CT(N,NN+NMAX,M1)
+                  CT12=CT(N,NN+NMAX,M1)
                   CT21=CT(N+NMAX,NN,M1)
-	            end if
+                  end if
 
 * complete \alpha-factors (Eq. (28)) taking
 * into account w.r.t. summation over +/- m in particle frame:
@@ -6429,9 +6429,9 @@ C   amplitude scattering matrix elements S11,S12,S21,S22 determined
       FAC=lambda**2/(2.d0*PIN**2*REV**2)     !=2/xs**2
       else
       FAC=2.d0/KEX**2
-	  end if
+        end if
 *
-	  write(nout+3,1105) lambda, fac*cext, cext
+        write(nout+3,1105) lambda, fac*cext, cext
       write(nout+12,1105) lambda, VV,VH
       write(nout+12,1105) lambda, HV,HH
       write(nout+13,1106) lambda, dble(VV*dconjg(vv) + VH*dconjg(vh)),
@@ -6928,7 +6928,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
 c     .. Scalar Arguments ..
 
       INTEGER    NTRM,LMAXD
-	  PARAMETER (LMAXD=60)
+        PARAMETER (LMAXD=60)
 
       LOGICAL    NOABS, YESANG
       REAL*8     XX
@@ -6971,10 +6971,10 @@ c                                                   ** Eq. R47a
 cc      F3(MRE) = -15.04d0 + MRE*( 8.42d0 + 16.35d0*MRE )
 c     ..
 
-ct	NOABS=.false.
-ct	YESANG=.false.
-ct	XX=7.31806289774349d0
-ct	CIOR=(1.45d0,1.d0)
+ct      NOABS=.false.
+ct      YESANG=.false.
+ct      XX=7.31806289774349d0
+ct      CIOR=(1.45d0,1.d0)
 
 c                                  ** Decide whether BigA can be
 c                                  ** calculated by up-recurrence
@@ -7014,14 +7014,14 @@ c                                   *** Downward recurrence for BigA
          IF(NOABS) THEN
 c                                        ** No-absorption case; Eq (R23)
             RBIGA(NTRM) = DBLE(CTMP)
-	      CBIGA(NTRM) = RBIGA(NTRM)
+            CBIGA(NTRM) = RBIGA(NTRM)
 
             DO 10 N = NTRM, 2, -1
 
                RBIGA(N - 1) = ( N*REZINV ) -
      &                        1.d0 / ( ( N*REZINV ) + RBIGA(N) )
 
-	         CBIGA(N-1) = RBIGA(N-1)
+               CBIGA(N-1) = RBIGA(N-1)
 
    10       CONTINUE
 
@@ -7043,12 +7043,12 @@ c                                  ** No-absorption case; Eq (R20,21)
             RTMP = SIN( MRE*XX )
             RBIGA(1) = - REZINV + RTMP /
      &                   ( RTMP*REZINV - COS(MRE*XX) )
-	      CBIGA(1) = RBIGA(1)
+            CBIGA(1) = RBIGA(1)
 
             DO 30 N = 2, NTRM
                RBIGA(N) = -( N*REZINV ) +
      &                      1.d0 / ( (N*REZINV) - RBIGA(N - 1) )
-	       CBIGA(N) = RBIGA(N)
+             CBIGA(N) = RBIGA(N)
    30       CONTINUE
 
          ELSE
@@ -7133,8 +7133,8 @@ c                                 ** Eq. R25b, k=2
       IF (KOUNT.GT.MAXIT) then
 cx     &    CALL ERRMSG('ConFra--Iteration failed to converge',.TRUE.)
           write(6,*)'ConFra--Iteration failed to converge'
-	    pause
-	end if
+          pause
+      end if
 
       MM  = - MM
       KK  = KK + 2
@@ -7222,7 +7222,7 @@ C       by the value of variable LMX)
 
       PARAMETER (LMAXD=60)
 
-	real*8 xt
+      real*8 xt
       integer lmx,l
       complex*16 zx,z1,ci,cone,CQEPSt
       complex*16 dr1(0:LMAXD),dr3(0:LMAXD),zeta(0:lmx),dzeta(0:lmx)
@@ -7232,7 +7232,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
 
       z1=dcmplx(dble(sqrt(zx*dconjg(zx))),0.d0)
       cqepst=zx/z1
-	  xt=dble(z1)
+        xt=dble(z1)
 
       if (imag(CQEPST).ne.0.d0) then
          call BIGA(CQEPST,xt,LMX,.false.,.false.,dr1(1))
@@ -7240,15 +7240,15 @@ C--------/---------/---------/---------/---------/---------/---------/--
          call BIGA(CQEPST,xt,LMX,.true.,.false.,dr1(1))
       end if
 
-	  z1=-ci*exp(ci*zx)*sin(zx)
-	  DR3(0)=ci
-	  DR1(0)=cone/zx - cone/(cone/zx + dr1(1))
-	  zeta(0)=-ci*exp(ci*zx)
+        z1=-ci*exp(ci*zx)*sin(zx)
+        DR3(0)=ci
+        DR1(0)=cone/zx - cone/(cone/zx + dr1(1))
+        zeta(0)=-ci*exp(ci*zx)
 
-	  do 15  l=1,lmx
+        do 15  l=1,lmx
 
-	   z1=z1*(-DR1(l-1)+dble(l)/zx)*(-DR3(l-1)+dble(l)/zx)
-	   DR3(l)=DR1(l)+ci/z1
+         z1=z1*(-DR1(l-1)+dble(l)/zx)*(-DR3(l-1)+dble(l)/zx)
+         DR3(l)=DR1(l)+ci/z1
            zeta(l)=zeta(l-1)*(-DR3(l-1)+dble(l)/zx)
            dzeta(l)=dr3(l)*zeta(l)
 
@@ -7307,16 +7307,16 @@ C Determine the Bessel function ratio A_1=\psi_1'/\psi_1
 * initial values of the recurrence (63),(64),(67) of [1]
 * \psi_0=zx*j_0=sin(zx); \xi_0=zx*h_0=-ci*exp(ci*zx)
 
-	  z1=-ci*exp(ci*zx)*sin(zx)
-	  DR3(0)=ci
-	  DR1(0)=cone/zx - cone/(cone/zx + dr1(1))
-	  zeta(0)=-ci*exp(ci*zx)
+        z1=-ci*exp(ci*zx)*sin(zx)
+        DR3(0)=ci
+        DR1(0)=cone/zx - cone/(cone/zx + dr1(1))
+        zeta(0)=-ci*exp(ci*zx)
 
 *
-	  do 15  l=1,lmx   !Eqs. (63),(64),(67) of Mackowski et al
+        do 15  l=1,lmx   !Eqs. (63),(64),(67) of Mackowski et al
 
-	   z1=z1*(-DR1(l-1)+dble(l)/zx)*(-DR3(l-1)+dble(l)/zx)
-	   DR3(l)=DR1(l)+ci/z1
+         z1=z1*(-DR1(l-1)+dble(l)/zx)*(-DR3(l-1)+dble(l)/zx)
+         DR3(l)=DR1(l)+ci/z1
            zeta(l)=zeta(l-1)*(-DR3(l-1)+dble(l)/zx)
            dzeta(l)=dr3(l)*zeta(l)
 
@@ -7653,10 +7653,10 @@ C                   >>>  GENERAL COMPLEX OMEGA   <<<
 
 250   call bess(lmax,omega,jl,djl)
 
-	do i=lmax,1,-1
-	jl(i)=jl(i-1)
-	djl(i)=djl(i-1)
-	enddo
+      do i=lmax,1,-1
+      jl(i)=jl(i-1)
+      djl(i)=djl(i-1)
+      enddo
 
       do i=lmax,lmax
         xnu=dble(lmax-i+2)
@@ -7867,7 +7867,7 @@ C ::: relative error allowed. If the convergence
 *
       integer i,ij,ip,il,j,l,ilm,ilmp,lcs1,nscan
       INTEGER LCS,lmax,lmaxs,lmaxt,m,ml,NGV
-c	logical ynphic
+c      logical ynphic
 
       real*8 pi,omega,xelinv,delo,delt,rmff,rmfc
       REAL*8 phi,xint,aint,xx
@@ -7895,13 +7895,13 @@ C  INPUT DATA ********************************************************
 *
       DATA PI/3.141592653589793d0/
       DATA ci/(0.d0,1.d0)/,czero/(0.D0,0.D0)/
-	  lcs1=lcs+1
+        lcs1=lcs+1
 
 * specify the number of different PHI points around the axis of symmetry
       NPHI=40
-	  NGV=40       !number of different theta points
+        NGV=40       !number of different theta points
 
-	  if(ngv.gt.100) write(6,*)
+        if(ngv.gt.100) write(6,*)
      & 'Increase dimension of R- and X-arrays to at least NGV+1=',
      & NGV+1
 *
@@ -7918,18 +7918,18 @@ C  TEMPORARY OPTIONS ******************************************
 
       lmaxs=lmax
 
-ct	LMAXS=max(6.d0,1+2*pi*rsnm/lambda)   !cutoff on scattered field
+ct      LMAXS=max(6.d0,1+2*pi*rsnm/lambda)   !cutoff on scattered field
 
-	  if(lmaxs.gt.lmax) then
-	  write(6,*)'In INTENS:'
-	  write(6,*)'Increase LMAX so that LMAXS.LE:LMAX'
-	  pause
-	  stop
-	  end if
+        if(lmaxs.gt.lmax) then
+        write(6,*)'In INTENS:'
+        write(6,*)'Increase LMAX so that LMAXS.LE:LMAX'
+        pause
+        stop
+        end if
 *
-	  write(nout,*)  '#Cutoff for T-matrix LMAXS=',LMAXS
-	  write(nout+1,*)'#Cutoff for T-matrix LMAXS=',LMAXS
-	  write(nout+2,*)'#Cutoff for T-matrix LMAXS=',LMAXS
+        write(nout,*)  '#Cutoff for T-matrix LMAXS=',LMAXS
+        write(nout+1,*)'#Cutoff for T-matrix LMAXS=',LMAXS
+        write(nout+2,*)'#Cutoff for T-matrix LMAXS=',LMAXS
 *
 
 C  END OF TEMPORARY OPTIONS ******************************************
@@ -7937,7 +7937,7 @@ cc      write(6,*)'r-component of the incident field amplitude'
 cc      (5,*) zelinc(1)
       write(6,*)
 cd      write(6,*)'FILL IN THE INCIDENT ELECTRIC FIELD COMPONENTS'
-cd	write(6,*)
+cd      write(6,*)
 cd      write(6,*)'THETA COMPONENT:'
 cd      read(5,*) zelinc(1)
 cd
@@ -7946,27 +7946,27 @@ cd      read(5,*) zelinc(2)
 
       write(6,*)'LINEARLY POLARIZED INCIDENT WAVE OF UNIT AMPLITUDE'
       write(6,*)'FILL IN POLARIZATION ANGLE ALPHA IN DEGREES'
-	  write(6,*)'[between (k,z)-plane and polarization vector]'
+        write(6,*)'[between (k,z)-plane and polarization vector]'
       write(6,*)'(For incidence along z-axis: '
       write(6,*)'alpha=0 for x-polarization'
-	  write(6,*)'alpha=90 for y-polarization)'
-	  read(5,*) xx
-	  write(nout,*)
+        write(6,*)'alpha=90 for y-polarization)'
+        read(5,*) xx
+        write(nout,*)
      &'#polarization angle alpha w.r.t. meridional plane in deg=',xx
-	  write(nout+1,*)
+        write(nout+1,*)
      &'#polarization angle alpha w.r.t. meridional plane in deg=',xx
-	  write(nout+2,*)
+        write(nout+2,*)
      &'#polarization angle alpha w.r.t. meridional plane in deg=',xx
 
-	  xx=xx*pi/180.d0
+        xx=xx*pi/180.d0
 
 * Theta component - per definition lies in the meridional plane
 * i.e., the plane through k and the z-axis. Provided that k coincides
 * with the z-axis, the meridional plane is taken to be the (z,x)-plane
-	  zelinc(1)=cos(xx)
+        zelinc(1)=cos(xx)
 
 * Phi component- per definition perpendicular to the meridional plane
-	  zelinc(2)=sin(xx)
+        zelinc(2)=sin(xx)
 *
       xelinv=sqrt(dble( zelinc(1)*dconjg(zelinc(1))+
      1      zelinc(2)*dconjg(zelinc(2)) ) )
@@ -7978,60 +7978,60 @@ cd      read(5,*) zelinc(2)
 C RAP=S(1,1)*KAPPA0/2.D0/PI=rmuf*ALPHA/LAMBDA =rsnm/LAMBDA
 
   2   write(6,*)
-	  write(6,*)'For semi-circular theta-scan write 1'
-	  write(6,*)'For scan along the x-axis write 2'
+        write(6,*)'For semi-circular theta-scan write 1'
+        write(6,*)'For scan along the x-axis write 2'
       write(6,*)'For scan along the z-axis write 3'
       write(6,*)'(by default, incidence in the (x,z)-plane)'
       read(5,*) nscan
       write(6,*)
 
       IF ((nscan.lt.1).or.(nscan.gt.4)) then
-	  write(6,*)'Incorrect choice of nscan. Please again.'
-	  go to 2
-	  end if
+        write(6,*)'Incorrect choice of nscan. Please again.'
+        go to 2
+        end if
 
-	  IF (nscan.eq.1) THEN
+        IF (nscan.eq.1) THEN
 
       write(6,*)
       write(6,*)'Chose a particular value of out-PHI in degrees'
       read(5,*) phi
       phi=phi*pi/180.d0     !conversion to radians
-	  NPHI=1
+        NPHI=1
 
-	  ELSE IF (nscan.eq.2) THEN
+        ELSE IF (nscan.eq.2) THEN
 
-cc	write(6,*)
+cc      write(6,*)
 cc      write(6,*)'Chose a particular value of out-THETA in degrees'
 cc      read(5,*) thet
-	  thet=90.d0
+        thet=90.d0
       thet=thet*pi/180.d0                         !conversion to radians
-	  x(1)=cos(thet)
-	  phi=0.d0
+        x(1)=cos(thet)
+        phi=0.d0
       NGV=0
 
-	  ELSE IF (nscan.eq.3) THEN
+        ELSE IF (nscan.eq.3) THEN
 
-	  phi=0.d0     !can in principle be arbitrary value
-	             !The result should not depend on the phi-choice
+        phi=0.d0     !can in principle be arbitrary value
+                   !The result should not depend on the phi-choice
       NGV=0
-	  NPHI=1
+        NPHI=1
 
-	  END IF
+        END IF
 *
       zpifac=zexp(ci*phi)
-	  omega=2.d0*pi*rsnm/lambda   !size parameter
+        omega=2.d0*pi*rsnm/lambda   !size parameter
 *
-	  write(nout,*)  '#In radians: Phi_inc=0, Phi_out=', phi
-	  write(nout+1,*)'#In radians: Phi_inc=0, Phi_out=', phi
-	  write(nout+2,*)'#In radians: Phi_inc=0, Phi_out=', phi
-	  WRITE(NOUT,*)'#cos(theta),r(theta), and |E| in columns'
-	  WRITE(NOUT+1,*)'#cos(theta),r(theta), E_r,E_theta,E_phi
+        write(nout,*)  '#In radians: Phi_inc=0, Phi_out=', phi
+        write(nout+1,*)'#In radians: Phi_inc=0, Phi_out=', phi
+        write(nout+2,*)'#In radians: Phi_inc=0, Phi_out=', phi
+        WRITE(NOUT,*)'#cos(theta),r(theta), and |E| in columns'
+        WRITE(NOUT+1,*)'#cos(theta),r(theta), E_r,E_theta,E_phi
      & in columns'
-	  WRITE(NOUT+2,*)'#cos(theta),r(theta), E_r,E_theta,E_phi
+        WRITE(NOUT+2,*)'#cos(theta),r(theta), E_r,E_theta,E_phi
      & in columns'
-	  write(nout,*)
-	  write(nout+1,*)
-	  write(nout+2,*)
+        write(nout,*)
+        write(nout+1,*)
+        write(nout+2,*)
 ***************************************************************************
 * Incident plane wave expansion into spherical harmonics:
 
@@ -8090,45 +8090,45 @@ C--------/---------/---------/---------/---------/---------/---------/--
 *>>> scanning radial path over the interval RINT:
 
 c      rmfc=1.d0       !determines a lower cutoff from which
-	                 !incident wave amplitude is calculated
-					 !for consistency check - should be at least 1.d0
+                       !incident wave amplitude is calculated
+                               !for consistency check - should be at least 1.d0
 
       do 600 il=0,nx            !nx            !over the interval RINT
 
 c      do 500 ipi=0,NPHI                      !over different phi angles
 cc      phi=2.d0*pi*dble(ipi)/dble(NPHI)
 
-	  if (nscan.le.2) then
+        if (nscan.le.2) then
 
-	  delo=rint/dble(nx)
+        delo=rint/dble(nx)
       rmff=1.d-4 + dble(il)*delo
 
 
-	  else if (nscan.eq.3) then
+        else if (nscan.eq.3) then
 
-	  delo=2.d0*rint/dble(nx)
+        delo=2.d0*rint/dble(nx)
       rmff=-rint+ 1.d-4 + dble(il)*delo
 
 * For theta=\pi/2 incidence this should read
 c     x(1)=xx
-c	if (rmff.lt.0.d0)  phi = -pi
-c	if (rmff.ge.0.d0)  phi = 0.d0
+c      if (rmff.lt.0.d0)  phi = -pi
+c      if (rmff.ge.0.d0)  phi = 0.d0
 c
 * For theta=0 incidence this should read
 c     phi=0.d0
 c
-	  if (rmff.lt.0.d0)  x(1)=-1.d0          !=cos(theta)
-	  if (rmff.ge.0.d0)  x(1)= 1.d0          !=cos(theta)
+        if (rmff.lt.0.d0)  x(1)=-1.d0          !=cos(theta)
+        if (rmff.ge.0.d0)  x(1)= 1.d0          !=cos(theta)
       rmff=abs(rmff)
 
       end if            !nscan
 
-	  if (nscan.eq.2) x(1)=0.d0
+        if (nscan.eq.2) x(1)=0.d0
 
-	  if (rmff.lt.1.d-4) rmff=1.d-4
+        if (rmff.lt.1.d-4) rmff=1.d-4
 
-cd	  rmff=(rsnm+1.d0)/rsnm
-cx	rmff= 0.8771d0 + dble(il)*delo
+cd        rmff=(rsnm+1.d0)/rsnm
+cx      rmff= 0.8771d0 + dble(il)*delo
 
 * identifying the layer for a given rmff
 
@@ -8150,8 +8150,8 @@ cx	rmff= 0.8771d0 + dble(il)*delo
 * generate arrays of Bessel functions
 *
       lmaxt=lmax
-	  if (rmff.lt.1.d-2) lmaxt=min(20,lmax,lmaxs)   !cut-off to control an
-	                                              !under/overflow of Bessel functions
+        if (rmff.lt.1.d-2) lmaxt=min(20,lmax,lmaxs)   !cut-off to control an
+                                                    !under/overflow of Bessel functions
 *
       CALL GNZBESS(RX(1),LMAXT,jl,drjl,nl,drnl)
 *
@@ -8164,11 +8164,11 @@ C--------/---------/---------/---------/---------/---------/---------/--
       DO L=1,LMAXT
 
       if ((j.gt.1).and.(l.le.lmaxs))  HL(L)=HL(L)/RX(1)      !HL now h_l(u)
-	  if ((j.gt.1).and.(l.le.lmaxs))  DRHL(L)=DRHL(L)/RX(1)  !DRHL now [uh_l(u)]'/u
+        if ((j.gt.1).and.(l.le.lmaxs))  DRHL(L)=DRHL(L)/RX(1)  !DRHL now [uh_l(u)]'/u
 
-	  DRJL(L)=JL(L)/RX(1) + DRJL(L)           !DRJL now [uj_l(u)]'/u
+        DRJL(L)=JL(L)/RX(1) + DRJL(L)           !DRJL now [uj_l(u)]'/u
 
-	  ENDDO
+        ENDDO
 *
 * Bessel function determined ===>
 *          determine electric and magnetic multipoles:
@@ -8178,7 +8178,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       if (nscan.eq.1) then
 
       delt=pi/dble(ngv)
-	x(i)=cos(dble(i-1)*delt)
+      x(i)=cos(dble(i-1)*delt)
 
       end if
 *********************************************************
@@ -8211,7 +8211,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       if (rmff.gt.1.d0) then
 
 * incident multipoles:  (PHI=0 for incident wave)
-	mrpolinc(ilm,ij)=zmfac*zrfac*cpolinc(ilm,ij)
+      mrpolinc(ilm,ij)=zmfac*zrfac*cpolinc(ilm,ij)
       nrpolinc(ilm,ij)=(zrfac*ppolinc(ilm,ij)*dble(l*(l+1))/rx(1)+
      & cdl*drjl(l)*bpolinc(ilm,ij))*zmfac
       end if
@@ -8286,21 +8286,21 @@ cc      zmpifac=zpifac**m        !zpifac=zexp(ci*phi) here
 
       do ij=1,3
 
-	if (j.eq.lcs1) then
+      if (j.eq.lcs1) then
        zescat(ij,1)=zescat(ij,1)
      1   + za(ilm)*bm(l,j)*mspole(ilm,ij)+
      2              zb(ilm)*be(l,j)*nspole(ilm,ij)
-	else if (j.eq.1) then
+      else if (j.eq.1) then
        zescat(ij,1)=zescat(ij,1)
      1   + za(ilm)*am(l,j)*mrpole(ilm,ij)+
      2              zb(ilm)*ae(l,j)*nrpole(ilm,ij)
-	else
+      else
        zescat(ij,1)=zescat(ij,1)
      1   +za(ilm)*am(l,j)*mrpole(ilm,ij)+
      2              zb(ilm)*ae(l,j)*nrpole(ilm,ij)+
-	2              za(ilm)*bm(l,j)*mspole(ilm,ij)+
+     2              za(ilm)*bm(l,j)*mspole(ilm,ij)+
      2              zb(ilm)*be(l,j)*nspole(ilm,ij)
-	end if
+      end if
 
       enddo
 
@@ -8319,8 +8319,8 @@ cc      zmpifac=zpifac**m        !zpifac=zexp(ci*phi) here
 
          if (j.eq.lcs1) then
            zint(ij)=zeinc(ij,ip)+zescat(ij,ip)
-	   else
-	     zint(ij)=zescat(ij,ip)
+         else
+           zint(ij)=zescat(ij,ip)
          end if
 
          xint=xint + zint(ij)*dconjg(zint(ij))
@@ -8330,8 +8330,8 @@ cc      zmpifac=zpifac**m        !zpifac=zexp(ci*phi) here
       if (rmff.gt.1.d0)  aint=sqrt(aint)
          xint=sqrt(xint)
 
-	if (nscan.le.2) r(i)=rsnm*rmff
-	if (nscan.eq.3) r(i)=x(i)*rsnm*rmff
+      if (nscan.le.2) r(i)=rsnm*rmff
+      if (nscan.eq.3) r(i)=x(i)*rsnm*rmff
 
       write(6,*)'r=', r(i)
       write(6,*)'phi=',phi
@@ -8339,17 +8339,17 @@ cc      zmpifac=zpifac**m        !zpifac=zexp(ci*phi) here
 
       if (rmff.gt.1.d0) then
       if (abs((aint-xelinv)/xelinv).gt.5.d-2) then
-	write(6,*)'INCREASE LMAX IN AXSPARTCL!'
+      write(6,*)'INCREASE LMAX IN AXSPARTCL!'
       write(6,*)'LMAX is not enough to ensure the convergence
      1 of the incident field intensity!!!'
       pause
       end if
-	end if
+      end if
 
       if (rmff.gt.1.d0)
      &  write(6,*)'Incident el. field magnitude=',aint
       write(6,*)'Total el. field magnitude=',xint
-	if (rmff.gt.1.d0)
+      if (rmff.gt.1.d0)
      &  write(6,*)'El. field enhancement factor=', xint/aint
 
 cc      if (ip.eq.1) write(6,*)'El. intensity for plus circ. pol.=',xint
@@ -8373,7 +8373,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
 cc      if (ip.eq.2) write(nout+1,*) phi,x(i),rsnm,xint
       enddo                !ip-loop
 
-	if (rmff.lt.1.d-3) go to 500
+      if (rmff.lt.1.d-3) go to 500
 
  200   continue                    !over theta angle
 
@@ -8382,7 +8382,7 @@ cc      if (ip.eq.2) write(nout+1,*) phi,x(i),rsnm,xint
  600   continue                    !end of scanning path
 *
  1000 FORMAT (2F10.4,F16.8)
- 1010	FORMAT (3F10.4,3F14.8)
+ 1010      FORMAT (3F10.4,3F14.8)
 
       return
       end
@@ -8432,7 +8432,7 @@ cc      si=dsqrt(1.d0-x*x)                 !DX=DABS(X)
 cc Activate only for testing purposes
 cc      if (DABS(1D0-DABS(X)).gt.5D-2) call VIGG (X, LMAX, M, DV1, DV2)
 
-	call vigamplv(x,LMAX,M,DV1,DV2,DDV1)
+      call vigamplv(x,LMAX,M,DV1,DV2,DDV1)
 C--------/---------/---------/---------/---------/---------/---------/--
 C  ===> X=cos(theta),LMAX,M (only nonnegative)
 C <===  DV1,DV2,DDV1
@@ -8525,7 +8525,7 @@ C     DV2(N)=[d/d(arccos x)] dvig(0,m,n,arccos x)
 C                              = d d_{0m}^{(l)}/d\theta
 C
 C     for 1.LE.N.LE.LMAX and 0.LE.X.LE.1
-C	DDV1 is calculated because (DV1/sin\theta) is singular for
+C      DDV1 is calculated because (DV1/sin\theta) is singular for
 C             either \beta=0 or \beta=\pi
 C     (For a given M.NEQ.0, only the M.LE.N.LE.LMAX terms are determined!)
 C =====
@@ -8543,7 +8543,7 @@ C
 C     (Rodrigues formula [Eq. (2.5.14) of Ref. \ct{Ed}] then yields
 C                       P_1(x)=x; P_2=(3x^2-1)/2; etc.
 C
-C	P_l^m(x) = (-1)^m (1-x^2)^{m/2} \fr{d^m P_l(x)}{dx} ===>
+C      P_l^m(x) = (-1)^m (1-x^2)^{m/2} \fr{d^m P_l(x)}{dx} ===>
 C                       P_1^1(\cos\beta)=-\sin\beta
 C     Therefore,
 C              d_{00}^{(1)}(\beta)=\cos\beta
@@ -8586,7 +8586,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
 * DV1, DDV1, and DV2 initialization
       DO 1 N=1,LMAX
          DV1(N) =0.D0
-	   DDV1(N)=0.D0
+         DDV1(N)=0.D0
          DV2(N) =0.D0
     1 CONTINUE
 
@@ -8711,19 +8711,19 @@ C
 *
       DO N=3,LMAX           !recurrence (3.36) of {TKS},
       DV2(N)=(2*N-1)*X*DV2(N-1)/(N-1)-N*DV2(N-2)/(N-1)
-	ENDDO
+      ENDDO
 ***********************************************************************
 *                           M > 0
 
- 	ELSE IF (M.GT.0) THEN
+       ELSE IF (M.GT.0) THEN
 *
 * >>> Determine X^m_m according to Eq. (3.29) of {TKS}:
 
-	A=1.d0/DSQRT(2.D0)               !X^1_1=A_1
+      A=1.d0/DSQRT(2.D0)               !X^1_1=A_1
 
-	DO I=1,M-1
+      DO I=1,M-1
       A=QS*DBLE(I+1)*DSQRT(2*I+1.d0)*A/(I*DSQRT(2*I+2.d0))
-	ENDDO
+      ENDDO
 
 * <<< A is now X^m_m; see (3.29) of {TKS}
 
@@ -8732,7 +8732,7 @@ C
 
 * >>> Determine X^{m+1}_m:
 
-	IF (M.EQ.LMAX)  GO TO 120
+      IF (M.EQ.LMAX)  GO TO 120
 
       DER=X*DSQRT(2*M+1.d0)*A          ! DER=X^{m+1}_m; see (3.30) of {TKS}
       DDV1(M+1)=DER
@@ -8740,17 +8740,17 @@ C
 
 * >>> Determine remaining X^{l}_m's
 
-	IF ((M+2).EQ.LMAX)  GO TO 120
+      IF ((M+2).EQ.LMAX)  GO TO 120
 
        DO N=M+2,LMAX
        D3=DSQRT(DBLE(N)**2-DBLE(M)**2)
        DDV1(N)=((2*N-1)*X*DDV1(N-1) -
      &                DSQRT(DBLE(N-1)**2-DBLE(M)**2)*DDV1(N-2))/D3
                                                       !see (3.31) of {TKS}
-	 DV2(N)=(N*X*DDV1(N)-DDV1(N-1)*D3)/DBLE(M)      !see (3.35) of {TKS}
+       DV2(N)=(N*X*DDV1(N)-DDV1(N-1)*D3)/DBLE(M)      !see (3.35) of {TKS}
        ENDDO
 
-	END IF
+      END IF
 
 cv  100 IF (M.NE.1) RETURN
 cv
@@ -11012,11 +11012,11 @@ C--------/---------/---------/---------/---------/---------/---------/--
         zeps1=1.d0-omxp**2/(1.d0+ci*plasma/(144.d0*omega))
       go to 5
 *
-	ELSE IF (nmat.eq.4) then             !Material decision IF - ZnS
+      ELSE IF (nmat.eq.4) then             !Material decision IF - ZnS
 *
        filfrac=0.62d0         ! filfrac of ZnS in ZnS core
 
-	 write(6,*)'Fill. fraction of ZnS in ZnS core=', filfrac
+       write(6,*)'Fill. fraction of ZnS in ZnS core=', filfrac
 
        call  znsrefind(LAMBDA,FILFRAC,zeps1)
        go to 5
@@ -11216,7 +11216,7 @@ cc      else if (nmat.eq.4) then
       else if (nmat.eq.8) then        ! Silicon data
 
 c     OPEN(UNIT=30,FILE='sieps.dat')  !Silicon data in nm
-	  OPEN(UNIT=30,FILE='Sidat.dat')   !Silicon data in nm for larger interval
+        OPEN(UNIT=30,FILE='Sidat.dat')   !Silicon data in nm for larger interval
       write(6,*)'Silicon particles'
       rewind(30)
         do ieps=1, nfin
@@ -11689,128 +11689,128 @@ C (C) Copr. 6/2003  Alexander Moroz
 
       subroutine sphrd(lambda,xrot,xperp,rev,eps0,zeps)
 C--------/---------/---------/---------/---------/---------/---------/--
-C	>>>  lambda,xc,xb,eps0,zeps
-C	<<<  sext(3)
+C      >>>  lambda,xc,xb,eps0,zeps
+C      <<<  sext(3)
 C
 C  xrot ... the half-length of the spheroid along the rotational z-axis
 C  xperp ... the half-length of the spheroid along the perpendicular axis
 C  rev ... equal-volume-sphere radius
 C--------/---------/---------/---------/---------/---------/---------/--
-	implicit none
-	integer NOUT
+      implicit none
+      integer NOUT
 C ::: number of the output unit for cross sections and scattering matrix
       PARAMETER (NOUT=35)
 
-	integer ij,ns,npol
-	real*8 lambda,xrot,xperp,rev,eps0,pi,sext(6),xk,xmn,xmj,xx,xe,
+      integer ij,ns,npol
+      real*8 lambda,xrot,xperp,rev,eps0,pi,sext(6),xk,xmn,xmj,xx,xe,
      &  xlz,xlx,xdz,xdzrn,xdx,xvol,xlp,xdp,xdprn,xcr,xfx,xapl,pf,qf
-	complex*16 ci,cone,zalph(6),zeps
+      complex*16 ci,cone,zalph(6),zeps
 
       DATA PI/3.141592653589793d0/
-	data ci/(0.d0,1.d0)/,cone/(1.d0,0.d0)/
+      data ci/(0.d0,1.d0)/,cone/(1.d0,0.d0)/
 
-	xk=2.d0*pi*sqrt(eps0)/lambda
-	xcr=pi*rev**2        !an effective geom. cross section
-	xvol=xrot*xperp**2/3.d0   !V/(4.d0*pi)
+      xk=2.d0*pi*sqrt(eps0)/lambda
+      xcr=pi*rev**2        !an effective geom. cross section
+      xvol=xrot*xperp**2/3.d0   !V/(4.d0*pi)
 
-	if (xrot.gt.xperp) then
-	ns=1         !prolate spheroid
-	else
-	ns=2         !oblate spheroid
-	end if
+      if (xrot.gt.xperp) then
+      ns=1         !prolate spheroid
+      else
+      ns=2         !oblate spheroid
+      end if
 
-	xmj=max(xrot,xperp)   !major semiaxis
-	xmn=min(xrot,xperp)   !minor semiaxis
+      xmj=max(xrot,xperp)   !major semiaxis
+      xmn=min(xrot,xperp)   !minor semiaxis
 
-	xe=(xmj**2-xmn**2)/xmj**2
-	xe=sqrt(xe)            !eccentricity
+      xe=(xmj**2-xmn**2)/xmj**2
+      xe=sqrt(xe)            !eccentricity
 
-	if (ns.eq.1) then ! prolate
+      if (ns.eq.1) then ! prolate
 
-	xlz=log((1.d0+xe)/(1.d0-xe))
-	xlz=(1.d0-xe**2)*(-1.d0 + xlz/(2.d0*xe))/xe**2
+      xlz=log((1.d0+xe)/(1.d0-xe))
+      xlz=(1.d0-xe**2)*(-1.d0 + xlz/(2.d0*xe))/xe**2
 *
-	xdz=1.d0 + xlz*(1.d0+xe**2)/(1.d0-xe**2)
-	xdz=3.d0*xdz/4.d0
-	xdzrn=1.d0/xe**2 + (5.d0*xe**2 -3.d0)/((1.d0-xe**2)*xe**2)*xlz
-	xdzrn=3.d0*xdzrn/4.d0
-	xdx=(3.d0*log((1.d0+xe)/(1.d0-xe))/(2.d0*xe) - xdz)/2.d0
+      xdz=1.d0 + xlz*(1.d0+xe**2)/(1.d0-xe**2)
+      xdz=3.d0*xdz/4.d0
+      xdzrn=1.d0/xe**2 + (5.d0*xe**2 -3.d0)/((1.d0-xe**2)*xe**2)*xlz
+      xdzrn=3.d0*xdzrn/4.d0
+      xdx=(3.d0*log((1.d0+xe)/(1.d0-xe))/(2.d0*xe) - xdz)/2.d0
 
-	else if (ns.eq.2) then ! oblate
+      else if (ns.eq.2) then ! oblate
 
-	xlz=1.d0 - sqrt(1.d0-xe**2)*dasin(xe)/xe
-	xlz=xlz/xe**2
+      xlz=1.d0 - sqrt(1.d0-xe**2)*dasin(xe)/xe
+      xlz=xlz/xe**2
 *
-	xdz=1.d0 + xlz*(1.d0-2.d0*xe**2)
-	xdz=3.d0*xdz/4.d0
-	xdzrn=(2.d0*xe**2 + 3.d0)*xlz - 1.d0
-	xdzrn=3.d0*xdzrn*(1.d0-xe**2)/(4.d0*xe**2)
-	xdx=(3.d0*sqrt(1.d0-xe**2)*dasin(xe)/xe - xdz)/2.d0
+      xdz=1.d0 + xlz*(1.d0-2.d0*xe**2)
+      xdz=3.d0*xdz/4.d0
+      xdzrn=(2.d0*xe**2 + 3.d0)*xlz - 1.d0
+      xdzrn=3.d0*xdzrn*(1.d0-xe**2)/(4.d0*xe**2)
+      xdx=(3.d0*sqrt(1.d0-xe**2)*dasin(xe)/xe - xdz)/2.d0
 
-	end if
+      end if
 
-	xlx=(1.d0-xlz)/2.d0
+      xlx=(1.d0-xlz)/2.d0
 
-	do 20 npol=1,2
+      do 20 npol=1,2
 
-	if (npol.eq.1) then        !polarization along the rotation axis
+      if (npol.eq.1) then        !polarization along the rotation axis
         xlp=xlz
-	  xdp=xdz
-	  xdprn=xdzrn
-	  xfx=1.d0-(xk*xperp)**2/10.d0
-	  xapl=xrot
-	else if (npol.eq.2) then   !perpendicular polarization
-	  xlp=xlx
-	  xdp=xdx
-	  xfx=1.d0-(xk*xrot)**2/10.d0
-	  xapl=xperp
-	end if
+        xdp=xdz
+        xdprn=xdzrn
+        xfx=1.d0-(xk*xperp)**2/10.d0
+        xapl=xrot
+      else if (npol.eq.2) then   !perpendicular polarization
+        xlp=xlx
+        xdp=xdx
+        xfx=1.d0-(xk*xrot)**2/10.d0
+        xapl=xperp
+      end if
 
 * Static Rayleigh polarizability:
-	zalph(1)=xvol*(zeps-cone)/(cone+xlp*(zeps-cone))
+      zalph(1)=xvol*(zeps-cone)/(cone+xlp*(zeps-cone))
 
 * MLWA polarizability
-	zalph(2)=zalph(1)/(cone-zalph(1)*xk**2/xmj
+      zalph(2)=zalph(1)/(cone-zalph(1)*xk**2/xmj
      & - ci*2.d0*xk**3*zalph(1)/3.d0)
 
 * MLWA polarizability with a ddepol factor:
-	zalph(3)=zalph(1)/(cone-xdp*zalph(1)*xk**2/xapl
+      zalph(3)=zalph(1)/(cone-xdp*zalph(1)*xk**2/xapl
      &  - ci*2.d0*xk**3*zalph(1)/3.d0)
 
-	pf=0.37d0
-	qf=1.d0-pf
+      pf=0.37d0
+      qf=1.d0-pf
 
 * MLWA polarizability with averaged ddepol factor:
-	zalph(4)=zalph(1)/(cone-(qf*xdp/xrot +pf/xapl)*zalph(1)*xk**2
+      zalph(4)=zalph(1)/(cone-(qf*xdp/xrot +pf/xapl)*zalph(1)*xk**2
      &  - ci*2.d0*xk**3*zalph(1)/3.d0)
 
 * MLWA polarizability with a ddepol factor + averaging:
-	zalph(5)=xfx*zalph(1)/(cone-xdp*xfx*zalph(1)*xk**2/xrot
+      zalph(5)=xfx*zalph(1)/(cone-xdp*xfx*zalph(1)*xk**2/xrot
      &  - ci*2.d0*xk**3*xfx*zalph(1)/3.d0)
 
 * MLWA polarizability with a renormalized ddepol factor:
-	zalph(6)=zalph(1)/(cone-xdprn*zalph(1)*xk**2/xapl
+      zalph(6)=zalph(1)/(cone-xdprn*zalph(1)*xk**2/xapl
      &  - ci*2.d0*xk**3*zalph(1)/3.d0)
 
-	do ij=1,6
+      do ij=1,6
         sext(ij)=4.d0*pi*xk*imag(zalph(ij))/xcr    ! extinction cross section
 *
 * xcr=pi*rev**2 - an effective geom. cross section
 
-	if (ij.eq.6)   write(NOUT+18,1108) lambda, sext(6)
+      if (ij.eq.6)   write(NOUT+18,1108) lambda, sext(6)
 
       enddo
 
-	if (npol.eq.1) write(NOUT+16,1107) lambda, sext
-	if (npol.eq.2) write(NOUT+17,1107) lambda, sext
+      if (npol.eq.1) write(NOUT+16,1107) lambda, sext
+      if (npol.eq.2) write(NOUT+17,1107) lambda, sext
 
- 20	continue
+ 20      continue
 
  1107 FORMAT (F8.2,6(3X,D12.6))
  1108 FORMAT (F8.2,3X,D12.6)
 
-	return
-	end
+      return
+      end
 
       subroutine sphrint(lmax,lcs,lambda,rsnm,rmf,zeps,am,ae,bm,be)
 C--------/---------/---------/---------/---------/---------/---------/--
@@ -12029,14 +12029,14 @@ C--------/---------/---------/---------/---------/---------/---------/--
       tt1(2,1,l,1,j)= -ci*sg(1)*UL(2,L)*UL(1,L)*(-DRUL(1,L)/UL(1,L)
      &     +DRUL(2,L)/UL(2,L))
       tt1(2,2,l,1,j)= -ci*sg(1)*WL(2,L)*UL(1,L)*(-DRUL(1,L)/UL(1,L)
-     &	+ DRWL(2,L)/WL(2,L))
+     &      + DRWL(2,L)/WL(2,L))
 *
       tt2(1,1,l,1,j)=-ci*sg(2)*UL(1,L)*WL(2,L)*(DRWL(2,L)/WL(2,L)
      &    - DRUL(1,L)/UL(1,L))
       tt2(1,2,l,1,j)=-ci*sg(2)*WL(1,L)*WL(2,L)*(DRWL(2,L)/WL(2,L)
      &    -  DRWL(1,L)/WL(1,L))
       tt2(2,1,l,1,j)=-ci*sg(2)*UL(1,L)*UL(2,L)*(-DRUL(2,L)/UL(2,L)
-     &	+DRUL(1,L)/UL(1,L))
+     &      +DRUL(1,L)/UL(1,L))
       tt2(2,2,l,1,j)=-ci*sg(2)*WL(1,L)*UL(2,L)*(-DRUL(2,L)/UL(2,L)
      & +DRWL(1,L)/WL(1,L))
 *
@@ -12048,11 +12048,11 @@ C--------/---------/---------/---------/---------/---------/---------/--
 C--------/---------/---------/---------/---------/---------/---------/--
 
       tt1(1,1,l,2,j)=-ci*sg(1)*UL(2,L)*WL(1,L)*
-	1    (DRWL(1,L)/(cp*WL(1,L)) - cp*DRUL(2,L)/UL(2,L))
+     1    (DRWL(1,L)/(cp*WL(1,L)) - cp*DRUL(2,L)/UL(2,L))
       tt1(1,2,l,2,j)=-ci*sg(1)*WL(2,L)*WL(1,L)*
-	1    (DRWL(1,L)/(cp*WL(1,L)) - cp*DRWL(2,L)/WL(2,L))
+     1    (DRWL(1,L)/(cp*WL(1,L)) - cp*DRWL(2,L)/WL(2,L))
       tt1(2,1,l,2,j)=-ci*sg(1)*UL(2,L)*UL(1,L)*
-	1    (-DRUL(1,L)/(cp*UL(1,L)) + cp*DRUL(2,L)/UL(2,L))
+     1    (-DRUL(1,L)/(cp*UL(1,L)) + cp*DRUL(2,L)/UL(2,L))
       tt1(2,2,l,2,j)=-ci*sg(1)*WL(2,L)*UL(1,L)*
      1    (-DRUL(1,L)/(cp*UL(1,L)) + cp*DRWL(2,L)/WL(2,L))
 *
@@ -12063,7 +12063,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       tt2(2,1,l,2,j)= -ci*sg(2)*UL(1,L)*UL(2,L)*
      1   (-cp*DRUL(2,L)/UL(2,L) +DRUL(1,L)/(cp*UL(1,L)))
       tt2(2,2,l,2,j)= -ci*sg(2)*WL(1,L)*UL(2,L)*
-	1   (-cp*DRUL(2,L)/UL(2,L) +DRWL(1,L)/(cp*WL(1,L)))
+     1   (-cp*DRUL(2,L)/UL(2,L) +DRWL(1,L)/(cp*WL(1,L)))
 C--------/---------/---------/---------/---------/---------/---------/--
 *
   27  CONTINUE       ! over l
@@ -12329,7 +12329,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
                                   !exactly what follows from {Ed}
             D1(I2,N)=DD1*SI
             D2(I2,N)=-DD2*SI
-	      D3(I2,N)=DD3*SI
+            D3(I2,N)=DD3*SI
 
          END IF
          ENDDO
@@ -18683,8 +18683,8 @@ C
       IN=J
    2  CONTINUE
       INT(I)=IN      !The largest element in the I-th row to the right of
-	               !the matrix diagonal (I,I)-element is
-				   !in the IN-th column and is denoted by YR
+                     !the matrix diagonal (I,I)-element is
+                           !in the IN-th column and is denoted by YR
 *
 * Executing pivoting:
 
