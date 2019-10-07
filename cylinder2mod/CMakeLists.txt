@@ -1,0 +1,14 @@
+#cmake_minimum_required(VERSION 3.0.2)
+SET (PROJECTNAME "cylinder2mod")
+PROJECT (${PROJECTNAME} Fortran)
+
+
+#include_directories(${CMAKE_BINARY_DIR}/errfun
+#        )
+ADD_EXECUTABLE(${PROJECTNAME} "axspartclnew4.f"
+        )
+#target_link_libraries(${PROJECTNAME}
+#        errfun
+#        )
+
+
