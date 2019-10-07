@@ -46,9 +46,11 @@ def eval(i):
     if os.path.isfile('multem2'):
         my_env = os.environ.copy()
         my_env["OMP_NUM_THREADS"] = "1"
+        print("Running multem...")
         subprocess.run(['./multem2'],
                        stdout=subprocess.DEVNULL,
                        env=my_env)
+        print("Done.")
     #FREQUENCY   TRANSMITTANCE  Reflectance   Absorbance
     d = np.loadtxt('fort.8').T
     C_all[i,:,:] = d
