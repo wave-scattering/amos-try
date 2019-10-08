@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: UTF-8 -*-
 from matplotlib import pyplot as plt
+from matplotlib.colors import LogNorm
 import numpy as np
 def expDtofloat(s):
     return float(s.decode().replace('D','E'))
@@ -12,5 +13,13 @@ data = np.loadtxt('axs-ext.dat', skiprows=15,
 data_size=len(set(data[:,0]))
 data = data[:,3].reshape((-1,data_size))
 
-plt.imshow(data)
+plt.imshow(data,
+           origin='lower',
+           cmap='jet',
+           aspect='auto',
+           norm=LogNorm(
+               vmin = np.min(data)*1.0,
+               vmax = np.max(data)*1.0
+               )
+           )
 plt.show()

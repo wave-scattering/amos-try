@@ -7,8 +7,9 @@ PROJECT (${PROJECTNAME} Fortran)
 #        )
 ADD_EXECUTABLE(${PROJECTNAME} "axspartclnew4.f"
         )
-#target_link_libraries(${PROJECTNAME}
-#        errfun
-#        )
+target_link_libraries(${PROJECTNAME}
+        errfun
+        amos
+        )
 
 
