@@ -13382,15 +13382,8 @@ C operations performed on columns of 'A' matrix in ZGER:
       RETURN
       END
 
-C (C) Copr. 03/2003  Alexander Moroz
-
 C (C) Copr. 09/1998  Alexander Moroz
-
-C (C) Copr. 03/2003  Alexander Moroz
-
 C (C) Copr. 10/2005  Alexander Moroz
-C (C) Copr. 01/2003  Alexander Moroz
-C (C) Copr. 01/2003  Alexander Moroz
       function zartan(zs)
 *--------/---------/---------/---------/---------/---------/---------/--
 * For a complex argument using that
