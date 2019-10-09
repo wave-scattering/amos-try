@@ -13,6 +13,7 @@ ADD_EXECUTABLE(${PROJECTNAME} "axspartclnew4.f"
         biga.f
         chebev.f # TODO replace with non NR
         gnricbessh.f
+        beschb.f # TODO replace with non NR
         )
 target_link_libraries(${PROJECTNAME}
         errfun
