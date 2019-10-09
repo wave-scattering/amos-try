@@ -11,6 +11,8 @@ ADD_EXECUTABLE(${PROJECTNAME} "axspartclnew4.f"
         bessik.f # TODO use amos lib
         bessjy.f # TODO use amos lib
         biga.f
+        chebev.f # TODO replace with non NR
+        gnricbessh.f
         )
 target_link_libraries(${PROJECTNAME}
         errfun
