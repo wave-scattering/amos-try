@@ -18,6 +18,7 @@ ADD_EXECUTABLE(${PROJECTNAME} "axspartclnew4.f"
 target_link_libraries(${PROJECTNAME}
         errfun
         amos
+        dense_solve
         )
 
 
