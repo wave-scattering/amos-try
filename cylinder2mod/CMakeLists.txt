@@ -6,6 +6,11 @@ PROJECT (${PROJECTNAME} Fortran)
 #include_directories(${CMAKE_BINARY_DIR}/errfun
 #        )
 ADD_EXECUTABLE(${PROJECTNAME} "axspartclnew4.f"
+        gnzbess.f
+        #bess.f # TODO use amos lib
+        bessik.f # TODO use amos lib
+        bessjy.f # TODO use amos lib
+        biga.f
         )
 target_link_libraries(${PROJECTNAME}
         errfun
