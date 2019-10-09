@@ -28,10 +28,10 @@ target_link_libraries(libmultem2b amos dense_solve multem_blas errfun)
 
 ADD_EXECUTABLE(${PROJECTNAME} "multem_mod.f90"
         )
-target_link_libraries(${PROJECTNAME} ${BLAS_LIBRARIES}
+target_link_libraries(${PROJECTNAME} #${BLAS_LIBRARIES}
         dense_solve libmultem2b multem_blas
         errfun
-        ${LAPACK_LIBRARIES} #${HDF5_Fortran_LIBRARIES}
+        #${LAPACK_LIBRARIES} #${HDF5_Fortran_LIBRARIES}
         )
 add_custom_command(
         TARGET ${PROJECTNAME} POST_BUILD

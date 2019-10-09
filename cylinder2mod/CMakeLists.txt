@@ -2,7 +2,10 @@
 SET (PROJECTNAME "cylinder2mod")
 PROJECT (${PROJECTNAME} Fortran)
 
-
+include_directories(${CMAKE_BINARY_DIR}/amos
+        ${CMAKE_BINARY_DIR}/lapack_wrapper
+        ${CMAKE_BINARY_DIR}/errfun
+        )
 #include_directories(${CMAKE_BINARY_DIR}/errfun
 #        )
 ADD_EXECUTABLE(${PROJECTNAME} "axspartclnew4.f"
