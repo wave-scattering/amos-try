@@ -346,323 +346,294 @@ C    TMT(4,*)=-TMT(3,*)^t where t denotes transposed TMT(3,*) submatrix
  
 C********************************************************************
                                                 
-      SUBROUTINE AMPL (NMAX,DLAM,TL,TL1,PL,PL1,ALPHA,BETA,
-     &                 VV,VH,HV,HH)  
-C--------/---------/---------/---------/---------/---------/---------/--
-C >>> NMAX,DLAM,TL,TL1,PL,PL1,ALPHA,BETA
-C <<< RAT
-C=================
-C
-C    GIVEN T MATRIX IN COMMON BLOCK IT CALCULATES THE AMPLITUDE MATRIX
-C
-C   NMAX - angular momentum cutoff
-C   DLAM - wavelength of incident light
-C   TL (THET0 IN MAIN) - zenith angle of the incident beam in degrees
-C   TL1 (THET IN MAIN) - zenith angle of the scattered beam in degrees    
-C   PL (PHI0 IN MAIN) - azimuth angle of the incident beam in degrees    
-C   PL1 (PHI IN MAIN) - azimuth angle of the scattered beam in degrees 
-C   ALPHA and BETA - Euler angles (in degrees) specifying the 
-C         orientation of the scattering particle relative to the 
-C         laboratory reference frame (Refs. 6 and 7).  
-C 
-C--------/---------/---------/---------/---------/---------/---------/--
-      IMPLICIT REAL*8 (A-B,D-H,O-Z)
-      IMPLICIT COMPLEX*16 (C)
-      INTEGER NOUT
-      
-* number of the output unit
-      PARAMETER (NOUT=35)
-      INCLUDE 'ampld.par.f'
-      
-      REAL*8 AL(3,2),AL1(3,2),AP(2,3),AP1(2,3),B(3,3),
-     *       R(2,2),R1(2,2),C(3,2),CA,CB,CT,CP,CTP,CPP,CT1,CP1,
-     *       CTP1,CPP1
-      REAL*8 DV1(NPN6),DV2(NPN6),DV01(NPN6),DV02(NPN6)
-      REAL*4
-     &     TR11(NPN6,NPN4,NPN4),TR12(NPN6,NPN4,NPN4),
-     &     TR21(NPN6,NPN4,NPN4),TR22(NPN6,NPN4,NPN4),
-     &     TI11(NPN6,NPN4,NPN4),TI12(NPN6,NPN4,NPN4),
-     &     TI21(NPN6,NPN4,NPN4),TI22(NPN6,NPN4,NPN4)
-      COMPLEX*16 CAL(NPN4,NPN4),VV,VH,HV,HH
-*_____
-      COMMON /TMAT/ TR11,TR12,TR21,TR22,TI11,TI12,TI21,TI22
-*_____
-
-      IF (ALPHA.LT.0D0.OR.ALPHA.GT.360D0.OR.
-     &    BETA.LT.0D0.OR.BETA.GT.180D0.OR.
-     &    TL.LT.0D0.OR.TL.GT.180D0.OR.
-     &    TL1.LT.0D0.OR.TL1.GT.180D0.OR.
-     &    PL.LT.0D0.OR.PL.GT.360D0.OR.
-     &    PL1.LT.0D0.OR.PL1.GT.360D0) THEN 
-          WRITE(NOUT,2000)
-          STOP
-      ELSE
-          CONTINUE
-      ENDIF  
- 2000 FORMAT ('AN ANGULAR PARAMETER IS OUTSIDE ITS',
-     &        ' ALLOWABLE RANGE')
-
-* SPECIFYING NUMERICAL CONSTANTS:
-
-      PIN=DACOS(-1D0)         !=PI
-      PIN2=PIN*0.5D0          !=PI/2
-      PI=PIN/180D0            !=PI/180
-      
-* conversion from degrees to radians:
-      ALPH=ALPHA*PI
-      BET=BETA*PI
-      THETL=TL*PI
-      PHIL=PL*PI
-      THETL1=TL1*PI
-      PHIL1=PL1*PI
-
-      EPS=1D-7
-      IF (THETL.LT.PIN2) THETL=THETL+EPS
-      IF (THETL.GT.PIN2) THETL=THETL-EPS
-      IF (THETL1.LT.PIN2) THETL1=THETL1+EPS
-      IF (THETL1.GT.PIN2) THETL1=THETL1-EPS
-      IF (PHIL.LT.PIN) PHIL=PHIL+EPS
-      IF (PHIL.GT.PIN) PHIL=PHIL-EPS
-      IF (PHIL1.LT.PIN) PHIL1=PHIL1+EPS
-      IF (PHIL1.GT.PIN) PHIL1=PHIL1-EPS
-      IF (BET.LE.PIN2.AND.PIN2-BET.LE.EPS) BET=BET-EPS
-      IF (BET.GT.PIN2.AND.BET-PIN2.LE.EPS) BET=BET+EPS
-      
-C_____________COMPUTE THETP, PHIP, THETP1, AND PHIP1, EQS. (8), (19), AND (20)
-
-      CB=DCOS(BET)
-      SB=DSIN(BET)
-      CT=DCOS(THETL)
-      ST=DSIN(THETL)
-      CP=DCOS(PHIL-ALPH)
-      SP=DSIN(PHIL-ALPH)
-      
-      CTP=CT*CB+ST*SB*CP
-      THETP=DACOS(CTP)
-      CPP=CB*ST*CP-SB*CT
-      SPP=ST*SP
-      PHIP=DATAN(SPP/CPP)
-      
-      IF (PHIP.GT.0D0.AND.SP.LT.0D0) PHIP=PHIP+PIN
-      IF (PHIP.LT.0D0.AND.SP.GT.0D0) PHIP=PHIP+PIN
-      IF (PHIP.LT.0D0) PHIP=PHIP+2D0*PIN
-
-      CT1=DCOS(THETL1)
-      ST1=DSIN(THETL1)
-      CP1=DCOS(PHIL1-ALPH)
-      SP1=DSIN(PHIL1-ALPH)
-      
-      CTP1=CT1*CB+ST1*SB*CP1
-      THETP1=DACOS(CTP1)
-      CPP1=CB*ST1*CP1-SB*CT1
-      SPP1=ST1*SP1
-      PHIP1=DATAN(SPP1/CPP1)
-      
-      IF (PHIP1.GT.0D0.AND.SP1.LT.0D0) PHIP1=PHIP1+PIN
-      IF (PHIP1.LT.0D0.AND.SP1.GT.0D0) PHIP1=PHIP1+PIN
-      IF (PHIP1.LT.0D0) PHIP1=PHIP1+2D0*PIN
-
-C____________COMPUTE MATRIX BETA, EQ. (22) of {Mis39}
-
-      CA=DCOS(ALPH)
-      SA=DSIN(ALPH)
-      B(1,1)=CA*CB
-      B(1,2)=SA*CB
-      B(1,3)=-SB
-      B(2,1)=-SA
-      B(2,2)=CA
-      B(2,3)=0D0
-      B(3,1)=CA*SB
-      B(3,2)=SA*SB
-      B(3,3)=CB
-
-C____________COMPUTE MATRICES AL AND AL1, EQ. (14)  of {Mis39}
-
-      CP=DCOS(PHIL)
-      SP=DSIN(PHIL)
-      CP1=DCOS(PHIL1)
-      SP1=DSIN(PHIL1)
-
-* Eq. (15) of {Mis39}:     
-      AL(1,1)=CT*CP
-      AL(1,2)=-SP
-      AL(2,1)=CT*SP
-      AL(2,2)=CP
-      AL(3,1)=-ST
-      AL(3,2)=0D0
-      
-* Eq. (16) of {Mis39}:       
-      AL1(1,1)=CT1*CP1
-      AL1(1,2)=-SP1
-      AL1(2,1)=CT1*SP1
-      AL1(2,2)=CP1
-      AL1(3,1)=-ST1
-      AL1(3,2)=0D0
-
-C____________COMPUTE MATRICES AP^(-1) AND AP1^(-1), EQ. (15) 
-
-      CT=CTP
-      ST=DSIN(THETP) 
-      CP=DCOS(PHIP)
-      SP=DSIN(PHIP)
-      CT1=CTP1
-      ST1=DSIN(THETP1)
-      CP1=DCOS(PHIP1)
-      SP1=DSIN(PHIP1)
-      AP(1,1)=CT*CP
-      AP(1,2)=CT*SP
-      AP(1,3)=-ST  
-      AP(2,1)=-SP
-      AP(2,2)=CP 
-      AP(2,3)=0D0
-      AP1(1,1)=CT1*CP1
-      AP1(1,2)=CT1*SP1
-      AP1(1,3)=-ST1   
-      AP1(2,1)=-SP1
-      AP1(2,2)=CP1 
-      AP1(2,3)=0D0
-
-C____________COMPUTE MATRICES R AND R^(-1), EQ. (13)
-      DO I=1,3
-         DO J=1,2
-            X=0D0
-            DO K=1,3
-               X=X+B(I,K)*AL(K,J)
-            ENDDO
-            C(I,J)=X
-         ENDDO
-      ENDDO
-      DO I=1,2
-         DO J=1,2
-            X=0D0
-            DO K=1,3
-               X=X+AP(I,K)*C(K,J)
-            ENDDO
-            R(I,J)=X
-         ENDDO
-      ENDDO
-      DO I=1,3
-         DO J=1,2
-            X=0D0
-            DO K=1,3
-               X=X+B(I,K)*AL1(K,J)
-            ENDDO
-            C(I,J)=X
-         ENDDO
-      ENDDO
-      DO I=1,2
-         DO J=1,2
-            X=0D0
-            DO K=1,3
-               X=X+AP1(I,K)*C(K,J)
-            ENDDO
-            R1(I,J)=X
-         ENDDO
-      ENDDO
-      D=1D0/(R1(1,1)*R1(2,2)-R1(1,2)*R1(2,1))
-      X=R1(1,1)
-      R1(1,1)=R1(2,2)*D
-      R1(1,2)=-R1(1,2)*D
-      R1(2,1)=-R1(2,1)*D
-      R1(2,2)=X*D
-
-      CI=(0D0,1D0)
-      DO 5 NN=1,NMAX
-         DO 5 N=1,NMAX
-            CN=CI**(NN-N-1)
-            DNN=DFLOAT((2*N+1)*(2*NN+1)) 
-            DNN=DNN/DFLOAT( N*NN*(N+1)*(NN+1) ) 
-            RN=DSQRT(DNN)
-            CAL(N,NN)=CN*RN
-    5 CONTINUE
-      DCTH0=CTP
-      DCTH=CTP1 
-      PH=PHIP1-PHIP
-      VV=(0D0,0D0)
-      VH=(0D0,0D0)
-      HV=(0D0,0D0)
-      HH=(0D0,0D0)
-      DO 500 M=0,NMAX
-         M1=M+1
-         NMIN=MAX(M,1)
-*
-* Specify Wigner d-matrices:
-
-         CALL VIGAMPL (DCTH, NMAX, M, DV1, DV2)
-         CALL VIGAMPL (DCTH0, NMAX, M, DV01, DV02)
-*
-         FC=2D0*DCOS(M*PH)
-         FS=2D0*DSIN(M*PH)
-         DO 400 NN=NMIN,NMAX
-            DV1NN=DV01(NN)         !changed from  M*DV01(NN)
-            DV2NN=DV02(NN)
-            DO 400 N=NMIN,NMAX
-               DV1N=DV1(N)         !changed from  M*DV1(NN)
-               DV2N=DV2(N)
-
-               CT11=DCMPLX(TR11(M1,N,NN),TI11(M1,N,NN))
-               CT22=DCMPLX(TR22(M1,N,NN),TI22(M1,N,NN))
-
-               IF (M.EQ.0) THEN
-
-                  CN=CAL(N,NN)*DV2N*DV2NN
-
-                  VV=VV+CN*CT22  
-                  HH=HH+CN*CT11
-
-                 ELSE
-
-                  CT12=DCMPLX(TR12(M1,N,NN),TI12(M1,N,NN))
-                  CT21=DCMPLX(TR21(M1,N,NN),TI21(M1,N,NN))
-
-                  CN1=CAL(N,NN)*FC
-                  CN2=CAL(N,NN)*FS
-
-                  D11=DV1N*DV1NN
-                  D12=DV1N*DV2NN
-                  D21=DV2N*DV1NN
-                  D22=DV2N*DV2NN
-
-                  VV=VV+(CT11*D11+CT21*D21   
-     &                  +CT12*D12+CT22*D22)*CN1   
-
-                  VH=VH+(CT11*D12+CT21*D22   
-     &                  +CT12*D11+CT22*D21)*CN2
-
-                  HV=HV-(CT11*D21+CT21*D11
-     &                  +CT12*D22+CT22*D12)*CN2   
-
-                  HH=HH+(CT11*D22+CT21*D12
-     &                  +CT12*D21+CT22*D11)*CN1      
-               ENDIF
-  400    CONTINUE
-  500 CONTINUE
-      DK=2D0*PIN/DLAM
-      VV=VV/DK
-      VH=VH/DK
-      HV=HV/DK
-      HH=HH/DK
-      CVV=VV*R(1,1)+VH*R(2,1)
-      CVH=VV*R(1,2)+VH*R(2,2)
-      CHV=HV*R(1,1)+HH*R(2,1)
-      CHH=HV*R(1,2)+HH*R(2,2)
-      VV=R1(1,1)*CVV+R1(1,2)*CHV
-      VH=R1(1,1)*CVH+R1(1,2)*CHH
-      HV=R1(2,1)*CVV+R1(2,2)*CHV
-      HH=R1(2,1)*CVH+R1(2,2)*CHH
-      
-      
-      PRINT 1101, VV
-      PRINT 1102, VH
-      PRINT 1103, HV
-      PRINT 1104, HH
- 1101 FORMAT ('S11=',D11.5,' + i*',D11.5)
- 1102 FORMAT ('S12=',D11.5,' + i*',D11.5)
- 1103 FORMAT ('S21=',D11.5,' + i*',D11.5)
- 1104 FORMAT ('S22=',D11.5,' + i*',D11.5)
-
-      RETURN
-      END
+!     SUBROUTINE AMPL (NMAX,DLAM,TL,TL1,PL,PL1,ALPHA,BETA,
+!    &                 VV,VH,HV,HH)
+!--------/---------/---------/---------/---------/---------/---------/--
+! >>> NMAX,DLAM,TL,TL1,PL,PL1,ALPHA,BETA
+! <<< RAT
+!=================
+!
+!    GIVEN T MATRIX IN COMMON BLOCK IT CALCULATES THE AMPLITUDE MATRIX
+!
+!   NMAX - angular momentum cutoff
+!   DLAM - wavelength of incident light
+!   TL (THET0 IN MAIN) - zenith angle of the incident beam in degrees
+!   TL1 (THET IN MAIN) - zenith angle of the scattered beam in degrees
+!   PL (PHI0 IN MAIN) - azimuth angle of the incident beam in degrees
+!   PL1 (PHI IN MAIN) - azimuth angle of the scattered beam in degrees
+!   ALPHA and BETA - Euler angles (in degrees) specifying the
+!         orientation of the scattering particle relative to the
+!         laboratory reference frame (Refs. 6 and 7).
+!
+!--------/---------/---------/---------/---------/---------/---------/--
+!     IMPLICIT REAL*8 (A-B,D-H,O-Z)
+!     IMPLICIT COMPLEX*16 (C)
+!     INTEGER NOUT
+!
+! number of the output unit
+!     PARAMETER (NOUT=35)
+!     INCLUDE 'ampld.par.f'
+!
+!     REAL*8 AL(3,2),AL1(3,2),AP(2,3),AP1(2,3),B(3,3),
+!    *       R(2,2),R1(2,2),C(3,2),CA,CB,CT,CP,CTP,CPP,CT1,CP1,
+!    *       CTP1,CPP1
+!     REAL*8 DV1(NPN6),DV2(NPN6),DV01(NPN6),DV02(NPN6)
+!     REAL*4
+!    &     TR11(NPN6,NPN4,NPN4),TR12(NPN6,NPN4,NPN4),
+!    &     TR21(NPN6,NPN4,NPN4),TR22(NPN6,NPN4,NPN4),
+!    &     TI11(NPN6,NPN4,NPN4),TI12(NPN6,NPN4,NPN4),
+!    &     TI21(NPN6,NPN4,NPN4),TI22(NPN6,NPN4,NPN4)
+!     COMPLEX*16 CAL(NPN4,NPN4),VV,VH,HV,HH
+!_____
+!     COMMON /TMAT/ TR11,TR12,TR21,TR22,TI11,TI12,TI21,TI22
+!_____
+!!     IF (ALPHA.LT.0D0.OR.ALPHA.GT.360D0.OR.
+!    &    BETA.LT.0D0.OR.BETA.GT.180D0.OR.
+!    &    TL.LT.0D0.OR.TL.GT.180D0.OR.
+!    &    TL1.LT.0D0.OR.TL1.GT.180D0.OR.
+!    &    PL.LT.0D0.OR.PL.GT.360D0.OR.
+!    &    PL1.LT.0D0.OR.PL1.GT.360D0) THEN
+!         WRITE(NOUT,2000)
+!         STOP
+!     ELSE
+!         CONTINUE
+!     ENDIF
+!2000 FORMAT ('AN ANGULAR PARAMETER IS OUTSIDE ITS',
+!    &        ' ALLOWABLE RANGE')
+!! SPECIFYING NUMERICAL CONSTANTS:
+!!     PIN=DACOS(-1D0)         !=PI
+!     PIN2=PIN*0.5D0          !=PI/2
+!     PI=PIN/180D0            !=PI/180
+!
+! conversion from degrees to radians:
+!     ALPH=ALPHA*PI
+!     BET=BETA*PI
+!     THETL=TL*PI
+!     PHIL=PL*PI
+!     THETL1=TL1*PI
+!     PHIL1=PL1*PI
+!!     EPS=1D-7
+!     IF (THETL.LT.PIN2) THETL=THETL+EPS
+!     IF (THETL.GT.PIN2) THETL=THETL-EPS
+!     IF (THETL1.LT.PIN2) THETL1=THETL1+EPS
+!     IF (THETL1.GT.PIN2) THETL1=THETL1-EPS
+!     IF (PHIL.LT.PIN) PHIL=PHIL+EPS
+!     IF (PHIL.GT.PIN) PHIL=PHIL-EPS
+!     IF (PHIL1.LT.PIN) PHIL1=PHIL1+EPS
+!     IF (PHIL1.GT.PIN) PHIL1=PHIL1-EPS
+!     IF (BET.LE.PIN2.AND.PIN2-BET.LE.EPS) BET=BET-EPS
+!     IF (BET.GT.PIN2.AND.BET-PIN2.LE.EPS) BET=BET+EPS
+!
+!_____________COMPUTE THETP, PHIP, THETP1, AND PHIP1, EQS. (8), (19), AND (20)
+!!     CB=DCOS(BET)
+!     SB=DSIN(BET)
+!     CT=DCOS(THETL)
+!     ST=DSIN(THETL)
+!     CP=DCOS(PHIL-ALPH)
+!     SP=DSIN(PHIL-ALPH)
+!
+!     CTP=CT*CB+ST*SB*CP
+!     THETP=DACOS(CTP)
+!     CPP=CB*ST*CP-SB*CT
+!     SPP=ST*SP
+!     PHIP=DATAN(SPP/CPP)
+!
+!     IF (PHIP.GT.0D0.AND.SP.LT.0D0) PHIP=PHIP+PIN
+!     IF (PHIP.LT.0D0.AND.SP.GT.0D0) PHIP=PHIP+PIN
+!     IF (PHIP.LT.0D0) PHIP=PHIP+2D0*PIN
+!!     CT1=DCOS(THETL1)
+!     ST1=DSIN(THETL1)
+!     CP1=DCOS(PHIL1-ALPH)
+!     SP1=DSIN(PHIL1-ALPH)
+!
+!     CTP1=CT1*CB+ST1*SB*CP1
+!     THETP1=DACOS(CTP1)
+!     CPP1=CB*ST1*CP1-SB*CT1
+!     SPP1=ST1*SP1
+!     PHIP1=DATAN(SPP1/CPP1)
+!
+!     IF (PHIP1.GT.0D0.AND.SP1.LT.0D0) PHIP1=PHIP1+PIN
+!     IF (PHIP1.LT.0D0.AND.SP1.GT.0D0) PHIP1=PHIP1+PIN
+!     IF (PHIP1.LT.0D0) PHIP1=PHIP1+2D0*PIN
+!!____________COMPUTE MATRIX BETA, EQ. (22) of {Mis39}
+!!     CA=DCOS(ALPH)
+!     SA=DSIN(ALPH)
+!     B(1,1)=CA*CB
+!     B(1,2)=SA*CB
+!     B(1,3)=-SB
+!     B(2,1)=-SA
+!     B(2,2)=CA
+!     B(2,3)=0D0
+!     B(3,1)=CA*SB
+!     B(3,2)=SA*SB
+!     B(3,3)=CB
+!!____________COMPUTE MATRICES AL AND AL1, EQ. (14)  of {Mis39}
+!!     CP=DCOS(PHIL)
+!     SP=DSIN(PHIL)
+!     CP1=DCOS(PHIL1)
+!     SP1=DSIN(PHIL1)
+!! Eq. (15) of {Mis39}:
+!     AL(1,1)=CT*CP
+!     AL(1,2)=-SP
+!     AL(2,1)=CT*SP
+!     AL(2,2)=CP
+!     AL(3,1)=-ST
+!     AL(3,2)=0D0
+!
+! Eq. (16) of {Mis39}:
+!     AL1(1,1)=CT1*CP1
+!     AL1(1,2)=-SP1
+!     AL1(2,1)=CT1*SP1
+!     AL1(2,2)=CP1
+!     AL1(3,1)=-ST1
+!     AL1(3,2)=0D0
+!!____________COMPUTE MATRICES AP^(-1) AND AP1^(-1), EQ. (15)
+!!     CT=CTP
+!     ST=DSIN(THETP)
+!     CP=DCOS(PHIP)
+!     SP=DSIN(PHIP)
+!     CT1=CTP1
+!     ST1=DSIN(THETP1)
+!     CP1=DCOS(PHIP1)
+!     SP1=DSIN(PHIP1)
+!     AP(1,1)=CT*CP
+!     AP(1,2)=CT*SP
+!     AP(1,3)=-ST
+!     AP(2,1)=-SP
+!     AP(2,2)=CP
+!     AP(2,3)=0D0
+!     AP1(1,1)=CT1*CP1
+!     AP1(1,2)=CT1*SP1
+!     AP1(1,3)=-ST1
+!     AP1(2,1)=-SP1
+!     AP1(2,2)=CP1
+!     AP1(2,3)=0D0
+!!____________COMPUTE MATRICES R AND R^(-1), EQ. (13)
+!     DO I=1,3
+!        DO J=1,2
+!           X=0D0
+!           DO K=1,3
+!              X=X+B(I,K)*AL(K,J)
+!           ENDDO
+!           C(I,J)=X
+!        ENDDO
+!     ENDDO
+!     DO I=1,2
+!        DO J=1,2
+!           X=0D0
+!           DO K=1,3
+!              X=X+AP(I,K)*C(K,J)
+!           ENDDO
+!           R(I,J)=X
+!        ENDDO
+!     ENDDO
+!     DO I=1,3
+!        DO J=1,2
+!           X=0D0
+!           DO K=1,3
+!              X=X+B(I,K)*AL1(K,J)
+!           ENDDO
+!           C(I,J)=X
+!        ENDDO
+!     ENDDO
+!     DO I=1,2
+!        DO J=1,2
+!           X=0D0
+!           DO K=1,3
+!              X=X+AP1(I,K)*C(K,J)
+!           ENDDO
+!           R1(I,J)=X
+!        ENDDO
+!     ENDDO
+!     D=1D0/(R1(1,1)*R1(2,2)-R1(1,2)*R1(2,1))
+!     X=R1(1,1)
+!     R1(1,1)=R1(2,2)*D
+!     R1(1,2)=-R1(1,2)*D
+!     R1(2,1)=-R1(2,1)*D
+!     R1(2,2)=X*D
+!!     CI=(0D0,1D0)
+!     DO 5 NN=1,NMAX
+!        DO 5 N=1,NMAX
+!           CN=CI**(NN-N-1)
+!           DNN=DFLOAT((2*N+1)*(2*NN+1))
+!           DNN=DNN/DFLOAT( N*NN*(N+1)*(NN+1) )
+!           RN=DSQRT(DNN)
+!           CAL(N,NN)=CN*RN
+!   5 CONTINUE
+!     DCTH0=CTP
+!     DCTH=CTP1
+!     PH=PHIP1-PHIP
+!     VV=(0D0,0D0)
+!     VH=(0D0,0D0)
+!     HV=(0D0,0D0)
+!     HH=(0D0,0D0)
+!     DO 500 M=0,NMAX
+!        M1=M+1
+!        NMIN=MAX(M,1)
+!
+! Specify Wigner d-matrices:
+!!        CALL VIGAMPL (DCTH, NMAX, M, DV1, DV2)
+!        CALL VIGAMPL (DCTH0, NMAX, M, DV01, DV02)
+!
+!        FC=2D0*DCOS(M*PH)
+!        FS=2D0*DSIN(M*PH)
+!        DO 400 NN=NMIN,NMAX
+!           DV1NN=DV01(NN)         !changed from  M*DV01(NN)
+!           DV2NN=DV02(NN)
+!           DO 400 N=NMIN,NMAX
+!              DV1N=DV1(N)         !changed from  M*DV1(NN)
+!              DV2N=DV2(N)
+!!              CT11=DCMPLX(TR11(M1,N,NN),TI11(M1,N,NN))
+!              CT22=DCMPLX(TR22(M1,N,NN),TI22(M1,N,NN))
+!!              IF (M.EQ.0) THEN
+!!                 CN=CAL(N,NN)*DV2N*DV2NN
+!!                 VV=VV+CN*CT22
+!                 HH=HH+CN*CT11
+!!                ELSE
+!!                 CT12=DCMPLX(TR12(M1,N,NN),TI12(M1,N,NN))
+!                 CT21=DCMPLX(TR21(M1,N,NN),TI21(M1,N,NN))
+!!                 CN1=CAL(N,NN)*FC
+!                 CN2=CAL(N,NN)*FS
+!!                 D11=DV1N*DV1NN
+!                 D12=DV1N*DV2NN
+!                 D21=DV2N*DV1NN
+!                 D22=DV2N*DV2NN
+!!                 VV=VV+(CT11*D11+CT21*D21
+!    &                  +CT12*D12+CT22*D22)*CN1
+!!                 VH=VH+(CT11*D12+CT21*D22
+!    &                  +CT12*D11+CT22*D21)*CN2
+!!                 HV=HV-(CT11*D21+CT21*D11
+!    &                  +CT12*D22+CT22*D12)*CN2
+!!                 HH=HH+(CT11*D22+CT21*D12
+!    &                  +CT12*D21+CT22*D11)*CN1
+!              ENDIF
+! 400    CONTINUE
+! 500 CONTINUE
+!     DK=2D0*PIN/DLAM
+!     VV=VV/DK
+!     VH=VH/DK
+!     HV=HV/DK
+!     HH=HH/DK
+!     CVV=VV*R(1,1)+VH*R(2,1)
+!     CVH=VV*R(1,2)+VH*R(2,2)
+!     CHV=HV*R(1,1)+HH*R(2,1)
+!     CHH=HV*R(1,2)+HH*R(2,2)
+!     VV=R1(1,1)*CVV+R1(1,2)*CHV
+!     VH=R1(1,1)*CVH+R1(1,2)*CHH
+!     HV=R1(2,1)*CVV+R1(2,2)*CHV
+!     HH=R1(2,1)*CVH+R1(2,2)*CHH
+!
+!
+!     PRINT 1101, VV
+!     PRINT 1102, VH
+!     PRINT 1103, HV
+!     PRINT 1104, HH
+!1101 FORMAT ('S11=',D11.5,' + i*',D11.5)
+!1102 FORMAT ('S12=',D11.5,' + i*',D11.5)
+!1103 FORMAT ('S21=',D11.5,' + i*',D11.5)
+!1104 FORMAT ('S22=',D11.5,' + i*',D11.5)
+!!     RETURN
+!     END
      
 C*********************************************************************
 
@@ -1107,27 +1078,26 @@ c      CALL GAULEG(-1.D0,1.D0,X,W,NG)
  
 C**********************************************************************
  
-      SUBROUTINE VARY (LAM,MRR,MRI,A,EPS,NP,NGAUSS,X,P,PPI,PIR,PII,
-     *                 R,DR,DDR,DRR,DRI,NMAX)
+      SUBROUTINE VARY (LAM,MRR,MRI,A,EPS,RSNM,HT,NP,NGAUSS,X,
+     *                 P,PPI,PIR,PII,R,DR,DDR,DRR,DRI,NMAX)
 C--------/---------/---------/---------/---------/---------/---------/--
 C >>> LAM,MRR,MRI,A,EPS,NP,NGAUSS,X,P,NMAX
 C <<< PPI,PIR,PII,R,DR,DDR,DRR,DRI
 C=========================
-C  LAM - wavelength of incident light
-C  MRR - the real part of the refractive index 
+C  LAM - wavelength of incident light in the ambient
+C  MRR - the real part of the refractive index
 C  MRI - the imaginary  part of the refractive index
-C  A=RAT*AXI, where RAT and AXI are the main program input parameters                            
-    
-C      RAT = 1 - particle size is specified in terms of the            
-C                equal-volume-sphere radius                             
-C      RAT.ne.1 - particle size is specified in terms of the           
+C  A=RAT*AXI, where RAT and AXI are the main program input parameters
+C      RAT = 1 - particle size is specified in terms of the
+C                equal-volume-sphere radius
+C      RAT.ne.1 - particle size is specified in terms of the
 C                equal-surface-area-sphere radius
-C  AXI - equivalent-(volume/surface-area)-sphere radius  
-C  NP - particle shape class 
+C  AXI - equivalent-(volume/surface-area)-sphere radius
+C  NP - particle shape class
 C  EPS - shape deformation parameter within a given particle shape class
-C  NGAUSS - the number of Gauss integration division points 
-C           in the integral over theta 
-C  NMAX - angular momentum cutoff 
+C  NGAUSS - the number of Gauss integration division points
+C           in the integral over theta
+C  NMAX - angular momentum cutoff
 C  P=DACOS(-1D0)
 C  PI=P*2D0/LAM - wave vector
 C  PPI=PI*PI
@@ -1148,16 +1118,21 @@ cc     *        J(NPNG2,NPN1),Y(NPNG2,NPN1),JR(NPNG2,NPN1),
 cc     *        JI(NPNG2,NPN1),DJ(NPNG2,NPN1),DY(NPNG2,NPN1),
 cc     *        DJR(NPNG2,NPN1),DJI(NPNG2,NPN1)
 cc      COMMON /CBESS/ J,Y,JR,JI,DJ,DY,DJR,DJI
+
       NG=NGAUSS*2
 
 * decision tree to specify particle shape:
 
       IF (NP.GT.0)  CALL RSP2(X,NG,A,EPS,NP,R,DR)       ! Chebyshev particle
-      IF (NP.EQ.-1) CALL RSP1(X,NG,NGAUSS,A,EPS,R,DR)   ! oblate/prolate spheroids 
+      IF (NP.EQ.-1) CALL RSP1(X,NG,NGAUSS,A,EPS,R,DR)   ! oblate/prolate spheroids
       IF (NP.EQ.-2) CALL RSP3(X,NG,NGAUSS,A,EPS,R,DR)   ! oblate/prolate cylinder
       IF (NP.EQ.-3) CALL RSP4(X,NG,A,R,DR)              ! a distorted Chebyshev droplet
-      IF (NP.EQ.-4) CALL RSP5(X,NG,A,EPS,R,DR)          ! sphere cut by a plane on its top   
-      IF (NP.EQ.-5) CALL RSPI5(X,NG,A,EPS,R,DR)         ! sphere cut by a plane on its bottom          
+      IF (NP.EQ.-4) CALL RSP5(X,NG,RSNM,EPS,R,DR)       ! sphere cut by a plane on its top
+      IF (NP.EQ.-5) CALL RSPI5(X,NG,RSNM,EPS,R,DR)      ! sphere cut by a plane on its bottom
+      IF (NP.EQ.-6) CALL RSP6(X,NG,RSNM,HT,R,DR)        ! upwardly oriented cone
+cc      IF (NP.EQ.-7) CALL RSP7(X,NG,RSNM,HT,R,DR)          ! cone cut on its top
+cc      IF (NP.EQ.-8) CALL RSP8(X,NG,RSNM,HT,R,DR)          ! cone on a cylinder
+
 *
       PI=P*2D0/LAM                 !wave vector
       PPI=PI*PI
@@ -1184,15 +1159,15 @@ cc      COMMON /CBESS/ J,Y,JR,JI,DJ,DY,DJR,DJI
       IF (NMAX.GT.NPN1) PRINT 9000,NMAX,NPN1
       IF (NMAX.GT.NPN1) STOP
  9000 FORMAT(' NMAX = ',I2,', i.e., greater than ',I3)
-* 
+*
 * TA is the ``max. size parameter", MAX(2*PI*SQRT(RI)/LAMBDA)
 
       TB=TA*DSQRT(MRR*MRR+MRI*MRI)     !=TA*EPSIN
       TB=DMAX1(TB,DFLOAT(NMAX))
-*      
+*
       NNMAX1=1.2D0*DSQRT(DMAX1(TA,DFLOAT(NMAX)))+3D0
       NNMAX2=(TB+4D0*(TB**0.33333D0)+1.2D0*DSQRT(TB))  !Wiscombe bound
-cc      NNMAX2=NNMAX2-NMAX+5
+      NNMAX2=NNMAX2-NMAX+5
 *
 * generate arrays of Bessel functions at NGAUSS GIF division
 * points and store them in the common block /CBESS/
@@ -1583,6 +1558,123 @@ cc          RTHET=0.D0
 
       RETURN
       END 
+
+C**********************************************************************
+
+      SUBROUTINE RSP6(X,NG,REV,HT,R,DR)
+C--------/---------/---------/---------/---------/---------/---------/--
+C >>> X,NG,REV,HT
+C <<< R,DR
+C=========================
+C   Activated for NP=-6
+C
+C   Calculation of the functions
+C              R(I)=r(y)**2 and DR(I)=((d/dy)r(y))/r(y)
+C   for an upwardly pointing singular cone specified by the parameters
+C   REV and EPS at NGAUSS Gauss integration formula (GIF) division points
+C   in the integral over theta.
+C   REV ... the the half width of the cone base
+C   HT ...  cone height (along the axial symmetry axis)
+C
+C   The origin of coordinates is placed on the axis of axial symmetry,
+C         at the distance (H/3) from the base to the cone
+C                                    <===>
+C     The base and slant of the cone form a triangle, and the origin
+C          of coordinates is placed at the triangle centroid.
+C
+C   ===>  the length of the cone slant A = DSQRT(H**2+REV**2)
+C   ===>  the length of the median of the cone slant MA = dsqrt(ma**2+rev**2/2.d0)/2.d0
+C
+C   The cone base end points and the traingle centroid form a second triangle.
+C   If we denote by 2*Theta1 the second triangle angle at the centroid,
+C   the separation angle theta_s as viewed from the origin (between the slant and
+C   base part of the cone surfaces) is given by
+C
+C               - cos (theta_s) =  cos (theta1) = (h/3)/(2*MA/3)  = h/(2*MA)
+C
+C   Then, for  theta>theta_s (i.e., cos (theta) < cos (theta_s) ):
+C
+C                      r(theta)=-h/(3*cos(theta))
+C
+C   For  theta<theta_s (i.e., cos (theta) > cos (theta_s) ), one first considers
+C   a triangle formed by the cone apex, the origin of coordinates and r(theta).
+C   Let Theta_v denote the angle of this triangle at the cone apex.
+C   According to the law of cosines:
+C
+C         c^2 = r^2+4h^2/9 - [4rh\cos(\theta)]/3
+C         r^2 = c^2+4h^2/9 - [4rh\cos(\theta_v)]/3
+C
+C   where c is the length of the traingle opposite to the origin of coordinates.
+C   Upon combining the last two equations one arrives
+C
+C                 r\cos(\theta)+c\cos(\theta_v) = 2h/3    (*)
+C
+C   According to the law of sines:
+C
+C                      c/sin(\theta) = r(\theta)/sin(\theta_v)
+C
+C   When substituting back to (*), one finds
+C
+C               r = (2h/3)/[\cos(\theta)+\cot(\theta_v) \sin(\theta)]
+C
+C   \cot(\theta_v) can be easily determined from the very first triangle,
+C
+C              \cot(\theta_v) = h/(b/2) = 2h/b
+C
+C   Conus volume = (PI*REV**2*H)/3.d0
+C   Here Y=ACOS(X)=THETA and EPS=2*R_0/H,
+C   where R_0 is the radius of the original uncut sphere, whereas H
+C   is the height (along the axial symmetry axis) of the resulting
+C   cut sphere.
+C   ===>
+C
+C   X - GIF division points \cos\theta_j -  Y = arccos X
+C
+C   NG=2*NGAUSS ... the number of GIF division points
+C
+C   1.LE.I.LE.NGAUSS
+C--------/---------/---------/---------/---------/---------/---------/--
+      IMPLICIT NONE
+
+      INTEGER I,NG
+      REAL*8 HT,MA,CO,SI,CC,SS,RAD,REV,THETA0,RTHET
+      REAL*8 X(NG),R(NG),DR(NG)
+
+      MA=DSQRT(HT**2+REV**2)              !=the length of the cone slant
+      MA=dsqrt(ma**2+8.d0*rev**2)/2.d0    !=the length of the median of the slant
+
+      THETA0=-HT/(2.d0*MA)                !=cos of the separation angle
+                                          !  (always negative)
+
+      DO 50 I=1,NG
+
+          CO=X(I)
+          CC=CO*CO
+          SS=1.D0-CC
+          SI=DSQRT(SS)                    !=\sin\theta
+
+          IF (CO.GT.THETA0) THEN          ! theta < theta0,
+                                          ! i.e. r(\theta) along the cone slant surface
+
+          MA=CO+HT*SI/REV
+          RAD=2.d0*HT/(3.d0*MA)
+          RTHET=2.d0*HT*(SI-HT*CO/REV)/(3.d0*MA**2)
+
+          ELSE IF (CO.LE.THETA0) THEN     ! theta > theta0,
+                                          ! i.e. r(\theta) along the cone base surface
+
+          RAD=-HT/(3.d0*CO)               !always positive (CO<0 on the base)
+          RTHET=RAD*SI/CO                 !always negative
+
+          END IF
+
+          R(I) = RAD*RAD
+          DR(I)= RTHET/RAD
+
+   50 CONTINUE
+
+      RETURN
+      END
 
 C*********************************************************************
  
@@ -2753,14 +2845,14 @@ C--------/---------/---------/---------/---------/---------/---------/--
 C >>> NMAX,NCHECK
 C <<< COMMON BLOCKS
 C=================
-C  NMAX - angular momentum cutoff
+C  NMAX=NMAX-M+1 here, where NMAX is the angular momentum cutoff in main
 C  NCHECK -
-C                                                                     
-C   CALCULATION OF THE MATRIX    T = - RG(Q) * (Q**(-1))              
-C                                                                     
-C   INPUT INFORMATION IS IN COMMON /CTT/                             
-C   OUTPUT INFORMATION IS IN COMMON /CT/                              
-C                                                                     
+C
+C   CALCULATION OF THE MATRIX    T = - RG(Q) * (Q**(-1))
+C
+C   INPUT  IN COMMON /CTT/
+C   OUTPUT IN COMMON /CT/
+C
 C--------/---------/---------/---------/---------/---------/---------/--
       IMPLICIT REAL*8 (A-H,O-Z)
       INTEGER NOUT
@@ -2781,10 +2873,10 @@ cc     *       A(NPN2,NPN2),C(NPN2,NPN2),D(NPN2,NPN2),E(NPN2,NPN2)
       COMMON /CT/ TR1,TI1
       COMMON /CTT/ QR,QI,RGQR,RGQI
 *
-      DATA EMACH/1.D-10/
+      DATA EMACH/0.D0/                 !/1.D-17/
 *
       NNMAX=2*NMAX
-  
+
       DO I=1,NNMAX
        DO J=1,NNMAX
           ZQ(I,J)=DCMPLX(QR(I,J),QI(I,J))
@@ -2798,13 +2890,10 @@ cc     *       A(NPN2,NPN2),C(NPN2,NPN2),D(NPN2,NPN2),E(NPN2,NPN2)
 *
        INFO=0
 *
-      write(6,*)'NAG in TMTAXSP has been deactivated'
-	write(6,*)   '(see lines 2805-2808 therein)'
-	stop
-ct           CALL F07ARF(NNMAX,NNMAX,ZQ,NPN2,IPIV,INFO)
-ct           IF (INFO.NE.0) WRITE(NOUT,1100) INFO
-ct           CALL F07AWF(NNMAX,ZQ,NPN2,IPIV,ZW,NPN2,INFO)
-ct           IF (INFO.NE.0) WRITE(NOUT,1100) INFO
+cc           CALL F07ARF(NNMAX,NNMAX,ZQ,NPN2,IPIV,INFO)
+cc           IF (INFO.NE.0) WRITE(NOUT,1100) INFO
+cc           CALL F07AWF(NNMAX,ZQ,NPN2,IPIV,ZX,NPN2,INFO)
+cc           IF (INFO.NE.0) WRITE(NOUT,1100) INFO
 *
  1100      FORMAT ('WARNING:  info=', i2)
 
@@ -2826,22 +2915,24 @@ ct           IF (INFO.NE.0) WRITE(NOUT,1100) INFO
              TI1(I,J)=TI
           ENDDO
        ENDDO
+
        GOTO 70                        !Return
 
 *********************************************************************
- 
+
 C  Gaussian elimination             !NAG library not used
 
   5   CALL ZGER(ZQ,IPIV,NNMAX,NPN2,EMACH)  !Gauss elimination of ZQ to
                                            !a lower diagonal matrix
+! 5   call zgetrf_wrap(ZQ, IPIV)
       DO 6 I=1,NNMAX
               DO K=1,NNMAX    !Initialization of the right-hand side ZB
                               !(a row vector) of the matrix equation ZX*ZQ=ZB
- 
-              ZX(K)=DCMPLX(RGQR(I,K),RGQI(I,K))
-              ENDDO 
 
-      CALL ZSUR (ZQ,IPIV,ZX,NNMAX,NPN2,EMACH)  !Solving ZX*ZQ=ZB by 
+              ZX(K)=DCMPLX(RGQR(I,K),RGQI(I,K))
+              ENDDO
+!     call zgetrs_wrap(ZQ, ZX, IPIV)
+      CALL ZSUR(ZQ,IPIV,ZX,NNMAX,NPN2,EMACH)  !Solving ZX*ZQ=ZB by
                                                !backsubstition
                                                !(ZX overwritten on exit)
              DO K=1,NNMAX
@@ -2852,7 +2943,7 @@ C  Gaussian elimination             !NAG library not used
              TI1(I,K)=-DIMAG(ZX(K))
              ENDDO
   6   CONTINUE
-* 
+*
    70 RETURN
       END
  
@@ -3381,136 +3472,136 @@ C--------/---------/---------/---------/---------/---------/---------/--
 
 C********************************************************************
 
-      SUBROUTINE ZSUR(A,INT,X,N,NC,EMACH)  
-C     ------------------------------------------------------------------  
-C     ZSUR IS  A STANDARD BACK-SUBSTITUTION  SUBROUTINE  USING THE   
-C     OUTPUT OF ZGE TO CALCULATE X TIMES A-INVERSE, RETURNED IN X  
-C     ------------------------------------------------------------------  
-      IMPLICIT NONE 
-C  
-C ..  SCALAR ARGUMENTS  ..  
-C  
-      INTEGER N,NC  
-      REAL*8 EMACH  
-C  
-C ..  ARRAY ARGUMENTS  ..  
-C  
-      INTEGER    INT(NC)  
-      COMPLEX*16 A(NC,NC),X(NC)  
-C  
-C ..  LOCAL SCALARS  ..  
-C  
-      INTEGER    I,II,IN,J,IJ  
-      COMPLEX*16 DUM  
-C  
-C ..  INTRINSIC FUNCTIONS  ..  
-C  
-*      INTRINSIC ABS  
-C     ------------------------------------------------------------------  
-C  
-      DO 5 II=2,N  
-      I=II-1  
-      IF(INT(I)-I)1,2,1    !If INT(I).NE.I switch the I-th and INT(I)-th 
+      SUBROUTINE ZSUR(A,INT,X,N,NC,EMACH)
+C     ------------------------------------------------------------------
+C     ZSUR IS  A STANDARD BACK-SUBSTITUTION  SUBROUTINE  USING THE
+C     OUTPUT OF ZGE TO CALCULATE X TIMES A-INVERSE, RETURNED IN X
+C     ------------------------------------------------------------------
+      IMPLICIT NONE
+C
+C ..  SCALAR ARGUMENTS  ..
+C
+      INTEGER N,NC
+      REAL*8 EMACH
+C
+C ..  ARRAY ARGUMENTS  ..
+C
+      INTEGER    INT(NC)
+      COMPLEX*16 A(NC,NC),X(NC)
+C
+C ..  LOCAL SCALARS  ..
+C
+      INTEGER    I,II,IN,J,IJ
+      COMPLEX*16 DUM
+C
+C ..  INTRINSIC FUNCTIONS  ..
+C
+*      INTRINSIC ABS
+C     ------------------------------------------------------------------
+C
+      DO 5 II=2,N
+      I=II-1
+      IF(INT(I)-I)1,2,1    !If INT(I).NE.I switch the I-th and INT(I)-th
                            !elements of the vector X
-   1  IN=INT(I)  
-      DUM=X(IN)  
-      X(IN)=X(I)  
-      X(I)=DUM  
+   1  IN=INT(I)
+      DUM=X(IN)
+      X(IN)=X(I)
+      X(I)=DUM
 *
 * Forming a matrix product
 *
-   2  DO 4 J=II,N  
-      IF(ABS(A(I,J))-EMACH)4,4,3  
+   2  DO 4 J=II,N
+      IF(ABS(A(I,J))-EMACH)4,4,3
    3  X(J)=X(J)-X(I)*A(I,J)
-   4  CONTINUE  
+   4  CONTINUE
 
-   5  CONTINUE               !the I-th row of A multiplied by X(I) 
-                             !subtracted from X 
+   5  CONTINUE               !the I-th row of A multiplied by X(I)
+                             !subtracted from X
 *
-      DO 10 II=1,N  
-      I=N-II+1  
-      IJ=I+1  
-      IF(I-N)6,8,6  
-   6  DO 7 J=IJ,N  
+      DO 10 II=1,N
+      I=N-II+1
+      IJ=I+1
+      IF(I-N)6,8,6
+   6  DO 7 J=IJ,N
    7  X(I)=X(I)-X(J)*A(J,I)
-   8  IF(ABS(A(I,I))-EMACH*1.0D-7)9,10,10  
-   9  A(I,I)=EMACH*1.0D-7*(1.D0,1.D0)  
-  10  X(I)=X(I)/A(I,I)  
-      RETURN  
-      END  
+   8  IF(ABS(A(I,I))-EMACH*1.0D-7)9,10,10
+   9  A(I,I)=EMACH*1.0D-7*(1.D0,1.D0)
+  10  X(I)=X(I)/A(I,I)
+      RETURN
+      END
 
 C********************************************************************
 
-      SUBROUTINE ZGER(A,INT,N,NC,EMACH)  
-C     ------------------------------------------------------------------  
-C     ZGE IS A STANDARD SUBROUTINE TO PERFORM GAUSSIAN ELIMINATION ON  
-C     A NC*NC MATRIX 'A' PRIOR  TO INVERSION, DETAILS STORED IN 'INT'  
+      SUBROUTINE ZGER(A,INT,N,NC,EMACH)
+C     ------------------------------------------------------------------
+C     ZGE IS A STANDARD SUBROUTINE TO PERFORM GAUSSIAN ELIMINATION ON
+C     A NC*NC MATRIX 'A' PRIOR  TO INVERSION, DETAILS STORED IN 'INT'
 C                   MAKES AN LOWER DIAGONAL MATRIX
 C     THIS ROUTINE DOES NOT BOTHER ABOUT ELEMENTS DIRECTLY ABOVE
 C     THE MATRIX DIAGONAL AS THEY ARE NOT USED EXPLICITLY IN AN
 C     ACCOMAPANYING ZSE ROUTINE
-C     ------------------------------------------------------------------  
-      IMPLICIT NONE 
-C  
-C ..  SCALAR ARGUMENTS  ..  
-C  
-      INTEGER N,NC  
-      REAL*8 EMACH  
-C  
-C ..  ARRAY ARGUMENTS  ..  
-C  
-      INTEGER    INT(NC)  
-      COMPLEX*16 A(NC,NC)  
-C  
-C ..  LOCAL SCALARS  ..  
-C  
-      INTEGER    I,II,IN,J,K  
-      COMPLEX*16 YR,DUM  
-C  
-C ..  INTRINSIC FUNCTIONS  ..  
-C  
-*      INTRINSIC ABS  
-C     ------------------------------------------------------------------  
-C  
-      DO 10 II=2,N  
-      I=II-1  
-      YR=A(I,I)  
-      IN=I  
+C     ------------------------------------------------------------------
+      IMPLICIT NONE
+C
+C ..  SCALAR ARGUMENTS  ..
+C
+      INTEGER N,NC
+      REAL*8 EMACH
+C
+C ..  ARRAY ARGUMENTS  ..
+C
+      INTEGER    INT(NC)
+      COMPLEX*16 A(NC,NC)
+C
+C ..  LOCAL SCALARS  ..
+C
+      INTEGER    I,II,IN,J,K
+      COMPLEX*16 YR,DUM
+C
+C ..  INTRINSIC FUNCTIONS  ..
+C
+*      INTRINSIC ABS
+C     ------------------------------------------------------------------
+C
+      DO 10 II=2,N
+      I=II-1
+      YR=A(I,I)
+      IN=I
 *
 * Finding an element with the largest magnitude in the I-th column
 * below the matrix diagonal (including the diag. element):
 
-      DO 2 J=II,N  
-      IF(ABS(YR)-ABS(A(I,J)))1,2,2  
-   1  YR=A(I,J)  
-      IN=J  
-   2  CONTINUE  
-      INT(I)=IN      !The largest element in the I-th row above the matrix 
+      DO 2 J=II,N
+      IF(ABS(YR)-ABS(A(I,J)))1,2,2
+   1  YR=A(I,J)
+      IN=J
+   2  CONTINUE
+      INT(I)=IN      !The largest element in the I-th row above the matrix
                      !diagonal is in the IN-th row and is denoted by YR
-* 
+*
       IF(IN-I)3,5,3  !If IN.NE.I switch the I-th and IN-th columns to the
    3  DO 4 J=I,N     !left of the matrix diagonal (including the diag. element)
-      DUM=A(J,I)  
-      A(J,I)=A(J,IN)  
-   4  A(J,IN)=DUM  
+      DUM=A(J,I)
+      A(J,I)=A(J,IN)
+   4  A(J,IN)=DUM
 
-   5  IF(ABS(YR)-EMACH)10,10,6  
+   5  IF(ABS(YR)-EMACH)10,10,6
 
 *
 * Gaussian elemination of matrix elements above the matrix diagonal.
-* Subtraction of (A(I,J)/A(I,I)) multiple of the Ith column from the Jth column 
+* Subtraction of (A(I,J)/A(I,I)) multiple of the Ith column from the Jth column
 * in the sub-matrix beginning with the (I+1,I+1) diag. element
 *
-   6  DO 9 J=II,N  
-      IF(ABS(A(I,J))-EMACH)9,9,7  
-   7  A(I,J)=A(I,J)/YR  
-      DO 8 K=II,N  
+   6  DO 9 J=II,N
+      IF(ABS(A(I,J))-EMACH)9,9,7
+   7  A(I,J)=A(I,J)/YR
+      DO 8 K=II,N
    8  A(K,J)=A(K,J)-A(I,J)*A(K,I)   !k-t element of j-th column
    9  CONTINUE                 !The elements in the Ith row
                                !above diagonal are not set to zero
 *
   10  CONTINUE                 !end of "column loop"
-      RETURN  
-      END  
+      RETURN
+      END
 
 C (C) Copr. 03/2003  Alexander Moroz

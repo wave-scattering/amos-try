@@ -9,8 +9,8 @@ include_directories(${CMAKE_BINARY_DIR}/amos
 #include_directories(${CMAKE_BINARY_DIR}/errfun
 #        )
 ADD_EXECUTABLE(${PROJECTNAME}
+        tmtaxsp1.f
         "axspartclnew4.f"
-#        tmtaxsp1.f
         gnzbess.f
         #bess.f # TODO use amos lib
         bessik.f # TODO use amos lib

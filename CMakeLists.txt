@@ -37,9 +37,9 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     #set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -fdefault-real-8")
 endif ()
 
-set(CMAKE_BUILD_TYPE Release
-        CACHE STRING "Build type (Debug, Release)" FORCE)
-set(CMAKE_Fortran_FLAGS_RELEASE "-std=f2003 -O3 -march=native -ffast-math -funroll-loops -mtune=native -fopenmp" )
+#set(CMAKE_BUILD_TYPE Release
+#        CACHE STRING "Build type (Debug, Release)" FORCE)
+#set(CMAKE_Fortran_FLAGS_RELEASE "-std=f2003 -O3 -march=native -ffast-math -funroll-loops -mtune=native -fopenmp" )
 add_subdirectory(amos)
 add_subdirectory(try-zbesj)
 add_subdirectory(lapack_wrapper)
