@@ -754,10 +754,10 @@ contains
     subroutine xmat(xodd, xeven, lmax, kappa, ak, elm, emach, ar1, ar2, ndend)
         !     ------------------------------------------------------------------
         !     xmat calculates the matrix describing multiple scatering  within
-        !     a  layer, returning  it as :  xodd,  corresponding  to  odd  l+m,
+        !     a layer, returning it as :  xodd, corresponding to odd l+m,
         !     with lm=(10),(2-1),(21),... and xeven, corresponding to even l+m,
         !     with lm=(00),(1-1),(11),(2-2),(20),(22),...
-        !     the  program  assumes  that  the  layer is a bravais lattice. the
+        !     the  program  assumes that the layer is a bravais lattice. the
         !     summation over the lattice follows the ewald method  suggested by
         !     kambe. emach is the machine accuracy.
 
@@ -792,7 +792,7 @@ contains
         !
         !     EMACH/1.D-8/ IS AN OLD MACHINE ACCURACY - TODO
         !     PI/3.14159265358979D0 - TODO
-        !     AN,AN1,AN2 cuold be integers  - TODO
+        !     AN,AN1,AN2 could be integers  - TODO
         !     Check obsolete IF(AC-1.0D-6) etc - TODO
         !
         !     Following Kambe, the Faddeeva complex error function is used
@@ -870,7 +870,7 @@ contains
         !end do
         !
         !                  E W A L D    P A R A M E T E R
-        !   the formula of kambe for the separation constant, alpha, is
+        !   the formula of Kambe for the separation constant, alpha, is
         !   used, subject to a restriction which is imposed to control
         !   later rounding errors
         !
@@ -961,7 +961,7 @@ contains
         test1=qt    !default was 1.0D6
 
         ! the dual lattice summation includes the vector \vg==0. In this case
-        ! there is only a single passage of the "do 21" loop controlled by
+        ! there is only a single passage of the "do i1" loop controlled by
         ! the initial setting of the variable II=1 at the loop end:
         ii = 1
 
@@ -1012,16 +1012,16 @@ contains
             !
             ! in the resulting summation!!!
             !--------/---------/---------/---------/---------/---------/---------/--
-            ! for  every lattice vector of the sum, three short arrays are
+            ! for every lattice vector of the sum, three short arrays are
             ! initialised as below. and used as tables:
             ! xpm(m) contains values of xpk**|m|
             ! agk(i) contains values of (ac/kappa)**i
             ! gkn(n) contains values of (gp/kappa)**(2*n-1)*gam(n,z)
             ! where l=0,l2max;m=-l,l;n=0,(l-|m|)/2;i=l-2*n
             ! gam is the incomplete gamma function, which is calculated by
-            ! recurrence  from  the value  for n=0, which  in turn can  be
+            ! recurrence from the value for n=0, which in turn can be
             ! expressed in terms of the complex error function cerf
-            ! ac=mod(akpt). note special action if ac=0
+            ! ac=mod(akpt). Note special action if ac=0
             !
                     acsq = akpt(1) * akpt(1) + akpt(2) * akpt(2)
                     gpsq = kapsq - acsq
@@ -1170,7 +1170,7 @@ contains
     !--------/---------/---------/---------/---------/---------/---------/--
     ! dlm2, the sum over real space lattice vectors, begins with
     ! the adjustment of the array pref, to contain values of the
-    ! prefactor  'p2' for lm=(00),(11),(20),(22),...
+    ! prefactor 'p2' for lm=(00),(11),(20),(22),...
     !
     ! The direct lattice vector R=0 is excluded from the summation.
     ! Therefore there is no need to enforce a single passage of "do I2"

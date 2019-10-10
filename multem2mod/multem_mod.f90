@@ -28,26 +28,26 @@ program multem
     implicit none
     !     ------------------------------------------------------------------
     !     A B S T R A C T
-    !     this program calculates either the absorbance, reflectivity  and
-    !     transmittance  of   light  by  a   finite  slab   consisting  of
-    !     homogeneous   plates and   multilayers  of  spherical  particles
-    !     arranged in  a two-dimensional  bravais lattice, or the  complex
-    !     photonic  band structure of such an infinite periodic structure.
+    !     this program calculates either the absorbance, reflectivity and
+    !     transmittance of light by a finite slab consisting of
+    !     homogeneous plates and multilayers of spherical particles
+    !     arranged in a two-dimensional bravais lattice, or the  complex
+    !     photonic band structure of such an infinite periodic structure.
     !
     !     D E S C R I P T I O N    O F    I N P U T    D A T A
-    !     ktype=     1: the direction of an incident  em wave is specified
+    !     ktype=     1: the direction of an incident em wave is specified
     !                   by the polar angles of incidence "theta" and "fi".
     !                   the program calculates the transmission,reflection
-    !                   and  absorption   coefficients of  a  finite  slab
-    !                2: the direction of  an incident em wave is specified
-    !                   by the components  of the wavevector  parallel  to
+    !                   and  absorption coefficients of a finite  slab
+    !                2: the direction of an incident em wave is specified
+    !                   by the components of the wavevector parallel to
     !                   the  interfaces of the structure:
-    !                   aq(1) and aq(2) (and the  frequency). the
-    !                   program  calculates  the transmission, reflection,
+    !                   aq(1) and aq(2) (and the frequency). The
+    !                   program calculates  the transmission, reflection,
     !                   absorption coefficients of a finite slab
-    !                3: the program calculates  the photonic  complex band
-    !                   structure of such  an infinite periodic  structure
-    !                   for a  wavevector with components parallel to  the
+    !                3: the program calculates the photonic  complex band
+    !                   structure of such an infinite periodic  structure
+    !                   for a wavevector with components parallel to  the
     !                   interfaces of the structure: aq(1) and aq(2)
     !     kscan=     1: scanning over frequencies
     !                2: scanning over wavelengths
@@ -55,16 +55,16 @@ program multem
     !                   different embedding medium
     !     lmax        : cutoff in spherical waves expansions
     !     ncomp       : number of different components in the unit slice.
-    !                   their type is specified  by the integer array
+    !                   their type is specified by the integer array
     !                   it(icomp)
     !     it=        1: homogeneous plate of thickness "d"
     !                2: multilayer  of spherical  particles arranged in  a
-    !                   2d  bravais lattice.each layer consists of "nplan"
+    !                   2d  bravais lattice. Each layer consists of "nplan"
     !                   non-primitive  planes of spheres with the same 2-d
-    !                   periodicity. the number of unit layers is equal to
+    !                   periodicity. The number of unit layers is equal to
     !                   2**(nlayer-1).
     !     dl, dr      : position vectors indicating the origin on the left
-    !                   and on the right of the  unit,  respectively. both
+    !                   and on the right of the  unit, respectively. Both
     !                   are directed from left to right.
     !     al          : primitive  translation  vector  of the  unit slice
     !                   (effective only for band structure calculation).it
@@ -72,16 +72,16 @@ program multem
     !     nunit       : specifies the number of unit slices (2**(nunit-1))
     !                   of the sample
     !     alpha,alphap: length of primitive vectors of the two-dimensional
-    !                   lattice. in program units the size of alpha serves
-    !                   as  the unit length.  thus  alpha must be equal to
+    !                   lattice. In program units the size of alpha serves
+    !                   as the unit length. Thus alpha must be equal to
     !                   1.d0
     !     fab         : angle (in deg) between alpha and alphap
     !     rmax        : upper limit for the length of  reciprocal  lattice
     !                   vectors (in units of 1/alpha) which  must be taken
     !                   into account
-    !     zinf,zsup   : minimum  and  maximum  values  of  frequency   (in
-    !                   program units: omega*alpha/c), or  wavelength  (in
-    !                   program units: lamda/alpha  ),  according  to  the
+    !     zinf,zsup   : minimum  and  maximum  values of frequency (in
+    !                   program units: omega*alpha/c), or wavelength (in
+    !                   program units: lamda/alpha  ), according to the
     !                   value of kscan. c and lamda refer to vacuum
     !     np          : number of equally spaced points between zinf, zsup
     !     polar       : polarization ('S ' or  'P ') of the incident light
@@ -89,8 +89,8 @@ program multem
     !                   of the structure (xy-plane) in units of 2*pi/alpha
     !     theta,fi    : polar angles of incidence (in deg) of the incident
     !                   light
-    !     fein        : angle  (in deg) specifying  the direction  of  the
-    !                   polarization  vector  for  normal  incidence.  not
+    !     fein        : angle (in deg) specifying the direction  of  the
+    !                   polarization vector for normal  incidence.  not
     !                   effective otherwise
     !     eps*,mu*    : relative dielectric functions and magnetic permea-
     !                   bilities of the various media
