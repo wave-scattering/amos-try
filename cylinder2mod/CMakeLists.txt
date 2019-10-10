@@ -8,7 +8,9 @@ include_directories(${CMAKE_BINARY_DIR}/amos
         )
 #include_directories(${CMAKE_BINARY_DIR}/errfun
 #        )
-ADD_EXECUTABLE(${PROJECTNAME} "axspartclnew4.f"
+ADD_EXECUTABLE(${PROJECTNAME}
+        "axspartclnew4.f"
+#        tmtaxsp1.f
         gnzbess.f
         #bess.f # TODO use amos lib
         bessik.f # TODO use amos lib
@@ -17,6 +19,7 @@ ADD_EXECUTABLE(${PROJECTNAME} "axspartclnew4.f"
         chebev.f # TODO replace with non NR
         gnricbessh.f
         beschb.f # TODO replace with non NR
+        sordalc.f
         )
 target_link_libraries(${PROJECTNAME}
         errfun

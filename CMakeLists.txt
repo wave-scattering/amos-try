@@ -46,6 +46,7 @@ add_subdirectory(lapack_wrapper)
 add_subdirectory(errfun)
 add_subdirectory(errfun_test)
 add_subdirectory(cylinder2mod)
+add_subdirectory(mishchenko_dp_fixed_particles)
 set(common "-std=f2008")
 
 set(CMAKE_BUILD_TYPE Debug
