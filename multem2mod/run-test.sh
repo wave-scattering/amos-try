@@ -9,3 +9,4 @@ make
 cd multem2mod
 ./circle-BIC-spectra-plot.py
 ./go.sh
+rm -rf test

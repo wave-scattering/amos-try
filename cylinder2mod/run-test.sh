@@ -8,3 +8,4 @@ cmake .
 make
 cd cylinder2mod
 ./cylinder2mod && ./plot-ext.py
+rm -rf test
