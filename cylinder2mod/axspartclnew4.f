@@ -493,7 +493,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
 
       write(6,*)'Read cylinder radius'
 !     read(5,*) rsnm
-      rsnm = 1.0D0
+      rsnm = 100.0D0
       write(6,*)'Auto-set cylinder radius',rsnm
 
        rsnm =  rsnm*2
@@ -883,7 +883,7 @@ c      rff(1)=0.75d0
 C--------/---------/---------/---------/---------/---------/---------/--
 
 !     read(5,*) x_min
-      x_min = 0.41D0
+      x_min = 0.45D0
       write(6,*)'Auto-set x_min', x_min
 
       lambda = 2 *pi * rsnm/x_min

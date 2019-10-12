@@ -36,7 +36,8 @@ target_link_libraries(${PROJECTNAME} #${BLAS_LIBRARIES}
 add_custom_command(
         TARGET ${PROJECTNAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_SOURCE_DIR}/multem2mod/input2_band.txt
+#        ${CMAKE_SOURCE_DIR}/multem2mod/input2_band.txt
+        ${CMAKE_SOURCE_DIR}/multem2mod/input_inoue.txt
         ${CMAKE_CURRENT_BINARY_DIR}/fort.10)
 
 
