@@ -189,6 +189,10 @@ contains
         end do
 
         zstep = (zsup - zinf) / dble(np - 1)
+!cxt remove after the test
+        ZINF=3.7d0  !0.3 d0  !3.7d0
+        ZSTEP=.1d0/dble(2.0_dp)  !0.7d0/dble(nstep)
+!cxt remove after the test
         zval = zinf - zstep
 
         if(ktype<3) then
@@ -214,8 +218,13 @@ contains
             kapin = kappa0 * d1
             kapout = kappa0 * d2
             if(ktype==1) then
+!cxt remove after the test
+                THETA=asin(1.0000003575641670d-2/3.7d0)  ! THETA*PI/180.D0
+!                kapin=3.7d0
+!cxt remove after the test
                 ak(1) = dble(kapin) * sin(theta) * cos(fi)
                 ak(2) = dble(kapin) * sin(theta) * sin(fi)
+
                 do i = 1, igkmax
                     eincid(i) = czero
                 end do
@@ -877,7 +886,9 @@ contains
         tv = abs(ar1(1) * ar2(2) - ar1(2) * ar2(1))
         alpha = tv / (4.0_dp * pi) * kapsq
         al = abs(alpha)     !Ewald parameter used by Kambe and Pendry
-
+!cxt remove after the test
+        al=1.3005500000000001_dp
+!cxt remove after the test
         if(exp(al) * emach - 5.0d-5 > 0) al = log(5.0d-5 / emach)
         alpha = cmplx_dp(al, 0.0_dp)
         rta = sqrt(alpha)
@@ -948,7 +959,7 @@ contains
         !     parallelogram of lattice points about the origin,of side 2*n1+1
         !     each step begins at label 9.
         !     akpt=the current lattice vector in the sum
-        !
+
         rtv = 2.0_dp * pi / tv    !Brillouin zone volume
 
         !reciprocal lattice basis vectors:
