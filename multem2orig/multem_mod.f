@@ -267,7 +267,12 @@ C
       G(2,IG1)=NT1(IG1)*B1(2)+NT2(IG1)*B2(2)  
       WRITE(6,215) IG1,NT1(IG1),NT2(IG1),VECMOD(IG1)  
     5 CONTINUE  
-      ZSTEP=(ZSUP-ZINF)/DFLOAT(NP-1)  
+      ZSTEP=(ZSUP-ZINF)/DFLOAT(NP-1)
+!cxt remove after the test
+      ZINF=3.7d0  !0.3 d0  !3.7d0
+      ZSTEP=.1d0/dble(2.0d0)  !0.7d0/dble(nstep)
+!cxt remove after the test
+
       ZVAL=ZINF-ZSTEP  
       IF(KTYPE.LT.3) THEN  
       IF(KSCAN.EQ.1) WRITE(6,216)  
@@ -290,7 +295,11 @@ C
       IF(KSCAN.EQ.2) KAPPA0=DCMPLX(2.D0*PI/ZVAL,EPSILON)  
       KAPIN =KAPPA0*D1  
       KAPOUT=KAPPA0*D2  
-                                             IF(KTYPE.EQ.1) THEN  
+                                             IF(KTYPE.EQ.1) THEN
+!cxt remove after the test
+                THETA=asin(1.0000003575641670d-2/3.7d0)  ! THETA*PI/180.D0
+!                kapin=3.7d0
+!cxt remove after the test
                            AK(1)=DREAL(KAPIN)*SIN(THETA)*COS(FI)  
                            AK(2)=DREAL(KAPIN)*SIN(THETA)*SIN(FI) 
 			   DO 50 I=1,IGKMAX 
@@ -1811,6 +1820,10 @@ C
       TV=ABS(AR1(1)*AR2(2)-AR1(2)*AR2(1))
       ALPHA=TV/(4.0D0*PI)*KAPSQ
       AL=ABS(ALPHA)
+!cxt remove after the test
+      al=1.3005500000000001D0
+!cxt remove after the test
+
       IF(EXP(AL)*EMACH-5.0D-5)5,5,4
    4  AL=LOG(5.0D-5/EMACH)
    5  ALPHA=DCMPLX(AL,0.0D0)

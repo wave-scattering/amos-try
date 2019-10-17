@@ -13,7 +13,7 @@ ENABLE_LANGUAGE(C)
 #INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIR})
 
 
-SET (CMAKE_Fortran_FLAGS "-O3 -cpp -mtune=native -fopenmp")
+SET (CMAKE_Fortran_FLAGS "-g -cpp -mtune=native -fopenmp")
 
 ADD_EXECUTABLE(${PROJECTNAME} "multem_mod.f")
 
