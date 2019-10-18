@@ -28,5 +28,8 @@ git checkout cmake
 
 cd ../../../
 find . -name ".git" -exec rm -rf "{}" \;
+find . -name ".gitignore" -exec rm -rf "{}" \;
+find . -name ".gitmodules" -exec rm -rf "{}" \;
+
 cd ..
 ./clean.sh

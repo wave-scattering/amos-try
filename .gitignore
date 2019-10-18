@@ -11,7 +11,6 @@ test
 *.zip
 *.tar.gz
 *.pdf
-*.txt
 fort.*
 .idea
 *.bak
