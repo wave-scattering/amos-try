@@ -8,6 +8,9 @@ include_directories(${CMAKE_BINARY_DIR}/amos
         )
 #include_directories(${CMAKE_BINARY_DIR}/errfun
 #        )
+
+add_library(libcylinder libcylinder.f90)
+
 ADD_EXECUTABLE(${PROJECTNAME}
         tmtaxsp1.f
         "axspartclnew4.f"
@@ -22,6 +25,7 @@ ADD_EXECUTABLE(${PROJECTNAME}
         sordalc.f
         )
 target_link_libraries(${PROJECTNAME}
+        libcylinder
         errfun
         amos
         dense_solve

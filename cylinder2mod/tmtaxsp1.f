@@ -83,6 +83,7 @@ C
 C                T_{lm,l'm}^{ij}= (-1)^{i+j} T_{l-m,l'-m}^{ij}
 C
 C--------/---------/---------/---------/---------/---------/---------/--
+      use libcylinder
       IMPLICIT REAL*8 (A-H,O-Z)
       INTEGER LMAXD,LMAX1D,LMTD
       INTEGER NAXSM,ICHOICEV,ICHOICE
@@ -97,7 +98,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       REAL*8 TR1(NPN2,NPN2),TI1(NPN2,NPN2)            
 c      REAL*8 XALPHA(300),XBETA(300),WALPHA(300),WBETA(300)
 
-      COMPLEX*16 CZERO
+!     COMPLEX*16 CZERO
       COMPLEX*16 zeps1,zeps0
       COMPLEX*16 TMT(4,LMTD,LMTD)
 * 
@@ -126,7 +127,7 @@ cc      COMMON /TMAT/ RT11,RT12,RT21,RT22,IT11,IT12,IT21,IT22
 * transfers real*8 RAT,A(REV),ALPHA,BETA,DDELT from the main here
 *     
 *****************************************************************
-      DATA CZERO/(0.D0,0.D0)/  
+!     DATA CZERO/(0.D0,0.D0)/
 *
       P=DACOS(-1D0)                 !local PI constant
 *
@@ -679,6 +680,7 @@ C     LMAXD ... maximal angular momentum cutoff
 C     NMAX ... floating  angular momentum cutoff
 C     CALLED ONLY BY the AMPL routine!!!
 C--------/---------/---------/---------/---------/---------/---------/--
+      use libcylinder
       INCLUDE 'ampld.par.f'
       IMPLICIT REAL*8 (A-H,O-Z)
       REAL*8 DDV1(NPN1),DV2(NPN1)
@@ -836,11 +838,12 @@ C                       \sqrt{\fr{(2 l_2+1)}{l_2(l_2+1)} }/2
 C  S  ... 1/(|\sin\theta|)
 C  SS ... 1/(\sin^2\theta)
 C--------/---------/---------/---------/---------/---------/---------/--
+      use libcylinder
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'ampld.par.f'
       INTEGER NEPS,JG,I,J
 	REAL*8 EE,EE1,CC,SI,XI1,XI2,XAV
-      REAL*8 XTHETA,THETA0,RX,PI
+      REAL*8 XTHETA,THETA0,RX
       REAL*8 X(NPNG2),W(NPNG2),X1(NPNG2),W1(NPNG2),
      *        X2(NPNG2),W2(NPNG2),
      *        S(NPNG2),SS(NPNG2),
@@ -848,7 +851,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
 *
       COMMON/REVVAL/ RX
 *
-      DATA PI/3.141592653589793d0/ 
+!     DATA PI/3.141592653589793d0/
 *      
       DO 10 N=1,NMAX
            NN=N*(N+1)
@@ -1099,8 +1102,8 @@ C  NGAUSS - the number of Gauss integration division points
 C           in the integral over theta
 C  NMAX - angular momentum cutoff
 C  P=DACOS(-1D0)
-C  PI=P*2D0/LAM - wave vector
-C  PPI=PI*PI
+C  WV=P*2D0/LAM - wave vector
+C  PPI=WV*WV
 C  PIR=PPI*MRR
 C  PII=PPI*MRI
 C  R=r^2(\theta)            for axially symmetric particles
@@ -1109,6 +1112,7 @@ C  DDR=\lambda/[2*\pi*r(\theta)]
 C  DRR=(MRR/(MRR**2+MRI**2))*(\lambda/[2*\pi*r(\theta)])
 C  DRI=-(MRI/(MRR**2+MRI**2))*(\lambda/[2*\pi*r(\theta)])
 C--------/---------/---------/---------/---------/---------/---------/--
+      use libcylinder
       INCLUDE 'ampld.par.f'
       IMPLICIT REAL*8 (A-H,O-Z)
       REAL*8  X(NPNG2),R(NPNG2),DR(NPNG2),MRR,MRI,LAM,
@@ -1134,8 +1138,8 @@ cc      IF (NP.EQ.-7) CALL RSP7(X,NG,RSNM,HT,R,DR)          ! cone cut on its to
 cc      IF (NP.EQ.-8) CALL RSP8(X,NG,RSNM,HT,R,DR)          ! cone on a cylinder
 
 *
-      PI=P*2D0/LAM                 !wave vector
-      PPI=PI*PI
+      WV=P*2D0/LAM                 !wave vector
+      PPI=WV*WV
       PIR=PPI*MRR
       PII=PPI*MRI
       V=1D0/(MRR*MRR+MRI*MRI)
@@ -1144,7 +1148,7 @@ cc      IF (NP.EQ.-8) CALL RSP8(X,NG,RSNM,HT,R,DR)          ! cone on a cylinder
       TA=0D0
       DO 10 I=1,NG
            VV=DSQRT(R(I))
-           V=VV*PI
+           V=VV*WV
            TA=MAX(TA,V)            !Max. size parameter
            VV=1D0/V
            DDR(I)=VV
@@ -1699,6 +1703,7 @@ C  NMAX   ... angular momentum cutoff
 C  NNMAX1 ... angular momentum cutoff - DETERMINES NUMERICAL ACCURACY 
 C  NNMAX2 ... angular momentum cutoff - DETERMINES NUMERICAL ACCURACY 
 C--------/---------/---------/---------/---------/---------/---------/--
+      use libcylinder
       INCLUDE 'ampld.par.f'
       IMPLICIT REAL*8 (A-H,O-Z)
       REAL*8 X(NG),XR(NG),XI(NG),
@@ -1820,6 +1825,7 @@ C   NMAX  - angular momentum cutoff
 C   NNMAX - angular momentum cutoff - DETERMINES NUMERICAL ACCURACY                
                                                  
 C--------/---------/---------/---------/---------/---------/---------/--
+      use libcylinder
       INCLUDE 'ampld.par.f'
       IMPLICIT REAL*8 (A-H,O-Z)
       
@@ -1851,9 +1857,9 @@ c     *       CUR(NPN1),CUI(NPN1)
       CZ0R=AR*ARI
       CZ0I=-AI*ARI
       CR=DCOS(XR)*DCOSH(XI)
-      CI=-DSIN(XR)*DSINH(XI)
-      AR=CZ0R*CR-CZ0I*CI
-      AI=CZ0I*CR+CZ0R*CI
+      CCI=-DSIN(XR)*DSINH(XI)
+      AR=CZ0R*CR-CZ0I*CCI
+      AI=CZ0I*CR+CZ0R*CCI
       CY0R=AR*CXXR-AI*CXXI
       CY0I=AI*CXXR+AR*CXXI
       CY1R=CY0R*CZR(1)-CY0I*CZI(1)
@@ -1936,6 +1942,7 @@ C  be complex. The routine below performs Waterman surface integral
 C  separately for the real and imaginary parts of the integrand.
 C
 C--------/---------/---------/---------/---------/---------/---------/--
+      use libcylinder
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'ampld.par.f'
       INTEGER NOUT     
@@ -2336,6 +2343,7 @@ C  be complex. The routine below performs Waterman surface integral
 C  separately for the real and imaginary parts of the integrand.
 C
 C--------/---------/---------/---------/---------/---------/---------/--
+      use libcylinder
       INCLUDE 'ampld.par.f'
       IMPLICIT REAL*8 (A-H,O-Z)
       REAL*8  X(NPNG2),W(NPNG2),AN(NPN1),S(NPNG2),SS(NPNG2),
@@ -2781,6 +2789,7 @@ C     NMAX - angular momentum cutoff
 C
 C     CALLED BY TMATR AND TMATR0 routines
 C--------/---------/---------/---------/---------/---------/---------/--
+      use libcylinder
       INCLUDE 'ampld.par.f'
       IMPLICIT REAL*8 (A-H,O-Z)
       REAL*8 DV1(NPN1),DV2(NPN1)
@@ -2854,6 +2863,7 @@ C   INPUT  IN COMMON /CTT/
 C   OUTPUT IN COMMON /CT/
 C
 C--------/---------/---------/---------/---------/---------/---------/--
+      use libcylinder
       IMPLICIT REAL*8 (A-H,O-Z)
       INTEGER NOUT
 
@@ -2978,6 +2988,7 @@ C <<< RAT
 C=================
 C  NMAX - angular momentum cutoff
 C--------/---------/---------/---------/---------/---------/---------/--
+      use libcylinder
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'ampld.par.f'
       REAL*8  A(NPN2,NPN2),F(NPN2,NPN2),B(NPN1),

@@ -69,6 +69,9 @@ if((main_project AND BUILD_TESTING) OR BUILD_TESTING_${PROJECT_NAME})
     add_subdirectory(src/tests)
 endif()
 
+enable_testing()
+add_subdirectory(src/tests)
+
 # generate package config files
 include(GNUInstallDirs)
 set(project_config "${PROJECT_NAME}Config.cmake")

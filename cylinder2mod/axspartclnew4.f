@@ -89,6 +89,7 @@ C  Computation can be speed up if one sets YNCHECK=.FALSE..
 C  However, then the check of Gauss integrations
 C  convergence is not performed.
 C---------------------------------------------------------------------
+      use libcylinder
       implicit none
       integer LMX,LCS,ILCS,ikl,ieps,istep,ide,ndefp,itter
       integer NOUT,NOUTI,NSTEP,NFIN,NMAT,NP,NPP,NDGS,NDGSP
@@ -200,7 +201,7 @@ c Declarations:
       integer ICHOICE,LMAX,NCHECK,NAXSM,NCHECKP,NAXSMP  !common block variables
 
       REAL*8 RMF(lcs),rff(lcs),RMUF,ff,filfrac   !ff for Bruggemann; filfrac for ZnS
-      real*8 pi,xs,lambda,rap,rev_beg
+      real*8 xs,lambda,rap,rev_beg
       real*8 enw,xstep,revf,revin,revinl,revl
       real*8 omf(NFIN),omxf,reepsz,plasma,omxp
       real*8 delo,omega0,omega,rsnm,hlength
@@ -210,7 +211,7 @@ c Declarations:
 
 
       complex*16 ceps1(NFIN),ZEPS1,ZEPS0V,Z1,Z2
-      COMPLEX*16 ci,zeps(lcs+1)
+      COMPLEX*16 zeps(lcs+1)
       real*16 global_eps_r, global_eps_i
 *
       COMMON /TOAMPLD/RAT,REV,ALPHA,BETA,DDELT
@@ -251,10 +252,6 @@ c Declarations:
 *
 * From here to spherec
 *---------------------------------------------------------------
-c Data:
-      DATA PI/3.141592653589793d0/
-      DATA ci/(0.d0,1.d0)/
-*
 * Convergence variable (has to be at least equal to 2):
 *
       lmax=25  !lmx
@@ -517,7 +514,7 @@ C     NP=-3 - no DEFP is specified
       read(5,*) rsnm
       rev=rsnm
 C      write(6,*)'rev(rsnm) not yet determined for NP=-3'
-C      pause
+C      stop
 *
       RAT=1. D0
 *
@@ -554,7 +551,7 @@ C
 C     NP=-7 -
 C
       write(6,*)'Not ready yet!'
-      pause
+      stop
 cc      write(6,*)'The length of in your units'
 cc      read(5,*) rsnm
 *
@@ -1822,7 +1819,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
  1006 FORMAT ('AMPLITUDE or S-MATRIX')
  5000 FORMAT ('4X4 PHASE MATRIX')
 
-      end
+      contains
 
 
 
@@ -1910,6 +1907,8 @@ C                T_{lm,l'm}^{ij}= (-1)^{i+j} T_{l-m,l'-m}^{ij}
 C
 C--------/---------/---------/---------/---------/---------/---------/--
       IMPLICIT REAL*8 (A-H,O-Z)
+      integer nmax, i, inm1, ixxx, ja, jam, jb, jbm, k1, k2, kk1, kk2,
+     & l1, l2, lmtot, m, n1, n2, ncheck, ndgs, ngauss, nm, np
       INTEGER LMAXD,LMAX1D,LMTD
       INTEGER NAXSM,ICHOICEV,ICHOICE
 
@@ -2211,7 +2210,7 @@ cz  230 CONTINUE    !end of loop over JA
      & L1=',L1,'M=',N1
       write(6,*)'abs(copte)=',abs(copte)
       write(6,*)'(True violation only in the absorptionless case!)'
-      pause
+      stop
       end if
 
       coptm=coptm+dble(TMT(2,JA,JA))
@@ -2221,7 +2220,7 @@ cz  230 CONTINUE    !end of loop over JA
      & L1=',L1,'M=',N1
       write(6,*)'abs(coptm)=',abs(coptm)
       write(6,*)'(True violation only in the absorptionless case!)'
-      pause
+      stop
       end if
 *
       if (n1.ne.0) then
@@ -2304,6 +2303,8 @@ C--------/---------/---------/---------/---------/---------/---------/--
       IMPLICIT REAL*8 (A-H,O-Z)
       INTEGER NOUT,NAXSM,ICHOICEV,ICHOICE
       LOGICAL YNCHECK
+      integer nmax, np, inm1, ixxx, m, m1, n, n1, n11, n2 ,n22, ncheck,
+     & ndgs, ngaus, ngauss, nm, nma, nn1, nn2, nnm, nnnggg
 
        INCLUDE 'ampld.par.f'
 * number of the output unit
@@ -2660,13 +2661,13 @@ cc         end if
          write(6,*)'QEXT=',QEXT
        write(6,*)
      & 'WARNING: abs(qsca).gt.abs(qext)!!!'
-c     pause
+c     stop
       end if
 
       if (qext.gt.1.d-7) then
        write(6,*)
      & 'WARNING: Partial sum QEXT has to be negative!'
-c      pause
+c      stop
       end if
 
 
@@ -2764,13 +2765,13 @@ c     &               DDR,DRR,DRI,NMAX,NCHECK,NAXSM)
          write(6,*)'QXT=',QXT
        write(6,*)
      & 'WARNING: abs(qsc).gt.abs(qxt)!!!'
-c     pause
+c     stop
       end if
 
       if (qxt.ge.1d-7) then
        write(6,*)
      & 'WARNING: Partial sum QXT has to be negative!'
-C      pause
+C      stop
       end if
 
 cc         write(nout,*)'M=',M
@@ -2910,6 +2911,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       IMPLICIT REAL*8 (A-B,D-H,O-Z)
       IMPLICIT COMPLEX*16 (C)
       INTEGER NOUT
+      integer nmax, i, j, k, m, m1, n, nmin, nn
 
 * number of the output unit
       PARAMETER (NOUT=35)
@@ -2957,15 +2959,15 @@ C for allowability
 
       PIN=DACOS(-1D0)         !=PI
       PIN2=PIN*0.5D0          !=PI/2
-      PI=PIN/180D0            !=PI/180
+      PIgrad=PIN/180D0            !=PI/180
 
 * conversion from degrees to radians:
-      ALPH=ALPHA*PI
-      BET=BETA*PI
-      THETL=TL*PI
-      PHIL=PL*PI
-      THETL1=TL1*PI
-      PHIL1=PL1*PI
+      ALPH=ALPHA*PIgrad
+      BET=BETA*PIgrad
+      THETL=TL*PIgrad
+      PHIL=PL*PIgrad
+      THETL1=TL1*PIgrad
+      PHIL1=PL1*PIgrad
 
 * initialization of the vacuum wavelength LAMBDA
 
@@ -3144,7 +3146,7 @@ C____________MATRICES R AND R^(-1) determined
 C=========================================================
 C      THE AMPLITUDE MATRIX IN PARTICLE FRAME
 C
-      CI=(0D0,1D0)
+!     CI=(0D0,1D0)
 
 C >>> ALPHA numerical prefactors without phi-angles
 C     (following Eq. (28))
@@ -3364,7 +3366,7 @@ C      IMPLICIT NONE
 
         INTEGER NMAX,NMIN,M,M1,N,NN
       REAL*8 DLAM,DK,LAMBDA,KEX,FAC,CEXT
-        REAL*8 TP,TP1,PP,PP1,FC,FS,REV,PIN,PIN2,PI,THETP,PHIP,THETP1,
+      REAL*8 TP,TP1,PP,PP1,FC,FS,REV,PIN,PIN2,PIgrad,THETP,PHIP,THETP1,
      & PHIP1,EPS,DNN,RN,DCTH0,DCTH,PH,DV1NN,DV2NN,DV1N,DV2N,D11,D12,
      & D21,D22
       REAL*8 DV1(NPN6),DV2(NPN6),DV01(NPN6),DV02(NPN6)
@@ -3408,12 +3410,12 @@ C for allowability
 
       PIN=DACOS(-1D0)         !=PI
       PIN2=PIN*0.5D0          !=PI/2
-      PI=PIN/180D0            !=PI/180
+      PIgrad=PIN/180D0            !=PI/180
 * conversion from degrees to radians:
-      THETP=TP*PI
-      PHIP=PP*PI
-      THETP1=TP1*PI
-      PHIP1=PP1*PI
+      THETP=TP*PIgrad
+      PHIP=PP*PIgrad
+      THETP1=TP1*PIgrad
+      PHIP1=PP1*PIgrad
 * initialization of the vacuum wavelength LAMBDA
 
         LAMBDA=DLAM*SQRT(ZEPS0)         !vacuum wavelength
@@ -3770,7 +3772,7 @@ ct      LMAXS=max(6.d0,1+2*pi*rsnm/lambda)   !cutoff on scattered field
         if(lmaxs.gt.lmax) then
         write(6,*)'In INTENS:'
         write(6,*)'Increase LMAX so that LMAXS.LE:LMAX'
-        pause
+        stop
         stop
         end if
 *
@@ -4189,7 +4191,7 @@ cc      zmpifac=zpifac**m        !zpifac=zexp(ci*phi) here
       write(6,*)'INCREASE LMAX IN AXSPARTCL!'
       write(6,*)'LMAX is not enough to ensure the convergence
      1 of the incident field intensity!!!'
-      pause
+      stop
       end if
       end if
 
@@ -4828,7 +4830,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       write(6,*)'NGAUSS on the input greater than the internal
      & cutoff NGAUD=', NGAUD
       write(6,*)'Increase the value of NGAUD to at least',NGAUSS
-        pause
+        stop
       stop
       end if
 *
@@ -4840,7 +4842,7 @@ C
       write(6,*)'NMX1 or NMX2 on the input greater than the internal
      & cutoff SU=', SU
       write(6,*)'Increase the value of SU to at least',max(NMX1,NMX2)
-        pause
+        stop
       stop
       end if
 *
@@ -5571,7 +5573,7 @@ C      If NMAX is larger than we can afford, the we must stop
       IF(NMAX.GT.ST) THEN
             WRITE (*,*) 'NMAX IS HIGHER THAT THE MAXIMUM POSSIBLE
      &                 VALUE OF',SU
-                pause
+                stop
             STOP 777
       END IF
 
@@ -6754,7 +6756,7 @@ C      Now if info=1 that means that U(l,l)=0 and invertion of A is not feasible
             else if(info.eq.0) then
                   info=j
                   write (*,*) 'MATRIX IS SINGULAR - info=',J
-                        pause
+                        stop
                   stop
             end if
             if(j.lt.nq) then
@@ -7424,7 +7426,7 @@ C********************************************************************
       if(dimag(alpha(j)).lt.0.d0) then
       write(6,*)'dimag(alpha(j))=',dimag(alpha(j)) ,' is negative'
       write(6,*)'omega, j=', omega, j
-      pause
+      stop
       end if
 c      write(6,*)'j, alpha(j)=', j, alpha(j)
 *>>> electric part:
@@ -7437,7 +7439,7 @@ c      write(6,*)'j, alpha(j)=', j, alpha(j)
       if(dimag(beta(j)).lt.0.d0) then
       write(6,*)'dimag(alpha(j))=',dimag(beta(j)) ,' is negative'
       write(6,*)'omega, j=', omega, j
-      pause
+      stop
       end if
 c      write(6,*)'beta(j)=', beta(j)
 
@@ -7995,6 +7997,8 @@ C
 C--------/---------/---------/---------/---------/---------/---------/--
        INCLUDE 'ampld.par.f'
       IMPLICIT REAL*8 (A-H,O-Z)
+      integer m, ngauss, nmax, ncheck, naxsm, i, i1, i2, k1, k2, kk1,
+     & kk2, mm1, n, n1, n2, ng, ngss, nm, nnmax
       REAL*8  X(NPNG2),W(NPNG2),AN(NPN1),
      *        R(NPNG2),DR(NPNG2),SIG(NPN2),
      *        J(NPNG2,NPN1),Y(NPNG2,NPN1),
@@ -8521,9 +8525,10 @@ C     nboth DDV1 and DV2. That part has been made using recurrences of
 C     Ref. \ct{TKS}
 C--------/---------/---------/---------/---------/---------/---------/--
 
+      use libcylinder
       IMPLICIT none
-      INTEGER NPN1,NPNG1,NPNG2,NPN2,NPL,NPN3,NPN4,NPN5,NPN6
-      INCLUDE 'ampld.par.f'
+!     INTEGER NPN1,NPNG1,NPNG2,NPN2,NPL,NPN3,NPN4,NPN5,NPN6
+!     INCLUDE 'ampld.par.f'
 
       integer n,LMAX,M,I,I2
       REAL*8 A,X,QS,D1,D2,D3,DER,DN,DX,QN,QN1,QN2,
@@ -8816,3 +8821,4 @@ C (C) Copr. 10/2005  Alexander Moroz
        return
        end
 C (C) Copr. 1/1999  Alexander Moroz
+      end program
