@@ -93,10 +93,10 @@ C---------------------------------------------------------------------
       implicit none
       integer LMX,LCS,ILCS,ikl,ieps,istep,ide,ndefp,itter
       integer NOUT,NOUTI,NSTEP,NFIN,NMAT,NP,NPP,NDGS,NDGSP
-      real*8 TOL,DEFP,DEFPP,DDELT,DDELTP,x_max,x_min
-      real*8 hlength_max,hlength_min,rl_min,rl_max
-      real*8 lambda_min,lambda_max,omega_max
-      COMPLEX*16 ZEPS0,CCEPS,CSEPS           !,ZARTAN
+      real(dp) TOL,DEFP,DEFPP,DDELT,DDELTP,x_max,x_min
+      real(dp) hlength_max,hlength_min,rl_min,rl_max
+      real(dp) lambda_min,lambda_max,omega_max
+      complex(dp) ZEPS0,CCEPS,CSEPS           !,ZARTAN
       character*1 ync,yncv
       logical ynperfcon,ynperfconv,ynintens,ynoptth,ynbrug,yncheck
 cc      external ZARTAN
@@ -200,27 +200,27 @@ c Declarations:
 
       integer ICHOICE,LMAX,NCHECK,NAXSM,NCHECKP,NAXSMP  !common block variables
 
-      REAL*8 RMF(lcs),rff(lcs),RMUF,ff,filfrac   !ff for Bruggemann; filfrac for ZnS
-      real*8 xs,lambda,rap,rev_beg
-      real*8 enw,xstep,revf,revin,revinl,revl
-      real*8 omf(NFIN),omxf,reepsz,plasma,omxp
-      real*8 delo,omega0,omega,rsnm,hlength
-      real*8 RAT,RATP,AXI,REV,REVP,ALPHA,BETA,ALPHAE,BETAE      !common block variables
-      real*8 THET0,THET,THETV,PHI0,PHI     !common block variables
+      real(dp) RMF(lcs),rff(lcs),RMUF,ff,filfrac   !ff for Bruggemann; filfrac for ZnS
+      real(dp) xs,lambda,rap,rev_beg
+      real(dp) enw,xstep,revf,revin,revinl,revl
+      real(dp) omf(NFIN),omxf,reepsz,plasma,omxp
+      real(dp) delo,omega0,omega,rsnm,hlength
+      real(dp) RAT,RATP,AXI,REV,REVP,ALPHA,BETA,ALPHAE,BETAE      !common block variables
+      real(dp) THET0,THET,THETV,PHI0,PHI     !common block variables
       real*16 ceps1real(NFIN),  ceps1imag(nfin)
 
 
-      complex*16 ceps1(NFIN),ZEPS1,ZEPS0V,Z1,Z2
-      COMPLEX*16 zeps(lcs+1)
+      complex(dp) ceps1(NFIN),ZEPS1,ZEPS0V,Z1,Z2
+      complex(dp) zeps(lcs+1)
       real*16 global_eps_r, global_eps_i
 *
       COMMON /TOAMPLD/RAT,REV,ALPHA,BETA,DDELT
 *
-* transfers real*8 RAT,REV,ALPHA,BETA,DDELT  from the main to AMPLDR
+* transfers real(dp) RAT,REV,ALPHA,BETA,DDELT  from the main to AMPLDR
 *
       COMMON /TOTAMPLD/THET0,THET,PHI0,PHI
 *
-* transfers real*8 THET0,THET,PHI0,PHI from the main to AMPLDR
+* transfers real(dp) THET0,THET,PHI0,PHI from the main to AMPLDR
 *
       COMMON /TOIAMPLD/NCHECK,NAXSM,NDGS
 *
@@ -233,7 +233,7 @@ c Declarations:
 *
       COMMON /TOTMT/DEFPP,RATP,REVP,ALPHAE,BETAE,DDELTP
 *
-* transfers real*8 DEFP,RAT,REV,ALPHAE,BETAE,DDELT from the main to TMTAXSPV
+* transfers real(dp) DEFP,RAT,REV,ALPHAE,BETAE,DDELT from the main to TMTAXSPV
 *
       COMMON /TOLTMT/ ynoptth
 *
@@ -1627,8 +1627,11 @@ ctest
         ide=4
         end if
 
-      call lisac(ide,lcs,lmax,lmax,ndgs*lmax,lambda,defpp,
-     & revinl/revl,revl,zeps)
+! TODO: commented out lisac just to compile, call has not enough arguments.
+!subroutine lisac(de,lcs,nmx1,nmx2,ngauss,lambda,eps,ki,kex,
+!     & THET0,THET,PHI0,PHI,zeps)
+!     call lisac(ide,lcs,lmax,lmax,ndgs*lmax,lambda,defpp,
+!    & revinl/revl,revl,zeps)
 
       else
       global_eps_r =REAL( zeps(1))
@@ -1906,7 +1909,7 @@ C
 C                T_{lm,l'm}^{ij}= (-1)^{i+j} T_{l-m,l'-m}^{ij}
 C
 C--------/---------/---------/---------/---------/---------/---------/--
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT real(dp) (A-H,O-Z)
       integer nmax, i, inm1, ixxx, ja, jam, jb, jbm, k1, k2, kk1, kk2,
      & l1, l2, lmtot, m, n1, n2, ncheck, ndgs, ngauss, nm, np
       INTEGER LMAXD,LMAX1D,LMTD
@@ -1917,15 +1920,15 @@ C--------/---------/---------/---------/---------/---------/---------/--
        INCLUDE 'ampld.par.f'
 * number of the output unit
 *
-      REAL*8  LAM,LAMBDA,MRR,MRI,RSNM,HT,X(NPNG2),W(NPNG2),
+      real(dp)  LAM,LAMBDA,MRR,MRI,RSNM,HT,X(NPNG2),W(NPNG2),
      *        S(NPNG2),SS(NPNG2),AN(NPN1),R(NPNG2),DR(NPNG2),
      *        DDR(NPNG2),DRR(NPNG2),DRI(NPNG2),ANN(NPN1,NPN1)
-      REAL*8 TR1(NPN2,NPN2),TI1(NPN2,NPN2)
-c      REAL*8 XALPHA(300),XBETA(300),WALPHA(300),WBETA(300)
+      real(dp) TR1(NPN2,NPN2),TI1(NPN2,NPN2)
+c      real(dp) XALPHA(300),XBETA(300),WALPHA(300),WBETA(300)
 
-      COMPLEX*16 CZERO,COPTE,COPTM
-      COMPLEX*16 zeps1,zeps0
-      COMPLEX*16 TMT(4,LMTD,LMTD)
+      complex(dp) CZERO,COPTE,COPTM
+      complex(dp) zeps1,zeps0
+      complex(dp) TMT(4,LMTD,LMTD)
 *
       logical ynoptth
 *
@@ -1947,7 +1950,7 @@ cc      COMMON /TMAT/ RT11,RT12,RT21,RT22,IT11,IT12,IT21,IT22
 *
       COMMON /TOTMT/EPS,RAT,REV,ALPHA,BETA,DDELT
 *
-* transfers real*8 EPS(DEFP),RAT,A(REV),ALPHA,BETA,DDELT
+* transfers real(dp) EPS(DEFP),RAT,A(REV),ALPHA,BETA,DDELT
 * from the main here
 *
       COMMON /TOLTMT/ ynoptth
@@ -2300,7 +2303,7 @@ C  THET - zenith angle of the scattered beam in degrees
 C  PHI0 - azimuth angle of the incident beam in degrees
 C  PHI - azimuth angle of the scattered beam in degrees
 C--------/---------/---------/---------/---------/---------/---------/--
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT real(dp) (A-H,O-Z)
       INTEGER NOUT,NAXSM,ICHOICEV,ICHOICE
       LOGICAL YNCHECK
       integer nmax, np, inm1, ixxx, m, m1, n, n1, n11, n2 ,n22, ncheck,
@@ -2310,19 +2313,19 @@ C--------/---------/---------/---------/---------/---------/---------/--
 * number of the output unit
       PARAMETER (NOUT=35)
 *
-      REAL*8  LAM,LAMBDA,MRR,MRI,RSNM,HT,DDELT,DDELTA,
+      real(dp)  LAM,LAMBDA,MRR,MRI,RSNM,HT,DDELT,DDELTA,
      *        X(NPNG2),W(NPNG2),
      *        S(NPNG2),SS(NPNG2),AN(NPN1),R(NPNG2),DR(NPNG2),
      *        DDR(NPNG2),DRR(NPNG2),DRI(NPNG2),ANN(NPN1,NPN1)
-      REAL*8 TR1(NPN2,NPN2),TI1(NPN2,NPN2)
-c      REAL*8 XALPHA(300),XBETA(300),WALPHA(300),WBETA(300)
+      real(dp) TR1(NPN2,NPN2),TI1(NPN2,NPN2)
+c      real(dp) XALPHA(300),XBETA(300),WALPHA(300),WBETA(300)
       REAL*4
      &     RT11(NPN6,NPN4,NPN4),RT12(NPN6,NPN4,NPN4),
      &     RT21(NPN6,NPN4,NPN4),RT22(NPN6,NPN4,NPN4),
      &     IT11(NPN6,NPN4,NPN4),IT12(NPN6,NPN4,NPN4),
      &     IT21(NPN6,NPN4,NPN4),IT22(NPN6,NPN4,NPN4)
-      COMPLEX*16 S11,S12,S21,S22
-      COMPLEX*16 zeps1,zeps0
+      complex(dp) S11,S12,S21,S22
+      complex(dp) zeps1,zeps0
 *
       COMMON /CT/ TR1,TI1
 * transfers the real and imaginary part of the T matrix (2*NMAX,2*NMAX)
@@ -2338,11 +2341,11 @@ c      REAL*8 XALPHA(300),XBETA(300),WALPHA(300),WBETA(300)
 *
       COMMON /TOAMPLD/RAT,REV,ALPHA,BETA,DDELT
 *
-* transfers real*8 RAT,A(REV),ALPHA,BETA,DDELT from the main here
+* transfers real(dp) RAT,A(REV),ALPHA,BETA,DDELT from the main here
 *
       COMMON /TOTAMPLD/THET0,THET,PHI0,PHI
 *
-* transfers real*8 THET0,THET,PHI0,PHI from the main here
+* transfers real(dp) THET0,THET,PHI0,PHI from the main here
 
       COMMON /TOIAMPLD/NCHECK,NAXSM,NDGS
 
@@ -2908,25 +2911,25 @@ C         orientation of the scattering particle relative to the
 C         laboratory reference frame (Refs. 6 and 7).
 C   VV,VH,HV,HH ... amplitude scattering matrix elements S11,S12,S21,S22
 C--------/---------/---------/---------/---------/---------/---------/--
-      IMPLICIT REAL*8 (A-B,D-H,O-Z)
-      IMPLICIT COMPLEX*16 (C)
+      IMPLICIT real(dp) (A-B,D-H,O-Z)
+      IMPLICIT complex(dp) (C)
       INTEGER NOUT
       integer nmax, i, j, k, m, m1, n, nmin, nn
 
 * number of the output unit
       PARAMETER (NOUT=35)
       INCLUDE 'ampld.par.f'
-      REAL*8 DLAM,LAMBDA,CEXT,CEXT1,CEXT2
-      REAL*8 AL(3,2),AL1(3,2),AP(2,3),AP1(2,3),B(3,3),
+      real(dp) DLAM,LAMBDA,CEXT,CEXT1,CEXT2
+      real(dp) AL(3,2),AL1(3,2),AP(2,3),AP1(2,3),B(3,3),
      *       R(2,2),R1(2,2),C(3,2),CA,CB,CT,CP,CTP,CPP,CT1,CP1,
      *       CTP1,CPP1
-      REAL*8 DV1(NPN6),DV2(NPN6),DV01(NPN6),DV02(NPN6)
+      real(dp) DV1(NPN6),DV2(NPN6),DV01(NPN6),DV02(NPN6)
       REAL*4
      &     TR11(NPN6,NPN4,NPN4),TR12(NPN6,NPN4,NPN4),
      &     TR21(NPN6,NPN4,NPN4),TR22(NPN6,NPN4,NPN4),
      &     TI11(NPN6,NPN4,NPN4),TI12(NPN6,NPN4,NPN4),
      &     TI21(NPN6,NPN4,NPN4),TI22(NPN6,NPN4,NPN4)
-      COMPLEX*16 CAL(NPN4,NPN4),VV,VH,HV,HH,ZEPS0
+      complex(dp) CAL(NPN4,NPN4),VV,VH,HV,HH,ZEPS0
 *_____
       COMMON /TMAT/ TR11,TR12,TR21,TR22,TI11,TI12,TI21,TI22
 *_
@@ -3365,11 +3368,12 @@ C      IMPLICIT NONE
         PARAMETER (ynmishch=.false.)
 
         INTEGER NMAX,NMIN,M,M1,N,NN
-      REAL*8 DLAM,DK,LAMBDA,KEX,FAC,CEXT
-      REAL*8 TP,TP1,PP,PP1,FC,FS,REV,PIN,PIN2,PIgrad,THETP,PHIP,THETP1,
+      real(dp) DLAM,DK,LAMBDA,KEX,FAC,CEXT
+      real(dp) TP,TP1,PP,PP1,FC,FS,REV,PIN,PIN2,PIgrad,THETP,PHIP,
+     & THETP1,
      & PHIP1,EPS,DNN,RN,DCTH0,DCTH,PH,DV1NN,DV2NN,DV1N,DV2N,D11,D12,
      & D21,D22
-      REAL*8 DV1(NPN6),DV2(NPN6),DV01(NPN6),DV02(NPN6)
+      real(dp) DV1(NPN6),DV2(NPN6),DV01(NPN6),DV02(NPN6)
 * Either Mischenko:
       REAL*4
      &     TR11(NPN6,NPN4,NPN4),TR12(NPN6,NPN4,NPN4),
@@ -3377,9 +3381,9 @@ C      IMPLICIT NONE
      &     TI11(NPN6,NPN4,NPN4),TI12(NPN6,NPN4,NPN4),
      &     TI21(NPN6,NPN4,NPN4),TI22(NPN6,NPN4,NPN4)
 * or Bohren:
-        COMPLEX*16 CT(ST2,ST2,ST1)
+        complex(dp) CT(ST2,ST2,ST1)
 *
-      COMPLEX*16 CN,CN1,CN2,CI,VV,VH,HV,HH,ZEPS0,CT11,CT12,CT21,CT22,
+      complex(dp) CN,CN1,CN2,CI,VV,VH,HV,HH,ZEPS0,CT11,CT12,CT21,CT22,
      & CAL(NPN4,NPN4)
 
 *_____
@@ -3605,10 +3609,10 @@ C       by the value of variable LMX)
 
       PARAMETER (LMAXD=60)
 
-      real*8 xt
+      real(dp) xt
       integer lmx,l
-      complex*16 zx,z1,ci,cone,CQEPSt
-      complex*16 dr1(0:LMAXD),dr3(0:LMAXD),zeta(0:lmx),dzeta(0:lmx)
+      complex(dp) zx,z1,ci,cone,CQEPSt
+      complex(dp) dr1(0:LMAXD),dr3(0:LMAXD),zeta(0:lmx),dzeta(0:lmx)
 
       DATA ci/(0.d0,1.d0)/,cone/(1.d0,0.d0)/
 C--------/---------/---------/---------/---------/---------/---------/--
@@ -3694,7 +3698,7 @@ C     NRMAX ... maximal number of allowed different R points
 C--------/---------/---------/---------/---------/---------/---------/--
       implicit none
       integer lmaxd,lmaxd1,LMTD,NRM,NPHI,NOUT,NX
-      real*8 TOL,RINT,rsnm,lambda,thetv,thet
+      real(dp) TOL,RINT,rsnm,lambda,thetv,thet
 
 * number of the output unit
       PARAMETER (NOUT=60)
@@ -3718,26 +3722,26 @@ C ::: relative error allowed. If the convergence
       INTEGER LCS,lmax,lmaxs,lmaxt,m,ml,NGV
 c      logical ynphic
 
-      real*8 pi,omega,xelinv,delo,delt,rmff,rmfc
-      REAL*8 phi,xint,aint,xx
-      REAL*8 rmf(lcs),X(100),r(100)
+      real(dp) pi,omega,xelinv,delo,delt,rmff,rmfc
+      real(dp) phi,xint,aint,xx
+      real(dp) rmf(lcs),X(100),r(100)
 
-      COMPLEX*16 RX(2),SG(2),CQEPS(2)                  !ZSIGMA
-      complex*16  cdl,zrfac,zsfac,zint(3),zeps(lcs+1)
-      complex*16  ci,czero,zeinc(3,2),zescat(3,2)
-      complex*16  zmfac,zmpifac,zpifac,zelinc(2)
-      complex*16  cpole(lmtd,3),bpole(lmtd,3),ppole(lmtd,3)
-      complex*16  cpolinc(lmtd,3),bpolinc(lmtd,3),ppolinc(lmtd,3)
-      complex*16  mrpole(lmtd,3),nrpole(lmtd,3),mspole(lmtd,3),
+      complex(dp) RX(2),SG(2),CQEPS(2)                  !ZSIGMA
+      complex(dp)  cdl,zrfac,zsfac,zint(3),zeps(lcs+1)
+      complex(dp)  ci,czero,zeinc(3,2),zescat(3,2)
+      complex(dp)  zmfac,zmpifac,zpifac,zelinc(2)
+      complex(dp)  cpole(lmtd,3),bpole(lmtd,3),ppole(lmtd,3)
+      complex(dp)  cpolinc(lmtd,3),bpolinc(lmtd,3),ppolinc(lmtd,3)
+      complex(dp)  mrpole(lmtd,3),nrpole(lmtd,3),mspole(lmtd,3),
      & nspole(lmtd,3),mrpolinc(lmtd,3),nrpolinc(lmtd,3)
-      COMPLEX*16 ZA(LMTD),ZB(LMTD)
-      COMPLEX*16 AM(lmaxd,lcs+1),AE(lmaxd,lcs+1),BM(lmaxd,lcs+1),
+      complex(dp) ZA(LMTD),ZB(LMTD)
+      complex(dp) AM(lmaxd,lcs+1),AE(lmaxd,lcs+1),BM(lmaxd,lcs+1),
      & BE(lmaxd,lcs+1)
 C                      =====================
 
-      COMPLEX*16 JL(0:lmaxd), NL(0:lmaxd)
-      COMPLEX*16 DRJL(0:lmaxd), DRNL(0:lmaxd)
-      COMPLEX*16 HL(0:lmaxd),DRHL(0:lmaxd)
+      complex(dp) JL(0:lmaxd), NL(0:lmaxd)
+      complex(dp) DRJL(0:lmaxd), DRNL(0:lmaxd)
+      complex(dp) HL(0:lmaxd),DRHL(0:lmaxd)
 *
 C--------/---------/---------/---------/---------/---------/---------/--
 C  INPUT DATA ********************************************************
@@ -4256,9 +4260,9 @@ C--------/---------/---------/---------/---------/---------/---------/--
       PARAMETER (LMAXD=60,LMAXD1=LMAXD+1,LMTD=LMAXD1**2-1)
 
       integer ilm,ilp,l,lmax,m,mp
-      REAL*8 DDV1(LMAXD1),DV1(LMAXD1),DV2(LMAXD1),X
-      complex*16  cpole(lmtd,3),bpole(lmtd,3),ppole(lmtd,3)
-      complex*16  ci,czero
+      real(dp) DDV1(LMAXD1),DV1(LMAXD1),DV2(LMAXD1),X
+      complex(dp)  cpole(lmtd,3),bpole(lmtd,3),ppole(lmtd,3)
+      complex(dp)  ci,czero
 
 C  INPUT DATA ********************************************************
 *
@@ -4428,9 +4432,9 @@ C--------/---------/---------/---------/---------/---------/---------/--
       PARAMETER (LMAXD=60,LMAXD1=LMAXD+1)
 
       integer n,LMAX,M,I,I2
-      REAL*8 A,X,QS,D1,D2,D3,DER,DN,DX,QN,QN1,QN2,
+      real(dp) A,X,QS,D1,D2,D3,DER,DN,DX,QN,QN1,QN2,
      & QNM,QNM1,QMM
-      REAL*8 DDV1(LMAXD1), DV1(LMAXD1), DV2(LMAXD1)
+      real(dp) DDV1(LMAXD1), DV1(LMAXD1), DV2(LMAXD1)
 
 * DV1, DDV1, and DV2 initialization
       DO 1 N=1,LMAX
@@ -4627,9 +4631,9 @@ C--------/---------/---------/---------/---------/---------/---------/--
       PARAMETER (LMAXD=60,LMAXD1=LMAXD+1)
 
       integer n,LMAX,M,I,I2
-      REAL*8 A,X,QS,QS1,D1,D2,D3,DER,DN,DSI,DX,QN,QN1,QN2,
+      real(dp) A,X,QS,QS1,D1,D2,D3,DER,DN,DSI,DX,QN,QN1,QN2,
      & QNM,QNM1,QMM
-      REAL*8 DDV1(LMAXD1), DV1(LMAXD1), DV2(LMAXD1)
+      real(dp) DDV1(LMAXD1), DV1(LMAXD1), DV2(LMAXD1)
 
       DO 1 N=1,LMAX
          DV1(N)=0D0
@@ -4798,25 +4802,25 @@ c      PARAMETER(SAa=7,SSs=1,SUu=1,SDd=1,S11=1,SEe=1)
       INTEGER NMX,NMX1,NMX2,IAM,IAM1,IAM2,IBM,NTOPE,DE,CA,OCP,ILCN
 
 cc      INTEGER IAJ,IAY,IBJ,ICJ,NX
-      REAL*8 LAMBDA,EPS,KI,KEX,THET0,THET,PHI0,PHI
-      REAL*8 CEXT,CSCA,QEXT,QSCA,QABS,CGN1,CGN2,DLAM
-      REAL*8 DELTA,SEN,COSS,XM,CGN(200)
-      REAL*8 AP1(SDd)
-      REAL*8 DPRIMA,PI,PG,H,DB(st2+1)
-      real*8 PX1(SSs,SAa),PX2(SSs,SAa),PX3(SSs,SAa),PX4(SSs,SAa)
-      real*8 AP2(SDd),AP3(SDd),AP4(SDd),BP1(SDd),BP2(SDd)
-cc      real*8       ASIM,ALFA,CTE,CZ,DN,EM,EPS1,EPS2,EPS3,KE1,KE2,KE3,
+      real(dp) LAMBDA,EPS,KI,KEX,THET0,THET,PHI0,PHI
+      real(dp) CEXT,CSCA,QEXT,QSCA,QABS,CGN1,CGN2,DLAM
+      real(dp) DELTA,SEN,COSS,XM,CGN(200)
+      real(dp) AP1(SDd)
+      real(dp) DPRIMA,PI,PG,H,DB(st2+1)
+      real(dp) PX1(SSs,SAa),PX2(SSs,SAa),PX3(SSs,SAa),PX4(SSs,SAa)
+      real(dp) AP2(SDd),AP3(SDd),AP4(SDd),BP1(SDd),BP2(SDd)
+cc      real(dp)       ASIM,ALFA,CTE,CZ,DN,EM,EPS1,EPS2,EPS3,KE1,KE2,KE3,
 cc    &  KI1,KI2,KI3,KM,KIM,sum,lam,NH,pc1,pc2,PC,PE,QBACK
-cc      real*8 AE1(SAa),AE2(SAa),AE3(SAa),AE4(SAa),BE1(SAa),BE2(SAa)
-      real*8 A1(SAa),A2(SAa),A3(SAa),A4(SAa),B1(SAa),B2(SAa),ANG(SAa)
-      real*8 FALLOS(SAa)
-      COMPLEX*16 D3(SUu,SUu,SDd),D4(SUu,SUu,SDd),D5(SUu,SUu,SDd)
-      COMPLEX*16 AX1(SUu,SUu,SDd),AX2(SUu,SUu,SDd)
-      COMPLEX*16 BX1(SUu,0:SDd,SDd),BX2(SUu,0:SDd,SDd)
-      COMPLEX*16 G1(SDd),G2(SDd)
-      COMPLEX*16 CT,Z1,Z2,Z3,Z4,Z5,TA(2),ZKE,MR,MR1,MR2
-      COMPLEX*16 T1(ST2,ST2,ST1),T(ST2,ST2,ST1)
-      complex*16 G3(SDd),G4(SDd),G5(SDd),ZEPS(lcs+1)
+cc      real(dp) AE1(SAa),AE2(SAa),AE3(SAa),AE4(SAa),BE1(SAa),BE2(SAa)
+      real(dp) A1(SAa),A2(SAa),A3(SAa),A4(SAa),B1(SAa),B2(SAa),ANG(SAa)
+      real(dp) FALLOS(SAa)
+      complex(dp) D3(SUu,SUu,SDd),D4(SUu,SUu,SDd),D5(SUu,SUu,SDd)
+      complex(dp) AX1(SUu,SUu,SDd),AX2(SUu,SUu,SDd)
+      complex(dp) BX1(SUu,0:SDd,SDd),BX2(SUu,0:SDd,SDd)
+      complex(dp) G1(SDd),G2(SDd)
+      complex(dp) CT,Z1,Z2,Z3,Z4,Z5,TA(2),ZKE,MR,MR1,MR2
+      complex(dp) T1(ST2,ST2,ST1),T(ST2,ST2,ST1)
+      complex(dp) G3(SDd),G4(SDd),G5(SDd),ZEPS(lcs+1)
 
       EXTERNAL PUJOL,TNATURAL,CGORDANR
 
@@ -5523,8 +5527,8 @@ C--------/---------/---------/---------/---------/---------/---------/--
       implicit none
       INTEGER SU,SUP,ST,ST1,ST2
       PARAMETER (SU=50,SUP=0,ST=SU+SUP,ST1=ST+1,ST2=ST+ST)
-      REAL*8 CBX,CEXT,CSCA,K1,K2,K3,K4,K5,K6,DELTA,C1(2),C2(2),EPS
-      COMPLEX*16 ZKE,MR,CCX,T(ST2,ST2,ST1),T1(ST2,ST2,ST1)
+      real(dp) CBX,CEXT,CSCA,K1,K2,K3,K4,K5,K6,DELTA,C1(2),C2(2),EPS
+      complex(dp) ZKE,MR,CCX,T(ST2,ST2,ST1),T1(ST2,ST2,ST1)
       INTEGER*4 ADHOC,I,J,NOCON
       INTEGER NMAX,N1MAX,N2MAX,NGAUSS,ML,CA,N1MAX2,NDGS
       EXTERNAL TNATURAL
@@ -5740,7 +5744,7 @@ C=======
 C      SUBROUTINE FOR CALCULATION OF THE NATURAL T-MATRIX
 C      (Natural=Z axis along the symmetry axis)
 C
-C      COMPLEX*16 T(ST2,ST2,ST1)
+C      complex(dp) T(ST2,ST2,ST1)
 C
 C     T_n= [Q_n^{11} - Q_n^{13} T_{n-1}] x
 C                 [Q_n^{31} - Q_n^{33} T_{n-1}]^{-1}
@@ -5752,7 +5756,7 @@ C      With some changes e.g. the use of Wigner instead of Legendre functions
 C      So don't be surprised if the equations slightly differ from that book's
 C      In case of doubt, read my lips: it works!
 C
-C      COMPLEX*16 HA(ST1),BC(ST1),BC2(ST1) ... h,j,y spherical Bessel functions
+C      complex(dp) HA(ST1),BC(ST1),BC2(ST1) ... h,j,y spherical Bessel functions
 C      Rx,Rw: abscissas and weights
 C--------/---------/---------/---------/---------/---------/---------/--
       implicit none
@@ -5766,16 +5770,16 @@ C--------/---------/---------/---------/---------/---------/---------/--
       DOUBLE PRECISION SENTH,COSTH,SENT2,THETA,WTSEN
       DOUBLE PRECISION EPS,RX(NGAUD),RW(NGAUD),WIG(ST1)
       DOUBLE PRECISION GM(ST1)   !PI,
-      DOUBLE PRECISION DEL(ST),D(ST1),DP(ST1),GM1
+      DOUBLE PRECISION DEL(ST),D(ST1),drp(ST1),GM1
       DOUBLE PRECISION KAYUDA,CEXT,CSCA,DELT,EMACH
-      COMPLEX*16 ZX1,ZAX,ZDX,ZIA(ST1),ZIZ(ST1),ZIB(ST1),
+      complex(dp) ZX1,ZAX,ZDX,ZIA(ST1),ZIZ(ST1),ZIB(ST1),
      & ZJA(ST1),ZJZ(ST1),ZKA(ST1),CB(ST1)
-      COMPLEX*16 A(ST2,ST2),B(ST2,ST2),AA(ST2,ST2),BB(ST2,ST2)
-      COMPLEX*16 HA(ST1),BC(ST1),BC2(ST1),ZWIG2(ST1)
-      COMPLEX*16 ZDERI,ZDESEN,ZI1,ZA,ZB,ZC,ZD,ZE,ZF,ZFX,ZFY,ZPJ,ZR
-      COMPLEX*16 ZGM2,ZKE,ZKR,MR,ZMD,MKR,CZERO
-      COMPLEX*16 T(ST2,ST2,ST1),T1(ST2,ST2,ST1),ZX(ST2),CCX
-      COMPLEX*16 JL(0:ST),NL(0:ST),DRJL(0:ST),DRNL(0:ST),
+      complex(dp) A(ST2,ST2),B(ST2,ST2),AA(ST2,ST2),BB(ST2,ST2)
+      complex(dp) HA(ST1),BC(ST1),BC2(ST1),ZWIG2(ST1)
+      complex(dp) ZDERI,ZDESEN,ZI1,ZA,ZB,ZC,ZD,ZE,ZF,ZFX,ZFY,ZPJ,ZR
+      complex(dp) ZGM2,ZKE,ZKR,MR,ZMD,MKR,CZERO
+      complex(dp) T(ST2,ST2,ST1),T1(ST2,ST2,ST1),ZX(ST2),CCX
+      complex(dp) JL(0:ST),NL(0:ST),DRJL(0:ST),DRNL(0:ST),
      & HL(0:ST),DRHL(0:ST)
 
       EXTERNAL GNZBESS,GNRCBSH,WIGNER,GAUSS     !BESSEL,BESSEL2,HANKEL,
@@ -5822,8 +5826,8 @@ C      For the cases of plane-symmetric particles, NCHECK=1, otherwise NCHECK=0
 C      Now, let's calculate n and n*(n+1) in hight-precision
       DO I=1,NMAX+1
             D(I)=DFLOAT(I)
-            DP(I)=DFLOAT(I)*DFLOAT(I+1)
-            if(I.NE.0) GM(I)=SQRT((2.0D0*D(I)+1.0D0)/DP(I))
+            drp(I)=DFLOAT(I)*DFLOAT(I+1)
+            if(I.NE.0) GM(I)=SQRT((2.0D0*D(I)+1.0D0)/drp(I))
       END DO
 
 * Initialization
@@ -5974,15 +5978,15 @@ C      of i,j so that we only calculate nonzero matrix elements
             ZJA(I)=JL(I-1)/JL(I)         !orig. DREAL(HA(I))/DREAL(HA(I+1))
             ZIB(I)=MR*BC(I)/BC(I+1)
             ZKA(I)=ZJA(I)-ZIA(I)
-            ZWIG2(I)=WIG(I+1)*DP(I)*ZDESEN            !real*8 WIG2 is complex*16 now
+            ZWIG2(I)=WIG(I+1)*drp(I)*ZDESEN            !real(dp) WIG2 is complex(dp) now
             IF(CA.EQ.2) CB(I)=MR*BC2(I)/BC2(I+1)
       END DO
 
       DO 20 I=NMIN,NMAX              !NMIN=MAX(1,M)
        DO 10 J=NMIN,NMAX
 *
-            ZPJ=D(I)*D(J)/ZKR                     !real*8 IPJ is complex*16 now
-            ZI1=WIG(I+1)*WIG(J+1)*ZDESEN         !real*8 I1 is complex*16 now
+            ZPJ=D(I)*D(J)/ZKR                     !real(dp) IPJ is complex(dp) now
+            ZI1=WIG(I+1)*WIG(J+1)*ZDESEN         !real(dp) I1 is complex(dp) now
             GM1=0.5D0*GM(I)*GM(J)/SENT2
             IF(MOD(M,2).NE.0) GM1=-GM1
             ZGM2=(0.0D0,1.0D0)*GM1
@@ -6001,8 +6005,8 @@ C      For plane-symmetric particles and i+j=even, matrix elements are zero
         ZA=ZKR+ZIA(I)*(ZKR*ZIB(J)-D(J))-D(I)*ZIB(J)+ZPJ  !D(I)=dble(I)
         ZB=DEL(I)*WIG(J+1)+DEL(J)*WIG(I+1)
         ZB=ZB*ZKR
-        ZC=ZI1*(DP(I)*ZIB(J)+DP(J)*ZIA(I)-ZPJ*(D(I)+D(J)+2.0D0))
-        ZR=ZC+ZKA(I)*DP(J)*ZI1                         !DP(J)=dble(J*(J+1))
+        ZC=ZI1*(drp(I)*ZIB(J)+drp(J)*ZIA(I)-ZPJ*(D(I)+D(J)+2.0D0))
+        ZR=ZC+ZKA(I)*drp(J)*ZI1                         !drp(J)=dble(J*(J+1))
         ZX1=D(M)*GM1*BC(J+1)
 
 C      ======== III quadrant calculations ============
@@ -6031,8 +6035,8 @@ C       =============================================================
       IF(CA.EQ.2) THEN
 
         ZA=ZKR*(1.0D0+ZIA(I)*CB(J))-D(J)*ZIA(I)-D(I)*CB(J)+ZPJ
-        ZC=ZC+(CB(J)-ZIB(J))*DP(I)*ZI1
-        ZR=ZC+ZKA(I)*DP(J)*ZI1
+        ZC=ZC+(CB(J)-ZIB(J))*drp(I)*ZI1
+        ZR=ZC+ZKA(I)*drp(J)*ZI1
         ZX1=D(M)*GM1*BC2(J+1)
 
 * AA,BB may be used before set
@@ -6062,7 +6066,7 @@ C      matrix elements are zero
       IF((NCHECK.EQ.1.AND.MOD((I+J),2).EQ.0).OR.NCHECK.NE.1) THEN
         ZD=ZKR*(ZIB(J)-ZMD*ZIA(I))+ZMD*D(I)-D(J)
         ZE=DEL(I)*DEL(J)
-        IF(M.NE.0) ZE=ZE+(DP(M)-D(M))*WIG(I+1)*WIG(J+1)
+        IF(M.NE.0) ZE=ZE+(drp(M)-D(M))*WIG(I+1)*WIG(J+1)
         ZE=ZE*ZKR
         ZFX=ZWIG2(J)*DEL(I)
         ZFY=ZWIG2(I)*DEL(J)
@@ -6536,7 +6540,7 @@ C      The sum is thumbs-up to within a 10^-12 factor when N2MAX=30
 C      Reference: Schulten and Gordon, J. Math. Phys. 16, 1961-1970 (1975)
 C--------/---------/---------/---------/---------/---------/---------/--
       implicit none
-      real*8 cc1,cc2,dd1,dd2,cgn(200),CX(200),C1,SC,CMAX,CMAX2
+      real(dp) cc1,cc2,dd1,dd2,cgn(200),CX(200),C1,SC,CMAX,CMAX2
       INTEGER IAJ,IBJ,ICJ,IBM,ICM,IAM1,IAM2,IAM,IAMEDIO
       INTEGER DN1,KP,KP2,IAMA,IAMB,DNTOPE,IAMIN,IAMAX,TIC
 *
@@ -6838,11 +6842,11 @@ C
 C--------/---------/---------/---------/---------/---------/---------/--
       implicit none
       integer nmat,nfin,ieps
-      real*8 ff,filfrac,pi,xs,lambda,reepsz,rsnm,rmuf,omxf,omega,
+      real(dp) ff,filfrac,pi,xs,lambda,reepsz,rsnm,rmuf,omxf,omega,
      * omxp,plasma
-      real*8 omf(nfin)
-      complex*16 ci,z1,z2,zeps0,ZEPS1
-      complex*16 ceps1(NFIN)
+      real(dp) omf(nfin)
+      complex(dp) ci,z1,z2,zeps0,ZEPS1
+      complex(dp) ceps1(NFIN)
       logical ynbrug
 
       DATA PI/3.141592653589793d0/
@@ -6995,8 +6999,8 @@ C         ROUTINE TO READ IN VARIOUS MATERIAL DATA
 C--------/---------/---------/---------/---------/---------/---------/--
       implicit none
       integer nmat,nfin,ieps
-      real*8 pi,rev,rmuf,omf(NFIN)
-      complex*16 ceps1(NFIN),ZEPS1
+      real(dp) pi,rev,rmuf,omf(NFIN)
+      complex(dp) ceps1(NFIN),ZEPS1
 
       DATA PI/3.141592653589793d0/
 *****************************   ZEPS1  ***********************************
@@ -7128,7 +7132,7 @@ C---------------------------------------------------------------------
       implicit none
       integer LMAXD,LCS,LMAX,LMAXD1,LMTD
       integer NFIN
-      real*8 TOL
+      real(dp) TOL
       character*1 ync
       logical ynperfcon,yntest
 
@@ -7166,24 +7170,24 @@ C ::: relative error allowed for the TCS. If the convergence
 *
 c Declarations:
       integer i,j,l,ikl,ij,ij1,m
-      real*8 ZEPS0
-      real*8 rmf(lcs),rmuf,xs,rsnm,pi
-      real*8 omega,lambda
+      real(dp) ZEPS0
+      real(dp) rmf(lcs),rmuf,xs,rsnm,pi
+      real(dp) omega,lambda
 *
-      COMPLEX*16 ci,czero,zeps(lcs+1),cqeps(2)
-      COMPLEX*16 RX(2),SG(2),zs,zz1,zz2
-      COMPLEX*16 KMT(2,lmaxd),TMT(4,LMTD,LMTD),alpha(lmaxd),beta(lmaxd)
+      complex(dp) ci,czero,zeps(lcs+1),cqeps(2)
+      complex(dp) RX(2),SG(2),zs,zz1,zz2
+      complex(dp) KMT(2,lmaxd),TMT(4,LMTD,LMTD),alpha(lmaxd),beta(lmaxd)
 *
-      COMPLEX*16 cm(lcs,lmaxd),dm(lcs,lmaxd),ce(lcs,lmaxd),
+      complex(dp) cm(lcs,lmaxd),dm(lcs,lmaxd),ce(lcs,lmaxd),
      & de(lcs,lmaxd)
-      COMPLEX*16 tt1(2,2,lmaxd,2),tt2(2,2,lmaxd,2)
-      COMPLEX*16 AM(lmaxd),AE(lmaxd),BM(lmaxd),BE(lmaxd)
+      complex(dp) tt1(2,2,lmaxd,2),tt2(2,2,lmaxd,2)
+      complex(dp) AM(lmaxd),AE(lmaxd),BM(lmaxd),BE(lmaxd)
 *
-      COMPLEX*16 JL(0:lmaxd),NL(0:lmaxd)
-      COMPLEX*16 DRJL(0:lmaxd),DRNL(0:lmaxd)
-      COMPLEX*16 UL(2,0:lmaxd),VL(2,0:lmaxd)
-      COMPLEX*16 DRUL(2,0:lmaxd),DRVL(2,0:lmaxd)
-      COMPLEX*16 ZARTAN
+      complex(dp) JL(0:lmaxd),NL(0:lmaxd)
+      complex(dp) DRJL(0:lmaxd),DRNL(0:lmaxd)
+      complex(dp) UL(2,0:lmaxd),VL(2,0:lmaxd)
+      complex(dp) DRUL(2,0:lmaxd),DRVL(2,0:lmaxd)
+      complex(dp) ZARTAN
 *
       external ZARTAN
 *
@@ -7479,9 +7483,9 @@ C ::: number of the output unit for cross sections and scattering matrix
       PARAMETER (NOUT=35)
 
       integer ij,ns,npol
-      real*8 lambda,xrot,xperp,rev,eps0,pi,sext(6),xk,xmn,xmj,xx,xe,
+      real(dp) lambda,xrot,xperp,rev,eps0,pi,sext(6),xk,xmn,xmj,xx,xe,
      &  xlz,xlx,xdz,xdzrn,xdx,xvol,xlp,xdp,xdprn,xcr,xfx,xapl,pf,qf
-      complex*16 ci,cone,zalph(6),zeps
+      complex(dp) ci,cone,zalph(6),zeps
 
       DATA PI/3.141592653589793d0/
       data ci/(0.d0,1.d0)/,cone/(1.d0,0.d0)/
@@ -7625,7 +7629,7 @@ C be even larger
 C---------------------------------------------------------------------
       implicit none
       integer NOUT,LMAX,LCS,LMAXD
-      real*8 TOL,OMEGA,pi,rsnm,rmuf
+      real(dp) TOL,OMEGA,pi,rsnm,rmuf
       logical ynperfcon
 C--------/---------/---------/---------/---------/---------/---------/--
 
@@ -7658,25 +7662,25 @@ C     >>>               DECLARATIONS:               <<<
 C***********************************************************************
 
       integer i,j,l
-      real*8 xs,xd1,xd2,lambda
+      real(dp) xs,xd1,xd2,lambda
 *
-      complex*16 cp,zeps0
-      COMPLEX*16 ci,czero
+      complex(dp) cp,zeps0
+      complex(dp) ci,czero
 *
-      COMPLEX*16 AM(LMAXD,lcs+1),AE(LMAXD,lcs+1),BM(LMAXD,lcs+1),
+      complex(dp) AM(LMAXD,lcs+1),AE(LMAXD,lcs+1),BM(LMAXD,lcs+1),
      & BE(LMAXD,lcs+1)
 
 * Array declarations:
 
-      REAL*8 RMF(lcs)
-      COMPLEX*16 RX(2),SG(2),CQEPS(2),zeps(lcs+1)
+      real(dp) RMF(lcs)
+      complex(dp) RX(2),SG(2),CQEPS(2),zeps(lcs+1)
 *
 * coated sphere declarations:
 *                    moving lmax ===>
 *
-      COMPLEX*16 cmx11(1:lmaxd),cmx12(1:lmaxd),cmx21(1:lmaxd),
+      complex(dp) cmx11(1:lmaxd),cmx12(1:lmaxd),cmx21(1:lmaxd),
      & cmx22(1:lmaxd)
-      COMPLEX*16 tt1(2,2,1:lmaxd,2,lcs),tt2(2,2,1:lmaxd,2,lcs)
+      complex(dp) tt1(2,2,1:lmaxd,2,lcs),tt2(2,2,1:lmaxd,2,lcs)
 *
 C--------/---------/---------/---------/---------/---------/---------/--
 C  KMT,NML,DML,NEL,DEL,EPS,RX,SG, and Bessel functions below must be
@@ -7686,11 +7690,11 @@ C                      ====================
 C                           SUBR MODIF:
 C                      =====================
 
-      COMPLEX*16 JL(0:lmaxd), NL(0:lmaxd)
-      COMPLEX*16 DRJL(0:lmaxd), DRNL(0:lmaxd)
-      COMPLEX*16 UL(2,0:lmaxd),DRUL(2,0:lmaxd)
-      COMPLEX*16 WL(2,0:lmaxd), DRWL(2,0:lmaxd)
-      COMPLEX*16 HL(0:lmaxd),DRHL(0:lmaxd)
+      complex(dp) JL(0:lmaxd), NL(0:lmaxd)
+      complex(dp) DRJL(0:lmaxd), DRNL(0:lmaxd)
+      complex(dp) UL(2,0:lmaxd),DRUL(2,0:lmaxd)
+      complex(dp) WL(2,0:lmaxd), DRWL(2,0:lmaxd)
+      complex(dp) HL(0:lmaxd),DRHL(0:lmaxd)
 C
 C********************************************************************
 C     READING THE DATA :
@@ -7996,10 +8000,10 @@ C  separately for the real and imaginary parts of the integrand.
 C
 C--------/---------/---------/---------/---------/---------/---------/--
        INCLUDE 'ampld.par.f'
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT real(dp) (A-H,O-Z)
       integer m, ngauss, nmax, ncheck, naxsm, i, i1, i2, k1, k2, kk1,
      & kk2, mm1, n, n1, n2, ng, ngss, nm, nnmax
-      REAL*8  X(NPNG2),W(NPNG2),AN(NPN1),
+      real(dp)  X(NPNG2),W(NPNG2),AN(NPN1),
      *        R(NPNG2),DR(NPNG2),SIG(NPN2),
      *        J(NPNG2,NPN1),Y(NPNG2,NPN1),
      *        JR(NPNG2,NPN1),JI(NPNG2,NPN1),DJ(NPNG2,NPN1),
@@ -8010,7 +8014,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
      *        DV1(NPN3),DDV1(NPN3),DV2(NPN3),
      *        DD1,DD2,DD3
 
-      REAL*8  R11(NPN1,NPN1),R12(NPN1,NPN1),
+      real(dp)  R11(NPN1,NPN1),R12(NPN1,NPN1),
      *        R21(NPN1,NPN1),R22(NPN1,NPN1),
      *        I11(NPN1,NPN1),I12(NPN1,NPN1),
      *        I21(NPN1,NPN1),I22(NPN1,NPN1),
@@ -8023,7 +8027,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
      *        RGQR(NPN2,NPN2),RGQI(NPN2,NPN2),
      *        TQR(NPN2,NPN2),TQI(NPN2,NPN2),
      *        TRGQR(NPN2,NPN2),TRGQI(NPN2,NPN2)
-cc      REAL*8 TR1(NPN2,NPN2),TI1(NPN2,NPN2)
+cc      real(dp) TR1(NPN2,NPN2),TI1(NPN2,NPN2)
 *________
       COMMON /TMAT99/
      &            R11,R12,R21,R22,I11,I12,I21,I22,RG11,RG12,RG21,RG22,
@@ -8531,9 +8535,9 @@ C--------/---------/---------/---------/---------/---------/---------/--
 !     INCLUDE 'ampld.par.f'
 
       integer n,LMAX,M,I,I2
-      REAL*8 A,X,QS,D1,D2,D3,DER,DN,DX,QN,QN1,QN2,
+      real(dp) A,X,QS,D1,D2,D3,DER,DN,DX,QN,QN1,QN2,
      & QNM,QNM1,QMM
-      REAL*8 DDV1(NPN6), DV1(NPN6), DV2(NPN6)
+      real(dp) DDV1(NPN6), DV1(NPN6), DV2(NPN6)
 
 * DV1, DDV1, and DV2 initialization
       DO 1 N=1,LMAX
@@ -8722,10 +8726,10 @@ C--------/---------/---------/---------/---------/---------/---------/--
 C   FILFRAC ... filfrac of ZnS in ZnS core
 C--------/---------/---------/---------/---------/---------/---------/--
       IMPLICIT NONE
-      COMPLEX*16              zeps
-      REAL*8          F,FILFRAC,LAMBDA,EPSHOST
-      REAL*8          EPSZnS
-      REAL*8          eMG1,EPSPAR
+      complex(dp)              zeps
+      real(dp)          F,FILFRAC,LAMBDA,EPSHOST
+      real(dp)          EPSZnS
+      real(dp)          eMG1,EPSPAR
 *
 c if the host is different from the medium (silica n=1.45)
 
@@ -8787,8 +8791,8 @@ C (C) Copr. 10/2005  Alexander Moroz
 * For a real z=x, |x|<1,  log here is purely imaginary and
 * equals to i*atan(2x/(1-x**2))\equiv 2*i*atan x
 *--------/---------/---------/---------/---------/---------/---------/--
-      complex*16 zartan,zs
-      real*8 xxs,xas,ar1,ar2,pi
+      complex(dp) zartan,zs
+      real(dp) xxs,xas,ar1,ar2,pi
       DATA PI/3.141592653589793d0/
 
       if (dimag(zs).eq.0.) then
