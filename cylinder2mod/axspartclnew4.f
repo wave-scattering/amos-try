@@ -259,21 +259,9 @@ C--------/---------/---------/---------/---------/---------/---------/--
       !---------------------------------------------------------------
       character(999)                :: file_name  !< Name of INI file.
       type(file_ini)                :: fini       !< INI file handler.
-      character(len=:), allocatable :: items(:,:) !< Items pairs.
-      integer                       :: error
-      character(len=:), allocatable :: string         !< String option.
 
       call cli_parse
-      call fini%load(filename=file_name)
-      string = repeat(' ', 999)
-      call fini%get(section_name='general', option_name='particle_type',
-     &  val=string, error=error)
-      write(*,*) trim(string)
-!     call fini%get_items(items)
-!     do i=1,size(items,dim=1)
-!       print "(A)", trim(items(i,1))//' = '//trim(items(i,2))
-!     enddo
-      stop
+      call ini_parse
 
 *
 * From here to spherec
@@ -377,9 +365,12 @@ C--------/---------/---------/---------/---------/---------/---------/--
 
       Open(unit = 90,file = 'epsWater.txt', status = 'unknown')
 *
-!     read(5,*) NP
-      NP=-2
-      write(6,*)'Auto-select: -2 (cylinder)'
+      if (NP == 0) then
+      write(6,*) 'Input the particle type:'
+      read(5,*) NP
+      else
+      write(6,*)'Auto-select from *.ini file: ', NP
+      end if
 cz      NP=-1                      !temporarily
 *
       NPP=NP
@@ -499,15 +490,19 @@ C--------/---------/---------/---------/---------/---------/---------/--
 *
       else if (NP.eq.-2) then
 *
-      write(6,*)'Read cylinder maximal r/l'
-!     read(5,*) rl_max
-      rl_max = 0.75D0
-      write(6,*)'Auto-set cylinder maximal r/l',rl_max
+      if (rl_max < 0) then
+        write(6,*)'Enter cylinder maximal r/l:'
+        read(5,*) rl_max
+      else
+        write(6,*)'Auto-set cylinder maximal r/l from *.ini', rl_max
+      end if
 
-      write(6,*)'Read cylinder minimal r/l'
-!     read(5,*) rl_min
-      rl_min = 0.45D0
-      write(6,*)'Auto-set cylinder minimal r/l', rl_min
+      if (rl_min < 0) then
+        write(6,*)'Enter cylinder minimal r/l:'
+        read(5,*) rl_min
+      else
+        write(6,*)'Auto-set cylinder minimal r/l from *.ini', rl_min
+      end if
 
       write(6,*)'Read amount of steps in length'
 !     read(5,*) ndefp
@@ -1849,6 +1844,42 @@ C--------/---------/---------/---------/---------/---------/---------/--
  5000 FORMAT ('4X4 PHASE MATRIX')
 
       contains
+
+      subroutine ini_parse()
+      character(len=:), allocatable :: items(:,:) !< Items pairs.
+      integer                       :: error
+      character(len=:), allocatable :: string         !< String option.
+      real(dp)                      :: double
+      integer                       :: num
+
+      call fini%load(filename=file_name)
+      string = repeat(' ', 999)
+
+      call fini%get(section_name='general', option_name='particle_type',
+     &  val=string, error=error)
+      NP = 0
+      if ((trim(string) .eq. 'cylinder') .or.(trim(string)=='-2')) NP=-2
+
+      call fini%get(section_name='cylinder', option_name='rl_min',
+     &  val=double, error=error)
+      rl_min = -1
+      if (error==0) rl_min = double
+
+      call fini%get(section_name='cylinder', option_name='rl_max',
+     &  val=double, error=error)
+      rl_max = -1
+      if (error==0) rl_max = double
+
+
+      write(*,*) trim(string)
+!     call fini%get_items(items)
+!     do i=1,size(items,dim=1)
+!       print "(A)", trim(items(i,1))//' = '//trim(items(i,2))
+!     enddo
+
+
+      end subroutine ini_parse
+
       subroutine cli_parse()
         !< Build and parse test cli.
         type(command_line_interface) :: cli  !< command line interface.
