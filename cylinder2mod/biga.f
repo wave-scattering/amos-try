@@ -8,7 +8,7 @@ c    Routines called :  CONFRA
 c              ERRMSG('ConFra--Iteration failed to converge',.TRUE.)
 c  =====
 c
-c  COMPLEX*16   CBIGA( LMAXD )
+c  complex(dp)   CBIGA( LMAXD )
 c  call BIGA (CIOR, XX, LMAXD, .false., .false., RBIGA, CBIGA )
 c
 c According to:
@@ -48,7 +48,7 @@ c
 c       REZINV     1 / ( MRE * XX ); temporary variable for recurrence
 c       ZINV       1 / ( CIOR * XX ); temporary variable for recurrence
 C--------/---------/---------/---------/---------/---------/---------/--
-
+      use libcylinder
       IMPLICIT  NONE
 
 c     .. Scalar Arguments ..
@@ -57,24 +57,24 @@ c     .. Scalar Arguments ..
       PARAMETER (LMAXD=60)
 
       LOGICAL    NOABS, YESANG
-      REAL*8     XX
-      COMPLEX*16 CIOR
+      real(dp)     XX
+      complex(dp) CIOR
 c     ..
 c     .. Array Arguments ..
 
-      REAL*8      RBIGA(LMAXD)
-      COMPLEX*16   CBIGA(LMAXD)
+      real(dp)      RBIGA(LMAXD)
+      complex(dp)   CBIGA(LMAXD)
 c     ..
 c     .. Local Scalars ..
 
       LOGICAL   DOWN
       INTEGER   N
-      REAL*8      MIM, MRE, REZINV, RTMP
-      COMPLEX*16   CTMP,ZINV
+      real(dp)      MIM, MRE, REZINV, RTMP
+      complex(dp)   CTMP,ZINV
 c     ..
 c     .. External Functions ..
 
-      COMPLEX*16   CONFRA
+      complex(dp)   CONFRA
       EXTERNAL  CONFRA
 c     ..
 c     .. Intrinsic Functions ..
@@ -83,7 +83,7 @@ c      INTRINSIC ABS, AIMAG, COS, EXP, REAL, SIN
 c     ..
 c     .. Statement Functions ..
 c
-      REAL*8      F1,F2
+      real(dp)      F1,F2
 c     ,F3  - not used here
 c     ..
 c     .. Statement Function definitions ..
@@ -196,7 +196,7 @@ c                                     ** Absorptive case; Eq (R20,22)
       RETURN
       END
 
-      COMPLEX*16 FUNCTION CONFRA(N,ZINV)
+      complex(dp) FUNCTION CONFRA(N,ZINV)
 C--------/---------/---------/---------/---------/---------/---------/--
 c         Compute Bessel function ratio A-sub-N from its
 c         continued fraction using Lentz method
@@ -220,18 +220,19 @@ c    KOUNT    Iteration counter ( used to prevent infinite looping )
 c    MAXIT    Max. allowed no. of iterations
 c    MM       + 1  and - 1, alternately
 C--------/---------/---------/---------/---------/---------/---------/--
+      use libcylinder
       IMPLICIT  NONE
 
 c     .. Scalar Arguments ..
 
       INTEGER   N
-      COMPLEX*16   ZINV
+      complex(dp)   ZINV
 c     ..
 c     .. Local Scalars ..
 
       INTEGER   KK, KOUNT, MAXIT, MM
-      REAL*8      EPS1, EPS2
-      COMPLEX*16   CAK, CAPT, CDENOM, CDTD, CNTN, CNUMER
+      real(dp)      EPS1, EPS2
+      complex(dp)   CAK, CAPT, CDENOM, CDTD, CNTN, CNUMER
 c     ..
 c     .. External Subroutines ..
 

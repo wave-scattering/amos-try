@@ -3,7 +3,7 @@
       REAL*8 a,b,x,c(m)
       INTEGER j
       REAL*8 d,dd,sv,y,y2
-      if ((x-a)*(x-b).gt.0.) pause 'x not in range in chebev'
+      if ((x-a)*(x-b).gt.0.) stop 'x not in range in chebev'
       d=0.d0
       dd=0.d0
       y=(2.d0*x-a-b)/(b-a)

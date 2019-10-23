@@ -58,10 +58,10 @@ C*****************************************************************
 C                >>> FOR GENERAL COMPLEX OMEGA   <<<
 C AMOS SLAC package from http://www.netlib.org/amos/ is used
 C -----------------------------------------------------------------
+      use libcylinder
       implicit none
       integer LMAX,IKODE,i,l,LMX
-      REAL*8 pi,pib2z,prod,fnu
-      PARAMETER (PI=3.141592653589793d0)
+      real(dp) pib2z,prod,fnu
 * LMX is internal LMAX here (for AMOS):
 c      PARAMETER (LMX=82)
       PARAMETER (LMX=82)
@@ -72,12 +72,12 @@ c      PARAMETER (LMX=82)
       PARAMETER (FNU=0.5d0)
 *
       integer nz,ierr
-      REAL*8 xom,xnu,rj,rymu,rjp,ry1,xi
-      complex*16 JL(0:lmax),NL(0:lmax),DJL(0:lmax),DNL(0:lmax)
-      complex*16 ei,omega,xjl,cxi,czi,cpib2z
-      complex*16 crj,crymu,crjp,cry1
-      real*8 zr,zi
-      real*8 cyr(lmx+1),cyi(lmx+1)
+      real(dp) xom,xnu,rj,rymu,rjp,ry1,xi
+      complex(dp) JL(0:lmax),NL(0:lmax),DJL(0:lmax),DNL(0:lmax)
+      complex(dp) ei,omega,xjl,cxi,czi,cpib2z
+      complex(dp) crj,crymu,crjp,cry1
+      real(dp) zr,zi
+      real(dp) cyr(lmx+1),cyi(lmx+1)
 c      character*1 yesn
 
       ei=dcmplx(0.d0,1.d0)
