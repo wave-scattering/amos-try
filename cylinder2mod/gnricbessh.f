@@ -40,7 +40,7 @@ C Determine the Bessel function ratio A_1=\psi_1'/\psi_1
 
       if (aimag(CQEPS).ne.0.d0) then
          call BIGA(CQEPS,xx,LMX,.false.,.false.,dr1(1))
-      else if (imag(CQEPS).eq.0.d0) then 
+      else if (aimag(CQEPS).eq.0.d0) then
          call BIGA(CQEPS,xx,LMX,.true.,.false.,dr1(1))
       end if
 

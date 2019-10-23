@@ -81,7 +81,7 @@ c      PARAMETER (LMX=82)
 c      character*1 yesn
 
       ei=cmplx_dp(0.d0,1.d0)
-      zi=dimag(omega)
+      zi=aimag(omega)
       zr=dble(omega)
 
 *-------------

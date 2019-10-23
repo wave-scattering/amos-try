@@ -207,12 +207,12 @@ c Declarations:
       real(dp) delo,omega0,omega,rsnm,hlength
       real(dp) RAT,RATP,AXI,REV,REVP,ALPHA,BETA,ALPHAE,BETAE      !common block variables
       real(dp) THET0,THET,THETV,PHI0,PHI     !common block variables
-      real*16 ceps1real(NFIN),  ceps1imag(nfin)
+      real(dp) ceps1real(NFIN),  ceps1imag(nfin)
 
 
       complex(dp) ceps1(NFIN),ZEPS1,ZEPS0V,Z1,Z2
       complex(dp) zeps(lcs+1)
-      real*16 global_eps_r, global_eps_i
+      real(dp) global_eps_r, global_eps_i
 *
       COMMON /TOAMPLD/RAT,REV,ALPHA,BETA,DDELT
 *
