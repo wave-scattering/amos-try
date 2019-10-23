@@ -141,7 +141,7 @@ cc      COMMON /TMAT/ RT11,RT12,RT21,RT22,IT11,IT12,IT21,IT22
 *
 * the imaginary  part of the refractive index contrast 
 *
-      MRI=DIMAG(SQRT(ZEPS1/ZEPS0)) 
+      MRI=aimag(SQRT(ZEPS1/ZEPS0))
 * 
       DDELT=0.1D0*DDELT               !conv. test is switched off now!!!
 *
@@ -209,7 +209,7 @@ cc      NNNGGG=NGAUSS+1
             TR1NN1=TR1(N1,N1)
             TI1NN1=TI1(N1,N1)
             
-            DN1=DFLOAT(2*N+1) 
+            DN1=dble(2*N+1) 
             
             QSCA=QSCA+DN1*(TR1NN*TR1NN+TI1NN*TI1NN
      &                    +TR1NN1*TR1NN1+TI1NN1*TI1NN1)
@@ -556,8 +556,8 @@ C********************************************************************
 !     DO 5 NN=1,NMAX
 !        DO 5 N=1,NMAX
 !           CN=CI**(NN-N-1)
-!           DNN=DFLOAT((2*N+1)*(2*NN+1))
-!           DNN=DNN/DFLOAT( N*NN*(N+1)*(NN+1) )
+!           DNN=dble((2*N+1)*(2*NN+1))
+!           DNN=DNN/dble( N*NN*(N+1)*(NN+1) )
 !           RN=DSQRT(DNN)
 !           CAL(N,NN)=CN*RN
 !   5 CONTINUE
@@ -708,11 +708,11 @@ c      real(dp) DDV1(LMAXD1),DV1(LMAXD1),DV2(LMAXD1)
 *                          
 *    A_m*(sin\theta)**m   initialization - (33) and recurrence (34) of Ref. {Mis39}
 
-   20 QMM=DFLOAT(M*M)
+   20 QMM=dble(M*M)
 
       DO 25 I=1,M
          I2=I*2
-         A=A*DSQRT(DFLOAT(I2-1)/DFLOAT(I2))*QS  !recurrence (33,34) of Ref. {Mis39} f
+         A=A*DSQRT(dble(I2-1)/dble(I2))*QS  !recurrence (33,34) of Ref. {Mis39} f
    25 CONTINUE
 
       end if
@@ -855,8 +855,8 @@ C--------/---------/---------/---------/---------/---------/---------/--
 *      
       DO 10 N=1,NMAX
            NN=N*(N+1)
-           AN(N)=DFLOAT(NN)
-           D=DSQRT(DFLOAT(2*N+1)/DFLOAT(NN))
+           AN(N)=dble(NN)
+           D=DSQRT(dble(2*N+1)/dble(NN))
            DD(N)=D
            DO 10 N1=1,N
                 DDD=D*DD(N1)*0.5D0
@@ -891,7 +891,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       ELSE IF (NEPS.GT.2) THEN
 
       NEPS=3*NEPS
-      NG1=DFLOAT(NGAUSS)/NEPS
+      NG1=dble(NGAUSS)/NEPS
 
       EE=EPS*EPS
       EE1=EE-1D0
@@ -961,7 +961,7 @@ c_____ estimate integration intervals:
 
 ******************   Only involves cylinders  ********************** 
      
-      NG1=DFLOAT(NGAUSS)/2D0
+      NG1=dble(NGAUSS)/2D0
       NG2=NGAUSS-NG1
       XX=-DCOS(DATAN(EPS))        !-COS OF SEPARATION ANGLE BETWEEN
                                   !HORIZONTAL AND VERTICAL CYLINDER
@@ -1167,9 +1167,9 @@ cc      IF (NP.EQ.-8) CALL RSP8(X,NG,RSNM,HT,R,DR)          ! cone on a cylinder
 * TA is the ``max. size parameter", MAX(2*PI*SQRT(RI)/LAMBDA)
 
       TB=TA*DSQRT(MRR*MRR+MRI*MRI)     !=TA*EPSIN
-      TB=DMAX1(TB,DFLOAT(NMAX))
+      TB=DMAX1(TB,dble(NMAX))
 *
-      NNMAX1=1.2D0*DSQRT(DMAX1(TA,DFLOAT(NMAX)))+3D0
+      NNMAX1=1.2D0*DSQRT(DMAX1(TA,dble(NMAX)))+3D0
       NNMAX2=(TB+4D0*(TB**0.33333D0)+1.2D0*DSQRT(TB))  !Wiscombe bound
       NNMAX2=NNMAX2-NMAX+5
 *
@@ -1266,7 +1266,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       IMPLICIT real(dp) (A-H,O-Z)
       real(dp) X(NG),R(NG),DR(NG)
-      DNP=DFLOAT(N)
+      DNP=dble(N)
       DN=DNP*DNP
       DN4=DN*4D0
       EP=EPS*EPS
@@ -1765,11 +1765,11 @@ C--------/---------/---------/---------/---------/---------/---------/--
 *
       L=NMAX+NNMAX
       XX=1D0/X
-      Z(L)=1D0/(DFLOAT(2*L+1)*XX)
+      Z(L)=1D0/(dble(2*L+1)*XX)
       L1=L-1
       DO 5 I=1,L1
          I1=L-I
-         Z(I1)=1D0/(DFLOAT(2*I1+1)*XX-Z(I1+1))
+         Z(I1)=1D0/(dble(2*I1+1)*XX-Z(I1+1))
     5 CONTINUE
       Z0=1D0/(XX-Z(1))
       Y0=Z0*DCOS(X)*XX
@@ -1779,7 +1779,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       DO 10 I=2,NMAX
          YI1=Y(I-1)
          YI=YI1*Z(I)
-         U(I)=YI1-DFLOAT(I)*YI*XX
+         U(I)=YI1-dble(I)*YI*XX
          Y(I)=YI
    10 CONTINUE
 
@@ -1810,10 +1810,10 @@ C--------/---------/---------/---------/---------/---------/---------/--
       Y(2)=(-3D0*X3+X1)*C-3D0*X2*S
       NMAX1=NMAX-1
       DO 5 I=2,NMAX1
-    5     Y(I+1)=DFLOAT(2*I+1)*X1*Y(I)-Y(I-1)
+    5     Y(I+1)=dble(2*I+1)*X1*Y(I)-Y(I-1)
       V(1)=-X1*(C+Y1)
       DO 10 I=2,NMAX
-  10       V(I)=Y(I-1)-DFLOAT(I)*X1*Y(I)
+  10       V(I)=Y(I-1)-dble(I)*X1*Y(I)
       RETURN
       END
 
@@ -1846,13 +1846,13 @@ c     *       CUR(NPN1),CUI(NPN1)
       XRXI=1D0/(XR*XR+XI*XI)
       CXXR=XR*XRXI             !Re [1/(XR+i*XI)]
       CXXI=-XI*XRXI            !Im [1/(XR+i*XI)] 
-      QF=1D0/DFLOAT(2*L+1)
+      QF=1D0/dble(2*L+1)
       CZR(L)=XR*QF
       CZI(L)=XI*QF
       L1=L-1
       DO I=1,L1
          I1=L-I
-         QF=DFLOAT(2*I1+1)
+         QF=dble(2*I1+1)
          AR=QF*CXXR-CZR(I1+1)
          AI=QF*CXXI-CZI(I1+1)
          ARI=1D0/(AR*AR+AI*AI)
@@ -1887,7 +1887,7 @@ c      CUI(1)=CU1I
       UI(1)=CU1I
       
       DO I=2,NMAX
-         QI=DFLOAT(I)
+         QI=dble(I)
          CYI1R=CYR(I-1)
          CYI1I=CYI(I-1)
          CYIR=CYI1R*CZR(I)-CYI1I*CZI(I)
@@ -2388,7 +2388,7 @@ cc      COMMON /CT/ TR1,TI1                      !output from TT routine
       COMMON /CTT/ QR,QI,RGQR,RGQI             !input for TT routine
 *________
       MM1=M
-      QM=DFLOAT(M)
+      QM=dble(M)
       QMM=QM*QM
       NG=2*NGAUSS
       NGSS=NG
@@ -2461,8 +2461,8 @@ cc      COMMON /CT/ TR1,TI1                      !output from TT routine
            
 cc           if (dr(i).eq.0.d0) WR=0.d0   !temporarily only
            
-           DS(I)=S(I)*QM*WR       !=DFLOAT(M)*W(I)*r^2(\theta)/(|\sin\theta|)
-           DSS(I)=SS(I)*QMM       !=DFLOAT(M)**2/(\sin^2\theta)
+           DS(I)=S(I)*QM*WR       !=dble(M)*W(I)*r^2(\theta)/(|\sin\theta|)
+           DSS(I)=SS(I)*QMM       !=dble(M)**2/(\sin^2\theta)
            RR(I)=WR
                       
    40 CONTINUE
@@ -2500,7 +2500,7 @@ cc           if (dr(i).eq.0.d0) WR=0.d0   !temporarily only
                     A21=D2N1*D1N2
                     A22=D2N1*D2N2
                     AA1=A12+A21            != D1N1*D2N2+D2N1*D1N2
-                    AA2=A11*DSS(I)+A22     !=(D1N1*D1N2)*DFLOAT(M)**2/(\sin^2\theta)
+                    AA2=A11*DSS(I)+A22     !=(D1N1*D1N2)*dble(M)**2/(\sin^2\theta)
                                            ! +D2N1*D2N2
                     
 * Vector spherical harmonics:
@@ -2615,7 +2615,7 @@ C  parts:
  
                     IF (NCHECK.EQ.1.AND.SI.GT.0D0) GO TO 150
 
-* [DFLOAT(M)*W(I)*r^2(I)/(|\sin\theta|)]*(D1N1*D2N2+D2N1*D1N2):
+* [dble(M)*W(I)*r^2(I)/(|\sin\theta|)]*(D1N1*D2N2+D2N1*D1N2):
                     E1=DSI*AA1
 
                     AR11=AR11+E1*B1R
@@ -2628,7 +2628,7 @@ C  parts:
   150               CONTINUE
 
                     
-* w(i)*r^2(\theta)*[(D1N1*D1N2)*DFLOAT(M)**2/(\sin^2\theta)+D2N1*D2N2]:
+* w(i)*r^2(\theta)*[(D1N1*D1N2)*dble(M)**2/(\sin^2\theta)+D2N1*D2N2]:
                     F1=RRI*AA2            !prefactor containing r^2(\theta)<->hat{r} part
                     
 * N1*(N1+1)*w(i)*r(\theta)*[dr/(d\theta)]*D1N1*D2N2:                     
@@ -2816,9 +2816,9 @@ C--------/---------/---------/---------/---------/---------/---------/--
       D1=1D0
       D2=X  
       DO N=1,NMAX
-         QN=DFLOAT(N)
-         QN1=DFLOAT(N+1)
-         QN2=DFLOAT(2*N+1)
+         QN=dble(N)
+         QN1=dble(N+1)
+         QN2=dble(2*N+1)
          D3=(QN2*X*D2-QN*D1)/QN1          !recurrence (31) of Ref. {Mis39}
          DER=QS1*(QN1*QN/QN2)*(-D1+D3)    !recurrence (35) of Ref. {Mis39}
          DV1(N)=D2
@@ -2828,21 +2828,21 @@ C--------/---------/---------/---------/---------/---------/---------/--
       ENDDO   
       RETURN
       
-   20 QMM=DFLOAT(M*M)
+   20 QMM=dble(M*M)
    
 *A_m initialization - recurrence (34) of Ref. {Mis39}
       DO I=1,M
          I2=I*2
-         A=A*DSQRT(DFLOAT(I2-1)/DFLOAT(I2))*QS  
+         A=A*DSQRT(dble(I2-1)/dble(I2))*QS  
       ENDDO 
 *  
       D1=0D0
       D2=A 
 
       DO N=M,NMAX
-         QN=DFLOAT(N)
-         QN2=DFLOAT(2*N+1)
-         QN1=DFLOAT(N+1)
+         QN=dble(N)
+         QN2=dble(2*N+1)
+         QN1=dble(N+1)
          QNM=DSQRT(QN*QN-QMM)
          QNM1=DSQRT(QN1*QN1-QMM)
          D3=(QN2*X*D2-QNM*D1)/QNM1              !recurrence (31) of Ref. {Mis39}
@@ -2926,7 +2926,7 @@ cc           IF (INFO.NE.0) WRITE(NOUT,1100) INFO
                     ARR=RGQR(I,K)
                     ARI=RGQI(I,K)
                     AR=ZQ(K,J)
-                    AI=DIMAG(ZQ(K,J))
+                    AI=aimag(ZQ(K,J))
                     TR=TR-ARR*AR+ARI*AI
                     TI=TI-ARR*AI-ARI*AR
                  ENDDO
@@ -2959,7 +2959,7 @@ C  Gaussian elimination             !NAG library not used
 * Assign T-matrix elements = - RG(Q) * (Q**(-1))
 *
              TR1(I,K)=-DBLE(ZX(K))
-             TI1(I,K)=-DIMAG(ZX(K))
+             TI1(I,K)=-aimag(ZX(K))
              ENDDO
   6   CONTINUE
 *
@@ -3007,7 +3007,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       INTEGER IPVT(NPN1),IND1(NPN1),IND2(NPN1)
 *
       NDIM=NPN1
-      NN1=(DFLOAT(NMAX)-0.1D0)*0.5D0+1D0 
+      NN1=(dble(NMAX)-0.1D0)*0.5D0+1D0
       NN2=NMAX-NN1
 *
       DO 5 I=1,NMAX
@@ -3255,7 +3255,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       IMPLICIT real(dp) (A-H,O-Z)
       real(dp) X(60),W(60)
 *
-      DN=DFLOAT(N)
+      DN=dble(N)
       EN=E*DN
       NG=60
 *
@@ -3388,7 +3388,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       DATA A,B,C /1D0,2D0,3D0/
       IND=MOD(N,2)
       K=N/2+IND
-      F=DFLOAT(N)
+      F=dble(N)
       DO 100 I=1,K
           M=N+1-I
           IF(I.EQ.1) X=A-B/((F+A)*F)

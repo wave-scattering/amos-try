@@ -1592,7 +1592,7 @@ c >>>
       z1 = (3.d0*ff-1.d0)*zeps1+(2.d0 - 3.d0*ff)*zeps0
       z2 =  sqrt(z1*z1 + 8.d0*zeps1*zeps0)
 *
-       if (IMAG(z2).GE.0.0) then
+       if (aIMAG(z2).GE.0.0) then
          zeps1= (z1 + z2)/4.d0
        else
          zeps1= (z1 - z2)/4.d0
@@ -1973,7 +1973,7 @@ cc      COMMON /TMAT/ RT11,RT12,RT21,RT22,IT11,IT12,IT21,IT22
 *
 * the imaginary  part of the refractive index contrast
 *
-      MRI=DIMAG(SQRT(ZEPS1/ZEPS0))
+      MRI=aimag(SQRT(ZEPS1/ZEPS0))
 *
       DDELT=0.1D0*DDELT               !conv. test is switched off now!!!
 *
@@ -2367,7 +2367,7 @@ cc      write(6,*)'LAM,LAMBDA in AMPL=', LAM, LAMBDA
 *
 * the imaginary  part of the refractive index contrast
 *
-      MRI=DIMAG(SQRT(ZEPS1/ZEPS0))
+      MRI=aimag(SQRT(ZEPS1/ZEPS0))
 *
       DDELTA=0.1D0*DDELT
 *
@@ -2460,7 +2460,7 @@ c 7334    FORMAT(' NMAX =', I3,'  DC2=',D8.2,'   DC1=',D8.2)
             TI1NN=TI1(N,N)
             TR1NN1=TR1(N1,N1)
             TI1NN1=TI1(N1,N1)
-            DN1=DFLOAT(2*N+1)
+            DN1=dble(2*N+1)
             QSCA=QSCA+DN1*(TR1NN*TR1NN+TI1NN*TI1NN
      &                    +TR1NN1*TR1NN1+TI1NN1*TI1NN1)
             QEXT=QEXT+(TR1NN+TR1NN1)*DN1
@@ -2542,7 +2542,7 @@ cc         NGGG=2*NGAUSS
             TR1NN1=TR1(N1,N1)
             TI1NN1=TI1(N1,N1)
 
-            DN1=DFLOAT(2*N+1)
+            DN1=dble(2*N+1)
 
             QSCA=QSCA+DN1*(TR1NN*TR1NN+TI1NN*TI1NN
      &                    +TR1NN1*TR1NN1+TI1NN1*TI1NN1)
@@ -2840,26 +2840,26 @@ C  AMPLITUDE MATRIX [Eqs. (2)-(4) of Ref. 6]
      &           S11,S12,S21,S22)
 *
 C  PHASE MATRIX [Eqs. (13)-(29) of Ref. 6]
-      Z11=0.5D0*(S11*DCONJG(S11)+S12*DCONJG(S12)
-     &          +S21*DCONJG(S21)+S22*DCONJG(S22))
-      Z12=0.5D0*(S11*DCONJG(S11)-S12*DCONJG(S12)
-     &          +S21*DCONJG(S21)-S22*DCONJG(S22))
-      Z13=-S11*DCONJG(S12)-S22*DCONJG(S21)
-      Z14=(0D0,1D0)*(S11*DCONJG(S12)-S22*DCONJG(S21))
-      Z21=0.5D0*(S11*DCONJG(S11)+S12*DCONJG(S12)
-     &          -S21*DCONJG(S21)-S22*DCONJG(S22))
-      Z22=0.5D0*(S11*DCONJG(S11)-S12*DCONJG(S12)
-     &          -S21*DCONJG(S21)+S22*DCONJG(S22))
-      Z23=-S11*DCONJG(S12)+S22*DCONJG(S21)
-      Z24=(0D0,1D0)*(S11*DCONJG(S12)+S22*DCONJG(S21))
-      Z31=-S11*DCONJG(S21)-S22*DCONJG(S12)
-      Z32=-S11*DCONJG(S21)+S22*DCONJG(S12)
-      Z33=S11*DCONJG(S22)+S12*DCONJG(S21)
-      Z34=(0D0,-1D0)*(S11*DCONJG(S22)+S21*DCONJG(S12))
-      Z41=(0D0,1D0)*(S21*DCONJG(S11)+S22*DCONJG(S12))
-      Z42=(0D0,1D0)*(S21*DCONJG(S11)-S22*DCONJG(S12))
-      Z43=(0D0,-1D0)*(S22*DCONJG(S11)-S12*DCONJG(S21))
-      Z44=S22*DCONJG(S11)-S12*DCONJG(S21)
+      Z11=0.5D0*(S11*conjg(S11)+S12*conjg(S12)
+     &          +S21*conjg(S21)+S22*conjg(S22))
+      Z12=0.5D0*(S11*conjg(S11)-S12*conjg(S12)
+     &          +S21*conjg(S21)-S22*conjg(S22))
+      Z13=-S11*conjg(S12)-S22*conjg(S21)
+      Z14=(0D0,1D0)*(S11*conjg(S12)-S22*conjg(S21))
+      Z21=0.5D0*(S11*conjg(S11)+S12*conjg(S12)
+     &          -S21*conjg(S21)-S22*conjg(S22))
+      Z22=0.5D0*(S11*conjg(S11)-S12*conjg(S12)
+     &          -S21*conjg(S21)+S22*conjg(S22))
+      Z23=-S11*conjg(S12)+S22*conjg(S21)
+      Z24=(0D0,1D0)*(S11*conjg(S12)+S22*conjg(S21))
+      Z31=-S11*conjg(S21)-S22*conjg(S12)
+      Z32=-S11*conjg(S21)+S22*conjg(S12)
+      Z33=S11*conjg(S22)+S12*conjg(S21)
+      Z34=(0D0,-1D0)*(S11*conjg(S22)+S21*conjg(S12))
+      Z41=(0D0,1D0)*(S21*conjg(S11)+S22*conjg(S12))
+      Z42=(0D0,1D0)*(S21*conjg(S11)-S22*conjg(S12))
+      Z43=(0D0,-1D0)*(S22*conjg(S11)-S12*conjg(S21))
+      Z44=S22*conjg(S11)-S12*conjg(S21)
 
 
       WRITE(NOUT+10,5001) Z11,Z12,Z13,Z14
@@ -2870,7 +2870,7 @@ C  PHASE MATRIX [Eqs. (13)-(29) of Ref. 6]
  5001 FORMAT (4F10.4)
 
 c      ITIME=MCLOCK()
-c      TIME=DFLOAT(ITIME)/6000D0
+c      TIME=dble(ITIME)/6000D0
 c      PRINT 1001,TIME
 c 1001 FORMAT (' time =',F8.2,' min')
 
@@ -3157,8 +3157,8 @@ C     (following Eq. (28))
       DO 5 NN=1,NMAX
          DO 5 N=1,NMAX
             CN=CI**(NN-N-1)
-            DNN=DFLOAT((2*N+1)*(2*NN+1))
-            DNN=DNN/DFLOAT( N*NN*(N+1)*(NN+1) )
+            DNN=dble((2*N+1)*(2*NN+1))
+            DNN=DNN/dble( N*NN*(N+1)*(NN+1) )
             RN=DSQRT(DNN)
             CAL(N,NN)=CN*RN
     5 CONTINUE
@@ -3283,16 +3283,16 @@ C      C_{ext} = (4\pi/k_1} \mb{Im} S_{22}    if E_\theta=0
 C
 C For particles with plane of symmetry:
 C Extiction for E along the axis of axial symmetry:
-      cext1=2.d0*dlam*dimag(VV)      !Eq. (2.159)
+      cext1=2.d0*dlam*aimag(VV)      !Eq. (2.159)
 
 C Extiction for E perpendicular to the axis of axial symmetry:
-      cext2=2.d0*dlam*dimag(HH)      !Eq. (2.159)
+      cext2=2.d0*dlam*aimag(HH)      !Eq. (2.159)
 
 C Orientationally averaged extiction
-      cext=dlam*dimag(VV+HH)         !Eq. (5.97)
+      cext=dlam*aimag(VV+HH)         !Eq. (5.97)
 
       write(6,*)'C_{ext}=\fr{2\pi}{k_1} Im (S_{11}+S_{22})=',
-     & cext               !=2.d0*PIN*dimag(VV+HH)/k_1
+     & cext               !=2.d0*PIN*aimag(VV+HH)/k_1
 
       write(10, *) lambda, cext1, cext2
 cc      FAC=lambda**2/(2.d0*PIN**2*REV**2)     !=2/xs**2
@@ -3301,10 +3301,10 @@ cc      FAC=lambda**2/(2.d0*PIN**2*REV**2)     !=2/xs**2
       write(nout+3,1107)lambda,fac*cext,fac*cext1,fac*cext2
       write(nout+12,1105) lambda, VV,VH
       write(nout+12,1105) lambda, HV,HH
-      write(nout+13,1106) lambda, dble(VV*dconjg(vv) + VH*dconjg(vh)),
-     &                               dble((vv+vh)*dconjg(vv+vh))
-      write(nout+14,1106) lambda, dble(hV*dconjg(hv) + hH*dconjg(hh)),
-     &                               dble((hv+hh)*dconjg(hv+hh))
+      write(nout+13,1106) lambda, dble(VV*conjg(vv) + VH*conjg(vh)),
+     &                               dble((vv+vh)*conjg(vv+vh))
+      write(nout+14,1106) lambda, dble(hV*conjg(hv) + hH*conjg(hh)),
+     &                               dble((hv+hh)*conjg(hv+hh))
 
 
  1101 FORMAT ('S11=',D11.5,' + i*',D11.5)
@@ -3444,8 +3444,8 @@ C     (following Eq. (28))
       DO 5 NN=1,NMAX
          DO 5 N=1,NMAX
             CN=CI**(NN-N-1)
-            DNN=DFLOAT((2*N+1)*(2*NN+1))
-            DNN=DNN/DFLOAT( N*NN*(N+1)*(NN+1) )
+            DNN=dble((2*N+1)*(2*NN+1))
+            DNN=DNN/dble( N*NN*(N+1)*(NN+1) )
             RN=DSQRT(DNN)
             CAL(N,NN)=CN*RN
     5 CONTINUE
@@ -3561,10 +3561,10 @@ C   amplitude scattering matrix elements S11,S12,S21,S22 determined
 
 * For particles with plane of symmetry:
 
-      cext=2.d0*PIN*dimag(VV+HH)/dlam       !Eq. (5.97)
+      cext=2.d0*PIN*aimag(VV+HH)/dlam       !Eq. (5.97)
 
       write(6,*)'C_{ext}= \fr{2\pi}{lambda} \mb{Im } (S_{11}+S_{22})=',
-     & cext               !=2.d0*PIN*dimag(VV+HH)/lambda
+     & cext               !=2.d0*PIN*aimag(VV+HH)/lambda
 *
       if (ynmishch) then
       FAC=lambda**2/(2.d0*PIN**2*REV**2)     !=2/xs**2
@@ -3575,10 +3575,10 @@ C   amplitude scattering matrix elements S11,S12,S21,S22 determined
         write(nout+3,1105) lambda, fac*cext, cext
       write(nout+12,1105) lambda, VV,VH
       write(nout+12,1105) lambda, HV,HH
-      write(nout+13,1106) lambda, dble(VV*dconjg(vv) + VH*dconjg(vh)),
-     &                               dble((vv+vh)*dconjg(vv+vh))
-      write(nout+14,1106) lambda, dble(hV*dconjg(hv) + hH*dconjg(hh)),
-     &                               dble((hv+hh)*dconjg(hv+hh))
+      write(nout+13,1106) lambda, dble(VV*conjg(vv) + VH*conjg(vh)),
+     &                               dble((vv+vh)*conjg(vv+vh))
+      write(nout+14,1106) lambda, dble(hV*conjg(hv) + hH*conjg(hh)),
+     &                               dble((hv+hh)*conjg(hv+hh))
 
 
  1101 FORMAT ('S11=',D11.5,' + i*',D11.5)
@@ -3617,13 +3617,13 @@ C       by the value of variable LMX)
       DATA ci/(0.d0,1.d0)/,cone/(1.d0,0.d0)/
 C--------/---------/---------/---------/---------/---------/---------/--
 
-      z1=cmplx_dp(dble(sqrt(zx*dconjg(zx))),0.d0)
+      z1=cmplx_dp(dble(sqrt(zx*conjg(zx))),0.d0)
       cqepst=zx/z1
         xt=dble(z1)
 
-      if (imag(CQEPST).ne.0.d0) then
+      if (aimag(CQEPST).ne.0.d0) then
          call BIGA(CQEPST,xt,LMX,.false.,.false.,dr1(1))
-      else if (imag(CQEPST).eq.0.d0) then
+      else if (aimag(CQEPST).eq.0.d0) then
          call BIGA(CQEPST,xt,LMX,.true.,.false.,dr1(1))
       end if
 
@@ -3821,8 +3821,8 @@ cd      read(5,*) zelinc(2)
 * Phi component- per definition perpendicular to the meridional plane
         zelinc(2)=sin(xx)
 *
-      xelinv=sqrt(dble( zelinc(1)*dconjg(zelinc(1))+
-     1      zelinc(2)*dconjg(zelinc(2)) ) )
+      xelinv=sqrt(dble( zelinc(1)*conjg(zelinc(1))+
+     1      zelinc(2)*conjg(zelinc(2)) ) )
 *
       thetv=thetv*pi/180.d0       !Theta angle of incidence (in radians)
       xx=cos(thetv)
@@ -3871,7 +3871,7 @@ cc      read(5,*) thet
 
         END IF
 *
-      zpifac=zexp(ci*phi)
+      zpifac=exp(ci*phi)
         omega=2.d0*pi*rsnm/lambda   !size parameter
 *
         write(nout,*)  '#In radians: Phi_inc=0, Phi_out=', phi
@@ -4168,7 +4168,7 @@ cc      zmpifac=zpifac**m        !zpifac=zexp(ci*phi) here
 
          do ij=1,3
 
-      if (rmff.gt.1.d0) aint=aint+zeinc(ij,ip)*dconjg(zeinc(ij,ip))
+      if (rmff.gt.1.d0) aint=aint+zeinc(ij,ip)*conjg(zeinc(ij,ip))
 
          if (j.eq.lcs1) then
            zint(ij)=zeinc(ij,ip)+zescat(ij,ip)
@@ -4176,7 +4176,7 @@ cc      zmpifac=zpifac**m        !zpifac=zexp(ci*phi) here
            zint(ij)=zescat(ij,ip)
          end if
 
-         xint=xint + zint(ij)*dconjg(zint(ij))
+         xint=xint + zint(ij)*conjg(zint(ij))
 
          enddo              !ij-loop
 
@@ -4211,15 +4211,15 @@ C--------/---------/---------/---------/---------/---------/---------/--
 
       write(nout,1000)   x(i),r(i),xint
       write(nout+1,1010) x(i),r(i),
-     1 sqrt(dble(zint(1)*dconjg(zint(1)))),
-     2 sqrt(dble(zint(2)*dconjg(zint(2)))),
-     3 sqrt(dble(zint(3)*dconjg(zint(3))))
-* sqrt(dble(zint*dconjg(zint)))
+     1 sqrt(dble(zint(1)*conjg(zint(1)))),
+     2 sqrt(dble(zint(2)*conjg(zint(2)))),
+     3 sqrt(dble(zint(3)*conjg(zint(3))))
+* sqrt(dble(zint*conjg(zint)))
 * (1),zint(2),zint(3)
       write(nout+2,1010) x(i),r(i),
-     1 sqrt(dble(zescat(1,1)*dconjg(zescat(1,1)))),
-     2 sqrt(dble(zescat(2,1)*dconjg(zescat(2,1)))),
-     3 sqrt(dble(zescat(3,1)*dconjg(zescat(3,1))))
+     1 sqrt(dble(zescat(1,1)*conjg(zescat(1,1)))),
+     2 sqrt(dble(zescat(2,1)*conjg(zescat(2,1)))),
+     3 sqrt(dble(zescat(3,1)*conjg(zescat(3,1))))
 * (1),zescat(2),zescat(3)
 
 
@@ -4468,9 +4468,9 @@ C--------/---------/---------/---------/---------/---------/---------/--
       D2=X                     !d^1_{00}=P_1=x
 
       DO 5 N=1,LMAX
-         QN=DFLOAT(N)
-         QN1=DFLOAT(N+1)
-         QN2=DFLOAT(2*N+1)
+         QN=dble(N)
+         QN1=dble(N+1)
+         QN2=dble(2*N+1)
          D3=(QN2*X*D2-QN*D1)/QN1       !recurrence (31) of Ref. {Mis39} for d^{N+1}_{00}
          DV1(N)=D2                     !d^N_{00}
          D1=D2                         !becomes d^{N-1}_{00} in D3
@@ -4487,7 +4487,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
    20 CONTINUE
       DO 25 I=1,M
          I2=I*2
-         A=A*DSQRT(DFLOAT(I2-1)/DFLOAT(I2))*QS  !recurrence (33,34) of Ref. {Mis39} f
+         A=A*DSQRT(dble(I2-1)/dble(I2))*QS  !recurrence (33,34) of Ref. {Mis39} f
    25 CONTINUE
 
 *
@@ -4495,12 +4495,12 @@ C--------/---------/---------/---------/---------/---------/---------/--
 
       D1=0.D0                 !=DV1(M-1); see Eq. (32) of Ref. {Mis39}
       D2=A                    !=DV1(M);   see Eq. (33) of Ref. {Mis39}
-      QMM=DFLOAT(M*M)
+      QMM=dble(M*M)
 *
       DO 30 N=M,LMAX
-         QN=DFLOAT(N)
-         QN1=DFLOAT(N+1)
-         QN2=DFLOAT(2*N+1)
+         QN=dble(N)
+         QN1=dble(N+1)
+         QN2=dble(2*N+1)
          QNM=DSQRT(QN*QN-QMM)
          QNM1=DSQRT(QN1*QN1-QMM)
          D3=(QN2*X*D2-QNM*D1)/QNM1    !recurrence (31) of Ref. {Mis39} for d^{N+1}_{0M}
@@ -4613,7 +4613,7 @@ C
 cv  100 IF (M.NE.1) RETURN
 cv
 cv      DO 110 N=1,LMAX
-cv         DN=DFLOAT(N*(N+1))
+cv         DN=dble(N*(N+1))
 cv         DN=0.5D0*DSQRT(DN)
 cv         IF (X.LT.0D0) DN=DN*(-1)**(N+1)
 cv         DV1(N)=DN
@@ -4654,9 +4654,9 @@ C--------/---------/---------/---------/---------/---------/---------/--
       D1=1D0
       D2=X
       DO 5 N=1,LMAX
-         QN=DFLOAT(N)
-         QN1=DFLOAT(N+1)
-         QN2=DFLOAT(2*N+1)
+         QN=dble(N)
+         QN1=dble(N+1)
+         QN2=dble(2*N+1)
          D3=(QN2*X*D2-QN*D1)/QN1
          DER=QS1*(QN1*QN/QN2)*(-D1+D3)
          DV1(N)=D2*DSI
@@ -4665,17 +4665,17 @@ C--------/---------/---------/---------/---------/---------/---------/--
          D2=D3
     5 CONTINUE
       RETURN
-   20 QMM=DFLOAT(M*M)
+   20 QMM=dble(M*M)
       DO 25 I=1,M
          I2=I*2
-         A=A*DSQRT(DFLOAT(I2-1)/DFLOAT(I2))*QS
+         A=A*DSQRT(dble(I2-1)/dble(I2))*QS
    25 CONTINUE
       D1=0D0
       D2=A
       DO 30 N=M,LMAX
-         QN=DFLOAT(N)
-         QN2=DFLOAT(2*N+1)
-         QN1=DFLOAT(N+1)
+         QN=dble(N)
+         QN2=dble(2*N+1)
+         QN1=dble(N+1)
          QNM=DSQRT(QN*QN-QMM)
          QNM1=DSQRT(QN1*QN1-QMM)
          D3=(QN2*X*D2-QNM*D1)/QNM1
@@ -4688,7 +4688,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       RETURN
   100 IF (M.NE.1) RETURN
       DO 110 N=1,LMAX
-         DN=DFLOAT(N*(N+1))
+         DN=dble(N*(N+1))
          DN=0.5D0*DSQRT(DN)
          IF (X.LT.0D0) DN=DN*(-1)**(N+1)
          DV1(N)=DN
@@ -4909,7 +4909,7 @@ C      in this example, theta=0,10,20...180 degrees
       NTOPE=7
       NC=1
       DO N=1,NTOPE
-            ANG(N)=DFLOAT(N-1)*180.0d0/dfloat(ntope-1)
+            ANG(N)=dble(N-1)*180.0d0/dble(ntope-1)
             ANG(N)=ANG(N)*PG
       END DO
 *
@@ -5103,7 +5103,7 @@ C      I suggest JOSA A 8, 871-882 (from now on, JOSA) for a clearer picture
 C      Calculation of Ann'n1 (JOSA, Eqs. 4.18)
 *
       do n=0,n2max+n2max
-          db(n+1)=dfloat(n+n+1)
+          db(n+1)=dble(n+n+1)
       end do
 *
       DO 303 N=1,N2MAX                !always >= 1
@@ -5189,12 +5189,12 @@ C      Calculation of Dmnnso (JOSA, Eqs. 4.29-4.33)
       if(BX1(N,N1,M+N2MAX+1).ne.0.and.BX1(NSO,N1,M+N2MAX+1).ne.0)
      & then
             ax1(N,NSO,M+N2MAX+1)=ax1(N,NSO,M+N2MAX+1)+DB(N1+1)*
-     *            BX1(N,N1,M+N2MAX+1)*DCONJG(BX1(NSO,N1,M+N2MAX+1))
+     *            BX1(N,N1,M+N2MAX+1)*conjg(BX1(NSO,N1,M+N2MAX+1))
             end if
       if(BX2(N,N1,M+N2MAX+1).ne.0.and.BX2(NSO,N1,M+N2MAX+1).ne.0)
      &      then
             ax2(N,NSO,M+N2MAX+1)=ax2(N,NSO,M+N2MAX+1)+DB(N1+1)*
-     *            BX2(N,N1,M+N2MAX+1)*DCONJG(BX2(NSO,N1,M+N2MAX+1))
+     *            BX2(N,N1,M+N2MAX+1)*conjg(BX2(NSO,N1,M+N2MAX+1))
             end if
 *
  341  CONTINUE
@@ -5209,15 +5209,15 @@ C      Calculation of Dmnnso (JOSA, Eqs. 4.29-4.33)
       if(BX1(N,N1,M+N2MAX+1).ne.0.and.BX1(NSO,N1,2-M+N2MAX+1).ne.0)
      &      then
             D3(N,NSO,M+N2MAX+1)=D3(N,NSO,M+N2MAX+1)+DB(N1+1)*
-     *               BX1(N,N1,M+N2MAX+1)*DCONJG(BX1(NSO,N1,2-M+N2MAX+1))
+     *               BX1(N,N1,M+N2MAX+1)*conjg(BX1(NSO,N1,2-M+N2MAX+1))
             end if
             if(BX2(N,N1,M+N2MAX+1).ne.0) then
             if(BX2(NSO,N1,2-M+N2MAX+1).ne.0) then
       D4(N,NSO,M+N2MAX+1)=D4(N,NSO,M+N2MAX+1)+DB(N1+1)*
-     *               BX2(N,N1,M+N2MAX+1)*DCONJG(BX2(NSO,N1,2-M+N2MAX+1))
+     *               BX2(N,N1,M+N2MAX+1)*conjg(BX2(NSO,N1,2-M+N2MAX+1))
       if(BX1(NSO,N1,2-M+N2MAX+1).ne.0) then
       D5(N,NSO,M+N2MAX+1)=D5(N,NSO,M+N2MAX+1)+DB(N1+1)*
-     *         BX2(N,N1,M+N2MAX+1)*DCONJG(BX1(NSO,N1,2-M+N2MAX+1))
+     *         BX2(N,N1,M+N2MAX+1)*conjg(BX1(NSO,N1,2-M+N2MAX+1))
       end if
       end if
       end if
@@ -5318,12 +5318,12 @@ C      D4 and D5 are stored as D1 and D2, to save memory
 390      CONTINUE
 400      CONTINUE
 *
-      AP1(S+1)=DREAL(G1(S+1)+G2(S+1))
-      AP2(S+1)=DREAL(G3(S+1)+G4(S+1))
-      AP3(S+1)=DREAL(G3(S+1)-G4(S+1))
-      AP4(S+1)=DREAL(G1(S+1)-G2(S+1))
-      BP1(S+1)=2.0D0*DREAL(G5(S+1))
-      BP2(S+1)=2.0D0*IMAG(G5(S+1))
+      AP1(S+1)=dble(G1(S+1)+G2(S+1))
+      AP2(S+1)=dble(G3(S+1)+G4(S+1))
+      AP3(S+1)=dble(G3(S+1)-G4(S+1))
+      AP4(S+1)=dble(G1(S+1)-G2(S+1))
+      BP1(S+1)=2.0D0*dble(G5(S+1))
+      BP2(S+1)=2.0D0*aIMAG(G5(S+1))
       XM=ABS(AP1(S+1))
 
       IF(ABS(AP2(S+1)).GT.XM) XM=ABS(AP2(S+1))
@@ -5534,7 +5534,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       PARAMETER (SU=50,SUP=0,ST=SU+SUP,ST1=ST+1,ST2=ST+ST)
       real(dp) CBX,CEXT,CSCA,K1,K2,K3,K4,K5,K6,DELTA,C1(2),C2(2),EPS
       complex(dp) ZKE,MR,CCX,T(ST2,ST2,ST1),T1(ST2,ST2,ST1)
-      INTEGER*4 ADHOC,I,J,NOCON
+      INTEGER ADHOC,I,J,NOCON
       INTEGER NMAX,N1MAX,N2MAX,NGAUSS,ML,CA,N1MAX2,NDGS
       EXTERNAL TNATURAL
       COMMON/CADOS/N1MAX2     !enters as N1MAX for CA=2
@@ -5636,7 +5636,7 @@ C      We will again suppose m=0
          END DO
          CCX=CCX+T(I,I,1)+T(I+NMAX,I+NMAX,1)
       END DO
-      C1(2)=-DREAL(CCX)
+      C1(2)=-dble(CCX)
       C2(2)=CBX
 50      N2MAX=N2MAX+1
 C      If N2MAX=N1MAX, it means we need all T-matrix elements; well...
@@ -5650,7 +5650,7 @@ C      If N2MAX=N1MAX, it means we need all T-matrix elements; well...
          END DO
          CCX=CCX+T(I,I,1)+T(I+NMAX,I+NMAX,1)
       END DO
-      C1(2)=-DREAL(CCX)
+      C1(2)=-dble(CCX)
       C2(2)=CBX
       K1=ABS(1-C1(2)/CEXT)
       K2=ABS(1-C2(2)/CSCA)
@@ -5830,8 +5830,8 @@ C      For the cases of plane-symmetric particles, NCHECK=1, otherwise NCHECK=0
 
 C      Now, let's calculate n and n*(n+1) in hight-precision
       DO I=1,NMAX+1
-            D(I)=DFLOAT(I)
-            drp(I)=DFLOAT(I)*DFLOAT(I+1)
+            D(I)=dble(I)
+            drp(I)=dble(I)*dble(I+1)
             if(I.NE.0) GM(I)=SQRT((2.0D0*D(I)+1.0D0)/drp(I))
       END DO
 
@@ -5979,8 +5979,8 @@ C      of i,j so that we only calculate nonzero matrix elements
       DO I=NMIN,NMAX                 !NMIN=MAX(1,M)
             ZIZ(I)=HA(I+1)*WTSEN
             ZIA(I)=HA(I)/HA(I+1)
-            ZJZ(I)=JL(I)*WTSEN           !orig. DREAL(ZIZ(I))
-            ZJA(I)=JL(I-1)/JL(I)         !orig. DREAL(HA(I))/DREAL(HA(I+1))
+            ZJZ(I)=JL(I)*WTSEN           !orig. dble(ZIZ(I))
+            ZJA(I)=JL(I-1)/JL(I)         !orig. dble(HA(I))/dble(HA(I+1))
             ZIB(I)=MR*BC(I)/BC(I+1)
             ZKA(I)=ZJA(I)-ZIA(I)
             ZWIG2(I)=WIG(I+1)*drp(I)*ZDESEN            !real(dp) WIG2 is complex(dp) now
@@ -6339,7 +6339,7 @@ C     orientation distribution:
 *
       CONTINUE
 *
-      CEXT=-DREAL(CCX)
+      CEXT=-dble(CCX)
 *
 C      If you want Cross Sections, multiply CEXT, CSCA by 2*pi/(k*k)
 C      where k = 2*pi/wavelength
@@ -6369,9 +6369,9 @@ C      M=0
         WIG(1)=1.0D0
         WIG(2)=COSTH
         DO TI=2,NMAX
-            WIG(TI+1)=(DFLOAT(TI+TI)-1.0D0)*COSTH*WIG(TI)
-            WIG(TI+1)=WIG(TI+1)-(DFLOAT(TI)-1.0D0)*WIG(TI-1)
-            WIG(TI+1)=WIG(TI+1)/(DFLOAT(TI))
+            WIG(TI+1)=(dble(TI+TI)-1.0D0)*COSTH*WIG(TI)
+            WIG(TI+1)=WIG(TI+1)-(dble(TI)-1.0D0)*WIG(TI-1)
+            WIG(TI+1)=WIG(TI+1)/(dble(TI))
         END DO
         RETURN
 C      M<>0
@@ -6380,14 +6380,14 @@ C      M<>0
         IF(MOD(M,2).NE.0) WIG(M+1)=-WIG(M+1)
       DO TI=0,M-1
           WIG(TI+1)=0.0D0
-          WIG(M+1)=WIG(M+1)*SENTH*DSQRT(DFLOAT(TI+1)*DFLOAT(M+TI+1))
-        WIG(M+1)=WIG(M+1)/(2.0D0*DFLOAT(TI+1))
+          WIG(M+1)=WIG(M+1)*SENTH*DSQRT(dble(TI+1)*dble(M+TI+1))
+        WIG(M+1)=WIG(M+1)/(2.0D0*dble(TI+1))
       END DO
       DO TI=M+1,NMAX
-       WIG(TI+1)=DFLOAT(TI+TI-1)*COSTH*WIG(TI)
+       WIG(TI+1)=dble(TI+TI-1)*COSTH*WIG(TI)
        WIG(TI+1)=WIG(TI+1)
-     &      -DSQRT(DFLOAT((TI-1)*(TI-1)-M*M))*WIG(TI-1)
-      WIG(TI+1)=WIG(TI+1)/DSQRT(DFLOAT(TI*TI-M*M))
+     &      -DSQRT(dble((TI-1)*(TI-1)-M*M))*WIG(TI-1)
+      WIG(TI+1)=WIG(TI+1)/DSQRT(dble(TI*TI-M*M))
       END DO
       RETURN
       END IF
@@ -6436,7 +6436,7 @@ C      your code might fall into an endless loop!
      & NGAUSS=', NGAUSS
       END IF
 *
-      CN=DFLOAT(NGAUSS)
+      CN=dble(NGAUSS)
       NDIV2=NGAUSS/2
       NP1=NGAUSS+1
       CNN1=CN*(CN+1.0D0)
@@ -6444,7 +6444,7 @@ C      your code might fall into an endless loop!
       CON1=0.5D0*PI
       CON2=0.5D0*PI
       do in=2,ngauss
-            rn=dfloat(in)
+            rn=dble(in)
             rn2(in)=(rn-1.0d0)/rn     !=(in-1)/in
             rn1(in)=rn2(in)+1.0d0     !=(2*in-1)/in
       end do
@@ -6452,7 +6452,7 @@ C      your code might fall into an endless loop!
 *
 *
       DO 1030 K=1,NDIV2
-         B=(DFLOAT(K)-0.25D0)*PI
+         B=(dble(K)-0.25D0)*PI
          BISQ=1.0D0/(B*B)          !Bisq is a first approximation to Rx
 *
          BFROOT=B*(1.0D0+BISQ*(C1+BISQ*(C2+BISQ*(C3+C4*BISQ))))
@@ -6462,7 +6462,7 @@ C      your code might fall into an endless loop!
          PM1=X
 *
             DO 1020 IN=2,NGAUSS
-             RN=DFLOAT(IN)
+             RN=dble(IN)
                P=((2.0D0*RN-1.0D0)*X*PM1-(RN-1.0D0)*PM2)/RN
                PM2=PM1
                PM1=P
@@ -6485,7 +6485,7 @@ C      So just to play in the safe side...
          PM1=X
          PMP1=1.0D0
             DO IN=2,NGAUSS
-                  RN=DFLOAT(IN)
+                  RN=dble(IN)
                   P=RN1(IN)*X*PM1-RN2(IN)*PM2
                   PM2=PM1
                   PM1=P
@@ -6514,7 +6514,7 @@ C      This works better at the endpoints
       NM2=NGAUSS-2
       PROD=CN
       DO 1040 K=1,NM2,2
-             PROD=PROD*DFLOAT(NM1-K)/DFLOAT(NGAUSS-K)
+             PROD=PROD*dble(NM1-K)/dble(NGAUSS-K)
  1040 CONTINUE
       RW(NDIV2+1)=2.0D0/(PROD*PROD)
       END IF
@@ -6570,9 +6570,9 @@ C      Calculation of every possible CG value
       CMAX=CX(1)
       SC=CX(1)*CX(1)
       if(dn1.eq.0) go      to 100
-      dd2=dfloat(iaj*(iaj+1)-ibj*(ibj+1)+icj*(icj+1))
-      cc2=dfloat((iaj-iama+1)*(iaj+iama))
-      cc2=cc2*dfloat((icj-iama-ibm+1)*(icj+iama+ibm))
+      dd2=dble(iaj*(iaj+1)-ibj*(ibj+1)+icj*(icj+1))
+      cc2=dble((iaj-iama+1)*(iaj+iama))
+      cc2=cc2*dble((icj-iama-ibm+1)*(icj+iama+ibm))
       cc2=-sqrt(cc2)
 C      If there are not many CG to calculate, upward recurrence alone will do
 *
@@ -6585,15 +6585,15 @@ C      Upward recurrence
             icm=iam+ibm
             if(abs(icm).gt.icj) go to 8
             cc1=cc2
-            cc2=dfloat((iaj-iam+1)*(iaj+iam))
-            cc2=cc2*dfloat((icj-icm+1)*(icj+icm))
+            cc2=dble((iaj-iam+1)*(iaj+iam))
+            cc2=cc2*dble((icj-icm+1)*(icj+icm))
             cc2=-sqrt(cc2)
 c      C-G(iaj,iaj,icj/iam,iam,icm)=0 if icj=odd, so...
             if(iaj.eq.ibj.and.iam.eq.ibm.and.mod(icj,2).ne.0) then
                   CX(IAM-IAMIN+1)=0.0d0
                   go to 5
             end if
-            dd1=dd2-2.0d0*dfloat((iam-1)*(icm-1))
+            dd1=dd2-2.0d0*dble((iam-1)*(icm-1))
             CX(IAM-IAMIN+1)=-CX(IAM-IAMIN)*DD1/CC2
             if(dn1.eq.1) then
                   SC=SC+CX(IAM-IAMIN+1)*CX(IAM-IAMIN+1)
@@ -6637,15 +6637,15 @@ C      Downward recurrence
       IAMA=IAMEDIO
       iamb=iamax
       CX(IAMB-IAMIN+1)=1.0D0
-      cc1=dfloat((iaj-iamb)*(iaj+iamb+1))
-      cc1=cc1*dfloat((icj-iamb-ibm)*(icj+iamb+ibm+1))
+      cc1=dble((iaj-iamb)*(iaj+iamb+1))
+      cc1=cc1*dble((icj-iamb-ibm)*(icj+iamb+ibm+1))
       cc1=-sqrt(cc1)
       do iam=iamb-1,iama,-1
             icm=iam+ibm
             if(icm.gt.icj) go to 100
             cc2=cc1
-            cc1=dfloat((iaj-iam)*(iaj+iam+1))
-            cc1=cc1*dfloat((icj-icm)*(icj+icm+1))
+            cc1=dble((iaj-iam)*(iaj+iam+1))
+            cc1=cc1*dble((icj-icm)*(icj+icm+1))
             cc1=-sqrt(cc1)
 c      C-G(iaj,iaj,icj/iam,iam,icm)=0 if icj=odd, so...
       if(iaj.eq.ibj.and.iam.eq.ibm.and.mod(icj,2).ne.0) then
@@ -6653,7 +6653,7 @@ c      C-G(iaj,iaj,icj/iam,iam,icm)=0 if icj=odd, so...
             go to 18
       end if
             if(-icm.gt.icj) go to 18
-            dd1=dd2-2.0d0*dfloat((iam+1)*(icm+1))
+            dd1=dd2-2.0d0*dble((iam+1)*(icm+1))
             CX(IAM-IAMIN+1)=-CX(IAM-IAMIN+2)*DD1/CC1
             if(iam.eq.(iamb-1)) go to 18
             CX(IAM-IAMIN+1)=CX(IAM-IAMIN+1)-CX(IAM-IAMIN+3)*CC2/CC1
@@ -6666,7 +6666,7 @@ C      Now, rescaling
       end do
 C      Here's where the combined (upward+downward) recurrence ends
   100 CONTINUE
-      SC=(dfloat(2*ICJ+1)/dfloat(2*IBJ+1))/SC
+      SC=(dble(2*ICJ+1)/dble(2*IBJ+1))/SC
         SC=SQRT(SC)
 C      Now, let's set the sign for SC
       if(cx(iamax-iamin+1).ne.abs(cx(iamax-iamin+1))) SC=-SC
@@ -6705,10 +6705,11 @@ C      (At^-1)*Bt = (B*(A^-1))t = -Tt
 C      This is a tailored adaptation of the ZGESV (=ZGETRF+ZGETRS)
 C      subroutine from the LAPACK package
 C--------/---------/---------/---------/---------/---------/---------/--
+      use libcylinder
       implicit none
       INTEGER SU,SUP,ST2                                !,ST3
       PARAMETER (SU=50,SUP=0,ST2=SU+SU+SUP+SUP)
-      DOUBLE COMPLEX a(ST2,ST2),b(ST2,ST2),uno,cero,ztemp
+      COMPLEX(dp) a(ST2,ST2),b(ST2,ST2),uno,cero,ztemp
       DOUBLE PRECISION SMAX
       INTEGER IPIV(ST2),I,J,K,LL,IMAX,JP,INFO,IP,NT,NQ,ca,ml,m
       uno=(1.0d+0,0.0d+0)
@@ -6732,11 +6733,11 @@ C      Sub-subroutine IZAMAX to get the value of i such that a(i,j)=max for a gi
             nt=nq-j+1
             imax=1
             if(nt.eq.1) go to 20
-                smax=cdabs(a(j,j))
+                smax=abs(a(j,j))
             do 10 i=2,nt
                   if(abs(a(j+i-1,j)).le.smax) go to 10
                   imax=i
-                  smax=cdabs(a(j+i-1,j))
+                  smax=abs(a(j+i-1,j))
   10        continue
   20        continue
             nt=nq-j
@@ -6986,7 +6987,7 @@ c >>>
       z1 = (3.d0*ff-1.d0)*zeps1+(2.d0 - 3.d0*ff)*zeps0
       z2 =  sqrt(z1*z1 + 8.d0*zeps1*zeps0)
 *
-       if (IMAG(z2).GE.0.0) then
+       if (aIMAG(z2).GE.0.0) then
          zeps1= (z1 + z2)/4.d0
        else
          zeps1= (z1 - z2)/4.d0
@@ -7432,8 +7433,8 @@ C********************************************************************
 *
 * Under normal circumstances, Im. part of a phase shift \geq 0 !!!)
 *
-      if(dimag(alpha(j)).lt.0.d0) then
-      write(6,*)'dimag(alpha(j))=',dimag(alpha(j)) ,' is negative'
+      if(aimag(alpha(j)).lt.0.d0) then
+      write(6,*)'aimag(alpha(j))=',aimag(alpha(j)) ,' is negative'
       write(6,*)'omega, j=', omega, j
       stop
       end if
@@ -7445,8 +7446,8 @@ c      write(6,*)'j, alpha(j)=', j, alpha(j)
 *
 * Under normal circumstances, Im. part of a phase shift \geq 0 !!!)
 *
-      if(dimag(beta(j)).lt.0.d0) then
-      write(6,*)'dimag(alpha(j))=',dimag(beta(j)) ,' is negative'
+      if(aimag(beta(j)).lt.0.d0) then
+      write(6,*)'aimag(alpha(j))=',aimag(beta(j)) ,' is negative'
       write(6,*)'omega, j=', omega, j
       stop
       end if
@@ -7579,7 +7580,7 @@ C ::: number of the output unit for cross sections and scattering matrix
      &  - ci*2.d0*xk**3*zalph(1)/3.d0)
 
       do ij=1,6
-        sext(ij)=4.d0*pi*xk*imag(zalph(ij))/xcr    ! extinction cross section
+        sext(ij)=4.d0*pi*xk*aimag(zalph(ij))/xcr    ! extinction cross section
 *
 * xcr=pi*rev**2 - an effective geom. cross section
 
@@ -8042,7 +8043,7 @@ cc      COMMON /CT/ TR1,TI1                      !output from TT routine
       COMMON /CTT/ QR,QI,RGQR,RGQI             !input for TT routine
 *________
       MM1=M
-      QM=DFLOAT(M)
+      QM=dble(M)
       QMM=QM*QM
       NG=2*NGAUSS
       NM=NMAX+NMAX
@@ -8571,9 +8572,9 @@ C--------/---------/---------/---------/---------/---------/---------/--
       D2=X                     !d^1_{00}=P_1=x
 
       DO 5 N=1,LMAX
-         QN=DFLOAT(N)
-         QN1=DFLOAT(N+1)
-         QN2=DFLOAT(2*N+1)
+         QN=dble(N)
+         QN1=dble(N+1)
+         QN2=dble(2*N+1)
          D3=(QN2*X*D2-QN*D1)/QN1       !recurrence (31) of Ref. {Mis39} for d^{N+1}_{00}
          DV1(N)=D2                     !d^N_{00}
          D1=D2                         !becomes d^{N-1}_{00} in D3
@@ -8589,7 +8590,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
    20 CONTINUE
       DO 25 I=1,M
          I2=I*2
-         A=A*DSQRT(DFLOAT(I2-1)/DFLOAT(I2))*QS  !recurrence (33,34) of Ref. {Mis39} f
+         A=A*DSQRT(dble(I2-1)/dble(I2))*QS  !recurrence (33,34) of Ref. {Mis39} f
    25 CONTINUE
 
 *
@@ -8597,12 +8598,12 @@ C--------/---------/---------/---------/---------/---------/---------/--
 
       D1=0.D0                 !=DV1(M-1); see Eq. (32) of Ref. {Mis39}
       D2=A                    !=DV1(M);   see Eq. (33) of Ref. {Mis39}
-      QMM=DFLOAT(M*M)
+      QMM=dble(M*M)
 *
       DO 30 N=M,LMAX
-         QN=DFLOAT(N)
-         QN1=DFLOAT(N+1)
-         QN2=DFLOAT(2*N+1)
+         QN=dble(N)
+         QN1=dble(N+1)
+         QN2=dble(2*N+1)
          QNM=DSQRT(QN*QN-QMM)
          QNM1=DSQRT(QN1*QN1-QMM)
          D3=(QN2*X*D2-QNM*D1)/QNM1             !recurrence (31) of Ref. {Mis39} for d^{N+1}_{0M}
@@ -8714,7 +8715,7 @@ C
 cv  100 IF (M.NE.1) RETURN
 cv
 cv      DO 110 N=1,LMAX
-cv         DN=DFLOAT(N*(N+1))
+cv         DN=dble(N*(N+1))
 cv         DN=0.5D0*DSQRT(DN)
 cv         IF (X.LT.0D0) DN=DN*(-1)**(N+1)
 cv         DV1(N)=DN
@@ -8800,12 +8801,12 @@ C (C) Copr. 10/2005  Alexander Moroz
       real(dp) xxs,xas,ar1,ar2,pi
       DATA PI/3.141592653589793d0/
 
-      if (dimag(zs).eq.0.) then
+      if (aimag(zs).eq.0.) then
         zartan=cmplx_dp(atan(dble(zs)),0.d0)
       return
       end if
          xas=abs(zs)**2
-      ar1=log((1.d0+xas-2.d0*dimag(zs))/(1.d0+xas+2.d0*dimag(zs)))/2.d0
+      ar1=log((1.d0+xas-2.d0*aimag(zs))/(1.d0+xas+2.d0*aimag(zs)))/2.d0
          xxs=dble(zs)
 * special case:
          if(xas.eq.1.) then
