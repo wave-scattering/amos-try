@@ -15,9 +15,6 @@ ADD_EXECUTABLE(${PROJECTNAME}
         tmtaxsp1.f
         "axspartclnew4.f"
         gnzbess.f
-        #bess.f # TODO use amos lib
-        bessik.f # TODO use amos lib
-        bessjy.f # TODO use amos lib
         biga.f
         chebev.f # TODO replace with non NR
         gnricbessh.f

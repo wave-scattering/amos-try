@@ -1,5 +1,5 @@
       SUBROUTINE gnzbess(omega,lmax,jl,djl,nl,dnl)
-
+!     2019/10/23 Removed bessjy and bessik dependance
 *   Variables declared but never referenced:
 *        CRY1              CRYMU             
 *   Variables used before set:
