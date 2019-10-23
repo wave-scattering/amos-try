@@ -80,7 +80,7 @@ c      PARAMETER (LMX=82)
       real(dp) cyr(lmx+1),cyi(lmx+1)
 c      character*1 yesn
 
-      ei=dcmplx(0.d0,1.d0)
+      ei=cmplx_dp(0.d0,1.d0)
       zi=dimag(omega)
       zr=dble(omega)
 
@@ -94,7 +94,7 @@ c      character*1 yesn
       end if 
 
       go to 200
- 200  czi=dcmplx(1.d0,0.d0)/omega
+ 200  czi=cmplx_dp(1.d0,0.d0)/omega
       cpib2z=sqrt(czi)*sqrt(pi/2.d0)
 
 *                  >>>  ASYMPTOTIC   PART  <<<
@@ -128,14 +128,14 @@ C--------/---------/---------/---------/---------/---------/---------/--
       stop
       end if 
 
-      JL(LMAX)=cpib2z*dcmplx(cyr(LMAX+1),cyi(LMAX+1))
-      JL(LMAX-1)=cpib2z*dcmplx(cyr(LMAX),cyi(LMAX))
+      JL(LMAX)=cpib2z*cmplx_dp(cyr(LMAX+1),cyi(LMAX+1))
+      JL(LMAX-1)=cpib2z*cmplx_dp(cyr(LMAX),cyi(LMAX))
 * (10.1.21) of AS:
       DJL(LMAX)=JL(LMAX-1)-dble(lmax+1)*JL(LMAX)*czi
 *  
       do i=1,lmax
         xnu=dble(lmax-i+2)
-        JL(LMAX-i)=cpib2z*dcmplx(cyr(LMAX-i+1),cyi(LMAX-i+1))
+        JL(LMAX-i)=cpib2z*cmplx_dp(cyr(LMAX-i+1),cyi(LMAX-i+1))
         xnu=xnu-2.d0
 * (10.1.22) of AS:
         DJL(LMAX-i)=JL(LMAX-i)*xnu*czi-JL(LMAX+1-i)       

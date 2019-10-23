@@ -262,11 +262,11 @@ C    TMT(4,*)=-TMT(3,*)^t where t denotes transposed TMT(3,*) submatrix
             TMT(2,JA,JB)=CZERO
             TMT(1,JA,JB)=CZERO  
 		else                                         
-            TMT(2,JA,JB)=DCMPLX(TR1(L1,L2),TI1(L1,L2))
-            TMT(1,JA,JB)=DCMPLX(TR1(N1,N2),TI1(N1,N2))
+            TMT(2,JA,JB)=cmplx_dp(TR1(L1,L2),TI1(L1,L2))
+            TMT(1,JA,JB)=cmplx_dp(TR1(N1,N2),TI1(N1,N2))
 	    end if
 * see (5.37) of {MTL}:
-            TMT(4,JA,JB)=CZERO         !DCMPLX(TR1(N1,L2),TI1(N1,L2))
+            TMT(4,JA,JB)=CZERO         !cmplx_dp(TR1(N1,L2),TI1(N1,L2))
             TMT(3,JB,JA)=CZERO         !-TMT(4,JA,JB)  
                       
          ENDDO
@@ -306,9 +306,9 @@ C    TMT(4,*)=-TMT(3,*)^t where t denotes transposed TMT(3,*) submatrix
             TMT(1,JA,JB)  =CZERO  
             TMT(1,JAM,JBM)=CZERO
             else
-            TMT(2,JA,JB)   = DCMPLX(TR1(K1,K2),TI1(K1,K2))
+            TMT(2,JA,JB)   = cmplx_dp(TR1(K1,K2),TI1(K1,K2))
             TMT(2,JAM,JBM) = TMT(2,JA,JB)            
-            TMT(1,JA,JB)   = DCMPLX(TR1(KK1,KK2),TI1(KK1,KK2))
+            TMT(1,JA,JB)   = cmplx_dp(TR1(KK1,KK2),TI1(KK1,KK2))
             TMT(1,JAM,JBM) = TMT(1,JA,JB)
           end if
 
@@ -318,7 +318,7 @@ C    TMT(4,*)=-TMT(3,*)^t where t denotes transposed TMT(3,*) submatrix
             TMT(3,JA,JB)  =CZERO  
             TMT(3,JAM,JBM)=CZERO
             else
-            TMT(4,JA,JB)   = DCMPLX(TR1(KK1,K2),TI1(KK1,K2))
+            TMT(4,JA,JB)   = cmplx_dp(TR1(KK1,K2),TI1(KK1,K2))
             TMT(4,JAM,JBM) =-TMT(4,JA,JB)
             TMT(3,JB,JA)   =-TMT(4,JA,JB) 
             TMT(3,JBM,JAM) = TMT(4,JA,JB)    !=-TMT(3,JB,JA) 
@@ -584,15 +584,15 @@ C********************************************************************
 !           DO 400 N=NMIN,NMAX
 !              DV1N=DV1(N)         !changed from  M*DV1(NN)
 !              DV2N=DV2(N)
-!!              CT11=DCMPLX(TR11(M1,N,NN),TI11(M1,N,NN))
-!              CT22=DCMPLX(TR22(M1,N,NN),TI22(M1,N,NN))
+!!              CT11=cmplx_dp(TR11(M1,N,NN),TI11(M1,N,NN))
+!              CT22=cmplx_dp(TR22(M1,N,NN),TI22(M1,N,NN))
 !!              IF (M.EQ.0) THEN
 !!                 CN=CAL(N,NN)*DV2N*DV2NN
 !!                 VV=VV+CN*CT22
 !                 HH=HH+CN*CT11
 !!                ELSE
-!!                 CT12=DCMPLX(TR12(M1,N,NN),TI12(M1,N,NN))
-!                 CT21=DCMPLX(TR21(M1,N,NN),TI21(M1,N,NN))
+!!                 CT12=cmplx_dp(TR12(M1,N,NN),TI12(M1,N,NN))
+!                 CT21=cmplx_dp(TR21(M1,N,NN),TI21(M1,N,NN))
 !!                 CN1=CAL(N,NN)*FC
 !                 CN2=CAL(N,NN)*FS
 !!                 D11=DV1N*DV1NN
@@ -2898,7 +2898,7 @@ cc     *       A(NPN2,NPN2),C(NPN2,NPN2),D(NPN2,NPN2),E(NPN2,NPN2)
 
       DO I=1,NNMAX
        DO J=1,NNMAX
-          ZQ(I,J)=DCMPLX(QR(I,J),QI(I,J))
+          ZQ(I,J)=cmplx_dp(QR(I,J),QI(I,J))
        ENDDO
       ENDDO
 
@@ -2948,7 +2948,7 @@ C  Gaussian elimination             !NAG library not used
               DO K=1,NNMAX    !Initialization of the right-hand side ZB
                               !(a row vector) of the matrix equation ZX*ZQ=ZB
 
-              ZX(K)=DCMPLX(RGQR(I,K),RGQI(I,K))
+              ZX(K)=cmplx_dp(RGQR(I,K),RGQI(I,K))
               ENDDO
 !     call zgetrs_wrap(ZQ, ZX, IPIV)
       CALL ZSUR(ZQ,IPIV,ZX,NNMAX,NPN2,EMACH)  !Solving ZX*ZQ=ZB by

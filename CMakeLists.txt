@@ -47,7 +47,7 @@ add_subdirectory(errfun)
 #add_subdirectory(errfun_test)
 add_subdirectory(FiNeR)
 add_subdirectory(multem2orig)
-#add_subdirectory(cylinder2mod)
+add_subdirectory(cylinder2mod)
 #add_subdirectory(mishchenko_dp_fixed_particles)
 set(common "-std=f2008")
 
@@ -64,4 +64,4 @@ set(CMAKE_Fortran_FLAGS_DEBUG   "${common} ${warn} -Wunused-variable -Wimplicit-
 
 
 add_subdirectory(multem2mod)
-add_subdirectory(cylinder2mod)
+#add_subdirectory(cylinder2mod)

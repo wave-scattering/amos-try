@@ -2076,11 +2076,11 @@ C    TMT(4,*)=-TMT(3,*)^t where t denotes transposed TMT(3,*) sub-matrix
             TMT(2,JA,JB)=CZERO
             TMT(1,JA,JB)=CZERO
           else
-            TMT(2,JA,JB)=DCMPLX(TR1(L1,L2),TI1(L1,L2))
-            TMT(1,JA,JB)=DCMPLX(TR1(N1,N2),TI1(N1,N2))
+            TMT(2,JA,JB)=cmplx_dp(TR1(L1,L2),TI1(L1,L2))
+            TMT(1,JA,JB)=cmplx_dp(TR1(N1,N2),TI1(N1,N2))
           end if
 * see (5.37) of {MTL}:
-            TMT(4,JA,JB)=CZERO         !DCMPLX(TR1(N1,L2),TI1(N1,L2))
+            TMT(4,JA,JB)=CZERO         !cmplx_dp(TR1(N1,L2),TI1(N1,L2))
             TMT(3,JB,JA)=CZERO         !-TMT(4,JA,JB)
 
 cd      if (ja.eq.2) then
@@ -2131,9 +2131,9 @@ c     &               DDR,DRR,DRI,NMAX,NCHECK,NAXSM)
             TMT(1,JA,JB)  =CZERO
             TMT(1,JAM,JBM)=CZERO
           else
-            TMT(2,JA,JB)   = DCMPLX(TR1(K1,K2),TI1(K1,K2))
+            TMT(2,JA,JB)   = cmplx_dp(TR1(K1,K2),TI1(K1,K2))
             TMT(2,JAM,JBM) = TMT(2,JA,JB)
-            TMT(1,JA,JB)   = DCMPLX(TR1(KK1,KK2),TI1(KK1,KK2))
+            TMT(1,JA,JB)   = cmplx_dp(TR1(KK1,KK2),TI1(KK1,KK2))
             TMT(1,JAM,JBM) = TMT(1,JA,JB)
           end if
 
@@ -2143,7 +2143,7 @@ c     &               DDR,DRR,DRI,NMAX,NCHECK,NAXSM)
             TMT(3,JA,JB)  =CZERO
             TMT(3,JAM,JBM)=CZERO
           else
-            TMT(4,JA,JB)   = DCMPLX(TR1(KK1,K2),TI1(KK1,K2))
+            TMT(4,JA,JB)   = cmplx_dp(TR1(KK1,K2),TI1(KK1,K2))
             TMT(4,JAM,JBM) =-TMT(4,JA,JB)
             TMT(3,JB,JA)   =-TMT(4,JA,JB)
             TMT(3,JBM,JAM) = TMT(4,JA,JB)    !=-TMT(3,JB,JA)
@@ -2319,7 +2319,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
      *        DDR(NPNG2),DRR(NPNG2),DRI(NPNG2),ANN(NPN1,NPN1)
       real(dp) TR1(NPN2,NPN2),TI1(NPN2,NPN2)
 c      real(dp) XALPHA(300),XBETA(300),WALPHA(300),WBETA(300)
-      REAL*4
+      real(dp)
      &     RT11(NPN6,NPN4,NPN4),RT12(NPN6,NPN4,NPN4),
      &     RT21(NPN6,NPN4,NPN4),RT22(NPN6,NPN4,NPN4),
      &     IT11(NPN6,NPN4,NPN4),IT12(NPN6,NPN4,NPN4),
@@ -2924,7 +2924,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
      *       R(2,2),R1(2,2),C(3,2),CA,CB,CT,CP,CTP,CPP,CT1,CP1,
      *       CTP1,CPP1
       real(dp) DV1(NPN6),DV2(NPN6),DV01(NPN6),DV02(NPN6)
-      REAL*4
+      REAL(dp)
      &     TR11(NPN6,NPN4,NPN4),TR12(NPN6,NPN4,NPN4),
      &     TR21(NPN6,NPN4,NPN4),TR22(NPN6,NPN4,NPN4),
      &     TI11(NPN6,NPN4,NPN4),TI12(NPN6,NPN4,NPN4),
@@ -3197,8 +3197,8 @@ C Main summation loop:
                DV1N=DV1(N)           !\pi-functions
                DV2N=DV2(N)           !\tau-functions
 
-               CT11=DCMPLX(TR11(M1,N,NN),TI11(M1,N,NN))
-               CT22=DCMPLX(TR22(M1,N,NN),TI22(M1,N,NN))
+               CT11=cmplx_dp(TR11(M1,N,NN),TI11(M1,N,NN))
+               CT22=cmplx_dp(TR22(M1,N,NN),TI22(M1,N,NN))
 
                IF (M.EQ.0) THEN     !T^{21}=T^{12}=0 in particle frame
 
@@ -3209,8 +3209,8 @@ C Main summation loop:
 
                  ELSE   !T^{21}\neq T^{12}\neq 0
 
-                  CT12=DCMPLX(TR12(M1,N,NN),TI12(M1,N,NN))
-                  CT21=DCMPLX(TR21(M1,N,NN),TI21(M1,N,NN))
+                  CT12=cmplx_dp(TR12(M1,N,NN),TI12(M1,N,NN))
+                  CT21=cmplx_dp(TR21(M1,N,NN),TI21(M1,N,NN))
 
 * complete \alpha-factors (Eq. (28)) taking
 * into account w.r.t. summation over +/- m in particle frame:
@@ -3375,7 +3375,7 @@ C      IMPLICIT NONE
      & D21,D22
       real(dp) DV1(NPN6),DV2(NPN6),DV01(NPN6),DV02(NPN6)
 * Either Mischenko:
-      REAL*4
+      REAL(dp)
      &     TR11(NPN6,NPN4,NPN4),TR12(NPN6,NPN4,NPN4),
      &     TR21(NPN6,NPN4,NPN4),TR22(NPN6,NPN4,NPN4),
      &     TI11(NPN6,NPN4,NPN4),TI12(NPN6,NPN4,NPN4),
@@ -3486,8 +3486,8 @@ C Main summation loop:
 
          if (ynmishch) then
 * In Mischenko's  notation:
-               CT11=DCMPLX(TR11(M1,N,NN),TI11(M1,N,NN))
-               CT22=DCMPLX(TR22(M1,N,NN),TI22(M1,N,NN))
+               CT11=cmplx_dp(TR11(M1,N,NN),TI11(M1,N,NN))
+               CT22=cmplx_dp(TR22(M1,N,NN),TI22(M1,N,NN))
          else
 * In Barber's notation:
                CT11=CT(N,NN,M1)
@@ -3505,8 +3505,8 @@ C Main summation loop:
 
                   if (ynmishch) then
 * In Mischenko's  notation:
-                  CT12=DCMPLX(TR12(M1,N,NN),TI12(M1,N,NN))
-                  CT21=DCMPLX(TR21(M1,N,NN),TI21(M1,N,NN))
+                  CT12=cmplx_dp(TR12(M1,N,NN),TI12(M1,N,NN))
+                  CT21=cmplx_dp(TR21(M1,N,NN),TI21(M1,N,NN))
                   else
 * In Barber's notation:
                   CT12=CT(N,NN+NMAX,M1)
@@ -3617,7 +3617,7 @@ C       by the value of variable LMX)
       DATA ci/(0.d0,1.d0)/,cone/(1.d0,0.d0)/
 C--------/---------/---------/---------/---------/---------/---------/--
 
-      z1=dcmplx(dble(sqrt(zx*dconjg(zx))),0.d0)
+      z1=cmplx_dp(dble(sqrt(zx*dconjg(zx))),0.d0)
       cqepst=zx/z1
         xt=dble(z1)
 
@@ -4310,14 +4310,15 @@ C--------/---------/---------/---------/---------/---------/---------/--
       ilp=L*(L+1)+M        ! (l,m) index with (1-1)=1
 
       bpole(ilp,1)= czero                      !Eq. (3.5) of \ct{Mis91}
-      bpole(ilp,2)= dcmplx(dv2(l))
+      bpole(ilp,2)= dv2(l) ! TODO: was dcmplx(dv2(l))
       bpole(ilp,3)= ci*ddv1(l)
 
       cpole(ilp,1)= czero                      !Eq. (3.6) of \ct{Mis91}
       cpole(ilp,2)= ci*ddv1(l)
-      cpole(ilp,3)=-dcmplx(dv2(l))
+      cpole(ilp,3)=-(dv2(l)) !TODO: was -cmplx_dp(dv2(l))
 
-      ppole(ilp,1)= dcmplx(dv1(l))             !Eq. (3.7) of \ct{Mis91}
+! TODO: was      ppole(ilp,1)= cmplx_dp(dv1(l))             !Eq. (3.7) of \ct{Mis91}
+      ppole(ilp,1)= (dv1(l))             !Eq. (3.7) of \ct{Mis91}
       ppole(ilp,2)= czero
       ppole(ilp,3)= czero
 
@@ -4330,14 +4331,18 @@ C--------/---------/---------/---------/---------/---------/---------/--
       ilm=L*(L+1)-M        ! (l,-m) index with (1-1)=1
 
       bpole(ilm,1)=czero
-      bpole(ilm,2)=dcmplx(dv2(l))*(-1.d0)**m
+! TODO: was     bpole(ilm,2)=cmplx_dp(dv2(l))*(-1.d0)**m
+      bpole(ilm,2)=(dv2(l))*(-1.d0)**m
       bpole(ilm,3)=-ci*ddv1(l)*(-1.d0)**m
 
       cpole(ilm,1)=czero
       cpole(ilm,2)=-ci*ddv1(l)*(-1.d0)**m
-      cpole(ilm,3)=-dcmplx(dv2(l))*(-1.d0)**m
+! TODO: was
+!     cpole(ilm,3)=-cmplx_dp(dv2(l))*(-1.d0)**m
+!!     ppole(ilm,1)=cmplx_dp(dv1(l)*(-1.d0)**m)
+      cpole(ilm,3)=-(dv2(l))*(-1.d0)**m
 
-      ppole(ilm,1)=dcmplx(dv1(l)*(-1.d0)**m)
+      ppole(ilm,1)=(dv1(l)*(-1.d0)**m)
       ppole(ilm,2)=czero
       ppole(ilm,3)=czero
 
@@ -7262,10 +7267,10 @@ c       write(6,*)'Size parameter x=2*pi*rs*n_0/lambda=', xs
       ij1=1
 
       do l=1,lmax
-      AM(l)=dcmplx(1.d0,0.d0)
-      AE(l)=dcmplx(1.d0,0.d0)
-      BM(l)=dcmplx(0.d0,0.d0)
-      BE(l)=dcmplx(0.d0,0.d0)
+      AM(l)=cmplx_dp(1.d0,0.d0)
+      AE(l)=cmplx_dp(1.d0,0.d0)
+      BM(l)=cmplx_dp(0.d0,0.d0)
+      BE(l)=cmplx_dp(0.d0,0.d0)
       enddo
 
       else if (ynperfcon) then
@@ -8796,7 +8801,7 @@ C (C) Copr. 10/2005  Alexander Moroz
       DATA PI/3.141592653589793d0/
 
       if (dimag(zs).eq.0.) then
-        zartan=dcmplx(atan(dble(zs)),0.d0)
+        zartan=cmplx_dp(atan(dble(zs)),0.d0)
       return
       end if
          xas=abs(zs)**2
@@ -8809,18 +8814,18 @@ C (C) Copr. 10/2005  Alexander Moroz
            else if (xxs.lt.0.) then
             ar2=-pi/2.d0
            end if
-         zartan =dcmplx(ar2,- ar1)/2.d0
+         zartan =cmplx_dp(ar2,- ar1)/2.d0
          end if
 
 * remaining cases:
          ar2=2.d0*xxs/(1.d0-xas)
 
          if(xas.lt.1.d0)  then     ! 1st and 4th quadrant
-         zartan=dcmplx(atan(ar2),- ar1)/2.d0
+         zartan=cmplx_dp(atan(ar2),- ar1)/2.d0
          else if (xas.gt.1. .and. xxs.ge.0.) then       ! 2nd quadrant
-         zartan=dcmplx(pi+atan(ar2),- ar1)/2.d0
+         zartan=cmplx_dp(pi+atan(ar2),- ar1)/2.d0
          else if(xas.gt.1. .and. xxs.lt.0.) then        ! 3rd quadrant
-         zartan=dcmplx(-pi+atan(ar2),- ar1)/2.d0
+         zartan=cmplx_dp(-pi+atan(ar2),- ar1)/2.d0
          end if
        return
        end

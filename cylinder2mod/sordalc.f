@@ -15,13 +15,13 @@ C   Re eps = - \fr{\om_p^2}{\om^2+\om_\tau^2}
 C   Im eps =   \fr{\om_p^2 \om_\tau}{\om^3+\om \om_\tau^2}
 C   1eV=1.24 \mu m
 C----------------------------------------------------------------------
+      use libcylinder
       IMPLICIT NONE
       INTEGER NMAT
-      REAL*8 lambda,plasma,tau
-      COMPLEX*16 zeps
+      real(dp) lambda,plasma,tau
+      complex(dp) zeps
 C                       -------------------------------
-      REAL*8 pi,x,y,omega
-      DATA PI/3.141592653589793d0/
+      real(dp) x,y,omega
 C   ---------      
 C ::: speed of light in vacuum in nm/s
 C      PARAMETER (c0=2.9927925d17)
@@ -57,7 +57,7 @@ c      read(5,*) lambda
        X=-plasma**2/(omega**2+tau**2)
        Y=tau*plasma**2/(omega**3+omega*tau**2)       
 *
-       zeps=dcmplx(X,Y)  
+       zeps=cmplx_dp(X,Y)
 *
        END
 *
