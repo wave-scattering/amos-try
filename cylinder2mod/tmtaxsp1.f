@@ -84,7 +84,7 @@ C                T_{lm,l'm}^{ij}= (-1)^{i+j} T_{l-m,l'-m}^{ij}
 C
 C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT REAL(dp) (A-H,O-Z)
       INTEGER LMAXD,LMAX1D,LMTD
       INTEGER NAXSM,ICHOICEV,ICHOICE
 
@@ -92,15 +92,15 @@ C--------/---------/---------/---------/---------/---------/---------/--
       INCLUDE 'ampld.par.f'
 * number of the output unit
 *
-      REAL*8  LAM,MRR,MRI,X(NPNG2),W(NPNG2),S(NPNG2),SS(NPNG2),
+      real(dp)  LAM,MRR,MRI,X(NPNG2),W(NPNG2),S(NPNG2),SS(NPNG2),
      *        AN(NPN1),R(NPNG2),DR(NPNG2),
      *        DDR(NPNG2),DRR(NPNG2),DRI(NPNG2),ANN(NPN1,NPN1)
-      REAL*8 TR1(NPN2,NPN2),TI1(NPN2,NPN2)            
-c      REAL*8 XALPHA(300),XBETA(300),WALPHA(300),WBETA(300)
+      real(dp) TR1(NPN2,NPN2),TI1(NPN2,NPN2)            
+c      real(dp) XALPHA(300),XBETA(300),WALPHA(300),WBETA(300)
 
-!     COMPLEX*16 CZERO
-      COMPLEX*16 zeps1,zeps0
-      COMPLEX*16 TMT(4,LMTD,LMTD)
+!     complex(dp) CZERO
+      complex(dp) zeps1,zeps0
+      complex(dp) TMT(4,LMTD,LMTD)
 * 
       COMMON /CT/ TR1,TI1
 * transfers the real and imaginary part of the T matrix (2*NMAX,2*NMAX) 
@@ -124,7 +124,7 @@ cc      COMMON /TMAT/ RT11,RT12,RT21,RT22,IT11,IT12,IT21,IT22
 *
       COMMON /TOTMT/EPS,RAT,REV,ALPHA,BETA,DDELT   
 * 
-* transfers real*8 RAT,A(REV),ALPHA,BETA,DDELT from the main here
+* transfers real(dp) RAT,A(REV),ALPHA,BETA,DDELT from the main here
 *     
 *****************************************************************
 !     DATA CZERO/(0.D0,0.D0)/
@@ -259,7 +259,7 @@ C    TMT(4,*)=-TMT(3,*)^t where t denotes transposed TMT(3,*) submatrix
                         !!!axis of rotation
 
 	    if ((NAXSM.eq.1).and.((-1)**(L1+L2).ne.1)) then
-	      TMT(2,JA,JB)=CZERO 
+            TMT(2,JA,JB)=CZERO
             TMT(1,JA,JB)=CZERO  
 		else                                         
             TMT(2,JA,JB)=DCMPLX(TR1(L1,L2),TI1(L1,L2))
@@ -287,7 +287,7 @@ C    TMT(4,*)=-TMT(3,*)^t where t denotes transposed TMT(3,*) submatrix
          DO L2=M,NMAX 
  
           K1=L1-M+1               !K1,K2,KK1,KK2 label the entries of
-	    K2=L2-M+1               !a TT returned T block
+          K2=L2-M+1               !a TT returned T block
           KK1=L1-M+1+NM
           KK2=L2-M+1+NM
 
@@ -300,29 +300,29 @@ C    TMT(4,*)=-TMT(3,*)^t where t denotes transposed TMT(3,*) submatrix
 * see (5.39) of {MTL}: !!!Iff plane of symmetry perpendicular to the
                        !!!axis of rotation
 
-	    if ((NAXSM.eq.1).and.((-1)**(L1+L2).ne.1)) then
-	      TMT(2,JA,JB)  =CZERO 
-	      TMT(2,JAM,JBM)=CZERO
+          if ((NAXSM.eq.1).and.((-1)**(L1+L2).ne.1)) then
+            TMT(2,JA,JB)  =CZERO
+            TMT(2,JAM,JBM)=CZERO
             TMT(1,JA,JB)  =CZERO  
-	      TMT(1,JAM,JBM)=CZERO  
-		else                                         
+            TMT(1,JAM,JBM)=CZERO
+            else
             TMT(2,JA,JB)   = DCMPLX(TR1(K1,K2),TI1(K1,K2))
             TMT(2,JAM,JBM) = TMT(2,JA,JB)            
             TMT(1,JA,JB)   = DCMPLX(TR1(KK1,KK2),TI1(KK1,KK2))
             TMT(1,JAM,JBM) = TMT(1,JA,JB)
-	    end if
+          end if
 
-	    if ((NAXSM.eq.1).and.((-1)**(L1+L2).ne.-1)) then
-	      TMT(4,JA,JB)  =CZERO 
-	      TMT(4,JAM,JBM)=CZERO
+          if ((NAXSM.eq.1).and.((-1)**(L1+L2).ne.-1)) then
+            TMT(4,JA,JB)  =CZERO
+            TMT(4,JAM,JBM)=CZERO
             TMT(3,JA,JB)  =CZERO  
-	      TMT(3,JAM,JBM)=CZERO  
-		else  
+            TMT(3,JAM,JBM)=CZERO
+            else
             TMT(4,JA,JB)   = DCMPLX(TR1(KK1,K2),TI1(KK1,K2))
             TMT(4,JAM,JBM) =-TMT(4,JA,JB)
             TMT(3,JB,JA)   =-TMT(4,JA,JB) 
             TMT(3,JBM,JAM) = TMT(4,JA,JB)    !=-TMT(3,JB,JA) 
-	    end if
+          end if
 *    
 *  Using reciprocity (Eq. (15) of Ref. \ct{Mis97}):
 *
@@ -367,24 +367,24 @@ C********************************************************************
 !         laboratory reference frame (Refs. 6 and 7).
 !
 !--------/---------/---------/---------/---------/---------/---------/--
-!     IMPLICIT REAL*8 (A-B,D-H,O-Z)
-!     IMPLICIT COMPLEX*16 (C)
+!     IMPLICIT real(dp) (A-B,D-H,O-Z)
+!     IMPLICIT complex(dp) (C)
 !     INTEGER NOUT
 !
 ! number of the output unit
 !     PARAMETER (NOUT=35)
 !     INCLUDE 'ampld.par.f'
 !
-!     REAL*8 AL(3,2),AL1(3,2),AP(2,3),AP1(2,3),B(3,3),
+!     real(dp) AL(3,2),AL1(3,2),AP(2,3),AP1(2,3),B(3,3),
 !    *       R(2,2),R1(2,2),C(3,2),CA,CB,CT,CP,CTP,CPP,CT1,CP1,
 !    *       CTP1,CPP1
-!     REAL*8 DV1(NPN6),DV2(NPN6),DV01(NPN6),DV02(NPN6)
+!     real(dp) DV1(NPN6),DV2(NPN6),DV01(NPN6),DV02(NPN6)
 !     REAL*4
 !    &     TR11(NPN6,NPN4,NPN4),TR12(NPN6,NPN4,NPN4),
 !    &     TR21(NPN6,NPN4,NPN4),TR22(NPN6,NPN4,NPN4),
 !    &     TI11(NPN6,NPN4,NPN4),TI12(NPN6,NPN4,NPN4),
 !    &     TI21(NPN6,NPN4,NPN4),TI22(NPN6,NPN4,NPN4)
-!     COMPLEX*16 CAL(NPN4,NPN4),VV,VH,HV,HH
+!     complex(dp) CAL(NPN4,NPN4),VV,VH,HV,HH
 !_____
 !     COMMON /TMAT/ TR11,TR12,TR21,TR22,TI11,TI12,TI21,TI22
 !_____
@@ -682,21 +682,21 @@ C     CALLED ONLY BY the AMPL routine!!!
 C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       INCLUDE 'ampld.par.f'
-      IMPLICIT REAL*8 (A-H,O-Z)
-      REAL*8 DDV1(NPN1),DV2(NPN1)
+      IMPLICIT real(dp) (A-H,O-Z)
+      real(dp) DDV1(NPN1),DV2(NPN1)
 
 c      IMPLICIT none
 c      INTEGER LMAXD,LMAXD1     
 c      PARAMETER (LMAXD=50,LMAXD1=LMAXD+1)
-c      REAL*8 DDV1(LMAXD1),DV1(LMAXD1),DV2(LMAXD1)
+c      real(dp) DDV1(LMAXD1),DV1(LMAXD1),DV2(LMAXD1)
 
       integer n,nmax,M,I,I2
-      REAL*8 A,X,QS,QS1,DSI,D1,D2,D3,DER,DN,DX,QN,QN1,QN2,
+      real(dp) A,X,QS,QS1,DSI,D1,D2,D3,DER,DN,DX,QN,QN1,QN2,
      & QNM,QNM1,QMM
 
 * DDV1 and DV2 initialization
       DO 1 N=1,NMAX
- 	   DDV1(N)=0.D0
+          DDV1(N)=0.D0
          DV2(N) =0.D0
     1 CONTINUE
 
@@ -773,19 +773,19 @@ C
 *
       DO N=3,NMAX           !recurrence (3.36) of {TKS}, 
       DV2(N)=(2*N-1)*X*DV2(N-1)/(N-1)-N*DV2(N-2)/(N-1)
-	ENDDO
+      ENDDO
 ***********************************************************************
 *                           M > 0
 
- 	ELSE IF (M.GT.0) THEN       
+       ELSE IF (M.GT.0) THEN
 *
 * >>> Determine X^m_m according to Eq. (3.29) of {TKS}:
 
-	A=1.d0/DSQRT(2.D0)               !X^1_1=A_1
-	
-	DO I=1,M-1
+      A=1.d0/DSQRT(2.D0)               !X^1_1=A_1
+
+      DO I=1,M-1
       A=QS*DBLE(I+1)*DSQRT(2*I+1.d0)*A/(I*DSQRT(2*I+2.d0))
-	ENDDO              
+      ENDDO
 
 * <<< A is now X^m_m; see (3.29) of {TKS}
 
@@ -794,7 +794,7 @@ C
 
 * >>> Determine X^{m+1}_m:
 
-	IF (M.EQ.NMAX)  GO TO 120        
+      IF (M.EQ.NMAX)  GO TO 120
 
       DER=X*DSQRT(2*M+1.d0)*A          ! DER=X^{m+1}_m; see (3.30) of {TKS}
       DDV1(M+1)=DER
@@ -802,17 +802,17 @@ C
 
 * >>> Determine remaining X^{l}_m's
 
-	IF ((M+2).EQ.NMAX)  GO TO 120 
+      IF ((M+2).EQ.NMAX)  GO TO 120
 
        DO N=M+2,NMAX
        D3=DSQRT(DBLE(N)**2-DBLE(M)**2)
        DDV1(N)=((2*N-1)*X*DDV1(N-1) - 
      &                DSQRT(DBLE(N-1)**2-DBLE(M)**2)*DDV1(N-2))/D3      
                                                       !see (3.31) of {TKS}
-	 DV2(N)=(N*X*DDV1(N)-DDV1(N-1)*D3)/DBLE(M)      !see (3.35) of {TKS}
+       DV2(N)=(N*X*DDV1(N)-DDV1(N-1)*D3)/DBLE(M)      !see (3.35) of {TKS}
        ENDDO
 
-	END IF
+      END IF
 
   120 RETURN
       END 
@@ -839,12 +839,12 @@ C  S  ... 1/(|\sin\theta|)
 C  SS ... 1/(\sin^2\theta)
 C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT real(dp) (A-H,O-Z)
       INCLUDE 'ampld.par.f'
       INTEGER NEPS,JG,I,J
-	REAL*8 EE,EE1,CC,SI,XI1,XI2,XAV
-      REAL*8 XTHETA,THETA0,RX
-      REAL*8 X(NPNG2),W(NPNG2),X1(NPNG2),W1(NPNG2),
+      real(dp) EE,EE1,CC,SI,XI1,XI2,XAV
+      real(dp) XTHETA,THETA0,RX
+      real(dp) X(NPNG2),W(NPNG2),X1(NPNG2),W1(NPNG2),
      *        X2(NPNG2),W2(NPNG2),
      *        S(NPNG2),SS(NPNG2),
      *        AN(NPN1),ANN(NPN1,NPN1),DD(NPN1)
@@ -868,18 +868,18 @@ C--------/---------/---------/---------/---------/---------/---------/--
 *
 * GIF division points and weights
 * 
-	NEPS=MAX(EPS,1.d0/EPS)      !number of Gauss integration  
-	                            !intervals from EPS
+      NEPS=MAX(EPS,1.d0/EPS)      !number of Gauss integration
+                                  !intervals from EPS
 
       IF (NP.EQ.-1) THEN         ! spheroid
 
-	IF(NEPS.EQ.1) THEN
+      IF(NEPS.EQ.1) THEN
      
       CALL GAUSS(NG,0,0,X,W)
 
-	ELSE IF (NEPS.EQ.2) THEN
+      ELSE IF (NEPS.EQ.2) THEN
 
-	CALL GAULEG(-1.d0,0.d0,X,W,NGAUSS)
+      CALL GAULEG(-1.d0,0.d0,X,W,NGAUSS)
 
       DO I=1,NGAUSS
 
@@ -888,64 +888,64 @@ C--------/---------/---------/---------/---------/---------/---------/--
 
       ENDDO
 
-	ELSE IF (NEPS.GT.2) THEN
-	
-	NEPS=3*NEPS
+      ELSE IF (NEPS.GT.2) THEN
+
+      NEPS=3*NEPS
       NG1=DFLOAT(NGAUSS)/NEPS
-	
+
       EE=EPS*EPS
       EE1=EE-1D0
 
-	XAV=0.d0
+      XAV=0.d0
 
-	DO I=1,NEPS
+      DO I=1,NEPS
 
-	XI1=DBLE(I)/(NEPS+1)
+      XI1=DBLE(I)/(NEPS+1)
          
           CC=XI1*XI1
           SI=1D0-CC
           X2(I)=ABS(XI1*SI*EE1/(SI+EE*CC))       !|dr(theta)/dtheta|
-	    XAV=XAV+1.d0/X2(I)
+          XAV=XAV+1.d0/X2(I)
 
-	ENDDO
+      ENDDO
 
-	XAV=XAV           !averaged 1/|dr(theta)/dtheta|
+      XAV=XAV           !averaged 1/|dr(theta)/dtheta|
 
 c_____ estimate integration intervals:
    
- 	DO I=1,NEPS
-	
-	X2(I)=1.d0/(XAV*X2(I))
+       DO I=1,NEPS
 
-	ENDDO
-	      
-	DO I=1,NEPS
+      X2(I)=1.d0/(XAV*X2(I))
 
-	IF(i.eq.1) then
+      ENDDO
 
-	XI1=0.d0
-	XI2=X2(1)
+      DO I=1,NEPS
 
-	else 
+      IF(i.eq.1) then
 
-	XI2=XI2+X2(I)
+      XI1=0.d0
+      XI2=X2(1)
 
-	end if
-	 
-	JG=NGAUSS+(I-1)*NG1
+      else
 
-	IF(I.EQ.NEPS) NG1=NGAUSS-(I-1)*NG1
-	
-	CALL GAULEG(XI1,XI2,X1,W1,NG1)
+      XI2=XI2+X2(I)
 
-	XI1=XI2
+      end if
+
+      JG=NGAUSS+(I-1)*NG1
+
+      IF(I.EQ.NEPS) NG1=NGAUSS-(I-1)*NG1
+
+      CALL GAULEG(XI1,XI2,X1,W1,NG1)
+
+      XI1=XI2
 
       DO  J=1,NG1
          W(JG+J)=W1(J)
          X(JG+J)=X1(J)
-	ENDDO         !J
+      ENDDO         !J
 
-	ENDDO         !I
+      ENDDO         !I
 
 *
 * Assuming mirror symmetry in the $\theta=\pi/2$ plane
@@ -953,9 +953,9 @@ c_____ estimate integration intervals:
       DO  I=1,NGAUSS
          W(I)=W(NG-I+1)
          X(I)=-X(NG-I+1)
-	ENDDO
+      ENDDO
 
-	ENDIF           !NEPS     
+      ENDIF           !NEPS
 
       ELSE IF (NP.EQ.-2) THEN         ! cylinder
 
@@ -1114,8 +1114,8 @@ C  DRI=-(MRI/(MRR**2+MRI**2))*(\lambda/[2*\pi*r(\theta)])
 C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       INCLUDE 'ampld.par.f'
-      IMPLICIT REAL*8 (A-H,O-Z)
-      REAL*8  X(NPNG2),R(NPNG2),DR(NPNG2),MRR,MRI,LAM,
+      IMPLICIT real(dp) (A-H,O-Z)
+      real(dp)  X(NPNG2),R(NPNG2),DR(NPNG2),MRR,MRI,LAM,
      *        Z(NPNG2),ZR(NPNG2),ZI(NPNG2),
      *        DDR(NPNG2),DRR(NPNG2),DRI(NPNG2)
 cc     *        J(NPNG2,NPN1),Y(NPNG2,NPN1),JR(NPNG2,NPN1),
@@ -1208,8 +1208,9 @@ C   NG=2*NGAUSS
 C                                                
 C   1.LE.I.LE.NGAUSS                                                    
 C--------/---------/---------/---------/---------/---------/---------/--
-      IMPLICIT REAL*8 (A-H,O-Z)
-      REAL*8 X(NG),R(NG),DR(NG)
+      use libcylinder
+      IMPLICIT real(dp) (A-H,O-Z)
+      real(dp) X(NG),R(NG),DR(NG)
       
       A=REV*EPS**(1D0/3D0)
       AA=A*A
@@ -1262,8 +1263,9 @@ C
 C   1.LE.I.LE.NGAUSS                                                  
 C 
 C--------/---------/---------/---------/---------/---------/---------/--
-      IMPLICIT REAL*8 (A-H,O-Z)
-      REAL*8 X(NG),R(NG),DR(NG)
+      use libcylinder
+      IMPLICIT real(dp) (A-H,O-Z)
+      real(dp) X(NG),R(NG),DR(NG)
       DNP=DFLOAT(N)
       DN=DNP*DNP
       DN4=DN*4D0
@@ -1315,8 +1317,9 @@ C
 C   1.LE.I.LE.NGAUSS                                                  
 C  
 C--------/---------/---------/---------/---------/---------/---------/--
-      IMPLICIT REAL*8 (A-H,O-Z)
-      REAL*8 X(NG),R(NG),DR(NG)
+      use libcylinder
+      IMPLICIT real(dp) (A-H,O-Z)
+      real(dp) X(NG),R(NG),DR(NG)
 
 * Determine half-length of the cylinder
       H=REV*( (2D0/(3D0*EPS*EPS))**(1D0/3D0) )
@@ -1376,9 +1379,10 @@ C
 C   1.LE.I.LE.NGAUSS                                                  
 C
 C--------/---------/---------/---------/---------/---------/---------/--
+      use libcylinder
       PARAMETER (NC=10)
-      IMPLICIT REAL*8 (A-H,O-Z)
-      REAL*8 X(NG),R(NG),DR(NG),C(0:NC)
+      IMPLICIT real(dp) (A-H,O-Z)
+      real(dp) X(NG),R(NG),DR(NG),C(0:NC)
       COMMON /CDROP/ C,R0V
       R0=REV*R0V
       DO I=1,NG
@@ -1439,8 +1443,9 @@ C   NG=2*NGAUSS ... the number of GIF division points
 C                                                
 C   1.LE.I.LE.NGAUSS                                                    
 C--------/---------/---------/---------/---------/---------/---------/--
-      IMPLICIT REAL*8 (A-H,O-Z)
-      REAL*8 X(NG),R(NG),DR(NG)
+      use libcylinder
+      IMPLICIT real(dp) (A-H,O-Z)
+      real(dp) X(NG),R(NG),DR(NG)
       
       IF (EPS.GE.2.d0*REV) THEN
       WRITE(6,*)'Invalid parameters for a cut sphere!'
@@ -1520,8 +1525,9 @@ C   NG=2*NGAUSS ... the number of GIF division points
 C                                                
 C   1.LE.I.LE.NGAUSS                                                    
 C--------/---------/---------/---------/---------/---------/---------/--
-      IMPLICIT REAL*8 (A-H,O-Z)
-      REAL*8 X(NG),R(NG),DR(NG)
+      use libcylinder
+      IMPLICIT real(dp) (A-H,O-Z)
+      real(dp) X(NG),R(NG),DR(NG)
       
       IF (EPS.GE.2.d0*REV) THEN
       WRITE(6,*)'Invalid parameters for a cut sphere!'
@@ -1638,11 +1644,12 @@ C   NG=2*NGAUSS ... the number of GIF division points
 C
 C   1.LE.I.LE.NGAUSS
 C--------/---------/---------/---------/---------/---------/---------/--
+      use libcylinder
       IMPLICIT NONE
 
       INTEGER I,NG
-      REAL*8 HT,MA,CO,SI,CC,SS,RAD,REV,THETA0,RTHET
-      REAL*8 X(NG),R(NG),DR(NG)
+      real(dp) HT,MA,CO,SI,CC,SS,RAD,REV,THETA0,RTHET
+      real(dp) X(NG),R(NG),DR(NG)
 
       MA=DSQRT(HT**2+REV**2)              !=the length of the cone slant
       MA=dsqrt(ma**2+8.d0*rev**2)/2.d0    !=the length of the median of the slant
@@ -1705,8 +1712,8 @@ C  NNMAX2 ... angular momentum cutoff - DETERMINES NUMERICAL ACCURACY
 C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       INCLUDE 'ampld.par.f'
-      IMPLICIT REAL*8 (A-H,O-Z)
-      REAL*8 X(NG),XR(NG),XI(NG),
+      IMPLICIT real(dp) (A-H,O-Z)
+      real(dp) X(NG),XR(NG),XI(NG),
      *        J(NPNG2,NPN1),Y(NPNG2,NPN1),JR(NPNG2,NPN1),
      *        JI(NPNG2,NPN1),DJ(NPNG2,NPN1),DY(NPNG2,NPN1),
      *        DJR(NPNG2,NPN1),DJI(NPNG2,NPN1),
@@ -1752,8 +1759,9 @@ C  Y ...
 C  NMAX - angular momentum cutoff
 C  NNMAX - angular momentum cutoff - DETERMINES NUMERICAL ACCURACY  
 C--------/---------/---------/---------/---------/---------/---------/--
-      IMPLICIT REAL*8 (A-H,O-Z)
-      REAL*8 Y(NMAX),U(NMAX),Z(800)
+      use libcylinder
+      IMPLICIT real(dp) (A-H,O-Z)
+      real(dp) Y(NMAX),U(NMAX),Z(800)
 *
       L=NMAX+NNMAX
       XX=1D0/X
@@ -1788,8 +1796,9 @@ C=================
 C  X =(2\pi/\lambda)*r
 C  NMAX - angular momentum cutoff
 C--------/---------/---------/---------/---------/---------/---------/--
-      IMPLICIT REAL*8 (A-H,O-Z)
-      REAL*8 Y(NMAX),V(NMAX)
+      use libcylinder
+      IMPLICIT real(dp) (A-H,O-Z)
+      real(dp) Y(NMAX),V(NMAX)
 *
       C=DCOS(X)
       S=DSIN(X)
@@ -1827,10 +1836,10 @@ C   NNMAX - angular momentum cutoff - DETERMINES NUMERICAL ACCURACY
 C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       INCLUDE 'ampld.par.f'
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT real(dp) (A-H,O-Z)
       
-      REAL*8 YR(NMAX),YI(NMAX),UR(NMAX),UI(NMAX)
-      REAL*8 CYR(NPN1),CYI(NPN1),CZR(1200),CZI(1200)
+      real(dp) YR(NMAX),YI(NMAX),UR(NMAX),UI(NMAX)
+      real(dp) CYR(NPN1),CYI(NPN1),CZR(1200),CZI(1200)
 c     *       CUR(NPN1),CUI(NPN1)
 *
       L=NMAX+NNMAX
@@ -1943,13 +1952,13 @@ C  separately for the real and imaginary parts of the integrand.
 C
 C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT real(dp) (A-H,O-Z)
       INCLUDE 'ampld.par.f'
       INTEGER NOUT     
 * number of the output unit
       PARAMETER (NOUT=35)
       
-      REAL*8  X(NPNG2),W(NPNG2),AN(NPN1),
+      real(dp)  X(NPNG2),W(NPNG2),AN(NPN1),
      *        R(NPNG2),DR(NPNG2),SIG(NPN2),
      *        J(NPNG2,NPN1),Y(NPNG2,NPN1),
      *        JR(NPNG2,NPN1),JI(NPNG2,NPN1),DJ(NPNG2,NPN1),
@@ -1959,7 +1968,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
      *        DRI(NPNG2),RR(NPNG2),
      *        DV1(NPN1),DV2(NPN1)
  
-      REAL*8  R11(NPN1,NPN1),R12(NPN1,NPN1),
+      real(dp)  R11(NPN1,NPN1),R12(NPN1,NPN1),
      *        R21(NPN1,NPN1),R22(NPN1,NPN1),
      *        I11(NPN1,NPN1),I12(NPN1,NPN1),
      *        I21(NPN1,NPN1),I22(NPN1,NPN1),
@@ -1972,7 +1981,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
      *        RGQR(NPN2,NPN2),RGQI(NPN2,NPN2),
      *        TQR(NPN2,NPN2),TQI(NPN2,NPN2),
      *        TRGQR(NPN2,NPN2),TRGQI(NPN2,NPN2)
-cc      REAL*8 TR1(NPN2,NPN2),TI1(NPN2,NPN2)
+cc      real(dp) TR1(NPN2,NPN2),TI1(NPN2,NPN2)
 *      
       COMMON /TMAT99/ 
      &            R11,R12,R21,R22,I11,I12,I21,I22,RG11,RG12,RG21,RG22,
@@ -2345,8 +2354,8 @@ C
 C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       INCLUDE 'ampld.par.f'
-      IMPLICIT REAL*8 (A-H,O-Z)
-      REAL*8  X(NPNG2),W(NPNG2),AN(NPN1),S(NPNG2),SS(NPNG2),
+      IMPLICIT real(dp) (A-H,O-Z)
+      real(dp)  X(NPNG2),W(NPNG2),AN(NPN1),S(NPNG2),SS(NPNG2),
      *        R(NPNG2),DR(NPNG2),SIG(NPN2),
      *        J(NPNG2,NPN1),Y(NPNG2,NPN1),
      *        JR(NPNG2,NPN1),JI(NPNG2,NPN1),DJ(NPNG2,NPN1),
@@ -2356,7 +2365,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
      *        DRI(NPNG2),DS(NPNG2),DSS(NPNG2),RR(NPNG2),
      *        DV1(NPN1),DV2(NPN1)
  
-      REAL*8  R11(NPN1,NPN1),R12(NPN1,NPN1),
+      real(dp)  R11(NPN1,NPN1),R12(NPN1,NPN1),
      *        R21(NPN1,NPN1),R22(NPN1,NPN1),
      *        I11(NPN1,NPN1),I12(NPN1,NPN1),
      *        I21(NPN1,NPN1),I22(NPN1,NPN1),
@@ -2369,7 +2378,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
      *        RGQR(NPN2,NPN2),RGQI(NPN2,NPN2),
      *        TQR(NPN2,NPN2),TQI(NPN2,NPN2),
      *        TRGQR(NPN2,NPN2),TRGQI(NPN2,NPN2)
-cc      REAL*8 TR1(NPN2,NPN2),TI1(NPN2,NPN2)
+cc      real(dp) TR1(NPN2,NPN2),TI1(NPN2,NPN2)
 *________
       COMMON /TMAT99/ 
      &            R11,R12,R21,R22,I11,I12,I21,I22,RG11,RG12,RG21,RG22,
@@ -2791,8 +2800,8 @@ C     CALLED BY TMATR AND TMATR0 routines
 C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       INCLUDE 'ampld.par.f'
-      IMPLICIT REAL*8 (A-H,O-Z)
-      REAL*8 DV1(NPN1),DV2(NPN1)
+      IMPLICIT real(dp) (A-H,O-Z)
+      real(dp) DV1(NPN1),DV2(NPN1)
  
       A=1D0
       QS=DSQRT(1D0-X*X)
@@ -2864,19 +2873,19 @@ C   OUTPUT IN COMMON /CT/
 C
 C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT real(dp) (A-H,O-Z)
       INTEGER NOUT
 
 * number of the output unit
       PARAMETER (NOUT=35)
       INCLUDE 'ampld.par.f'
 
-      REAL*8  QR(NPN2,NPN2),QI(NPN2,NPN2),EMACH,
+      real(dp)  QR(NPN2,NPN2),QI(NPN2,NPN2),EMACH,
      *       RGQR(NPN2,NPN2),RGQI(NPN2,NPN2)
-cc      REAL*8 F(NPN2,NPN2),B(NPN2),WORK(NPN2),
+cc      real(dp) F(NPN2,NPN2),B(NPN2),WORK(NPN2),
 cc     *       A(NPN2,NPN2),C(NPN2,NPN2),D(NPN2,NPN2),E(NPN2,NPN2)
-      REAL*8 TR1(NPN2,NPN2),TI1(NPN2,NPN2)
-      COMPLEX*16 ZQ(NPN2,NPN2),ZX(NPN2),ZW(NPN2)
+      real(dp) TR1(NPN2,NPN2),TI1(NPN2,NPN2)
+      complex(dp) ZQ(NPN2,NPN2),ZX(NPN2),ZW(NPN2)
       INTEGER IPIV(NPN2),IPVT(NPN2)
 *
       COMMON /CHOICE/ ICHOICE
@@ -2965,7 +2974,8 @@ C >>> A,B,NDIM,N
 C <<< C=A*B
 C=================
 C--------/---------/---------/---------/---------/---------/---------/--
-      REAL*8 A(NDIM,N),B(NDIM,N),C(NDIM,N),cij
+      use libcylinder
+      real(dp) A(NDIM,N),B(NDIM,N),C(NDIM,N),cij
 *
       DO 10 I=1,N
            DO 10 J=1,N
@@ -2989,9 +2999,9 @@ C=================
 C  NMAX - angular momentum cutoff
 C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
-      IMPLICIT REAL*8 (A-H,O-Z)
+      IMPLICIT real(dp) (A-H,O-Z)
       INCLUDE 'ampld.par.f'
-      REAL*8  A(NPN2,NPN2),F(NPN2,NPN2),B(NPN1),
+      real(dp)  A(NPN2,NPN2),F(NPN2,NPN2),B(NPN1),
      *        WORK(NPN1),Q1(NPN1,NPN1),Q2(NPN1,NPN1),
      &        P1(NPN1,NPN1),P2(NPN1,NPN1)
       INTEGER IPVT(NPN1),IND1(NPN1),IND2(NPN1)
@@ -3046,8 +3056,9 @@ C >>> EPS
 C <<< RAT
 C=================
 C--------/---------/---------/---------/---------/---------/---------/--
-      IMPLICIT REAL*8 (A-H,O-Z)
-      REAL*8 A(NDIM,N),X(NDIM,N),WORK(N),B(N)
+      use libcylinder
+      IMPLICIT real(dp) (A-H,O-Z)
+      real(dp) A(NDIM,N),X(NDIM,N),WORK(N),B(N)
       INTEGER IPVT(N)
 *
       CALL DECOMP (NDIM,N,A,COND,IPVT,WORK)
@@ -3080,8 +3091,9 @@ C >>> EPS
 C <<< RAT
 C=================
 C--------/---------/---------/---------/---------/---------/---------/--
-      IMPLICIT REAL*8 (A-H,O-Z)
-      REAL*8 A(NDIM,N),COND,WORK(N)
+      use libcylinder
+      IMPLICIT real(dp) (A-H,O-Z)
+      real(dp) A(NDIM,N),COND,WORK(N)
       INTEGER IPVT(N)
 *
       IPVT(N)=1
@@ -3175,8 +3187,9 @@ C >>> EPS
 C <<< RAT
 C=================
 C--------/---------/---------/---------/---------/---------/---------/--
-      IMPLICIT REAL*8 (A-H,O-Z)
-      REAL*8 A(NDIM,N),B(N)
+      use libcylinder
+      IMPLICIT real(dp) (A-H,O-Z)
+      real(dp) A(NDIM,N),B(N)
       INTEGER IPVT(N)
 *
       IF (N.EQ.1) GO TO 50
@@ -3213,7 +3226,8 @@ C >>> EPS
 C <<< RAT
 C=================
 C--------/---------/---------/---------/---------/---------/---------/--
-      IMPLICIT REAL*8 (A-H,O-Z)
+      use libcylinder
+      IMPLICIT real(dp) (A-H,O-Z)
       IF (D.GE.1) GO TO 10
       E=DSQRT(1D0-D*D)
       R=0.5D0*(D**(2D0/3D0) + D**(-1D0/3D0)*DASIN(E)/E)
@@ -3237,8 +3251,9 @@ C >>> N,E,RAT
 C <<< RAT
 C=================
 C--------/---------/---------/---------/---------/---------/---------/--
-      IMPLICIT REAL*8 (A-H,O-Z)
-      REAL*8 X(60),W(60)
+      use libcylinder
+      IMPLICIT real(dp) (A-H,O-Z)
+      real(dp) X(60),W(60)
 *
       DN=DFLOAT(N)
       EN=E*DN
@@ -3278,7 +3293,8 @@ C >>> EPS
 C <<< RAT
 C=================
 C--------/---------/---------/---------/---------/---------/---------/--
-      IMPLICIT REAL*8 (A-H,O-Z)
+      use libcylinder
+      IMPLICIT real(dp) (A-H,O-Z)
 *
       RAT=(1.5D0/EPS)**(1D0/3D0)
       RAT=RAT/DSQRT( (EPS+2D0)/(2D0*EPS) )
@@ -3294,13 +3310,14 @@ C >>> EPS
 C <<< RAT
 C=================
 C--------/---------/---------/---------/---------/---------/---------/--      
-      IMPLICIT REAL*8 (A-H,O-Z)
+      use libcylinder
+      IMPLICIT real(dp) (A-H,O-Z)
       INTEGER NOUT
 * number of the output unit
       PARAMETER (NOUT=35)  
       PARAMETER (NC=10, NG=60) 
                  
-      REAL*8 X(NG),W(NG),C(0:NC)
+      real(dp) X(NG),W(NG),C(0:NC)
       COMMON /CDROP/ C,R0V
       C(0)=-0.0481 D0
       C(1)= 0.0359 D0
@@ -3331,10 +3348,10 @@ C--------/---------/---------/---------/---------/---------/---------/--
             DRI=DRI-C(N)*N*DSIN(XIN)
          ENDDO
          SI=DSIN(XI)
-         CI=X(I)
+         cki=X(I)
          RISI=RI*SI
          S=S+WI*RI*DSQRT(RI*RI+DRI*DRI)
-         V=V+WI*RI*RISI*(RISI-DRI*CI)
+         V=V+WI*RI*RISI*(RISI-DRI*cki)
       ENDDO
       RS=DSQRT(S*0.5D0)
       RV=(V*3D0*0.25D0)**(1D0/3D0)
@@ -3365,8 +3382,9 @@ C    N - NUMBER OF GIF DIVISION POINTS (mostly N=NGAUSS in main program)
 C    Z - DIVISION POINTS                                              
 C    W - WEIGHTS                                                      
 C--------/---------/---------/---------/---------/---------/---------/--
-      IMPLICIT REAL*8 (A-H,P-Z)
-      REAL*8 Z(N),W(N)
+      use libcylinder
+      IMPLICIT real(dp) (A-H,P-Z)
+      real(dp) Z(N),W(N)
       DATA A,B,C /1D0,2D0,3D0/
       IND=MOD(N,2)
       K=N/2+IND
@@ -3432,8 +3450,9 @@ C  this routine returns arrays x(1:n) and w(1:n) of length n, containing
 C  the abscissas and weights of the Gaussian-Legendre n-point quadrature 
 C  formula.
 C--------/---------/---------/---------/---------/---------/---------/--
+      use libcylinder
       INTEGER n
-      REAL*8 x1,x2,x(n),w(n)
+      real(dp) x1,x2,x(n),w(n)
       DOUBLE PRECISION EPS
       PARAMETER (EPS=3.d-14)
       INTEGER i,j,m
@@ -3488,22 +3507,23 @@ C     ------------------------------------------------------------------
 C     ZSUR IS  A STANDARD BACK-SUBSTITUTION  SUBROUTINE  USING THE
 C     OUTPUT OF ZGE TO CALCULATE X TIMES A-INVERSE, RETURNED IN X
 C     ------------------------------------------------------------------
+      use libcylinder
       IMPLICIT NONE
 C
 C ..  SCALAR ARGUMENTS  ..
 C
       INTEGER N,NC
-      REAL*8 EMACH
+      real(dp) EMACH
 C
 C ..  ARRAY ARGUMENTS  ..
 C
       INTEGER    INT(NC)
-      COMPLEX*16 A(NC,NC),X(NC)
+      complex(dp) A(NC,NC),X(NC)
 C
 C ..  LOCAL SCALARS  ..
 C
       INTEGER    I,II,IN,J,IJ
-      COMPLEX*16 DUM
+      complex(dp) DUM
 C
 C ..  INTRINSIC FUNCTIONS  ..
 C
@@ -3552,22 +3572,23 @@ C     THIS ROUTINE DOES NOT BOTHER ABOUT ELEMENTS DIRECTLY ABOVE
 C     THE MATRIX DIAGONAL AS THEY ARE NOT USED EXPLICITLY IN AN
 C     ACCOMAPANYING ZSE ROUTINE
 C     ------------------------------------------------------------------
+      use libcylinder
       IMPLICIT NONE
 C
 C ..  SCALAR ARGUMENTS  ..
 C
       INTEGER N,NC
-      REAL*8 EMACH
+      real(dp) EMACH
 C
 C ..  ARRAY ARGUMENTS  ..
 C
       INTEGER    INT(NC)
-      COMPLEX*16 A(NC,NC)
+      complex(dp) A(NC,NC)
 C
 C ..  LOCAL SCALARS  ..
 C
       INTEGER    I,II,IN,J,K
-      COMPLEX*16 YR,DUM
+      complex(dp) YR,DUM
 C
 C ..  INTRINSIC FUNCTIONS  ..
 C

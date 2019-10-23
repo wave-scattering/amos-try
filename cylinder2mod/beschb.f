@@ -8,11 +8,12 @@ c by Chebyshev expansion for |x|\leq 2
 c by Chebyshev expansion for |x|\leq 1/2. Also returns \Gamma^{-1}(1-\nu)
 c and \Gamma^{-1}(1+\nu)
 c--------/---------/---------/---------/---------/---------/---------/--
+      use libcylinder
       INTEGER NUSE1,NUSE2
       DOUBLE PRECISION gam1,gam2,gammi,gampl,x
       PARAMETER (NUSE1=7,NUSE2=8)
 CU    USES chebev
-      REAL*8 xx,c1(7),c2(8),chebev
+      real(dp) xx,c1(7),c2(8),chebev
       SAVE c1,c2
       DATA c1/-1.142022680371172d0,6.516511267076d-3,3.08709017308d-4,
      *-3.470626964d-6,6.943764d-9,3.6780d-11,-1.36d-13/

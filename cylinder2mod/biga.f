@@ -106,7 +106,7 @@ ct      CIOR=(1.45d0,1.d0)
 c                                  ** Decide whether BigA can be
 c                                  ** calculated by up-recurrence
       MRE = DBLE(CIOR)
-      MIM = ABS(IMAG(CIOR))
+      MIM = ABS(AIMAG(CIOR))
 
       IF( MRE.LT.1.0 .OR. MRE.GT.10.0 .OR. MIM.GT.10.0 ) THEN
 
@@ -299,7 +299,7 @@ c                                  ** Eq. R26
 c                                  ** Check for convergence; Eq. R31
 
          IF (      ABS( DBLE (CAPT) - 1.d0 ).GE.EPS2
-     &        .OR. ABS( IMAG(CAPT) )      .GE.EPS2 )  THEN
+     &        .OR. ABS( AIMAG(CAPT) )      .GE.EPS2 )  THEN
 
 c                                        ** Eq. R30
             CNUMER = CAK + 1.d0 / CNUMER
