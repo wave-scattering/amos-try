@@ -139,14 +139,13 @@ c if coated, the ratio 'core radius/particle radius'
 c   (If lcs.ne.1, program is singular for rff=0. and 1.) - use homogeneous
 c    particle instead!!!
 c       PARAMETER (rff=0.95d0)
-c background dielectric constant
-      PARAMETER (ZEPS0=1.D0)
-c
+
 c Temporarily, before the coated part is finished,
 c read in particle core dielectric function to CSEPS
 c particle (core) dielectric constant (depending whether lcs=1 or lcs=2)
 c
-      PARAMETER (CCEPS=(80.0d0,0.0000000d0))
+! Should be set in *.ini config file
+C      PARAMETER (CCEPS=(80.0d0,0.0000000d0))
 C      PARAMETER (CCEPS=(1.45D0,0.0d0)**2)    !SiO2
 c      PARAMETER (CCEPS=(1.2D0,0.01d0)**2)    !to test lisac
 c      PARAMETER (CCEPS=(-70.720839d0,7.05596d0))   !-70.720839,7.05596   Au for 1319nm
@@ -263,6 +262,10 @@ C--------/---------/---------/---------/---------/---------/---------/--
       call cli_parse
       call ini_parse
 
+c background dielectric constant
+!     PARAMETER (ZEPS0=1.D0) !set in ini_parse
+c
+
 *
 * From here to spherec
 *---------------------------------------------------------------
@@ -341,7 +344,7 @@ CCCCCCCCCCCCCCCCCC    Assignement of common variables CCCCCCCCCCC
 * Preinitialization necessary since below rsnm,rev, and defp (all
 * feeded in evanesc) are not always specified:
 *
-      rsnm=1.d0
+!     rsnm=1.d0 ! Should be set in *.ini file
       rev=1.d0
       defp=1.d0
 *
@@ -490,29 +493,33 @@ C--------/---------/---------/---------/---------/---------/---------/--
 *
       else if (NP.eq.-2) then
 *
-      if (rl_max < 0) then
+      if (rl_max < 0_dp) then
         write(6,*)'Enter cylinder maximal r/l:'
         read(5,*) rl_max
       else
         write(6,*)'Auto-set cylinder maximal r/l from *.ini', rl_max
       end if
 
-      if (rl_min < 0) then
+      if (rl_min < 0_dp) then
         write(6,*)'Enter cylinder minimal r/l:'
         read(5,*) rl_min
       else
         write(6,*)'Auto-set cylinder minimal r/l from *.ini', rl_min
       end if
 
-      write(6,*)'Read amount of steps in length'
-!     read(5,*) ndefp
-      ndefp = 15
-      write(6,*)'Auto-set amount of steps in length',ndefp
+      if (ndefp <= 0) then
+        write(6,*)'Enter amount of steps in length:'
+        read(5,*) ndefp
+      else
+        write(6,*)'Auto-set amount of steps in length from *.ini',ndefp
+      end if
 
-      write(6,*)'Read cylinder radius'
-!     read(5,*) rsnm
-      rsnm = 100.0D0
-      write(6,*)'Auto-set cylinder radius',rsnm
+      if (rsnm <= 0_dp) then
+        write(6,*)'Enter cylinder radius:'
+        read(5,*) rsnm
+      else
+        write(6,*)'Auto-set cylinder radius from *.ini',rsnm
+      end if
 
        rsnm =  rsnm*2
 
@@ -636,11 +643,7 @@ C      BETA=0.D0
      &    the orientation  of the scattering particle relative to the
      & laboratory reference  frame'
 !     READ(5,*)  ALPHA, BETA
-      ALPHA = 0.D0
-      BETA = 0.D0
       write(6,*)'Auto-set ALPHA and BETA',ALPHA,BETA
-
-
 
       if((ALPHA.eq.0).and.(BETA.eq.0))
      & write(6,*)'Laboratory frame coincides with particle frame'
@@ -664,16 +667,12 @@ C      PHI - azimuth angle of the scattered beam in degrees
       write(6,*)'Specify (theta,phi) angles of the incident beam
      1             (in degrees)'
 !     read(5,*) THET0,PHI0
-      THET0 =90.D0
-      PHI0 = 0.D0
-      write(6,*)'Auto-set...'
+      write(6,*)'Auto-set from *.ini:', thet0, phi0
 *
       write(6,*)'Specify (theta,phi) angles of the scattered beam
      1             (in degrees)'
 !     read(5,*) THET,PHI
-      THET = 90.D0
-      PHI = 0.D0
-      write(6,*)'Auto-set...'
+      write(6,*)'Auto-set from *.ini', thet, phi
 *
       else if (ynintens) then
       write(6,*)'PHI angle of incidence of the incident plane wave
@@ -900,9 +899,12 @@ c      rff(1)=0.75d0
       end if
 C--------/---------/---------/---------/---------/---------/---------/--
 
-!     read(5,*) x_min
-      x_min = 0.45D0
-      write(6,*)'Auto-set x_min', x_min
+      if (x_min < 0) then
+        write(6,*)'Enter minimum value of x-parameter:'
+        read(5,*) x_min
+      else
+        write(6,*)'Auto-set x_min from *.ini ', x_min
+      end if
 
       lambda = 2 *pi * rsnm/x_min
 cv      lambda=633.d0                      !JAP89_5776 for gold ellipsod
@@ -943,17 +945,21 @@ c       write(6,*)'Equiv. size parameter x=2*pi*rs*n_0/lambda=',xs
 *
       if (.not.ynintens) then
       write(6,*)'Scan up to x-parameter (in nm)'
-!     read(5,*) x_max
-      x_max = 0.55D0
-      write(6,*)'Auto-set x_max', x_max
+      if (x_max < 0) then
+        write(6,*)'Enter maximum value of x-parameter:'
+        read(5,*) x_max
+      else
+        write(6,*)'Auto-set x_max from *.ini ', x_max
+      end if
 
       enw = 2*pi*rsnm/x_max
 c      enw=500
-      write(6,*)'Amount of scanning steps'
-!     read(5,*) nstep
-      nstep = 20
-      write(6,*)'Auto-set nstep',nstep
-
+      if (nstep <= 0) then
+        write(6,*)'Enter amount of scanning steps:'
+        read(5,*) nstep
+      else
+        write(6,*)'Auto-set nstep from *.ini ',nstep
+      end if
 c      xstep=5
       end if
 *
@@ -1845,41 +1851,105 @@ C--------/---------/---------/---------/---------/---------/---------/--
 
       contains
 
+C--------/---------/---------/---------/---------/---------/---------/--
       subroutine ini_parse()
       character(len=:), allocatable :: items(:,:) !< Items pairs.
       integer                       :: error
       character(len=:), allocatable :: string         !< String option.
-      real(dp)                      :: double
+      real(dp)                      :: double, d_re, d_im
       integer                       :: num
-
+      write(6,*) 'Reading config from file: ', file_name
       call fini%load(filename=file_name)
       string = repeat(' ', 999)
 
       call fini%get(section_name='general', option_name='particle_type',
      &  val=string, error=error)
       NP = 0
-      if ((trim(string) .eq. 'cylinder') .or.(trim(string)=='-2')) NP=-2
+      if ((trim(string) .eq. 'cylinder').or.(trim(string)=='-2')) NP=-2
 
       call fini%get(section_name='cylinder', option_name='rl_min',
      &  val=double, error=error)
-      rl_min = -1
+      rl_min = -1_dp
       if (error==0) rl_min = double
 
       call fini%get(section_name='cylinder', option_name='rl_max',
      &  val=double, error=error)
-      rl_max = -1
+      rl_max = -1_dp
       if (error==0) rl_max = double
 
+      call fini%get(section_name='cylinder', option_name='rl_steps',
+     &  val=num, error=error)
+      ndefp = 0
+      if (error==0) ndefp = num
 
-      write(*,*) trim(string)
-!     call fini%get_items(items)
-!     do i=1,size(items,dim=1)
-!       print "(A)", trim(items(i,1))//' = '//trim(items(i,2))
-!     enddo
+      call fini%get(section_name='cylinder', option_name='radius',
+     &  val=double, error=error)
+      rsnm = -1_dp
+      if (error==0) rsnm = double
 
+      call fini%get(section_name='cylinder', option_name='alpha',
+     &  val=double, error=error)
+      alpha = 0_dp
+      if (error==0) alpha = double
+
+      call fini%get(section_name='cylinder', option_name='beta',
+     &  val=double, error=error)
+      beta = 0_dp
+      if (error==0) beta = double
+
+      call fini%get(section_name='general',
+     &  option_name='background_epsilon',
+     &  val=double, error=error)
+      zeps0 = 1_dp
+      if (error==0) zeps0 = double
+
+      d_re = 1_dp
+      call fini%get(section_name='cylinder', option_name='eps_real',
+     &  val=d_re, error=error)
+      d_im = 0_dp
+      call fini%get(section_name='cylinder', option_name='eps_imag',
+     &  val=d_im, error=error)
+      cceps = d_re + ci*d_im
+
+      call fini%get(section_name='beam', option_name='theta0',
+     &  val=double, error=error)
+      thet0 = 0_dp
+      if (error==0) thet0 = double
+
+      call fini%get(section_name='beam', option_name='phi0',
+     &  val=double, error=error)
+      phi0 = 0_dp
+      if (error==0) phi0 = double
+
+      call fini%get(section_name='beam', option_name='theta',
+     &  val=double, error=error)
+      thet = 0_dp
+      if (error==0) thet = double
+
+      call fini%get(section_name='beam', option_name='phi',
+     &  val=double, error=error)
+      phi = 0_dp
+      if (error==0) phi = double
+
+      call fini%get(section_name='beam', option_name='x_min',
+     &  val=double, error=error)
+      x_min = -1_dp
+      if (error==0) x_min = double
+
+      call fini%get(section_name='beam', option_name='x_max',
+     &  val=double, error=error)
+      x_max = -1_dp
+      if (error==0) x_max = double
+
+      call fini%get(section_name='beam', option_name='x_steps',
+     &  val=num, error=error)
+      nstep = 0
+      if (error==0) nstep = num
 
       end subroutine ini_parse
 
+
+C--------/---------/---------/---------/---------/---------/---------/--
       subroutine cli_parse()
         !< Build and parse test cli.
         type(command_line_interface) :: cli  !< command line interface.

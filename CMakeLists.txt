@@ -56,7 +56,7 @@ set(CMAKE_BUILD_TYPE Debug
 set(warn "-Wall -Wextra  -fPIC -fmax-errors=1")
 set(CMAKE_Fortran_FLAGS_DEBUG   "${common} ${warn} -Wunused-variable -Wimplicit-interface -Wunused-dummy-argument -g -fbounds-check -fcheck-array-temporaries -fbacktrace")
 
-#    set(CMAKE_BUILD_TYPE Release
+#set(CMAKE_BUILD_TYPE Release
 #            CACHE STRING "Build type (Debug, Release)" FORCE)
 #set(CMAKE_Fortran_FLAGS_RELEASE "${common} -O3 -march=native -ffast-math -funroll-loops -mtune=native -fopenmp" )
 
