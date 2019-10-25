@@ -3152,14 +3152,14 @@ cc      COMMON /CT/ TR1,TI1                      !output from TT routine
       ENDIF
 *
       SI=1D0
-      DO 5 N=1,NM                 !NM=2*NMAX
+      DO N=1,NM                 !NM=2*NMAX
            SI=-SI
            SIG(N)=SI              !=(-1)**N
-    5 CONTINUE
+      end do
 *
 * Assigning Wigner d-matrices:
 
-      DO 25 I=1,NGAUSS
+      DO I=1,NGAUSS
 
          I1=NGAUSS-I+1
          I2=NGAUSS+I
@@ -3229,19 +3229,17 @@ C--------/---------/---------/---------/---------/---------/---------/--
           ENDDO
 
           END IF
-
-   25 CONTINUE
+      end do
 *
 *  Assigning r^2(\theta)*weight product:
 
-      DO 40 I=1,NGSS
+      DO I=1,NGSS
            WR=W(I)*R(I)
 
 cc          if (dr(i).eq.0.d0) WR=0.d0   !temporarily only
 
            RR(I)=WR            !W(I)*r^2(\theta)
-
-   40 CONTINUE
+      end do
 *
       DO 300  N1=MM1,NMAX         !MM1=M below
            AN1=AN(N1)
