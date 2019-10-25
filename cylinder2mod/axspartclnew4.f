@@ -2438,7 +2438,7 @@ c     &               DDR,DRR,DRI,NMAX,NCHECK,NAXSM)
 * assigning of RT^{ij} and IT^{ij} matrix entries to be
 * used later by AMPL routine.
 *
-         DO 214 N2=1,NM              !summation over orbital numbers
+         DO N2=1,NM              !summation over orbital numbers
 
 * conversion of the N22 index of RT1 and IT1 matrices
 * to the index NN2 of RT^{ij} and IT^{ij} matrices
@@ -2446,7 +2446,7 @@ c     &               DDR,DRR,DRI,NMAX,NCHECK,NAXSM)
             NN2=N2+M-1        !from M to NMAX
             N22=N2+NM         !from NMAX+1 to 2*NMAX-M+1
 
-            DO 214 N1=1,NM           !summation over orbital numbers
+            DO N1=1,NM           !summation over orbital numbers
 
 * conversion of the N11 index of RT1 and IT1 matrices
 * to the index NN1 of RT^{ij} and IT^{ij} matrices
@@ -2476,8 +2476,8 @@ c     &               DDR,DRR,DRI,NMAX,NCHECK,NAXSM)
 *
 * multiplication by 2d0 here accounts for +/-M symmetry of resulting
 * expressions
-
-  214    CONTINUE     !end of the loop over orbital numbers
+            end do
+         end do     !end of the loop over orbital numbers
 
          NNM=2*NM
          QXT=0D0
@@ -2891,14 +2891,15 @@ C
 C >>> ALPHA numerical prefactors without phi-angles
 C     (following Eq. (28))
 
-      DO 5 NN=1,NMAX
-         DO 5 N=1,NMAX
+      DO NN=1,NMAX
+         DO N=1,NMAX
             CN=CI**(NN-N-1)
             DNN=dble((2*N+1)*(2*NN+1))
             DNN=DNN/dble( N*NN*(N+1)*(NN+1) )
             RN=DSQRT(DNN)
             CAL(N,NN)=CN*RN
-    5 CONTINUE
+         end do
+      end do
 
       DCTH0=CTP             !\cos\vartheta_{inc}^P
       DCTH=CTP1             !\cos\vartheta_{sca}^P
@@ -2913,7 +2914,7 @@ C     (following Eq. (28))
 C______________________________________________________________
 C Main summation loop:
 
-      DO 500 M=0,NMAX
+      DO M=0,NMAX
          M1=M+1
          NMIN=MAX(M,1)
 *
@@ -2925,12 +2926,12 @@ C Main summation loop:
          FC=2D0*DCOS(M*PH)    !takes into account +/- m contribution
          FS=2D0*DSIN(M*PH)
 *
-         DO 400 NN=NMIN,NMAX
+         DO NN=NMIN,NMAX
 
             DV1NN=DV01(NN)           !\pi-functions
             DV2NN=DV02(NN)           !\tau-functions
 
-            DO 400 N=NMIN,NMAX
+            DO  N=NMIN,NMAX
                DV1N=DV1(N)           !\pi-functions
                DV2N=DV2(N)           !\tau-functions
 
@@ -2975,9 +2976,9 @@ C Main summation loop:
                   HH=HH+(CT11*D22+CT21*D12
      &                  +CT12*D21+CT22*D11)*CN1
                ENDIF
-
-  400    CONTINUE      !(over n,n')
-  500 CONTINUE         !end of main summation loop (over m)
+            end do
+         end do     !(over n,n')
+      end do        !end of main summation loop (over m)
 
 C Final multiplication of S11,S12,S21,S22 by (1/k) in the
 C original code:
