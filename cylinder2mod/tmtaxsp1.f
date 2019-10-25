@@ -2943,24 +2943,25 @@ C  Gaussian elimination             !NAG library not used
   5   CALL ZGER(ZQ,IPIV,NNMAX,NPN2,EMACH)  !Gauss elimination of ZQ to
                                            !a lower diagonal matrix
 ! 5   call zgetrf_wrap(ZQ, IPIV)
-      DO 6 I=1,NNMAX
+      DO I=1,NNMAX
               DO K=1,NNMAX    !Initialization of the right-hand side ZB
                               !(a row vector) of the matrix equation ZX*ZQ=ZB
 
-              ZX(K)=cmplx_dp(RGQR(I,K),RGQI(I,K))
+                ZX(K)=cmplx_dp(RGQR(I,K),RGQI(I,K))
               ENDDO
 !     call zgetrs_wrap(ZQ, ZX, IPIV)
-      CALL ZSUR(ZQ,IPIV,ZX,NNMAX,NPN2,EMACH)  !Solving ZX*ZQ=ZB by
+              CALL ZSUR(ZQ,IPIV,ZX,NNMAX,NPN2,EMACH)
+                                               !Solving ZX*ZQ=ZB by
                                                !backsubstition
                                                !(ZX overwritten on exit)
              DO K=1,NNMAX
 *
 * Assign T-matrix elements = - RG(Q) * (Q**(-1))
 *
-             TR1(I,K)=-DBLE(ZX(K))
-             TI1(I,K)=-aimag(ZX(K))
+               TR1(I,K)=-DBLE(ZX(K))
+               TI1(I,K)=-aimag(ZX(K))
              ENDDO
-  6   CONTINUE
+      end do
 *
    70 RETURN
       END

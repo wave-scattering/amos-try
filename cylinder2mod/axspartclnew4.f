@@ -3546,7 +3546,7 @@ C  parts:
                 RGQI(N1,N2)=TRGQI(N1,N2)
   320 CONTINUE
 *
-      CALL TT(NM,NCHECK)
+      CALL TT(NM)
 *
       RETURN
       END
