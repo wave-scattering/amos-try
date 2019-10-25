@@ -100,7 +100,7 @@ C---------------------------------------------------------------------
       real(dp) TOL,DEFP,DEFPP,DDELT,DDELTP,x_max,x_min
       real(dp) hlength_max,hlength_min,rl_min,rl_max
       complex(dp) ZEPS0,CCEPS,CSEPS           !,ZARTAN
-      character*1 ync,yncv
+      character(1) ync,yncv
       logical ynperfcon,ynperfconv,ynintens,ynoptth,ynbrug,yncheck
 cc      external ZARTAN
 
@@ -2365,9 +2365,9 @@ cc         end if
 * assigning of RT^{ij} and IT^{ij} matrix entries to be
 * used later by AMPL routine
 
-      DO 213 N2=1,NMAX
+      DO N2=1,NMAX
          NN2=N2+NMAX
-         DO 213 N1=1,NMAX
+         DO N1=1,NMAX
             NN1=N1+NMAX
             ZZ1=TR1(N1,N2)
             RT11(1,N1,N2)=ZZ1
@@ -2388,8 +2388,8 @@ cc         end if
 *
             QSCA=QSCA+ZZ1*ZZ1+ZZ2*ZZ2+ZZ3*ZZ3+ZZ4*ZZ4
      &           +ZZ5*ZZ5+ZZ6*ZZ6+ZZ7*ZZ7+ZZ8*ZZ8
-*
-  213 CONTINUE   !end of the loop over orbital numbers
+         end do
+      end do !end of the loop over orbital numbers
 *________________
 
 
