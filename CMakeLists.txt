@@ -34,7 +34,7 @@ if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     # gfortran
     # Enable this if you want to check for single/double corruption (and use
     # the Debug build):
-    #set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -fdefault-real-8")
+#    set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} -fdefault-real-8")
 endif ()
 
 #set(CMAKE_BUILD_TYPE Release
@@ -51,15 +51,15 @@ add_subdirectory(FiNeR)
 #add_subdirectory(mishchenko_dp_fixed_particles)
 set(common "-std=f2008")
 
-#set(CMAKE_BUILD_TYPE Debug
-#        CACHE STRING "Build type (Debug, Release)" FORCE)
-#set(warn "-Wall -Wextra  -fPIC -fmax-errors=1")
-#set(CMAKE_Fortran_FLAGS_DEBUG   "${common} ${warn} -Wunused-variable -Wimplicit-interface -Wunused-dummy-argument -g -fbounds-check -fcheck-array-temporaries -fbacktrace")
+set(CMAKE_BUILD_TYPE Debug
+        CACHE STRING "Build type (Debug, Release)" FORCE)
+set(warn "-Wall -Wextra  -fPIC -fmax-errors=1")
+set(CMAKE_Fortran_FLAGS_DEBUG   "${common} ${warn} -Wunused-variable -Wimplicit-interface -Wunused-dummy-argument -g -fbounds-check -fcheck-array-temporaries -fbacktrace")
 
-set(CMAKE_BUILD_TYPE Release
-            CACHE STRING "Build type (Debug, Release)" FORCE)
-#set(CMAKE_Fortran_FLAGS_RELEASE "${common} -O3 -march=native -ffast-math -funroll-loops -mtune=native -fopenmp" )
-set(CMAKE_Fortran_FLAGS_RELEASE "${common} -O3 -march=native -ffast-math -funroll-loops -mtune=native" )
+#set(CMAKE_BUILD_TYPE Release
+#            CACHE STRING "Build type (Debug, Release)" FORCE)
+##set(CMAKE_Fortran_FLAGS_RELEASE "${common} -O3 -march=native -ffast-math -funroll-loops -mtune=native -fopenmp" )
+#set(CMAKE_Fortran_FLAGS_RELEASE "${common} -O3 -march=native -ffast-math -funroll-loops -mtune=native" )
 
 #add_subdirectory(cylinder)
 
