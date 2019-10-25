@@ -691,8 +691,7 @@ c      PARAMETER (LMAXD=50,LMAXD1=LMAXD+1)
 c      real(dp) DDV1(LMAXD1),DV1(LMAXD1),DV2(LMAXD1)
 
       integer n,nmax,M,I,I2
-      real(dp) A,X,QS,QS1,DSI,D1,D2,D3,DER,DN,DX,QN,QN1,QN2,
-     & QNM,QNM1,QMM
+      real(dp) A,X,QS,D3,DER,DX,QMM
 
 * DDV1 and DV2 initialization
       DO 1 N=1,NMAX
@@ -1689,7 +1688,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
 
 C*********************************************************************
  
-      SUBROUTINE BESS (X,XR,XI,NG,NMAX,NNMAX1,NNMAX2)
+      SUBROUTINE BESS (X,XR,XI,NG,NMAX,NNMAX1)
 C--------/---------/---------/---------/---------/---------/---------/--
 C >>> X,XR,XI,NG,NMAX,NNMAX1,NNMAX2
 C <<< Output J,Y,JR,JI,DJ,DY,DJR,DJI  to common block CBESS
@@ -1954,10 +1953,10 @@ C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       IMPLICIT real(dp) (A-H,O-Z)
       INCLUDE 'ampld.par.f'
-      INTEGER NOUT     
+      INTEGER NOUT
 * number of the output unit
       PARAMETER (NOUT=35)
-      
+
       real(dp)  X(NPNG2),W(NPNG2),AN(NPN1),
      *        R(NPNG2),DR(NPNG2),SIG(NPN2),
      *        J(NPNG2,NPN1),Y(NPNG2,NPN1),
@@ -3227,7 +3226,7 @@ C <<< RAT
 C=================
 C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
-      IMPLICIT real(dp) (A-H,O-Z)
+      real(dp) :: E, D, RAT, R
       IF (D.GE.1) GO TO 10
       E=DSQRT(1D0-D*D)
       R=0.5D0*(D**(2D0/3D0) + D**(-1D0/3D0)*DASIN(E)/E)

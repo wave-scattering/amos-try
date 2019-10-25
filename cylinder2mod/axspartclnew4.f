@@ -95,11 +95,10 @@ C---------------------------------------------------------------------
 
       use libcylinder
       implicit none
-      integer LMX,LCS,ILCS,ikl,ieps,istep,ide,ndefp,itter
+      integer LCS,ILCS,ikl,ieps,istep,ide,ndefp,itter
       integer NOUT,NOUTI,NSTEP,NFIN,NMAT,NP,NPP,NDGS,NDGSP
       real(dp) TOL,DEFP,DEFPP,DDELT,DDELTP,x_max,x_min
       real(dp) hlength_max,hlength_min,rl_min,rl_max
-      real(dp) lambda_min,lambda_max,omega_max
       complex(dp) ZEPS0,CCEPS,CSEPS           !,ZARTAN
       character*1 ync,yncv
       logical ynperfcon,ynperfconv,ynintens,ynoptth,ynbrug,yncheck
@@ -112,7 +111,7 @@ C ::: number of the output unit for the field intensity
       PARAMETER (NOUTI=60)
 c Maximal number of spherical harmonics used. The floating number is
 c specified below by the value of LMAX parameter
-      PARAMETER (lmx=100)
+!     PARAMETER (lmx=100)
 *
 * If convergence test in the calculation of the scattering cross sections
 * is to be performed, yncheck=.true., otherwise yncheck=.false.
@@ -204,7 +203,7 @@ c Declarations:
       integer ICHOICE,LMAX,NCHECK,NAXSM,NCHECKP,NAXSMP  !common block variables
 
       real(dp) RMF(lcs),rff(lcs),RMUF,ff,filfrac   !ff for Bruggemann; filfrac for ZnS
-      real(dp) xs,lambda,rap,rev_beg
+      real(dp) lambda,rev_beg
       real(dp) enw,xstep,revf,revin,revinl,revl
       real(dp) omf(NFIN),omxf,reepsz,plasma,omxp
       real(dp) delo,omega0,omega,rsnm,hlength
