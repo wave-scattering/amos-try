@@ -852,17 +852,18 @@ C--------/---------/---------/---------/---------/---------/---------/--
 *
 !     DATA PI/3.141592653589793d0/
 *      
-      DO 10 N=1,NMAX
+      DO N=1,NMAX
            NN=N*(N+1)
            AN(N)=dble(NN)
            D=DSQRT(dble(2*N+1)/dble(NN))
            DD(N)=D
-           DO 10 N1=1,N
+           DO N1=1,N
                 DDD=D*DD(N1)*0.5D0
                 ANN(N,N1)=DDD
                 ANN(N1,N)=DDD
-   10 CONTINUE
-   
+           end do
+      end do
+
       NG=2*NGAUSS      
 *
 * GIF division points and weights
@@ -1721,7 +1722,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
      *        ADJI(NPN1)
       COMMON /CBESS/ J,Y,JR,JI,DJ,DY,DJR,DJI    !arrays of generated Bessel functions
 * 
-      DO 10 I=1,NG
+      DO I=1,NG
            XX=X(I)
 *
            CALL RJB(XX,AJ,ADJ,NMAX,NNMAX1)
@@ -1732,7 +1733,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
 *
            CALL CJB(YR,YI,AJR,AJI,ADJR,ADJI,NMAX,2)
 *
-           DO 10 N=1,NMAX
+           DO N=1,NMAX
                 J(I,N)=AJ(N)
                 Y(I,N)=AY(N)
                 JR(I,N)=AJR(N)
@@ -1741,7 +1742,8 @@ C--------/---------/---------/---------/---------/---------/---------/--
                 DY(I,N)=ADY(N)
                 DJR(I,N)=ADJR(N)
                 DJI(I,N)=ADJI(N)
-   10 CONTINUE
+           end do
+      end do
 
       RETURN
       END
@@ -2861,7 +2863,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
  
 C**********************************************************************
  
-      SUBROUTINE TT(NMAX,NCHECK)
+      SUBROUTINE TT(NMAX)
 C--------/---------/---------/---------/---------/---------/---------/--
 C >>> NMAX,NCHECK
 C <<< COMMON BLOCKS
@@ -2882,8 +2884,8 @@ C--------/---------/---------/---------/---------/---------/---------/--
 cc      real(dp) F(NPN2,NPN2),B(NPN2),WORK(NPN2),
 cc     *       A(NPN2,NPN2),C(NPN2,NPN2),D(NPN2,NPN2),E(NPN2,NPN2)
       real(dp) TR1(NPN2,NPN2),TI1(NPN2,NPN2)
-      complex(dp) ZQ(NPN2,NPN2),ZX(NPN2),ZW(NPN2)
-      INTEGER IPIV(NPN2),IPVT(NPN2)
+      complex(dp) ZQ(NPN2,NPN2),ZX(NPN2)
+      INTEGER IPIV(NPN2)
 *
       COMMON /CHOICE/ ICHOICE
       COMMON /CT/ TR1,TI1
