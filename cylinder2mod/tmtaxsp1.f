@@ -1951,11 +1951,18 @@ C  separately for the real and imaginary parts of the integrand.
 C
 C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
-      IMPLICIT real(dp) (A-H,O-Z)
-      INCLUDE 'ampld.par.f'
-      INTEGER NOUT
-* number of the output unit
-      PARAMETER (NOUT=35)
+      IMPLICIT none
+      integer ngauss, nmax, ncheck, naxsm, i, i1, i2, k1, k2, kk1, kk2,
+     & mm1, n, n1, n2, ng, ngss, nm, nnmax
+      real(dp) :: PPI, PIR, PII, D1N1, A12, A21, A22, AI12, AI21, AN1,
+     & AN12, AN2, AR12, AR21, B1I, B1R, B2I, B2R, B3I, B3R, B4I, B4R,
+     & B5r, b5i, c1r, c1i, c2r, c2i, c3r, c3i, c4r, c4i, c5r, c5i,
+     & d1n2, d2n1, d2n2, dd1, dd2, ddri, drii, drri, f1, f2,
+     & factor, gi12, gi21, gr12, gr21,
+     & qdj1,  qdji2, qdjr2, qdy1, qj1,
+     & qji2, qjr2, qy1,  rri, si, tai12, tai21,
+     & tar12, tar21, tgi12, tgi21,
+     & tgr12, tgr21, tppi, tpii, tpir, uri
 
       real(dp)  X(NPNG2),W(NPNG2),AN(NPN1),
      *        R(NPNG2),DR(NPNG2),SIG(NPN2),
@@ -2003,15 +2010,15 @@ cc      COMMON /CT/ TR1,TI1                       !output from TT routine
       ENDIF
 *
       SI=1D0
-      DO 5 N=1,NNMAX
+      DO N=1,NNMAX
            SI=-SI
            SIG(N)=SI              !=(-1)**N
-    5 CONTINUE
+      end do
 *
 * Assigning Wigner d-matrices - assuming mirror symmetry 
 * in the \theta=\pi/2 plane:
 
-      DO 25 I=1,NGAUSS
+      DO I=1,NGAUSS
 
          I1=NGAUSS-I+1 
 cc         I2=NGAUSS+I 
@@ -2059,21 +2066,19 @@ cc         I2=NGAUSS+I
           ENDDO     
            
          END IF
-                                                        
-   25 CONTINUE
+      end do
 *
 *  Assigning r^2(\theta)*weight product:
 
-      DO 40 I=1,NGSS
+      DO I=1,NGSS
            RR(I)=W(I)*R(I)
            
 cc           if (dr(i).eq.0.d0) RR(I)=0.d0   !temporarily only
-           
-   40 CONTINUE
+      end do
 * 
-      DO 300 N1=MM1,NMAX
+      DO N1=MM1,NMAX
            AN1=AN(N1)
-           DO 300 N2=MM1,NMAX
+           DO N2=MM1,NMAX
                 AN2=AN(N2)
                 
                 AR12=0D0
@@ -2091,7 +2096,7 @@ c        OPEN(NOUT+3,FILE='surfint.dat')   !Gauss convergence check
 *
 * Gauss integration loop:
 *
-                DO 200 I=1,NGSS    !=NGAUSS   if NCHECK.EQ.1
+                DO I=1,NGSS    !=NGAUSS   if NCHECK.EQ.1
                                    !=2*NGAUSS if NCHECK.EQ.0 
                 
                     D1N1=D1(I,N1)
@@ -2212,8 +2217,7 @@ C  parts:
                     
                     GR21=GR21+F1*C4R+F2*C5R        !~Re Rg J^{21}
                     GI21=GI21+F1*C4I+F2*C5I        !~Im Rg J^{21}
-                    
-  200           CONTINUE               !end of Gauss integration
+                end do               !end of Gauss integration
   
 c                write(nout+3,*)'N1=',N1,'   N2=',N2 
 c                write(nout+3,*)'AR12=', AR12 
@@ -2238,8 +2242,8 @@ c                write(nout+3,*)'GI21=', GI21
                 RG21(N1,N2)=GR21*AN12
                 IG12(N1,N2)=GI12*AN12
                 IG21(N1,N2)=GI21*AN12
-                
-  300 CONTINUE            !end of the loop over angular momenta
+          end do
+      end do            !end of the loop over angular momenta
  
 c      close(nout+3)
 
@@ -2872,12 +2876,6 @@ C   OUTPUT IN COMMON /CT/
 C
 C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
-      IMPLICIT real(dp) (A-H,O-Z)
-      INTEGER NOUT
-
-* number of the output unit
-      PARAMETER (NOUT=35)
-      INCLUDE 'ampld.par.f'
 
       real(dp)  QR(NPN2,NPN2),QI(NPN2,NPN2),EMACH,
      *       RGQR(NPN2,NPN2),RGQI(NPN2,NPN2)
