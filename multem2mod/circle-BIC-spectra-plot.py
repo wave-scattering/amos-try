@@ -59,18 +59,21 @@ def eval(i):
 
 if __name__ == "__main__":
     plt.figure(figsize=(11,6))
-    npts = 204
-    lmax=4
+    npts = 504
+    lmax=7
     r_ratio = 0.47050000
     # from_k = 3.7128
     # to_k = 3.7129
-    plot_factor = 1#/3.666*1.75
+    plot_factor = 1#/3.666*1.75x`
     #from_k = 1.6/plot_factor
     #to_k = 2.25/plot_factor
 
-    # As in article
-    from_k = 3.73
-    to_k = 3.741
+    # # As in article
+    # from_k = 3.73
+    # to_k = 3.741
+
+    from_k = 3.731
+    to_k = 3.735
 
     # from_k = 3.3
     # to_k = 4.6

@@ -389,6 +389,7 @@ C     -4                  sphere cut by a plane on its top
 C     -5                  sphere cut by a plane on its bottom
 C     -6                  cone
 C     -7                  conus on a finite cylinder (in preparation)
+!     -8                  nanorod (cylinder capped with half-spheroids)
 *
 C      PARAMETER (NP=-1)
 *
@@ -408,6 +409,8 @@ C     NP=-6 - DEFP is the height (along the axial symmetry axis) divided
 C             by the width of a base
 C     NP=-7 - DEFP  is the height (along the axial symmetry axis) divided
 C             by the width of a base
+C     NP=-8 - DEFP = the ratio of the cylinder diameter to its length.
+C             Spheroid caps are defined by additional parameter.
 C
 C Warning:
 C   In computations for spheres, use DEFP=1.000001 instead of DEFP=1.
@@ -1867,6 +1870,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
      &  val=string, error=error)
       NP = 0
       if ((trim(string) .eq. 'cylinder').or.(trim(string)=='-2')) NP=-2
+      if ((trim(string) .eq. 'nanorod').or.(trim(string)=='-8')) NP=-8
 
       call fini%get(section_name='cylinder', option_name='rl_min',
      &  val=double, error=error)
