@@ -98,7 +98,7 @@ C---------------------------------------------------------------------
       integer LCS,ILCS,ikl,ieps,istep,ide,ndefp,itter
       integer NOUT,NOUTI,NSTEP,NFIN,NMAT,NP,NPP,NDGS,NDGSP
       real(dp) TOL,DEFP,DEFPP,DDELT,DDELTP,x_max,x_min
-      real(dp) hlength_max,hlength_min,rl_min,rl_max
+      real(dp) hlength_max,hlength_min,rl_min,rl_max, nanorod_cap_hr
       complex(dp) ZEPS0,CCEPS,CSEPS           !,ZARTAN
       character(1) ync,yncv
       logical ynperfcon,ynperfconv,ynintens,ynoptth,ynbrug,yncheck
@@ -363,6 +363,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       write(6,*)'sphere cut by a plane on its bottom: type -5'
       write(6,*)'upwardly oriented cone: type -6'
       write(6,*)'conus on a finite cylinder: type -7'
+      write(6,*)'nanorod/finite cylinder capped by half-spheroids: -9'
       write(6,*)'intensity around homogeneous/coated sphere: type -50'
 
       Open(unit = 90,file = 'epsWater.txt', status = 'unknown')
@@ -389,7 +390,7 @@ C     -4                  sphere cut by a plane on its top
 C     -5                  sphere cut by a plane on its bottom
 C     -6                  cone
 C     -7                  conus on a finite cylinder (in preparation)
-!     -8                  nanorod (cylinder capped with half-spheroids)
+!     -9                  nanorod (cylinder capped with half-spheroids)
 *
 C      PARAMETER (NP=-1)
 *
@@ -409,8 +410,9 @@ C     NP=-6 - DEFP is the height (along the axial symmetry axis) divided
 C             by the width of a base
 C     NP=-7 - DEFP  is the height (along the axial symmetry axis) divided
 C             by the width of a base
-C     NP=-8 - DEFP = the ratio of the cylinder diameter to its length.
-C             Spheroid caps are defined by additional parameter.
+C     NP=-9 - DEFP = the ratio of the cylinder diameter to its length.
+C             Spheroid caps of the nanorod are defined by additional
+C             parameter.
 C
 C Warning:
 C   In computations for spheres, use DEFP=1.000001 instead of DEFP=1.
@@ -493,7 +495,7 @@ C             prolate spheroids.
 *
 C--------/---------/---------/---------/---------/---------/---------/--
 *
-      else if (NP.eq.-2) then
+      else if ((NP .eq. -2) .or. (NP .eq. -9)) then
 *
       if (rl_max < 0_dp) then
         write(6,*)'Enter cylinder maximal r/l:'
@@ -621,7 +623,8 @@ C                          ellipsoid, and cylinder
 *
       NCHECK=0
 *
-      IF (NP.EQ.-1.OR.NP.EQ.-2) NCHECK=1         !ellipsoid(sphere) and cylinder
+      !ellipsoid(sphere), cylinder, and nanorod
+      IF (NP.EQ.-1.OR.NP.EQ.-2.OR.NP.EQ.-9) NCHECK=1
       IF (NP.GT.0.AND.(-1)**NP.EQ.1) NCHECK=1    !Chebysh. particle
 *
 C If theta=pi/2 is not a scatterer mirror symmetry plane:
@@ -1669,8 +1672,8 @@ ctest
 
 C      write(90,*) lambda,  global_eps_r,
 C     & global_eps_i
-      call ampldr(yncheck,lmax,ichoice,npp,defpp,rsnm,hlength,lambda,
-     &  zeps(1),zeps0)
+      call ampldr(yncheck,lmax,ichoice,npp,defpp,nanorod_cap_hr,
+     & rsnm,hlength,lambda,zeps(1),zeps0)
       end if
 *
 C--------/---------/---------/---------/---------/---------/---------/--
@@ -1870,7 +1873,12 @@ C--------/---------/---------/---------/---------/---------/---------/--
      &  val=string, error=error)
       NP = 0
       if ((trim(string) .eq. 'cylinder').or.(trim(string)=='-2')) NP=-2
-      if ((trim(string) .eq. 'nanorod').or.(trim(string)=='-8')) NP=-8
+      if ((trim(string) .eq. 'nanorod').or.(trim(string)=='-8')) NP=-9
+
+      call fini%get(section_name='nanorod',
+     &  option_name='nanorod_cap_hr', val=double, error=error)
+      nanorod_cap_hr = 1_dp ! default is round cap
+      if (error==0) nanorod_cap_hr = double
 
       call fini%get(section_name='cylinder', option_name='rl_min',
      &  val=double, error=error)
@@ -1982,8 +1990,8 @@ C--------/---------/---------/---------/---------/---------/---------/--
 
 C**********************************************************************
 
-      SUBROUTINE AMPLDR(yncheck,nmax,ichoicev,np,eps,rsnm,ht,lambda,
-     1                  zeps1,zeps0)
+      SUBROUTINE AMPLDR(yncheck,nmax,ichoicev,np,eps,nanorod_cap_hr,
+     &                  rsnm,ht,lambda,zeps1,zeps0)
 
 C Warning in module AMPLDR in file ampldr.f: Variables set but never used:
 C    NGGG set at line 493 file ampldr.f
@@ -2017,6 +2025,8 @@ C     NP=-3 - no EPS is specified
 C     NP=-4 - EPS is the height (along the axial symmetry axis)
 C             of the resulting cut sphere
 C                Note that always EPS.LT.2*REV specified
+!     NP=-9 - EPS = the ratio of the cylinder diameter to its length,
+!             nanorod caps are set independantly.
 C
 C Warning:
 C  In computations for spheres, use EPS=1.000001 instead of EPS=1.
@@ -2049,6 +2059,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       LOGICAL YNCHECK
       integer nmax, np, inm1, ixxx, m, m1, n, n1, n11, n2 ,n22, ncheck,
      & ndgs, ngaus, ngauss, nm, nma, nn1, nn2, nnm, nnnggg
+      real(dp) nanorod_cap_hr
 
        INCLUDE 'ampld.par.f'
 * number of the output unit
@@ -2123,6 +2134,7 @@ cc      write(6,*)'LAM,LAMBDA in AMPL=', LAM, LAMBDA
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-1) CALL SAREA (EPS,RAT)
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.GE.0) CALL SURFCH(NP,EPS,RAT)
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-2) CALL SAREAC (EPS,RAT)
+      IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-9) CALL SAREAC (EPS,RAT)
       IF (NP.EQ.-3) CALL DROP (RAT)
 
       PRINT 7400, LAM,MRR,MRI
@@ -2320,7 +2332,8 @@ c 7337    FORMAT(' NG=',I3,'  DC2=',D8.2,'   DC1=',D8.2)
 *
 * specify particle shape:
 *
-         CALL VARY(LAM,MRR,MRI,A,EPS,RSNM,HT,NP,NGAUSS,X,P,
+         CALL VARY(LAM,MRR,MRI,A,EPS,nanorod_cap_hr,
+     &             RSNM,HT,NP,NGAUSS,X,P,
      &              PPI,PIR,PII,R,DR,DDR,DRR,DRI,NMAX)
 *
 * determine m=m'=0 elements of the T matrix

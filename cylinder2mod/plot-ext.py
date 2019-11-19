@@ -13,6 +13,11 @@ data = np.loadtxt('axs-ext.dat', skiprows=15,
 data_size=len(set(data[:,0]))
 data = data[:,3].reshape((-1,data_size))
 
+negval = sum(1 for i in data.flatten() if i < 0)
+print('Negative', negval, 'of',len(data.flatten()))
+
+data = np.abs(data)
+
 plt.imshow(data,
            origin='lower',
            cmap='jet',

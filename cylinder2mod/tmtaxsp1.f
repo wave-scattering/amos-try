@@ -46,6 +46,8 @@ C     NP=-3 - no EPS is specified
 C     NP=-4 - EPS is the height (along the axial symmetry axis) 
 C             of the resulting cut sphere
 C                Note that always EPS.LT.2*REV specified
+!     NP=-9 - EPS = the ratio of the cylinder diameter to its length,
+!             nanorod caps are set independantly.
 C
 C Warning:
 C  In computations for spheres, use EPS=1.000001 instead of EPS=1.    
@@ -162,6 +164,8 @@ cc      COMMON /TMAT/ RT11,RT12,RT21,RT22,IT11,IT12,IT21,IT22
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-1) CALL SAREA (EPS,RAT)
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.GE.0) CALL SURFCH(NP,EPS,RAT)
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-2) CALL SAREAC (EPS,RAT)
+      ! TODO make a correct evaluation of SAREAC for nanorod
+      IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-9) CALL SAREAC (EPS,RAT)
       IF (NP.EQ.-3) CALL DROP (RAT)
 
 *___________________________________________________
@@ -957,7 +961,7 @@ c_____ estimate integration intervals:
 
       ENDIF           !NEPS
 
-      ELSE IF (NP.EQ.-2) THEN         ! cylinder
+      ELSE IF (NP.EQ.-2.or.NP.eq.-9) THEN  ! cylinder or nanorod
 
 ******************   Only involves cylinders  ********************** 
      
@@ -1081,7 +1085,8 @@ c      CALL GAULEG(-1.D0,1.D0,X,W,NG)
  
 C**********************************************************************
  
-      SUBROUTINE VARY (LAM,MRR,MRI,A,EPS,RSNM,HT,NP,NGAUSS,X,
+      SUBROUTINE VARY (LAM,MRR,MRI,A,EPS,nanorod_cap_hr,
+     &                 RSNM,HT,NP,NGAUSS,X,
      *                 P,PPI,PIR,PII,R,DR,DDR,DRR,DRI,NMAX)
 C--------/---------/---------/---------/---------/---------/---------/--
 C >>> LAM,MRR,MRI,A,EPS,NP,NGAUSS,X,P,NMAX
@@ -1115,6 +1120,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       INCLUDE 'ampld.par.f'
       IMPLICIT real(dp) (A-H,O-Z)
+      real(dp) nanorod_cap_hr
       real(dp)  X(NPNG2),R(NPNG2),DR(NPNG2),MRR,MRI,LAM,
      *        Z(NPNG2),ZR(NPNG2),ZI(NPNG2),
      *        DDR(NPNG2),DRR(NPNG2),DRI(NPNG2)
@@ -1136,6 +1142,8 @@ cc      COMMON /CBESS/ J,Y,JR,JI,DJ,DY,DJR,DJI
       IF (NP.EQ.-6) CALL RSP6(X,NG,RSNM,HT,R,DR)        ! upwardly oriented cone
 cc      IF (NP.EQ.-7) CALL RSP7(X,NG,RSNM,HT,R,DR)          ! cone cut on its top
 cc      IF (NP.EQ.-8) CALL RSP8(X,NG,RSNM,HT,R,DR)          ! cone on a cylinder
+      IF (NP.EQ.-9) CALL RSP3nanorod (X,NG,NGAUSS,A,EPS,
+     &                                nanorod_cap_hr, R,DR) ! nanorod
 
 *
       WV=P*2D0/LAM                 !wave vector
@@ -1356,7 +1364,7 @@ cc         RTHET=0.D0
       RETURN
       END
 
-      SUBROUTINE RSP3nanorod (X,NG,NGAUSS,REV,EPS,cap, R,DR)
+      SUBROUTINE RSP3nanorod (X,NG,NGAUSS,REV,EPS,CAPHR, R,DR)
 C--------/---------/---------/---------/---------/---------/---------/--
 C >>> X,NG,NGAUSS,REV,EPS
 C <<< R,DR
@@ -1364,13 +1372,15 @@ C=========================
 C   Activated for NP=-8
 C
 C   Calculation of the functions R(I)=r(y)**2 and
-C   DR(I)=((d/dy)r(y))/r(y) for an oblate/prolate cylinder
-C   specified by the parameters REV and EPS  at NGAUSS  Gauss
+C   DR(I)=((d/dy)r(y))/r(y) for a nanorod particle
+C   specified by the parameters REV, EPS, and CAP  at NGAUSS  Gauss
 C   integration points in the integral over theta.
 C
 C   X - GIF division points \cos\theta_j -  Y = arccos X
 C   REV ... equal-volume-sphere radius r_ev
 C   EPS ... the ratio of the cylinder diameter to its length
+C   CAP ... the ratio of half-spheroid caps height to cylider radius
+C   CAPH .. cap height
 C   H   ... half-length of the cylinder
 C   A=H*EPS  ... cylinder radius   ====>
 C
@@ -1385,40 +1395,69 @@ C   1.LE.I.LE.NGAUSS
 C
 C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
-      IMPLICIT real(dp) (A-H,O-Z)
+      implicit none
+!     IMPLICIT real(dp) (A-H,O-Z)
+      integer NG, NGAUSS, I
+      real(dp) REV, EPS, CAP, H, A, CO, SI, RAD, RTHET, xstep
+      real(dp) aa, bb, valDR, c2, s2, alpha, beta, gamma, detsr,
+     &  nom, psi, CAPHR
       real(dp) X(NG),R(NG),DR(NG)
-
+!     REV = 1.
+!     EPS = 2.
+!     CAP = 0.0003
+!     xstep = pi/(ng-1)
+!     do i = 1,ng, 1
+!     ! TODO: remove testing setting of x
+!       x(i)=cos(pi-(i-1)*xstep)
+!     end do
 * Determine half-length of the cylinder
       H=REV*( (2D0/(3D0*EPS*EPS))**(1D0/3D0) )
 
 * Determine cylinder radius:
       A=H*EPS
+!   # Parameters for nanorod cap
+      CAP = CAPHR*A
+      aa = CAP**2
+      bb = A**2
 
-      DO 50 I=1,NGAUSS
+      DO I=1,NGAUSS,1
          CO=-X(I)
          SI=DSQRT(1D0-CO*CO)
 
-         IF (SI/CO.GT.A/H) GO TO 20
-
-* Along the plane cuts:
-         RAD=H/CO
-         RTHET=H*SI/(CO*CO)
-         GO TO 30
-
+         IF (dabs(SI/CO).GT.dabs(A/H)) then
 * Along the circular surface:
-   20    CONTINUE
-         RAD=A/SI
-         RTHET=-A*CO/(SI*SI)
-cc         RAD=1.D-10
-cc         RTHET=0.D0
+           RAD=A/SI
+           RTHET=-A*CO/(SI*SI)
+           valDR = -RTHET/RAD
 
-   30    R(I)=RAD*RAD
+         else
+*  Along elliptic cap
+            c2 = CO**2
+            s2 = SI**2
+! Solution of square euation of ellipse move from the origin
+            alpha = bb*c2 + aa*s2
+            beta = -bb*2*H*CO
+            gamma = bb*H**2 - aa*bb
+            detsr = dsqrt(beta**2 - (gamma)*(4*alpha))
+            nom = -beta - detsr
+            RAD = nom/(2*alpha)
+            psi = aa*SI*CO - bb*SI*CO
+
+            valDR = -(
+     &                 (-2*H*bb*SI - (-4*H**2*bb**2*SI*CO -4*gamma*psi
+     &                              )
+     &                              /detsr
+     &                 )
+     &                 - 2*nom*psi/alpha
+     &               )/nom
+         endif
+         R(I)=RAD*RAD
          R(NG-I+1)=R(I)          !using mirror symmetry
 
-         DR(I)=-RTHET/RAD
+         DR(I)=valDR
          DR(NG-I+1)=-DR(I)       !using mirror symmetry
 
-   50 CONTINUE
+      enddo
 
       RETURN
       END

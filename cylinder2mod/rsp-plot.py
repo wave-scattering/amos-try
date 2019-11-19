@@ -10,7 +10,6 @@ def rsp1 (X,NG,NGAUSS,REV,EPS):
     A = REV*EPS**(1./3.)
     AA = A*A
     EE = EPS*EPS
-    print(EE)
     EE1 = EE-1.
 
     for I in range(NGAUSS):
@@ -66,7 +65,6 @@ def rsp_nanorod(X, NG, NGAUSS, REV, EPS, CAP):
     # Parameters for nanorod cap
     aa = CAP**2
     bb = A**2
-    print(aa, bb, aa/bb, bb/aa)
 
     for I in range(NGAUSS):
         CO = -X[I]
@@ -80,7 +78,6 @@ def rsp_nanorod(X, NG, NGAUSS, REV, EPS, CAP):
         else:
             # Along elliptic cap
             c2 = CO**2
-            if c2< 0.5: print(c2)
             s2 = SI**2
             # Solution of square euation of ellipse move from the origin
             alpha = bb*c2 + aa*s2
@@ -107,23 +104,23 @@ def rsp_nanorod(X, NG, NGAUSS, REV, EPS, CAP):
     return R, DR
 
 
-NGAUSS = 150
+NGAUSS = 100
 NG = 2*NGAUSS
-REV = 1.  # Equivalent radius
-EPS = 2.
-CAP = 0.0003
+REV = 2.  # Equivalent radius
+EPS = 1
+CAP = 0.0004
 isOnlySpheroid = True
 isOnlySpheroid = False
 if isOnlySpheroid:
     CAP = REV*EPS**(1./3.)/2
 
-theta = np.linspace(0, -np.pi, NG)
+theta = np.linspace(0, np.pi, NG)[::-1]
 # theta = np.linspace(-np.pi/2., np.pi/2., NG)
 X = np.cos(theta)
-
 R1, DR1 = rsp1(X, NG, NGAUSS, REV, EPS)
 R3, DR3 = rsp3(X, NG, NGAUSS, REV, EPS)
 R, DR = rsp_nanorod(X, NG, NGAUSS, REV, EPS, CAP)
+print(DR)
 
 xxa = R**(1./2.)*np.cos(theta)
 yya = R**(1./2.)*np.sin(theta)
@@ -198,7 +195,7 @@ rdr = str(sp.diff(RAD,x)/RAD) \
     .replace('-4*aa*SI*CO + 4*bb*SI*CO', '-4*psi')
 
 
-print(rdr)
+#print(rdr)
 
 
 plt.show()
