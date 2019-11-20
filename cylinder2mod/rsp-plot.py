@@ -53,10 +53,6 @@ def rsp3(X, NG, NGAUSS, REV, EPS):
 def rsp_nanorod(X, NG, NGAUSS, REV, EPS, CAP):
     R = np.zeros(NG)
     DR = np.zeros(NG)
-    # # Determine half-length of the cylinder
-    # H = REV*( (2./(3.*EPS*EPS))**(1./3.) )
-    # # Determine cylinder radius:
-    # A = H*EPS
 
     # Determine cylinder radius:
     A = REV * (2*EPS / (3 - EPS * EPSe)) ** (1. / 3.)
@@ -93,14 +89,16 @@ def rsp_nanorod(X, NG, NGAUSS, REV, EPS, CAP):
             detsr = np.sqrt(beta**2 - (gamma)*(4*alpha))
             # RAD = (-beta - detsr)/(2*alpha)
             RAD = (-beta+np.sqrt(beta**2-4*alpha*gamma))/(2*alpha)
-            nom = -beta - detsr
-            psi = aa*SI*CO - bb*SI*CO
+            # nom = -beta - detsr
+            # psi = aa*SI*CO - bb*SI*CO
             # .replace('-beta - np.sqrt(beta**2 - (gamma)*(4*alpha))','nom') \
             # .replace('np.sqrt(beta**2 - (gamma)*(4*alpha))','detsr') \
             # valDR = -((2*alpha)*((-2*Hc*bb*SI - (-4*Hc**2*bb**2*SI*CO + (-gamma)*(8*psi)/2)/detsr)/(2*alpha) + (nom)*(-4*psi)/(2*alpha)**2)/(nom))
             # valDR = -(2*alpha)*((-2*Hc*bb*SI - (-4*Hc**2*bb**2*SI*CO + (-gamma)*(8*psi)/2)/detsr)/(2*alpha) + (nom)*(-4*psi)/(2*alpha)**2)/(nom)
-            valDR = -((2*aa*s2 + 2*bb*c2)*((-2*Hc*bb*SI - (-4*Hc**2*bb**2*SI*CO + (-Hc**2*bb + aa*bb)*(8*aa*SI*CO - 8*bb*SI*CO)/2)/np.sqrt(4*Hc**2*bb**2*c2 - (Hc**2*bb - aa*bb)*(4*aa*s2 + 4*bb*c2)))/(2*aa*s2 + 2*bb*c2) + (2*Hc*bb*CO - np.sqrt(4*Hc**2*bb**2*c2 - (Hc**2*bb - aa*bb)*(4*aa*s2 + 4*bb*c2)))*(-4*aa*SI*CO + 4*bb*SI*CO)/(2*aa*s2 + 2*bb*c2)**2)/(2*Hc*bb*CO - np.sqrt(4*Hc**2*bb**2*c2 - (Hc**2*bb - aa*bb)*(4*aa*s2 + 4*bb*c2)))
-                      )
+            # valDR = -((2*aa*s2 + 2*bb*c2)*((-2*Hc*bb*SI - (-4*Hc**2*bb**2*SI*CO + (-Hc**2*bb + aa*bb)*(8*aa*SI*CO - 8*bb*SI*CO)/2)/np.sqrt(4*Hc**2*bb**2*c2 - (Hc**2*bb - aa*bb)*(4*aa*s2 + 4*bb*c2)))/(2*aa*s2 + 2*bb*c2) + (2*Hc*bb*CO - np.sqrt(4*Hc**2*bb**2*c2 - (Hc**2*bb - aa*bb)*(4*aa*s2 + 4*bb*c2)))*(-4*aa*SI*CO + 4*bb*SI*CO)/(2*aa*s2 + 2*bb*c2)**2)/(2*Hc*bb*CO - np.sqrt(4*Hc**2*bb**2*c2 - (Hc**2*bb - aa*bb)*(4*aa*s2 + 4*bb*c2)))
+            #           )
+            valDR = (2*aa*s2 + 2*bb*c2)*(-(-2*Hc*bb*SI - (-4*Hc**2*bb**2*SI*CO + (-Hc**2*bb + aa*bb)*(8*aa*SI*CO - 8*bb*SI*CO)/2)/np.sqrt(4*Hc**2*bb**2*c2 - (Hc**2*bb - aa*bb)*(4*aa*s2 + 4*bb*c2)))/(2*aa*s2 + 2*bb*c2) - (2*Hc*bb*CO - np.sqrt(4*Hc**2*bb**2*c2 - (Hc**2*bb - aa*bb)*(4*aa*s2 + 4*bb*c2)))*(-4*aa*SI*CO + 4*bb*SI*CO)/(2*aa*s2 + 2*bb*c2)**2)/(2*Hc*bb*CO - np.sqrt(4*Hc**2*bb**2*c2 - (Hc**2*bb - aa*bb)*(4*aa*s2 + 4*bb*c2)))
+
             # valDR = -(
             #            (-2*Hc*bb*SI - (-4*Hc**2*bb**2*SI*CO -4*gamma*psi
             #                         )
@@ -176,14 +174,15 @@ NG = 2*NGAUSS
 REV = 2.  # Equivalent radius
 EPS = 0.5
 # EPSe = 1/EPS
-EPSe = 1.2
+EPSe = 1.1
 
 
-A = REV * (2*EPS / (3 - EPS * EPSe)) ** (1. / 3.)
-H = A/EPS
-CAP = A * EPSe
+A1 = REV * (2*EPS / (3 - EPS * EPSe)) ** (1. / 3.)
+H1 = A1/EPS
+CAP = A1 * EPSe
 
 theta = np.linspace(0, np.pi, NG)[::-1]
+theta2 = np.linspace(0, np.pi/10, NG)[::-1]
 # theta = np.linspace(-np.pi/2., np.pi/2., NG)
 X = np.cos(theta)
 R1, DR1 = rsp1(X, NG, NGAUSS, REV, EPS)
@@ -191,24 +190,53 @@ R3, DR3 = rsp3(X, NG, NGAUSS, REV, EPS)
 R, DR = rsp_nanorod(X, NG, NGAUSS, REV, EPS, CAP)
 Rc, DRc = rsp_nanorod2(X, NG, NGAUSS, REV, EPS, EPSe)
 
-xxa = R**(1./2.)*np.cos(theta)
-yya = R**(1./2.)*np.sin(theta)
-xxac = Rc**(1./2.)*np.cos(theta)
-yyac = Rc**(1./2.)*np.sin(theta)
-xxa1 = R1**(1./2.)*np.cos(theta)
-yya1 = R1**(1./2.)*np.sin(theta)
-xxa3 = R3**(1./2.)*np.cos(theta)
-yya3 = R3**(1./2.)*np.sin(theta)
+# isDecart = True
+isDecart = False
+if isDecart:
+    xxa = R**(1./2.)*np.cos(theta)
+    yya = R**(1./2.)*np.sin(theta)
+    xxac = Rc**(1./2.)*np.cos(theta)
+    yyac = Rc**(1./2.)*np.sin(theta)
+    xxa1 = R1**(1./2.)*np.cos(theta)
+    yya1 = R1**(1./2.)*np.sin(theta)
+    xxa3 = R3**(1./2.)*np.cos(theta)
+    yya3 = R3**(1./2.)*np.sin(theta)
+    xcirc = H1 * np.sin(theta2)
+    ycirc = H1 * np.cos(theta2)
+
+    xx3 = DR3*np.cos(theta)*R3**(1./2.)
+    yy3 = DR3*np.sin(theta)*R3**(1./2.)
+    xx1 = DR1*np.cos(theta)*R1**(1./2.)
+    yy1 = DR1*np.sin(theta)*R1**(1./2.)
+    xx = DR*np.cos(theta)*R**(1./2.)
+    yy = DR*np.sin(theta)*R**(1./2.)
+    xxc = DRc*np.cos(theta)*Rc**(1./2.)
+    yyc = DRc*np.sin(theta)*Rc**(1./2.)
+else:
+    xxa = theta
+    xxac = theta
+    xxa1 = theta
+    xxa3 = theta
+    xcirc = theta
+
+    yya = R**(1./2.)
+    yyac = Rc**(1./2.)
+    yya1 = R1**(1./2.)
+    yya3 = R3**(1./2.)
+    ycirc = H1*np.ones(len(theta))
 
 
-xx3 = DR3*np.cos(theta)*R3**(1./2.)
-yy3 = DR3*np.sin(theta)*R3**(1./2.)
-xx1 = DR1*np.cos(theta)*R1**(1./2.)
-yy1 = DR1*np.sin(theta)*R1**(1./2.)
-xx = DR*np.cos(theta)*R**(1./2.)
-yy = DR*np.sin(theta)*R**(1./2.)
-xxc = DRc*np.cos(theta)*R**(1./2.)
-yyc = DRc*np.sin(theta)*R**(1./2.)
+
+    xx = theta
+    xxc = theta
+    xx1 = theta
+    xx3 = theta
+
+    yy = DR*R**(1./2.)
+    yyc = DRc*Rc**(1./2.)
+    yy1 = DR1*R1**(1./2.)
+    yy3 = DR3*R3**(1./2.)
+
 
 color = np.linspace(0, 1, len(xx))
 
@@ -217,7 +245,7 @@ color = np.linspace(0, 1, len(xx))
 fig, ax = plt.subplots(1,2)
 ax[0].scatter(xxc, yyc, c=color, s=80, cmap='Set1')
 ax[0].scatter(xx, yy, c=color, s=20, cmap='tab10', marker='x')
-ax[0].scatter(xx3, yy3, c=color, s=1, cmap='jet')
+ax[0].scatter(xx3, yy3, c=color, s=10, cmap='jet')
 ax[0].scatter(xx1, yy1, c=color, s=1, cmap='plasma_r')
     # ax[0].set_aspect(1.0)
     # ax[1].scatter(xx3, yy3, c=color, cmap='gray')
@@ -229,10 +257,11 @@ ax[0].scatter(xx1, yy1, c=color, s=1, cmap='plasma_r')
     #     ax[i].set_ylim(-2,2)
 # else:
 #     fig, ax = plt.subplots(1,1)
+ax[1].plot(xcirc,ycirc)
 ax[1].scatter(xxac, yyac, c=color, s=80,cmap='Set1')
 ax[1].scatter(xxa, yya, c=color, s=20,cmap='tab10', marker ='x')
 ax[1].scatter(xxa1, yya1, c=color,s=1, cmap='plasma_r')
-ax[1].scatter(xxa3, yya3, c=color,s=1, cmap='jet_r')
+ax[1].scatter(xxa3, yya3, c=color,s=10, cmap='jet_r')
 # ax[0].set_aspect(1.0)
 # ax[1].scatter(xxa3, yya3, c=color, cmap='gray')
 ax[1].set_aspect(1.0)
@@ -252,7 +281,7 @@ beta = -2*Hc*bb*CO
 gamma = Hc**2*bb - aa*bb
 RAD = (-beta-sp.sqrt(beta**2-4*alpha*gamma))/(2*alpha)
 
-rdr = str(sp.diff(RAD,x)/RAD) \
+rdr = str(sp.diff(-RAD,x)/RAD) \
     .replace('sin(x)**2','s2') \
     .replace('cos(x)**2','c2') \
     .replace('sin(x)','SI') \
