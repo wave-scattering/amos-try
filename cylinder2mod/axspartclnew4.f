@@ -1874,7 +1874,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
      &  val=string, error=error)
       NP = 0
       if ((trim(string) .eq. 'cylinder').or.(trim(string)=='-2')) NP=-2
-      if ((trim(string) .eq. 'nanorod').or.(trim(string)=='-8')) NP=-9
+      if ((trim(string) .eq. 'nanorod').or.(trim(string)=='-9')) NP=-9
 
       call fini%get(section_name='nanorod',
      &  option_name='nanorod_cap_hr', val=double, error=error)

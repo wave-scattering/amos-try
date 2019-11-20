@@ -1371,7 +1371,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
 C >>> X,NG,NGAUSS,REV,EPS
 C <<< R,DR
 C=========================
-C   Activated for NP=-8
+C   Activated for NP=-9
 C
 C   Calculation of the functions R(I)=r(y)**2 and
 C   DR(I)=((d/dy)r(y))/r(y) for a nanorod particle

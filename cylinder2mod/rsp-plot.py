@@ -173,8 +173,8 @@ NGAUSS = 200
 NG = 2*NGAUSS
 REV = 2.  # Equivalent radius
 EPS = 0.5
-# EPSe = 1/EPS
-EPSe = 1.1
+EPSe = 1/EPS
+EPSe = 0
 
 
 A1 = REV * (2*EPS / (3 - EPS * EPSe)) ** (1. / 3.)
