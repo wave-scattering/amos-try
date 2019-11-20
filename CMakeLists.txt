@@ -53,8 +53,8 @@ set(common "-std=f2008")
 
 set(CMAKE_BUILD_TYPE Debug
         CACHE STRING "Build type (Debug, Release)" FORCE)
-set(warn "-Wall -Wextra  -fPIC -fmax-errors=1")
-set(CMAKE_Fortran_FLAGS_DEBUG   "${common} ${warn} -Wunused-variable -Wimplicit-interface -Wunused-dummy-argument -g -fbounds-check -fcheck-array-temporaries -fbacktrace")
+#set(warn "-Wall -Wunused-variable -Wimplicit-interface -Wunused-dummy-argument -Wextra  -fPIC -fmax-errors=1")
+set(CMAKE_Fortran_FLAGS_DEBUG   "${common} ${warn} -g -fbounds-check -fcheck-array-temporaries -fbacktrace")
 
 #set(CMAKE_BUILD_TYPE Release
 #            CACHE STRING "Build type (Debug, Release)" FORCE)
@@ -66,4 +66,4 @@ set(CMAKE_Fortran_FLAGS_DEBUG   "${common} ${warn} -Wunused-variable -Wimplicit-
 
 add_subdirectory(multem2mod)
 add_subdirectory(cylinder2mod)
-add_subdirectory(mishchenko_dp_fixed_particles)
+#add_subdirectory(mishchenko_dp_fixed_particles)

@@ -749,7 +749,7 @@ C  different NDGS-values are recommended.
             NDGS=min(16.d0,4*max(defp,1.d0/defp))
          end if
       ELSE
-         NDGS=4
+         NDGS=5
       END IF
 *
       WRITE(6,*) 'NDGS=',NDGS

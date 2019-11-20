@@ -124,7 +124,7 @@ def rsp_nanorod2(X, NG, NGAUSS, REV, EPS, EPSe):
     He = A * EPSe
     Hc = H -He
     EPSc = Hc/A
-
+    print(A, H, He, Hc, EPSc, EPSe, EPS, REV)
     for I in range(NGAUSS):
         CO = -X[I]
         SI = np.sqrt(1.-CO*CO)
@@ -169,12 +169,12 @@ def rsp_nanorod2(X, NG, NGAUSS, REV, EPS, EPSe):
 
 
 
-NGAUSS = 200
+NGAUSS = 8
 NG = 2*NGAUSS
 REV = 2.  # Equivalent radius
 EPS = 0.5
 EPSe = 1/EPS
-EPSe = 0
+EPSe = 0.65
 
 
 A1 = REV * (2*EPS / (3 - EPS * EPSe)) ** (1. / 3.)
@@ -189,7 +189,7 @@ R1, DR1 = rsp1(X, NG, NGAUSS, REV, EPS)
 R3, DR3 = rsp3(X, NG, NGAUSS, REV, EPS)
 R, DR = rsp_nanorod(X, NG, NGAUSS, REV, EPS, CAP)
 Rc, DRc = rsp_nanorod2(X, NG, NGAUSS, REV, EPS, EPSe)
-
+print(DRc)
 # isDecart = True
 isDecart = False
 if isDecart:
@@ -244,7 +244,7 @@ color = np.linspace(0, 1, len(xx))
 # if False:
 fig, ax = plt.subplots(1,2)
 ax[0].scatter(xxc, yyc, c=color, s=80, cmap='Set1')
-ax[0].scatter(xx, yy, c=color, s=20, cmap='tab10', marker='x')
+# ax[0].scatter(xx, yy, c=color, s=20, cmap='tab10', marker='x')
 ax[0].scatter(xx3, yy3, c=color, s=10, cmap='jet')
 ax[0].scatter(xx1, yy1, c=color, s=1, cmap='plasma_r')
     # ax[0].set_aspect(1.0)
@@ -259,7 +259,7 @@ ax[0].scatter(xx1, yy1, c=color, s=1, cmap='plasma_r')
 #     fig, ax = plt.subplots(1,1)
 ax[1].plot(xcirc,ycirc)
 ax[1].scatter(xxac, yyac, c=color, s=80,cmap='Set1')
-ax[1].scatter(xxa, yya, c=color, s=20,cmap='tab10', marker ='x')
+# ax[1].scatter(xxa, yya, c=color, s=20,cmap='tab10', marker ='x')
 ax[1].scatter(xxa1, yya1, c=color,s=1, cmap='plasma_r')
 ax[1].scatter(xxa3, yya3, c=color,s=10, cmap='jet_r')
 # ax[0].set_aspect(1.0)

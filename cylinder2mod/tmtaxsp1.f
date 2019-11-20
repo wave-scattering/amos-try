@@ -1366,7 +1366,7 @@ cc         RTHET=0.D0
       RETURN
       END
 
-      SUBROUTINE RSP3nanorod (X,NG,NGAUSS,REV,EPS,CAPHR, R,DR)
+      SUBROUTINE RSP3nanorod (X,NG,NGAUSS,REV,EPS, EPSe, R,DR)
 C--------/---------/---------/---------/---------/---------/---------/--
 C >>> X,NG,NGAUSS,REV,EPS
 C <<< R,DR
@@ -1380,15 +1380,13 @@ C   integration points in the integral over theta.
 C
 C   X - GIF division points \cos\theta_j -  Y = arccos X
 C   REV ... equal-volume-sphere radius r_ev
-C   EPS ... the ratio of the cylinder diameter to its length
-C   CAP ... the ratio of half-spheroid caps height to cylider radius
-C   CAPH .. cap height
-C   H   ... half-length of the cylinder
-C   A=H*EPS  ... cylinder radius   ====>
-C
-C   4*PI*REV**3/3=2*H*PI*A**2=2*PI*H**3*EPS**2 <====>
-C                H=REV*( (2D0/(3D0*EPS*EPS))**(1D0/3D0) )
-C
+C   EPS ... the ratio of the nanorod diameter to its length
+C   EPSe ... the ratio of half-spheroid caps height to cylider radius
+C   EPSc ... the ration of cylinder half-height to cylinder radius
+C   H   ... half-length of the nanorod
+C   He .. cap height
+C   Hc .. cylinder height
+C   A  ... cylinder radius   ====>
 C
 C   NGAUSS ... the number of GIF division points
 C   NG=2*NGAUSS
@@ -1402,56 +1400,48 @@ C--------/---------/---------/---------/---------/---------/---------/--
       integer NG, NGAUSS, I
       real(dp) REV, EPS, CAP, H, A, CO, SI, RAD, RTHET, xstep
       real(dp) aa, bb, valDR, c2, s2, alpha, beta, gamma, detsr,
-     &  nom, psi, CAPHR
+     &  nom, psi, He, Hc, EPSe, EPSc
       real(dp) X(NG),R(NG),DR(NG)
-!     REV = 1.
-!     EPS = 2.
-!     CAP = 0.0003
+
+!     REV = 2._dp
+!     EPS = 0.5_dp
+!     EPSe = 0.65_dp
 !     xstep = pi/(ng-1)
 !     do i = 1,ng, 1
 !     ! TODO: remove testing setting of x
 !       x(i)=cos(pi-(i-1)*xstep)
 !     end do
-* Determine half-length of the cylinder
-      H=REV*( (2D0/(3D0*EPS*EPS))**(1D0/3D0) )
 
-* Determine cylinder radius:
-      A=H*EPS
-!   # Parameters for nanorod cap
-      CAP = CAPHR*A
-      aa = CAP**2
-      bb = A**2
+      !     cylider radius
+      A = REV * (2D0*EPS / (3D0 - EPS * EPSe)) ** (1D0 / 3D0)
+      H = A/EPS      ! nanorod half-height
+      He = A * EPSe  ! spheroid cap half-height
+      Hc = H -He     ! cylinder half-height
+      EPSc = Hc/A    ! cylider aspect ratio
+
 
       DO I=1,NGAUSS,1
          CO=-X(I)
-         SI=DSQRT(1D0-CO*CO)
+         SI=DSQRT(1_dp-CO*CO)
 
-         IF (dabs(SI/CO).GT.dabs(A/H)) then
+         IF ((Hc*SI).GT.(A*CO)) then
 * Along the circular surface:
            RAD=A/SI
            RTHET=-A*CO/(SI*SI)
            valDR = -RTHET/RAD
-
          else
 *  Along elliptic cap
             c2 = CO**2
             s2 = SI**2
 ! Solution of square euation of ellipse move from the origin
-            alpha = bb*c2 + aa*s2
-            beta = -bb*2*H*CO
-            gamma = bb*H**2 - aa*bb
-            detsr = dsqrt(beta**2 - (gamma)*(4*alpha))
-            nom = -beta + detsr
-            RAD = nom/(2*alpha)
-            psi = aa*SI*CO - bb*SI*CO
+            alpha = dsqrt( (EPSe**2 - EPSc**2)*s2 + c2)
+            beta = EPSe**2*s2 + c2
+            RAD = (Hc*CO + He*alpha) / beta
+            valDR = -((-alpha*Hc*SI
+     &                   + He*(EPSe**2-EPSc**2-1._dp)*SI*CO
+     &               )/(He*alpha**2 + alpha*Hc*CO)
+     &               - ( 2*(EPSe**2 - 1._dp)*SI*CO / beta ))
 
-            valDR = -(
-     &                 (-2*H*bb*SI - (-4*H**2*bb**2*SI*CO -4*gamma*psi
-     &                              )
-     &                              /detsr
-     &                 )
-     &                 - 2*nom*psi/alpha
-     &               )/nom
          endif
          R(I)=RAD*RAD
          R(NG-I+1)=R(I)          !using mirror symmetry
