@@ -115,7 +115,8 @@ c specified below by the value of LMAX parameter
 *
 * If convergence test in the calculation of the scattering cross sections
 * is to be performed, yncheck=.true., otherwise yncheck=.false.
-      parameter (yncheck=.false.)
+!     parameter (yncheck=.false.)
+      parameter (yncheck=.true.)
 *
 * If particle is coated, ync=y, otherwise ync=n
       parameter (ync='n')
@@ -2134,7 +2135,8 @@ cc      write(6,*)'LAM,LAMBDA in AMPL=', LAM, LAMBDA
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-1) CALL SAREA (EPS,RAT)
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.GE.0) CALL SURFCH(NP,EPS,RAT)
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-2) CALL SAREAC (EPS,RAT)
-      IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-9) CALL SAREAC (EPS,RAT)
+      IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-9)
+     &  CALL SAREAnanorod (EPS,RAT,nanorod_cap_hr)
       IF (NP.EQ.-3) CALL DROP (RAT)
 
       PRINT 7400, LAM,MRR,MRI
@@ -2194,7 +2196,8 @@ c 7334    FORMAT(' NMAX =', I3,'  DC2=',D8.2,'   DC1=',D8.2)
          CALL CONST(NGAUSS,NMAX,X,W,AN,ANN,S,SS,NP,EPS,RSNM,HT)      !In AMPLDR
 *
 * specify particle shape:
-         CALL VARY(LAM,MRR,MRI,A,EPS,RSNM,HT,NP,NGAUSS,X,P,
+         CALL VARY(LAM,MRR,MRI,A,EPS,nanorod_cap_hr,
+     &              RSNM,HT,NP,NGAUSS,X,P,
      &              PPI,PIR,PII,R,DR,DDR,DRR,DRI,NMAX)
 *
 * determine m=m'=0 elements of the T matrix
@@ -2277,7 +2280,8 @@ cc         NGGG=2*NGAUSS
 *
 * specify particle shape:
 *
-         CALL VARY(LAM,MRR,MRI,A,EPS,RSNM,HT,NP,NGAUSS,X,P,
+         CALL VARY(LAM,MRR,MRI,A,EPS,nanorod_cap_hr,
+     &              RSNM,HT,NP,NGAUSS,X,P,
      &              PPI,PIR,PII,R,DR,DDR,DRR,DRI,NMAX)
 *
 * determine m=m'=0 elements of the T matrix

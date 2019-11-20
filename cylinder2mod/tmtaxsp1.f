@@ -1,4 +1,4 @@
-      SUBROUTINE TMTAXSP(nmax,RAP,zeps1,zeps0,TMT) 
+      SUBROUTINE TMTAXSP(nmax,nanorod_cap_hr,RAP,zeps1,zeps0,TMT)
 
 c Warning in module TMTAXSP in file tmtaxsp.f: Variables set but never used:
 c    NGGG set at line 182 file tmtaxsp.f
@@ -165,7 +165,8 @@ cc      COMMON /TMAT/ RT11,RT12,RT21,RT22,IT11,IT12,IT21,IT22
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.GE.0) CALL SURFCH(NP,EPS,RAT)
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-2) CALL SAREAC (EPS,RAT)
       ! TODO make a correct evaluation of SAREAC for nanorod
-      IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-9) CALL SAREAC (EPS,RAT)
+      IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-9)
+     &  CALL SAREAnanorod (EPS,RAT, nanorod_cap_hr)
       IF (NP.EQ.-3) CALL DROP (RAT)
 
 *___________________________________________________
@@ -195,7 +196,8 @@ cc      NNNGGG=NGAUSS+1
 *
 * specify particle shape:
 *
-         CALL VARY(LAM,MRR,MRI,A,EPS,NP,NGAUSS,X,P,PPI,PIR,PII,R,
+         CALL VARY(LAM,MRR,MRI,A,EPS,nanorod_cap_hr,
+     &              NP,NGAUSS,X,P,PPI,PIR,PII,R,
      &              DR,DDR,DRR,DRI,NMAX)
 *
 * determine m=m'=0 elements of the T matrix
@@ -1439,7 +1441,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
             beta = -bb*2*H*CO
             gamma = bb*H**2 - aa*bb
             detsr = dsqrt(beta**2 - (gamma)*(4*alpha))
-            nom = -beta - detsr
+            nom = -beta + detsr
             RAD = nom/(2*alpha)
             psi = aa*SI*CO - bb*SI*CO
 
@@ -3394,6 +3396,22 @@ C--------/---------/---------/---------/---------/---------/---------/--
 C********************************************************************
  
       SUBROUTINE SAREAC (EPS,RAT)
+C--------/---------/---------/---------/---------/---------/---------/--
+C >>> EPS
+C <<< RAT
+C=================
+C--------/---------/---------/---------/---------/---------/---------/--
+      use libcylinder
+      IMPLICIT real(dp) (A-H,O-Z)
+*
+      RAT=(1.5D0/EPS)**(1D0/3D0)
+      RAT=RAT/DSQRT( (EPS+2D0)/(2D0*EPS) )
+*
+      RETURN
+      END
+
+
+      SUBROUTINE SAREAnanorod (EPS,RAT, nanorod_cap_hr)
 C--------/---------/---------/---------/---------/---------/---------/--
 C >>> EPS
 C <<< RAT

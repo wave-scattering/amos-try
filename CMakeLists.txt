@@ -66,3 +66,4 @@ set(CMAKE_Fortran_FLAGS_DEBUG   "${common} ${warn} -Wunused-variable -Wimplicit-
 
 add_subdirectory(multem2mod)
 add_subdirectory(cylinder2mod)
+add_subdirectory(mishchenko_dp_fixed_particles)
