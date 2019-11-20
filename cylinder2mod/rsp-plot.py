@@ -171,12 +171,12 @@ def rsp_nanorod2(X, NG, NGAUSS, REV, EPS, EPSe):
 
 
 
-NGAUSS = 100
+NGAUSS = 200
 NG = 2*NGAUSS
 REV = 2.  # Equivalent radius
-EPS = 2
+EPS = 0.5
 # EPSe = 1/EPS
-EPSe = 0.45
+EPSe = 1.2
 
 
 A = REV * (2*EPS / (3 - EPS * EPSe)) ** (1. / 3.)
@@ -215,8 +215,8 @@ color = np.linspace(0, 1, len(xx))
 # if True:
 # if False:
 fig, ax = plt.subplots(1,2)
-ax[0].scatter(xxc, yyc, c=color, s=80, cmap='hot_r')
-ax[0].scatter(xx, yy, c=color, s=40, cmap='gray', marker='x')
+ax[0].scatter(xxc, yyc, c=color, s=80, cmap='Set1')
+ax[0].scatter(xx, yy, c=color, s=20, cmap='tab10', marker='x')
 ax[0].scatter(xx3, yy3, c=color, s=1, cmap='jet')
 ax[0].scatter(xx1, yy1, c=color, s=1, cmap='plasma_r')
     # ax[0].set_aspect(1.0)
@@ -229,15 +229,15 @@ ax[0].scatter(xx1, yy1, c=color, s=1, cmap='plasma_r')
     #     ax[i].set_ylim(-2,2)
 # else:
 #     fig, ax = plt.subplots(1,1)
-ax[1].scatter(xxac, yyac, c=color, s=80,cmap='hot_r')
-ax[1].scatter(xxa, yya, c=color, s=40,cmap='gray', marker ='x')
+ax[1].scatter(xxac, yyac, c=color, s=80,cmap='Set1')
+ax[1].scatter(xxa, yya, c=color, s=20,cmap='tab10', marker ='x')
 ax[1].scatter(xxa1, yya1, c=color,s=1, cmap='plasma_r')
 ax[1].scatter(xxa3, yya3, c=color,s=1, cmap='jet_r')
-    # ax[0].set_aspect(1.0)
-    # ax[1].scatter(xxa3, yya3, c=color, cmap='gray')
-    # ax[1].set_aspect(1.0)
-    # ax[2].scatter(xxa1, yya1, c=color, cmap='gray')
-    # ax[2].set_aspect(1.0)
+# ax[0].set_aspect(1.0)
+# ax[1].scatter(xxa3, yya3, c=color, cmap='gray')
+ax[1].set_aspect(1.0)
+# ax[2].scatter(xxa1, yya1, c=color, cmap='gray')
+# ax[2].set_aspect(1.0)
 
 import sympy as sp
 
