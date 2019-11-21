@@ -61,15 +61,21 @@ def getErrorDescRandomSphereCluster(ErrCode):
     else:
         return 'Unknown error code'
 
-def tmfixed(Lambda, NP, Re, Rat, Eps, m, Error = 1.0e-4, NDGS = 4, Alpha = 0.0, Beta = 90.0, Theta0 = 0.0, Theta = 0.0, Phi0 = 0.0, Phi = 0.0):
-    from _tmfixed import tmfixed as tmf
+
+def tmfixed(lmbda, np, re, rat, eps,  m, epse=1, error = 1.0e-4, ndgs = 4, alpha = 0.0, beta = 90.0, theta0 = 0.0, theta = 0.0, phi0 = 0.0, Phi = 0.0):
+    import sys
+    if sys.version_info.major >= 3:
+        from tmatrix._tmfixed import tmfixed as tmf
+    else:
+        from _tmfixed import tmfixed as tmf
+
     from scipy import zeros
 
     S = zeros((2, 2), dtype = complex)
     Qext = 0.0
     Qsca = 0.0
     errcode = 0
-    (Qext, Qsca, S[0, 0], S[0, 1], S[1, 0], S[1, 1], errcode) = tmf(Re, Rat, Lambda, m.real, m.imag, Eps, NP, Error, NDGS, Alpha, Beta, Theta0, Theta, Phi0, Phi)
+    (Qext, Qsca, S[0, 0], S[0, 1], S[1, 0], S[1, 1], errcode) = tmf(re, rat, lmbda, m.real, m.imag, eps, epse, np, error, ndgs, alpha, beta, theta0, theta, phi0, Phi)
 
     if errcode > 0:
         raise ValueError(getErrorDescFixed(errcode))

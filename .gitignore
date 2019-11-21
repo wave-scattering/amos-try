@@ -36,3 +36,5 @@ fort.*
 *.dat
 *.a
 *.cbp
+*.pyf
+#*#
