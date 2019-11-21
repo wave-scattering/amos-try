@@ -3,13 +3,14 @@
 
 python module _tmfixed ! in 
     interface  ! in :_tmfixed
-        subroutine tmfixed(axi,rat,lam,mrr,mri,eps,np,ddelt,ndgs,alpha,beta,thet0,thet,phi0,phi,qext,qsca,s11,s12,s21,s22,errcode) ! in :_tmfixed:ampld.lp.f
+        subroutine tmfixed(axi,rat,lam,mrr,mri,eps,epse,np,ddelt,ndgs,alpha,beta,thet0,thet,phi0,phi,qext,qsca,s11,s12,s21,s22,errcode) ! in :_tmfixed:ampld.lp.f
             real*8 :: axi
             real*8 :: rat
             real*8 :: lam
             real*8 :: mrr
             real*8 :: mri
             real*8 :: eps
+            real*8 :: epse
             integer :: np
             real*8 :: ddelt
             integer :: ndgs
