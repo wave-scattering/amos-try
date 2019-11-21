@@ -3,12 +3,13 @@ q!    -*- f90 -*-
 
 python module _tmrandom ! in 
     interface  ! in :_tmrandom
-        subroutine tmrandom(axi,rat,lam,mrr,mri,eps,np,ddelt,ndgs,cextin,cscat,asymm,errcode) ! in :_tmrandom:tmd.lp.f
+        subroutine tmrandom(axi,rat,lam,mrr,mri,eps,epse,np,ddelt,ndgs,cextin,cscat,asymm,errcode) ! in :_tmrandom:tmd.lp.f
             real*8 :: axi
             real*8 :: rat
             real*8 :: lam
             real*8 :: mrr
             real*8 :: mri
+            real*8 :: eps
             real*8 :: eps
             integer :: np
             real*8 :: ddelt

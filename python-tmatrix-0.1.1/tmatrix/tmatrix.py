@@ -1,4 +1,4 @@
-(SPH, CYL, GCH) = (-1, -2, -3)
+(SPH, CYL, GCH, NANOROD) = (-1, -2, -3, -9)
 (OBLATE, PROLATE) = range(2)
 (CGM, OOSM) = range(2)
 MAXSPHERES = 150
@@ -85,7 +85,7 @@ def tmfixed(lmbda, np, re, rat, eps,  m, epse=1, error = 1.0e-4, ndgs = 4, alpha
 
     return (Qext, Qsca, Qabs, Albedo), S
 
-def tmrandom(Lambda, NP, Re, Rat, Eps, m, Error = 1.0e-4, NDGS = 4):
+def tmrandom(Lambda, NP, Re, Rat, Eps, m, Error = 1.0e-4, NDGS = 4, epse = 1):
     from _tmrandom import tmrandom as tmr
     from scipy import pi
 
@@ -93,7 +93,8 @@ def tmrandom(Lambda, NP, Re, Rat, Eps, m, Error = 1.0e-4, NDGS = 4):
     Csca = 0.0
     g = 0.0
     errcode = 0
-    (Cext, Csca, g, errcode) = tmr(Re, Rat, Lambda, m.real, m.imag, Eps, NP, Error, NDGS)
+    epse = 1.
+    (Cext, Csca, g, errcode) = tmr(Re, Rat, Lambda, m.real, m.imag, Eps, epse, NP, Error, NDGS)
 
     if errcode > 0:
         raise ValueError(getErrorDescRandom(errcode))
@@ -237,6 +238,11 @@ def RandomCylinder(Lambda, Rv, Eps, m, Type = OBLATE, Error = 1.0e-4, NDGS = 4):
         return tmrandom(Lambda, CYL, Rv, 1.0, Eps, m, Error, NDGS)
     else:
         return tmrandom(Lambda, CYL, Rv, 1.0, 1.0/Eps, m, Error, NDGS)
+
+
+def RandomNanorod(Lambda, Rv, Eps, m, Type = OBLATE, Error = 1.0e-4, NDGS = 4, epse=1):
+    return tmrandom(Lambda, NANOROD, Rv, 1.0, Eps, m, Error, NDGS, epse=epse)
+
 
 def RandomChebyshev(Lambda, Rv, Eps, m, Degree, Type = OBLATE, Error = 1.0e-4, NDGS = 4):
     if Type == OBLATE:
