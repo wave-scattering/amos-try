@@ -1,0 +1,11 @@
+Metadata-Version: 1.0
+Name: python-tmatrix
+Version: 0.1.1
+Summary: T-matrix codes by M.I. Mishchenko, L.D. Travis, and D.W. Mackowski
+Home-page: http://www.giss.nasa.gov/staff/mmishchenko/t_matrix.html
+Author: Ovidio Peña Rodríguez
+Author-email: ovidio@bytesfall.com
+License: GPL
+Description: A Python implementation of T-matrix codes by Michael I. Mishchenko, Larry D. Travis, and Daniel W. Mackowski (the used versions of the code employ DOUBLE PRECISION variables) for the following cases:  * The calculation of the amplitude and phase matrices for a particle with an axially    symmetric shape in fixed or randomly oriented positions. The calculations are    applicable to spheroids, finite circular cylinders, Chebyshev particles, and    generalized Chebyshev particles (distorted water drops).  * The calculation of light scattering by randomly oriented two-sphere clusters with    touching or separated components.  * The calculation of the efficiency factors and scattering matrix for an ensemble of    spheres in fixed or randomly oriented positions.
+Keywords: Light scattering,Axisymmetric particles,Efficiency factors,Cross-sections
+Platform: any

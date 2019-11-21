@@ -1,0 +1,8 @@
+include MANIFEST.in
+include setup.py
+include Makefile
+include src/tmd.par.f
+include src/ampld.par.f
+include src/tmnsdim.f
+include tests/*
+
