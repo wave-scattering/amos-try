@@ -1,0 +1,195 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module _tmnsfixed ! in 
+    interface  ! in :_tmnsfixed
+        subroutine tmnsfixed(npart,xi,xp,yp,zp,sni,ski,xscale,rscale,rirscale,riiscale,itermax,meth,eps,qeps1,qeps2,phi,theta,qet,qat,qst,g,qei,qai,sa,sm,errcode) ! in :_tmnsfixed:scsmfo1b.f
+            integer :: npart
+            real*8 dimension(150) :: xi
+            real*8 dimension(150) :: xp
+            real*8 dimension(150) :: yp
+            real*8 dimension(150) :: zp
+            real*8 dimension(150) :: sni
+            real*8 dimension(150) :: ski
+            real*8 :: xscale
+            real*8 :: rscale
+            real*8 :: rirscale
+            real*8 :: riiscale
+            integer :: itermax
+            integer :: meth
+            real*8 :: eps
+            real*8 :: qeps1
+            real*8 :: qeps2
+            real*8 :: phi
+            real*8 :: theta
+            real*8, intent(out) :: qet
+            real*8, intent(out) :: qat
+            real*8, intent(out) :: qst
+            real*8, intent(out) :: g
+            real*8 dimension(150,3), intent(out) :: qei
+            real*8 dimension(150,3), intent(out) :: qai
+            complex*16 dimension(4), intent(out) :: sa
+            real*8 dimension(4,4), intent(out) :: sm
+            real*8, intent(out) :: errcode
+            real*8 dimension(165,165) :: bcof
+            real*8 dimension(329) :: fnr
+            common /consts/ bcof,fnr
+        end subroutine tmnsfixed
+        subroutine scatexp(amn0,nodrt,nodrg,gmn) ! in :_tmnsfixed:scsmfo1b.f
+            complex*16 dimension(2,1680,2) :: amn0
+            integer :: nodrt
+            integer :: nodrg
+            complex*16 dimension(nodrg*(nodrg+3)/2+1),depend(nodrg) :: gmn
+            real*8 dimension(165,165) :: bcof
+            real*8 dimension(329) :: fnr
+            common /consts/ bcof,fnr
+        end subroutine scatexp
+        subroutine scatfunc(amn0,nodrt,xv,ct,phi,sa,sm) ! in :_tmnsfixed:scsmfo1b.f
+            complex*16 dimension(2,1680,2) :: amn0
+            integer :: nodrt
+            real*8 :: xv
+            real*8 :: ct
+            real*8 :: phi
+            complex*16 dimension(4) :: sa
+            real*8 dimension(4,4) :: sm
+            real*8 dimension(165,165) :: bcof
+            real*8 dimension(329) :: fnr
+            common /consts/ bcof,fnr
+        end subroutine scatfunc
+        subroutine amncalc(inew,npart,xp,yp,zp,sni,ski,xi,nodr,nodrtmax,niter,eps,qeps1,qeps2,meth,ea,qei,qai,amn0) ! in :_tmnsfixed:scsmfo1b.f
+            integer :: inew
+            integer :: npart
+            real*8 dimension(*) :: xp
+            real*8 dimension(*) :: yp
+            real*8 dimension(*) :: zp
+            real*8 dimension(*) :: sni
+            real*8 dimension(*) :: ski
+            real*8 dimension(*) :: xi
+            integer dimension(150) :: nodr
+            integer :: nodrtmax
+            integer :: niter
+            real*8 :: eps
+            real*8 :: qeps1
+            real*8 :: qeps2
+            integer :: meth
+            real*8 dimension(2) :: ea
+            real*8 dimension(150,3) :: qei
+            real*8 dimension(150,3) :: qai
+            complex*16 dimension(2,1680,2) :: amn0
+            real*8 dimension(165,165) :: bcof
+            real*8 dimension(329) :: fnr
+            common /consts/ bcof,fnr
+        end subroutine amncalc
+        subroutine itersoln(npart,nodr,nblk,eps,niter,meth,itest,ek,drot,amnl,an1,pnp,anp,iter,err) ! in :_tmnsfixed:scsmfo1b.f
+            integer :: npart
+            integer dimension(150) :: nodr
+            integer dimension(150) :: nblk
+            real*8 :: eps
+            integer :: niter
+            integer :: meth
+            integer :: itest
+            complex*16 dimension(10,11175.0) :: ek
+            real*8 dimension(505,11175.0) :: drot
+            complex*16 dimension(2,275,11175.0) :: amnl
+            complex*16 dimension(2,10,150) :: an1
+            complex*16 dimension(2,120,150) :: pnp
+            complex*16 dimension(2,120,150) :: anp
+            integer :: iter
+            real*8 :: err
+        end subroutine itersoln
+        subroutine vctran(anpt,idir,nodrj,nodri,ekt,drott,amnlt,ndd,nda) ! in :_tmnsfixed:scsmfo1b.f
+            complex*16 dimension(2,*) :: anpt
+            integer :: idir
+            integer :: nodrj
+            integer :: nodri
+            complex*16 dimension(*) :: ekt
+            real*8 dimension(*) :: drott
+            complex*16 dimension(2,*) :: amnlt
+            integer :: ndd
+            integer :: nda
+        end subroutine vctran
+        subroutine rotcoef(cbe,kmax,nmax,dc,ndim) ! in :_tmnsfixed:scsmfo1b.f
+            real*8 :: cbe
+            integer :: kmax
+            integer :: nmax
+            real*8 dimension(2 * ndim + 1,*) :: dc
+            integer optional,check((shape(dc,0)-1)/(2)==ndim),depend(dc) :: ndim=(shape(dc,0)-1)/(2)
+            real*8 dimension(165,165) :: bcof
+            real*8 dimension(329) :: fnr
+            common /consts/ bcof,fnr
+        end subroutine rotcoef
+        subroutine rotvec(alpha,cbe,nmax,mmax,amn,idir) ! in :_tmnsfixed:scsmfo1b.f
+            real*8 :: alpha
+            real*8 :: cbe
+            integer :: nmax
+            integer :: mmax
+            complex*16 dimension(2,*) :: amn
+            integer :: idir
+            real*8 dimension(165,165) :: bcof
+            real*8 dimension(329) :: fnr
+            common /consts/ bcof,fnr
+        end subroutine rotvec
+        subroutine trancoef(itype,r,nmax,lmax,ac,nd) ! in :_tmnsfixed:scsmfo1b.f
+            integer :: itype
+            real*8 :: r
+            integer :: nmax
+            integer :: lmax
+            complex*16 dimension(2,nd,*) :: ac
+            integer optional,check(shape(ac,1)==nd),depend(ac) :: nd=shape(ac,1)
+            real*8 dimension(165,165) :: bcof
+            real*8 dimension(329) :: fnr
+            common /consts/ bcof,fnr
+        end subroutine trancoef
+        subroutine tranvec(r,lmax,nmax,amn,eps,err) ! in :_tmnsfixed:scsmfo1b.f
+            real*8 :: r
+            integer :: lmax
+            integer :: nmax
+            complex*16 dimension(2,*) :: amn
+            real*8 :: eps
+            real*8 :: err
+            real*8 dimension(165,165) :: bcof
+            real*8 dimension(329) :: fnr
+            common /consts/ bcof,fnr
+        end subroutine tranvec
+        subroutine vcfunc(m,n,k,l,wmax,vcn) ! in :_tmnsfixed:scsmfo1b.f
+            integer :: m
+            integer :: n
+            integer :: k
+            integer :: l
+            integer :: wmax
+            real*8 dimension(*) :: vcn
+            real*8 dimension(165,165) :: bcof
+            real*8 dimension(329) :: fnr
+            common /consts/ bcof,fnr
+        end subroutine vcfunc
+        subroutine hankel(n,ds,xi) ! in :_tmnsfixed:scsmfo1b.f
+            integer :: n
+            real*8 :: ds
+            complex*16 dimension(*) :: xi
+        end subroutine hankel
+        subroutine bessel(n,ds,nmax,psi) ! in :_tmnsfixed:scsmfo1b.f
+            integer :: n
+            real*8 :: ds
+            integer :: nmax
+            real*8 dimension(*) :: psi
+        end subroutine bessel
+        subroutine mie1(x,sn,sk,nstop,qeps,qext,qsca,an) ! in :_tmnsfixed:scsmfo1b.f
+            real*8 :: x
+            real*8 :: sn
+            real*8 :: sk
+            integer :: nstop
+            real*8 :: qeps
+            real*8 :: qext
+            real*8 :: qsca
+            complex*16 dimension(2,10) :: an
+        end subroutine mie1
+        subroutine cbessel(n,ds,psi) ! in :_tmnsfixed:scsmfo1b.f
+            integer :: n
+            complex*16 :: ds
+            complex*16 dimension(*) :: psi
+        end subroutine cbessel
+    end interface 
+end python module _tmnsfixed
+
+! This file was auto-generated with f2py (version:2).
+! See http://cens.ioc.ee/projects/f2py2e/

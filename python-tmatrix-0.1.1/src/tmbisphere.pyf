@@ -1,0 +1,192 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module _tmbisphere ! in 
+    interface  ! in :_tmbisphere
+        subroutine tmbisphere(lam,r1,n1,k1,r2,n2,k2,r12,cext,csca,g,errcode) ! in :_tmbisphere:bisphere.f
+            real*8 :: lam
+            real*8 :: r1
+            real*8 :: n1
+            real*8 :: k1
+            real*8 :: r2
+            real*8 :: n2
+            real*8 :: k2
+            real*8 :: r12
+            real*8, intent(out) :: cext
+            real*8, intent(out) :: csca
+            real*8, intent(out) :: g
+            integer, intent(out) :: errcode
+        end subroutine tmbisphere
+        subroutine bisphere(xi,x12,sn,sk,al1,al2,al3,al4,be1,be2,cext,csca,nodr1,nodrt1,l1max,lam,errcode) ! in :_tmbisphere:bisphere.f
+            real*8 dimension(2) :: xi
+            real*8 :: x12
+            real*8 dimension(2) :: sn
+            real*8 dimension(2) :: sk
+            real*8 dimension(171) :: al1
+            real*8 dimension(171) :: al2
+            real*8 dimension(171) :: al3
+            real*8 dimension(171) :: al4
+            real*8 dimension(171) :: be1
+            real*8 dimension(171) :: be2
+            real*8 :: cext
+            real*8 :: csca
+            integer :: nodr1
+            integer :: nodrt1
+            integer :: l1max
+            real*8 :: lam
+            integer :: errcode
+            real*4 dimension(86,85,85) :: rt11
+            real*4 dimension(86,85,85) :: rt12
+            real*4 dimension(86,85,85) :: rt21
+            real*4 dimension(86,85,85) :: rt22
+            real*4 dimension(86,85,85) :: it11
+            real*4 dimension(86,85,85) :: it12
+            real*4 dimension(86,85,85) :: it21
+            real*4 dimension(86,85,85) :: it22
+            real*8 dimension(166) :: fac
+            common /tmat/ rt11,rt12,rt21,rt22,it11,it12,it21,it22
+            common /factor/ fac
+        end subroutine bisphere
+        subroutine matr(a1,a2,a3,a4,b1,b2,lmax,npna) ! in :_tmbisphere:bisphere.f
+            real*8 dimension(171) :: a1
+            real*8 dimension(171) :: a2
+            real*8 dimension(171) :: a3
+            real*8 dimension(171) :: a4
+            real*8 dimension(171) :: b1
+            real*8 dimension(171) :: b2
+            integer :: lmax
+            integer :: npna
+        end subroutine matr
+        subroutine hovenr(l1,a1,a2,a3,a4,b1,b2) ! in :_tmbisphere:bisphere.f
+            integer optional,check(len(a1)>=l1),depend(a1) :: l1=len(a1)
+            real*8 dimension(l1) :: a1
+            real*8 dimension(l1),depend(l1) :: a2
+            real*8 dimension(l1),depend(l1) :: a3
+            real*8 dimension(l1),depend(l1) :: a4
+            real*8 dimension(l1),depend(l1) :: b1
+            real*8 dimension(l1),depend(l1) :: b2
+        end subroutine hovenr
+        subroutine gsp(nmax,mord,csca,lam,alf1,alf2,alf3,alf4,bet1,bet2,lmax,errcode) ! in :_tmbisphere:bisphere.f
+            integer :: nmax
+            integer :: mord
+            real*8 :: csca
+            real*8 :: lam
+            real*8 dimension(171) :: alf1
+            real*8 dimension(171) :: alf2
+            real*8 dimension(171) :: alf3
+            real*8 dimension(171) :: alf4
+            real*8 dimension(171) :: bet1
+            real*8 dimension(171) :: bet2
+            integer :: lmax
+            integer :: errcode
+            real*8 dimension(600) :: ssign
+            real*8 dimension(500) :: f
+            real*4 dimension(86,85,85) :: tr11
+            real*4 dimension(86,85,85) :: tr12
+            real*4 dimension(86,85,85) :: tr21
+            real*4 dimension(86,85,85) :: tr22
+            real*4 dimension(86,85,85) :: ti11
+            real*4 dimension(86,85,85) :: ti12
+            real*4 dimension(86,85,85) :: ti21
+            real*4 dimension(86,85,85) :: ti22
+            common /ss/ ssign
+            common /fac/ f
+            common /tmat/ tr11,tr12,tr21,tr22,ti11,ti12,ti21,ti22
+        end subroutine gsp
+        subroutine fact ! in :_tmbisphere:bisphere.f
+            real*8 dimension(500) :: f
+            common /fac/ f
+        end subroutine fact
+        subroutine signum ! in :_tmbisphere:bisphere.f
+            real*8 dimension(600) :: ssign
+            common /ss/ ssign
+        end subroutine signum
+        subroutine ccg(n,n1,nmax,k1,k2,gg,errcode) ! in :_tmbisphere:bisphere.f
+            integer :: n
+            integer :: n1
+            integer :: nmax
+            integer :: k1
+            integer :: k2
+            real*8 dimension(171,86) :: gg
+            integer :: errcode
+        end subroutine ccg
+        subroutine direct(n,m,n1,m1,nn,mm,c) ! in :_tmbisphere:bisphere.f
+            integer :: n
+            integer :: m
+            integer :: n1
+            integer :: m1
+            integer :: nn
+            integer :: mm
+            real*8 :: c
+            real*8 dimension(500) :: f
+            common /fac/ f
+        end subroutine direct
+        subroutine ccgin(n,n1,m,mm,g,errcode) ! in :_tmbisphere:bisphere.f
+            integer :: n
+            integer :: n1
+            integer :: m
+            integer :: mm
+            real*8 :: g
+            integer :: errcode
+            real*8 dimension(600) :: ssign
+            real*8 dimension(500) :: f
+            common /ss/ ssign
+            common /fac/ f
+        end subroutine ccgin
+        subroutine vwhac2(itype,icall,r,ntot,ltot,ms,mold,nm,lm,cm,cn,cn1,ncd,c,a,b) ! in :_tmbisphere:bisphere.f
+            integer :: itype
+            integer :: icall
+            real*8 :: r
+            integer :: ntot
+            integer :: ltot
+            integer :: ms
+            integer :: mold
+            integer :: nm
+            integer :: lm
+            complex*16 dimension(*) :: cm
+            complex*16 dimension(*) :: cn
+            complex*16 dimension(*) :: cn1
+            integer optional,check((shape(c,0)-1)==ncd),depend(c) :: ncd=(shape(c,0)-1)
+            complex*16 dimension(ncd + 1,ncd + 1) :: c
+            complex*16 :: a
+            complex*16 :: b
+            real*8 dimension(166) :: fac
+            common /factor/ fac
+        end subroutine vwhac2
+        subroutine bessel(n,ds,xi) ! in :_tmbisphere:bisphere.f
+            integer :: n
+            real*8 :: ds
+            complex*16 dimension(*) :: xi
+        end subroutine bessel
+        subroutine mie1(x,sn,sk,nstop,qext,qsca,an,cn,iray) ! in :_tmbisphere:bisphere.f
+            real*8 :: x
+            real*8 :: sn
+            real*8 :: sk
+            integer :: nstop
+            real*8 :: qext
+            real*8 :: qsca
+            complex*16 dimension(*) :: an
+            real*8 dimension(*) :: cn
+            integer :: iray
+        end subroutine mie1
+        subroutine psic(n,ds,psi) ! in :_tmbisphere:bisphere.f
+            integer :: n
+            complex*16 :: ds
+            complex*16 dimension(*) :: psi
+        end subroutine psic
+        subroutine gj2(a,n1,n,np) ! in :_tmbisphere:bisphere.f
+            complex*16 dimension(np,np) :: a
+            integer :: n1
+            integer :: n
+            integer optional,check(shape(a,0)==np),depend(a) :: np=shape(a,0)
+        end subroutine gj2
+        subroutine gaussj(a,n,np) ! in :_tmbisphere:bisphere.f
+            complex*16 dimension(np,np) :: a
+            integer :: n
+            integer optional,check(shape(a,0)==np),depend(a) :: np=shape(a,0)
+        end subroutine gaussj
+    end interface 
+end python module _tmbisphere
+
+! This file was auto-generated with f2py (version:2).
+! See http://cens.ioc.ee/projects/f2py2e/
