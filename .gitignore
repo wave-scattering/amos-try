@@ -36,5 +36,8 @@ fort.*
 *.dat
 *.a
 *.cbp
-#*#
+\#*\#
 build
+*.so
+*f2pywrappers.f
+*.pyc
