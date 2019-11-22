@@ -276,7 +276,7 @@ C   THE AUTHORS AND THEIR ORGANIZATION DISCLAIM ALL LIABILITY FOR
 C   ANY DAMAGES THAT MAY RESULT FROM THE USE OF THE PROGRAM. 
 
  
-      SUBROUTINE tmfixed(AXI,RAT,LAM,MRR,MRI,EPS,NP,DDELT,NDGS,
+      SUBROUTINE tmfixed(AXI,RAT,LAM,MRR,MRI,EPS,EPSe,NP,DDELT,NDGS,
      &                   ALPHA,BETA,THET0,THET,PHI0,PHI,
      &                   QEXT,QSCA,S11,S12,S21,S22,ERRCODE)
       
@@ -331,11 +331,11 @@ C 5454 FORMAT ('NCHECK=',I1)
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-1) CALL SAREA (EPS,RAT)
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.GE.0) CALL SURFCH(NP,EPS,RAT)
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-2) CALL SAREAC (EPS,RAT)
+      IF (NP.EQ.-3) CALL DROP (RAT)
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-9) then
       errcode = 99
       return
       endif
-      IF (NP.EQ.-3) CALL DROP (RAT)
 C     PRINT 8000, RAT
 C 8000 FORMAT ('RAT=',F8.6)
 C      IF(NP.EQ.-1.AND.EPS.GE.1D0) PRINT 7000,EPS
@@ -1010,7 +1010,7 @@ C**********************************************************************
       IF (NP.GT.0) CALL RSP2(X,NG,A,EPS,NP,R,DR)
       IF (NP.EQ.-1) CALL RSP1(X,NG,NGAUSS,A,EPS,NP,R,DR)
       IF (NP.EQ.-2) CALL RSP3(X,NG,NGAUSS,A,EPS,R,DR)
-!     IF (NP.EQ.-9) CALL RSP3nanorod(X,NG,NGAUSS,A,EPS,EPSe, R,DR)
+      IF (NP.EQ.-9) CALL RSP3nanorod(X,NG,NGAUSS,A,EPS,EPSe, R,DR)
       IF (NP.EQ.-3) CALL RSP4(X,NG,A,R,DR)
       PI=P*2D0/LAM
       PPI=PI*PI
@@ -1120,94 +1120,92 @@ C**********************************************************************
       RETURN
       END
 
+      SUBROUTINE RSP3nanorod (X,NG,NGAUSS,REV,EPS, EPSe, R,DR)
+C--------/---------/---------/---------/---------/---------/---------/--
+C >>> X,NG,NGAUSS,REV,EPS
+C <<< R,DR
+C=========================
+C   Activated for NP=-9
+C
+C   Calculation of the functions R(I)=r(y)**2 and
+C   DR(I)=((d/dy)r(y))/r(y) for a nanorod particle
+C   specified by the parameters REV, EPS, and CAP  at NGAUSS  Gauss
+C   integration points in the integral over theta.
+C
+C   X - GIF division points \cos\theta_j -  Y = arccos X
+C   REV ... equal-volume-sphere radius r_ev
+C   EPS ... the ratio of the nanorod diameter to its length
+C   EPSe ... the ratio of half-spheroid caps height to cylider radius
+C   EPSc ... the ration of cylinder half-height to cylinder radius
+C   H   ... half-length of the nanorod
+C   He .. cap height
+C   Hc .. cylinder height
+C   A  ... cylinder radius   ====>
+C
+C   NGAUSS ... the number of GIF division points
+C   NG=2*NGAUSS
+C
+C   1.LE.I.LE.NGAUSS
+C
+C--------/---------/---------/---------/---------/---------/---------/--
+      implicit none
+!     IMPLICIT real(dp) (A-H,O-Z)
+      integer NG, NGAUSS, I
+      real(8) REV, EPS, CAP, H, A, CO, SI, RAD, RTHET, xstep
+      real(8) aa, bb, valDR, c2, s2, alpha, beta, gamma, detsr,
+     &  nom, psi, He, Hc, EPSe, EPSc
+      real(8) X(NG),R(NG),DR(NG)
 
-c$$$      SUBROUTINE RSP3nanorod (X,NG,NGAUSS,REV,EPS, EPSe, R,DR)
-c$$$C--------/---------/---------/---------/---------/---------/---------/--
-c$$$C >>> X,NG,NGAUSS,REV,EPS
-c$$$C <<< R,DR
-c$$$C=========================
-c$$$C   Activated for NP=-9
-c$$$C
-c$$$C   Calculation of the functions R(I)=r(y)**2 and
-c$$$C   DR(I)=((d/dy)r(y))/r(y) for a nanorod particle
-c$$$C   specified by the parameters REV, EPS, and CAP  at NGAUSS  Gauss
-c$$$C   integration points in the integral over theta.
-c$$$C
-c$$$C   X - GIF division points \cos\theta_j -  Y = arccos X
-c$$$C   REV ... equal-volume-sphere radius r_ev
-c$$$C   EPS ... the ratio of the nanorod diameter to its length
-c$$$C   EPSe ... the ratio of half-spheroid caps height to cylider radius
-c$$$C   EPSc ... the ration of cylinder half-height to cylinder radius
-c$$$C   H   ... half-length of the nanorod
-c$$$C   He .. cap height
-c$$$C   Hc .. cylinder height
-c$$$C   A  ... cylinder radius   ====>
-c$$$C
-c$$$C   NGAUSS ... the number of GIF division points
-c$$$C   NG=2*NGAUSS
-c$$$C
-c$$$C   1.LE.I.LE.NGAUSS
-c$$$C
-c$$$C--------/---------/---------/---------/---------/---------/---------/--
-c$$$      implicit none
-c$$$!     IMPLICIT real(dp) (A-H,O-Z)
-c$$$      integer NG, NGAUSS, I
-c$$$      real(8) REV, EPS, CAP, H, A, CO, SI, RAD, RTHET, xstep
-c$$$      real(8) aa, bb, valDR, c2, s2, alpha, beta, gamma, detsr,
-c$$$     &  nom, psi, He, Hc, EPSe, EPSc
-c$$$      real(8) X(NG),R(NG),DR(NG)
-c$$$
-c$$$!     REV = 2.D0
-c$$$!     EPS = 0.5D0
-c$$$!     EPSe = 0.65D0
-c$$$!     xstep = pi/(ng-1)
-c$$$!     do i = 1,ng, 1
-c$$$!     ! TODO: remove testing setting of x
-c$$$!       x(i)=cos(pi-(i-1)*xstep)
-c$$$!     end do
-c$$$
-c$$$      !     cylider radius
-c$$$      A = REV * (2D0*EPS / (3D0 - EPS * EPSe)) ** (1D0 / 3D0)
-c$$$      H = A/EPS      ! nanorod half-height
-c$$$      He = A * EPSe  ! spheroid cap half-height
-c$$$      Hc = H -He     ! cylinder half-height
-c$$$      EPSc = Hc/A    ! cylider aspect ratio
-c$$$
-c$$$
-c$$$      DO I=1,NGAUSS,1
-c$$$         CO=-X(I)
-c$$$         SI=DSQRT(1D0-CO*CO)
-c$$$
-c$$$         IF ((Hc*SI).GT.(A*CO)) then
-c$$$* Along the circular surface:
-c$$$           RAD=A/SI
-c$$$           RTHET=-A*CO/(SI*SI)
-c$$$           valDR = -RTHET/RAD
-c$$$         else
-c$$$*  Along elliptic cap
-c$$$            c2 = CO**2
-c$$$            s2 = SI**2
-c$$$! Solution of square euation of ellipse move from the origin
-c$$$            alpha = dsqrt( (EPSe**2 - EPSc**2)*s2 + c2)
-c$$$            beta = EPSe**2*s2 + c2
-c$$$            RAD = (Hc*CO + He*alpha) / beta
-c$$$            valDR = -((-alpha*Hc*SI
-c$$$     &                   + He*(EPSe**2-EPSc**2-1.D0)*SI*CO
-c$$$     &               )/(He*alpha**2 + alpha*Hc*CO)
-c$$$     &               - ( 2*(EPSe**2 - 1.D0)*SI*CO / beta ))
-c$$$
-c$$$         endif
-c$$$         R(I)=RAD*RAD
-c$$$         R(NG-I+1)=R(I)          !using mirror symmetry
-c$$$
-c$$$         DR(I)=valDR
-c$$$         DR(NG-I+1)=-DR(I)       !using mirror symmetry
-c$$$
-c$$$      enddo
-c$$$
-c$$$      RETURN
-c$$$      END
+!     REV = 2.D0
+!     EPS = 0.5D0
+!     EPSe = 0.65D0
+!     xstep = pi/(ng-1)
+!     do i = 1,ng, 1
+!     ! TODO: remove testing setting of x
+!       x(i)=cos(pi-(i-1)*xstep)
+!     end do
 
+      !     cylider radius
+      A = REV * (2D0*EPS / (3D0 - EPS * EPSe)) ** (1D0 / 3D0)
+      H = A/EPS      ! nanorod half-height
+      He = A * EPSe  ! spheroid cap half-height
+      Hc = H -He     ! cylinder half-height
+      EPSc = Hc/A    ! cylider aspect ratio
+
+
+      DO I=1,NGAUSS,1
+         CO=-X(I)
+         SI=DSQRT(1D0-CO*CO)
+
+         IF ((Hc*SI).GT.(A*CO)) then
+* Along the circular surface:
+           RAD=A/SI
+           RTHET=-A*CO/(SI*SI)
+           valDR = -RTHET/RAD
+         else
+*  Along elliptic cap
+            c2 = CO**2
+            s2 = SI**2
+! Solution of square euation of ellipse move from the origin
+            alpha = dsqrt( (EPSe**2 - EPSc**2)*s2 + c2)
+            beta = EPSe**2*s2 + c2
+            RAD = (Hc*CO + He*alpha) / beta
+            valDR = -((-alpha*Hc*SI
+     &                   + He*(EPSe**2-EPSc**2-1.D0)*SI*CO
+     &               )/(He*alpha**2 + alpha*Hc*CO)
+     &               - ( 2*(EPSe**2 - 1.D0)*SI*CO / beta ))
+
+         endif
+         R(I)=RAD*RAD
+         R(NG-I+1)=R(I)          !using mirror symmetry
+
+         DR(I)=valDR
+         DR(NG-I+1)=-DR(I)       !using mirror symmetry
+
+      enddo
+
+      RETURN
+      END
 
 C**********************************************************************
 C                                                                     *

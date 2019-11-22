@@ -10,7 +10,7 @@ python module _tmrandom ! in
             real*8 :: mrr
             real*8 :: mri
             real*8 :: eps
-            real*8 :: eps
+            real*8 :: epse
             integer :: np
             real*8 :: ddelt
             integer :: ndgs
