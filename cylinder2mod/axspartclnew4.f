@@ -2320,6 +2320,7 @@ c 7337    FORMAT(' NG=',I3,'  DC2=',D8.2,'   DC1=',D8.2)
          write(6,*)'QEXT1=',QEXT1
          write(6,*)'QEXT=',QEXT
 
+
          IF(DSCA.LE.DDELTA.AND.DEXT.LE.DDELTA) GO TO 160
 *<<<
          QEXT1=QEXT
@@ -2559,6 +2560,7 @@ c     &          '  nmax=',I3)
 
       QABS=-QEXT-QSCA       !absorption
       WALB=-QSCA/QEXT       !albedo
+
 
       IF (ABS(WALB).GT.1D0+DDELTA) THEN
       PRINT 9111
