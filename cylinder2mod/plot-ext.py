@@ -26,25 +26,28 @@ x_max = float(config['beam']['x_max'])
 
 rl_min = float(config['cylinder']['rl_min'])
 rl_max = float(config['cylinder']['rl_max'])
+plt.figure()
+spectra = data[7,:]
+spectra_x = np.linspace(x_min, x_max, len(spectra))
+plt.plot(spectra_x, spectra)
+# plt.title(f'$r/L = ${rl_max}')
+plt.tight_layout()
+plt.savefig('spectra.pdf')
 
+plt.figure()
 plt.imshow(data,
            origin='lower',
            cmap='hot',
            aspect='auto',
-           vmin = np.mean(data)*0.1, vmax = np.mean(data)*4,
+           # vmin = np.mean(data)*0.1, vmax = np.mean(data)*4,
            extent=(x_min, x_max, rl_min, rl_max),
-           # norm=LogNorm(
-           #     vmin = np.min(data)*1.0,
-           #     vmax = np.max(data)*1.0
-           #     )
+           norm=LogNorm(
+               vmin = np.min(data)*1.0,
+               vmax = np.max(data)*1.0
+               )
            )
 plt.xlabel(r'$kr$')
 plt.ylabel(r'$r/L$')
-plt.colorbar()
-
-plt.figure()
-spectra = data[-1,:]
-spectra_x = np.linspace(x_min, x_max, len(spectra))
-plt.plot(spectra_x, spectra)
-plt.title(f'$r/L = ${rl_max}')
-plt.show()
+plt.tight_layout()
+# plt.colorbar()
+plt.savefig('map.pdf')
