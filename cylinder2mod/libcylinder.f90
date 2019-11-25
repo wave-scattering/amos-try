@@ -43,7 +43,8 @@ contains
 !        * For a real z=x, |x|<1,  log here is purely imaginary and
 !        * equals to i*atan(2x/(1-x**2))\equiv 2*i*atan x
 !        *--------/---------/---------/---------/---------/---------/---------/--
-        complex(dp) zartan,zs
+        complex(dp) zartan
+        complex(dp), intent(in) :: zs
         real(dp) xxs,xas,ar1,ar2
 
         if (aimag(zs).eq.0.) then
