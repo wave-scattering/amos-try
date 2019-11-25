@@ -2269,6 +2269,7 @@ c        PRINT 7334, NMAX,DSCA,DEXT
 
       DO 150 NGAUS=NNNGGG,NPNG1
 *
+         IF (NGAUS.gt.300.and.NGAUS.lt.2595) cycle
          IF (NGAUS.EQ.NPNG1) PRINT 7336
 *
          NGAUSS=NGAUS
