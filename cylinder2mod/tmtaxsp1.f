@@ -1746,9 +1746,9 @@ C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       IMPLICIT NONE
 
-      INTEGER I,NG
-      real(dp) HT,MA,CO,SI,CC,SS,RAD,REV,THETA0,RTHET
-      real(dp) X(NG),R(NG),DR(NG)
+      INTEGER :: I,NG
+      real(dp) :: HT,MA,CO,SI,CC,SS,RAD,REV,THETA0,RTHET
+      real(dp) :: X(NG),R(NG),DR(NG)
 
       MA=DSQRT(HT**2+REV**2)              !=the length of the cone slant
       MA=dsqrt(ma**2+8.d0*rev**2)/2.d0    !=the length of the median of the slant

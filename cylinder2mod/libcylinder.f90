@@ -1,9 +1,11 @@
 module libcylinder
     use constants
+    use model_parameters
 !    use dense_solve
 !    use multem_blas
 !    use amos
 !    use errfun, only : wpop
+
     implicit none
     public cmplx_dp
 

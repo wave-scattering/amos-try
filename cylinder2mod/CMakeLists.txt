@@ -12,9 +12,11 @@ include_directories(${CMAKE_BINARY_DIR}/amos
 
 add_library(constants constants.f90)
 
+add_library(model_parameters model_parameters.f90)
+target_link_libraries(model_parameters constants FiNeR::FiNeR)
+
 add_library(libcylinder libcylinder.f90)
-target_link_libraries(libcylinder
-        constants)
+target_link_libraries(libcylinder constants model_parameters)
 
 ADD_EXECUTABLE(${PROJECTNAME}
         tmtaxsp1.f
@@ -29,11 +31,11 @@ ADD_EXECUTABLE(${PROJECTNAME}
         )
 target_link_libraries(${PROJECTNAME}
         constants
+        model_parameters
         libcylinder
         errfun
         amos
         dense_solve
-        FiNeR::FiNeR
         ${BLAS_LIBRARIES}
         ${LAPACK_LIBRARIES}
         )
