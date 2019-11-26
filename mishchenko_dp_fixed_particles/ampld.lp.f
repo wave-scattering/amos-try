@@ -1834,8 +1834,13 @@ C                                                                     *
 C**********************************************************************
  
       SUBROUTINE TT(NMAX,NCHECK)
-      INCLUDE 'amplq.par.f'
+!     implicit none
       IMPLICIT REAL*8 (A-H,O-Z)
+      integer nmax, ncheck, nnmax, info, ndim, k, j, i
+
+      INCLUDE 'amplq.par.f'
+      real(8) TR, TI, arr, ari, ar, ai
+!     complex(8) ar
       REAL*8 F(NPN2,NPN2),B(NPN2),WORK(NPN2),
      *       QR(NPN2,NPN2),QI(NPN2,NPN2),
      *       RGQR(NPN2,NPN2),RGQI(NPN2,NPN2),

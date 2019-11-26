@@ -1,21 +1,12 @@
 module libcylinder
+    use constants
 !    use dense_solve
 !    use multem_blas
 !    use amos
 !    use errfun, only : wpop
-
     implicit none
-    integer, parameter, public :: dp = kind(0.0D0)
-    complex(dp), parameter, public :: ci = (0.0_dp, 1.0_dp)
-    complex(dp), parameter, public :: czero = (0.0_dp, 0.0_dp)
-    complex(dp), parameter, public :: cone = (1.0_dp, 0.0_dp)
-    complex(dp), parameter, public :: ctwo = (2.0_dp, 0.0_dp)
-    real(dp), parameter, public :: pi = 4.0_dp * ATAN(1.0_dp)
     public cmplx_dp
 
-    integer, parameter, public :: NPN1=200, NPNG1=2600, NPNG2=2*NPNG1, NPN2=2*NPN1, &
-               NPL=NPN2+1, NPN3=NPN1+1,&
-               NPN4=NPN1, NPN5=2*NPN4, NPN6=NPN4+1
 
 contains
     complex(dp) function cmplx_dp(re, im)
@@ -303,14 +294,14 @@ contains
             dv2(m) = x * a                        !see (3.34) of {tks}
             !* >>> determine x^{m+1}_m:
 
-            if (m.eq.lmax)  go to 120
+            if (m.eq.lmax)  return
             !     ! der=x^{m+1}_m; see (3.30) of {tks}
             der = x * dsqrt(2 * m + 1.d0) * a
             ddv1(m + 1) = der
             dv2(m + 1) = ((m + 1) * x * der - a * dsqrt(2 * m + 1.d0)) / dble(m)  !(3.35) of {tks}
             !* >>> determine remaining x^{l}_m's
 
-            if ((m + 2).eq.lmax)  go to 120
+            if ((m + 2).eq.lmax) return
 
             do n = m + 2, lmax
                 d3 = dsqrt(dble(n)**2 - dble(m)**2)
@@ -322,6 +313,112 @@ contains
 
         end if
 
-        120 return
+        return
     end
+
+    !*****************************************************************
+
+    subroutine vig (x, nmax, m, dv1, dv2)
+        !--------/---------/---------/---------/---------/---------/---------/--
+        ! >>> x,nmax,m (only nonnegative)
+        ! <<< dv1, dv2
+        ! =============
+        !     for a given azimuthal number m.ge.0 returns
+        !      the wigner d-functions , i.e.,
+        !
+        !     dv1(n)=dvig(0,m,n,arccos x) = d_{0m}^{(l)}
+        !     and
+        !     dv2(n)=[d/d(arccos x)] dvig(0,m,n,arccos x)  ! = d d_{0m}^{(l)}/d\theta
+        !
+        !     for 1.le.n.le.nmax and 0.le.x.le.1
+        !     (for a given m.neq.0, only the m.le.n.le.nmax terms are determined!)
+        !     according to eq. (4.1.24) of ref. \ct{ed}:
+        !
+        !             d_{00}^{(l)}(\theta)= p_l(\cos\theta) ===>
+        !
+        !     (rodrigues formula [eq. (2.5.14) of ref. \ct{ed}] then yields
+        !                       p_1(x)=x; p_2=(3x^2-1)/2; etc.
+        !     one can show that $d_{00}^{(1)}(\theta)=\cos\theta$
+        !
+        !     similar to routine vigampl, which however returns the wigner d-functions
+        !     divided by sin\theta, i.e.,
+        !     dv1(n)=dvig(0,m,n,arccos x)/sin(arccos x) = d_{0m}^{(l)}/sin\theta
+        !
+        !     made using recurrences of  ref. \ct{mis39}
+        !     (there is a missing $l$ factor in the 2nd term in the curly bracket
+        !     in recurrence (35) of ref. \ct{mis39} for dv2).
+        !
+        !     one has (see eq. (4.2.5) of \ct{ed}):
+        !                       $d_{0m}^{(l)}=(-1)^m d_{0-m}^{(l)}$
+        !     and (see eq. (35) of \ct{mis91}):
+        !            $dd_{0m}^{(l)}/(d\theta)=(-1)^m dd_{0-m}^{(l)}/(d\theta)$
+        !
+        !     x=cos(theta), where theta is the polar angle
+        !     nmax - angular momentum cutoff
+        !
+        !     called by tmatr and tmatr0 routines
+        !--------/---------/---------/---------/---------/---------/---------/--
+        implicit real(dp) (a-h, o-z)
+        real(dp) dv1(:), dv2(:)
+        integer n, nmax, lmax, m, i, i2
+        real(dp) a, x, qs, qs1, d1, d2, d3, der, dn, dx, qn, qn1, qn2, &
+                qnm, qnm1, qmm
+
+
+        a = 1d0
+        qs = dsqrt(1d0 - x * x)
+        qs1 = 1d0 / qs
+        do n = 1, nmax
+            dv1(n) = 0d0
+            dv2(n) = 0d0
+        enddo
+
+        if (m.ne.0) go to 20
+
+        d1 = 1d0
+        d2 = x
+        do n = 1, nmax
+            qn = dble(n)
+            qn1 = dble(n + 1)
+            qn2 = dble(2 * n + 1)
+            !        !recurrence (31) of ref. {mis39}
+            d3 = (qn2 * x * d2 - qn * d1) / qn1
+            !        !recurrence (35) of ref. {mis39}
+            der = qs1 * (qn1 * qn / qn2) * (-d1 + d3)
+            dv1(n) = d2
+            dv2(n) = der
+            d1 = d2
+            d2 = d3
+        enddo
+        return
+
+        20 qmm = dble(m * m)
+        !*a_m initialization - recurrence (34) of ref. {mis39}
+        do i = 1, m
+            i2 = i * 2
+            a = a * dsqrt(dble(i2 - 1) / dble(i2)) * qs
+        enddo
+        !*
+        d1 = 0d0
+        d2 = a
+
+        do n = m, nmax
+            qn = dble(n)
+            qn2 = dble(2 * n + 1)
+            qn1 = dble(n + 1)
+            qnm = dsqrt(qn * qn - qmm)
+            qnm1 = dsqrt(qn1 * qn1 - qmm)
+            !        !recurrence (31) of ref. {mis39}
+            d3 = (qn2 * x * d2 - qnm * d1) / qnm1
+            !        !recurrence (35) of ref. {mis39}
+            der = qs1 * (-qn1 * qnm * d1 + qn * qnm1 * d3) / qn2
+            dv1(n) = d2
+            dv2(n) = der
+            d1 = d2
+            d2 = d3
+        enddo
+        !*
+        return
+    end
+
 end module libcylinder

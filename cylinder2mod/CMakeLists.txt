@@ -1,6 +1,7 @@
 #cmake_minimum_required(VERSION 3.0.2)
 SET (PROJECTNAME "cylinder2mod")
 PROJECT (${PROJECTNAME} Fortran)
+FIND_PACKAGE(LAPACK REQUIRED)
 
 include_directories(${CMAKE_BINARY_DIR}/amos
         ${CMAKE_BINARY_DIR}/lapack_wrapper
@@ -9,7 +10,11 @@ include_directories(${CMAKE_BINARY_DIR}/amos
 #include_directories(${CMAKE_BINARY_DIR}/errfun
 #        )
 
+add_library(constants constants.f90)
+
 add_library(libcylinder libcylinder.f90)
+target_link_libraries(libcylinder
+        constants)
 
 ADD_EXECUTABLE(${PROJECTNAME}
         tmtaxsp1.f
@@ -20,13 +25,17 @@ ADD_EXECUTABLE(${PROJECTNAME}
         gnricbessh.f
         beschb.f # TODO replace with non NR
         sordalc.f
+#        lpd.f
         )
 target_link_libraries(${PROJECTNAME}
+        constants
         libcylinder
         errfun
         amos
         dense_solve
         FiNeR::FiNeR
+        ${BLAS_LIBRARIES}
+        ${LAPACK_LIBRARIES}
         )
 
 #add_custom_command(

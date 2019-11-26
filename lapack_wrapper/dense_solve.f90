@@ -4,6 +4,7 @@ module dense_solve
     private
     public zgetrf_wrap, zgetrs_wrap, zgeev_wrap, zgeevx_wrap, zgebal_wrap, zgehrd_wrap
     interface
+        ! TODO add intent(in) and intent(out) for wrapped subroutines
         subroutine zgetrs_wrap (mat_array, bx, permutation_indices)
             integer, parameter:: dp=kind(0.d0)
             complex(dp) ::mat_array(:,:), bx(:)

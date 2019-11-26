@@ -87,6 +87,7 @@ C
 C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       IMPLICIT REAL(dp) (A-H,O-Z)
+      real(dp) nanorod_cap_hr
       INTEGER LMAXD,LMAX1D,LMTD
       INTEGER NAXSM,ICHOICEV,ICHOICE
 
@@ -1186,7 +1187,7 @@ cc      IF (NP.EQ.-8) CALL RSP8(X,NG,RSNM,HT,R,DR)          ! cone on a cylinder
 * generate arrays of Bessel functions at NGAUSS GIF division
 * points and store them in the common block /CBESS/
 *
-      CALL BESS(Z,ZR,ZI,NG,NMAX,NNMAX1,NNMAX2)
+      CALL BESS(Z,ZR,ZI,NG,NMAX,NNMAX1)
 *
       RETURN
       END
@@ -2308,7 +2309,7 @@ C  parts:
                     GR12=GR12+F1*C2R+F2*C3R        !~Re Rg J^{12}
                     GI12=GI12+F1*C2I+F2*C3I        !~Im Rg J^{12}
 
-* N2*(N2+1)*w(i)*r(\theta)*[dr/(d\theta)]*D2N1*D1N2: 
+!*  N2*(N2+1)*w(i)*r(\theta)*[dr/(d\theta)]*D2N1*D1N2:
                     F2=RRI*URI*AN2*A21     !prefactor containing r(\theta)*[dr/(d\theta)]
                                            !hat{theta} part
                     
@@ -2406,7 +2407,7 @@ c      close(nout+3)
 *
 * Calculate the product Q^{-1} Rg Q
 *
-      CALL TT(NMAX,NCHECK)
+      CALL TT(NMAX)
 *
       RETURN
       END
@@ -2859,106 +2860,7 @@ C  parts:
       RETURN
       END
  
-C*****************************************************************
- 
-      SUBROUTINE VIG (X, NMAX, M, DV1, DV2)
-C--------/---------/---------/---------/---------/---------/---------/--
-C >>> X,NMAX,M (only nonnegative)
-C <<< DV1, DV2
-C =============
-C     For a given azimuthal number M.GE.0 returns 
-C      the Wigner d-functions , i.e.,
-C
-C     DV1(N)=dvig(0,m,n,arccos x) = d_{0m}^{(l)} 
-C     and
-C     DV2(N)=[d/d(arccos x)] dvig(0,m,n,arccos x)  ! = d d_{0m}^{(l)}/d\theta
-C
-C     for 1.LE.N.LE.NMAX and 0.LE.X.LE.1
-C     (For a given M.NEQ.0, only the M.LE.N.LE.NMAX terms are determined!)
-C     According to Eq. (4.1.24) of Ref. \ct{Ed}:
-C
-C             d_{00}^{(l)}(\theta)= P_l(\cos\theta) ===>
-C
-C     (Rodrigues formula [Eq. (2.5.14) of Ref. \ct{Ed}] then yields 
-C                       P_1(x)=x; P_2=(3x^2-1)/2; etc.
-C     One can show that $d_{00}^{(1)}(\theta)=\cos\theta$
-C
-C     Similar to routine VIGAMPL, which however returns the Wigner d-functions 
-C     divided by sin\theta, i.e.,
-C     DV1(N)=dvig(0,m,n,arccos x)/sin(arccos x) = d_{0m}^{(l)}/sin\theta
-C
-C     Made using recurrences of  Ref. \ct{Mis39}  
-C     (There is a missing $l$ factor in the 2nd term in the curly bracket 
-C     in recurrence (35) of Ref. \ct{Mis39} for DV2).  
-C
-C     One has (see Eq. (4.2.5) of \ct{Ed}):
-C                       $d_{0m}^{(l)}=(-1)^m d_{0-m}^{(l)}$
-C     and (see Eq. (35) of \ct{Mis91}):
-C            $dd_{0m}^{(l)}/(d\theta)=(-1)^m dd_{0-m}^{(l)}/(d\theta)$
-C
-C     X=cos(theta), where theta is the polar angle
-C     NMAX - angular momentum cutoff
-C
-C     CALLED BY TMATR AND TMATR0 routines
-C--------/---------/---------/---------/---------/---------/---------/--
-      use libcylinder
-      INCLUDE 'ampld.par.f'
-      IMPLICIT real(dp) (A-H,O-Z)
-      real(dp) DV1(NPN1),DV2(NPN1)
- 
-      A=1D0
-      QS=DSQRT(1D0-X*X)
-      QS1=1D0/QS
-      DO N=1,NMAX
-         DV1(N)=0D0
-         DV2(N)=0D0
-      ENDDO   
-      
-      IF (M.NE.0) GO TO 20
-      
-      D1=1D0
-      D2=X  
-      DO N=1,NMAX
-         QN=dble(N)
-         QN1=dble(N+1)
-         QN2=dble(2*N+1)
-         D3=(QN2*X*D2-QN*D1)/QN1          !recurrence (31) of Ref. {Mis39}
-         DER=QS1*(QN1*QN/QN2)*(-D1+D3)    !recurrence (35) of Ref. {Mis39}
-         DV1(N)=D2
-         DV2(N)=DER
-         D1=D2
-         D2=D3
-      ENDDO   
-      RETURN
-      
-   20 QMM=dble(M*M)
-   
-*A_m initialization - recurrence (34) of Ref. {Mis39}
-      DO I=1,M
-         I2=I*2
-         A=A*DSQRT(dble(I2-1)/dble(I2))*QS  
-      ENDDO 
-*  
-      D1=0D0
-      D2=A 
 
-      DO N=M,NMAX
-         QN=dble(N)
-         QN2=dble(2*N+1)
-         QN1=dble(N+1)
-         QNM=DSQRT(QN*QN-QMM)
-         QNM1=DSQRT(QN1*QN1-QMM)
-         D3=(QN2*X*D2-QNM*D1)/QNM1              !recurrence (31) of Ref. {Mis39}
-         DER=QS1*(-QN1*QNM*D1+QN*QNM1*D3)/QN2   !recurrence (35) of Ref. {Mis39}
-         DV1(N)=D2
-         DV2(N)=DER
-         D1=D2
-         D2=D3
-      ENDDO 
-*  
-      RETURN
-      END 
- 
 C**********************************************************************
  
       SUBROUTINE TT(NMAX)
@@ -2983,7 +2885,10 @@ cc      real(dp) F(NPN2,NPN2),B(NPN2),WORK(NPN2),
 cc     *       A(NPN2,NPN2),C(NPN2,NPN2),D(NPN2,NPN2),E(NPN2,NPN2)
       real(dp) TR1(NPN2,NPN2),TI1(NPN2,NPN2)
       complex(dp) ZQ(NPN2,NPN2),ZX(NPN2)
+      complex(dp), allocatable :: ZQcrop(:,:)
       INTEGER IPIV(NPN2)
+      integer, allocatable:: ipiv_crop(:)
+      integer nnmax
 *
       COMMON /CHOICE/ ICHOICE
       COMMON /CT/ TR1,TI1
@@ -3002,10 +2907,23 @@ cc     *       A(NPN2,NPN2),C(NPN2,NPN2),D(NPN2,NPN2),E(NPN2,NPN2)
       IF (ICHOICE.EQ.2) GOTO 5    ! NAG or not NAG decision tree
 
 ********************************************************************
-*   Inversion from NAG-LIB or Waterman's method    !NAG library used
-*
-       INFO=0
-*
+C     Matrix inversion from LAPACK
+
+      DO I=1,NNMAX
+           DO J=1,NNMAX
+              ZQ(I,J)=CMPLX_dp(QR(I,J),QI(I,J))
+           ENDDO
+      ENDDO
+      INFO=0
+!     allocate(ZQcrop(1:NNMAX, 1:NNMAX))
+!     ZQcrop = ZQ(1:NNMAX, 1:NNMAX)
+!     call zgetrf_wrap(ZQ, IPIV)
+!     ZQ(1:NNMAX, 1:NNMAX) = ZQcrop
+      CALL ZGETRF(NNMAX,NNMAX,ZQ,NPN2,IPIV,INFO)
+      IF (INFO.NE.0) WRITE (6,1100) INFO
+      CALL ZGETRI(NNMAX,ZQ,NPN2,IPIV,ZW,NPN2,INFO)
+      IF (INFO.NE.0) WRITE (6,1100) INFO
+
 cc           CALL F07ARF(NNMAX,NNMAX,ZQ,NPN2,IPIV,INFO)
 cc           IF (INFO.NE.0) WRITE(NOUT,1100) INFO
 cc           CALL F07AWF(NNMAX,ZQ,NPN2,IPIV,ZX,NPN2,INFO)
@@ -3409,6 +3327,7 @@ C=================
 C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       IMPLICIT real(dp) (A-H,O-Z)
+      real(dp) nanorod_cap_hr
 *
       RAT=(1.5D0/EPS)**(1D0/3D0)
       RAT=RAT/DSQRT( (EPS+2D0)/(2D0*EPS) )
