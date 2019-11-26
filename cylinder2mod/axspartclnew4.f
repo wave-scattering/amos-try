@@ -89,9 +89,6 @@ C  Computation can be speed up if one sets YNCHECK=.FALSE..
 C  However, then the check of Gauss integrations
 C  convergence is not performed.
 C---------------------------------------------------------------------
-      use finer, only :  file_ini
-      use flap, only : command_line_interface
-      use penf, only : I4P
 
       use libcylinder
       implicit none
@@ -256,8 +253,6 @@ C--------/---------/---------/---------/---------/---------/---------/--
       !---------------------------------------------------------------
       !     Read config
       !---------------------------------------------------------------
-      character(999)                :: file_name  !< Name of INI file.
-      type(file_ini)                :: fini       !< INI file handler.
 
       call cli_parse
       call ini_parse
@@ -1864,8 +1859,8 @@ C--------/---------/---------/---------/---------/---------/---------/--
       character(len=:), allocatable :: string         !< String option.
       real(dp)                      :: double, d_re, d_im
       integer                       :: num
-      write(6,*) 'Reading config from file: ', file_name
-      call fini%load(filename=file_name)
+      write(6,*) 'Reading config from file: ', ini_config_file_name
+      call fini%load(filename=ini_config_file_name)
 
       allocate(character(999) :: string)
       string = repeat(' ', 999)
@@ -1961,31 +1956,6 @@ C--------/---------/---------/---------/---------/---------/---------/--
       if (error==0) nstep = num
 
       end subroutine ini_parse
-C--------/---------/---------/---------/---------/---------/---------/--
-
-
-      subroutine cli_parse()
-        !< Build and parse test cli.
-        type(command_line_interface) :: cli  !< command line interface.
-        integer(I4P)                 :: error !< Error trapping flag.
-
-        call cli%init(progname='cylinder2mod',
-     &                 authors='',
-     &                 help='Usage: ',
-     &                 examples=["cylinder2mod -i config.ini"],
-     &                 epilog=new_line('a')//"all done")
-
-        call cli%add(switch='--ini',
-     &                switch_ab='-i',
-     &                help='name of ini file',
-     &                required=.false.,
-     &                def='default.ini',
-     &                act='store')
-
-        call cli%parse(error=error) ; if (error/=0) stop
-
-        call cli%get(switch='--ini', val=file_name)
-      endsubroutine cli_parse
 
 
 
