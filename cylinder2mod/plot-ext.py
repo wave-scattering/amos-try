@@ -32,24 +32,24 @@ spectra_x = np.linspace(x_min, x_max, len(spectra))
 plt.plot(spectra_x/2/np.pi/50*300000, spectra)
 # plt.title(f'$r/L = ${rl_max}')
 plt.tight_layout()
-plt.show()
-# plt.savefig('spectra.pdf')
+# plt.show()
+plt.savefig('spectra.pdf')
 
-# plt.figure()
-# plt.imshow(data,
-#            origin='lower',
-#            cmap='hot',
-#            aspect='auto',
-#            # vmin = np.mean(data)*0.1, vmax = np.mean(data)*4,
-#            extent=(x_min/2/np.pi/50*300, x_max/2/np.pi/50*300, rl_min, rl_max),
-#            norm=LogNorm(
-#                vmin = np.min(data)*1.0,
-#                vmax = np.max(data)*1.0
-#                )
-#            )
-# plt.xlabel(r'$kr$')
-# plt.ylabel(r'$r/L$')
-# plt.tight_layout()
-# # plt.colorbar()
-# # plt.show()
-# plt.savefig('map.pdf')
+plt.figure()
+plt.imshow(data,
+           origin='lower',
+           cmap='hot',
+           aspect='auto',
+           # vmin = np.mean(data)*0.1, vmax = np.mean(data)*4,
+           extent=(x_min/2/np.pi/50*300, x_max/2/np.pi/50*300, rl_min, rl_max),
+           norm=LogNorm(
+               vmin = np.min(data)*1.0,
+               vmax = np.max(data)*1.0
+               )
+           )
+plt.xlabel(r'$kr$')
+plt.ylabel(r'$r/L$')
+plt.tight_layout()
+# plt.colorbar()
+# plt.show()
+plt.savefig('map.pdf')

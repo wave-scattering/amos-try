@@ -1,4 +1,4 @@
-      SUBROUTINE TMTAXSP(nmax,nanorod_cap_hr,RAP,zeps1,zeps0,TMT)
+      SUBROUTINE TMTAXSP(nmax,RAP,zeps1,TMT)
 
 c Warning in module TMTAXSP in file tmtaxsp.f: Variables set but never used:
 c    NGGG set at line 182 file tmtaxsp.f
@@ -36,7 +36,7 @@ C LOCAL VARIABLES:
 C ===============
 C ICHOICE=1 if NAG library is available, otherwise ICHOICE=2 
 C
-C NP,EPS: specifies the shape of particles within a given NP class:
+C EPS: specifies the shape of particles within a given NP class:
 C     NP.gt.0 - EPS = deformation parameter of a Chebyshev particle
 C     NP=-1 - EPS = the ratio of the horizontal to rotational axes. EPS is 
 C             larger than 1 for oblate spheroids and smaller than 1 for        
@@ -87,7 +87,6 @@ C
 C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       IMPLICIT REAL(dp) (A-H,O-Z)
-      real(dp) nanorod_cap_hr
       INTEGER LMAXD,LMAX1D,LMTD
       INTEGER NAXSM,ICHOICEV,ICHOICE
 
@@ -102,7 +101,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
 c      real(dp) XALPHA(300),XBETA(300),WALPHA(300),WBETA(300)
 
 !     complex(dp) CZERO
-      complex(dp) zeps1,zeps0
+      complex(dp) zeps1
       complex(dp) TMT(4,LMTD,LMTD)
 * 
       COMMON /CT/ TR1,TI1
@@ -121,9 +120,9 @@ cc      COMMON /TMAT/ RT11,RT12,RT21,RT22,IT11,IT12,IT21,IT22
 * 
 * transfers REV to CONST routine
 *
-      COMMON /TOITMT/ICHOICEV,NP,NCHECK,NAXSM,NDGS   
+      COMMON /TOITMT/ICHOICEV,NCHECK,NAXSM,NDGS
 *
-* transfers integers ICHOICEV,NP,NCHECK,NAXSM,NDGS from the main here
+* transfers integers ICHOICEV,NCHECK,NAXSM,NDGS from the main here
 *
       COMMON /TOTMT/EPS,RAT,REV,ALPHA,BETA,DDELT   
 * 
@@ -163,11 +162,11 @@ cc      COMMON /TMAT/ RT11,RT12,RT21,RT22,IT11,IT12,IT21,IT22
       LMTOT=(NMAX+1)**2-1
 
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-1) CALL SAREA (EPS,RAT)
-      IF (DABS(RAT-1D0).GT.1D-8.AND.NP.GE.0) CALL SURFCH(NP,EPS,RAT)
+      IF (DABS(RAT-1D0).GT.1D-8.AND.NP.GE.0) CALL SURFCH(EPS,RAT)
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-2) CALL SAREAC (EPS,RAT)
       ! TODO make a correct evaluation of SAREAC for nanorod
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-9)
-     &  CALL SAREAnanorod (EPS,RAT, nanorod_cap_hr)
+     &  CALL SAREAnanorod (EPS,RAT)
       IF (NP.EQ.-3) CALL DROP (RAT)
 
 *___________________________________________________
@@ -193,12 +192,12 @@ cc      NNNGGG=NGAUSS+1
 *
 * GIF division points and weights + other numerical constants
 *
-         CALL CONST(NGAUSS,NMAX,X,W,AN,ANN,S,SS,NP,EPS)
+         CALL CONST(NGAUSS,NMAX,X,W,AN,ANN,S,SS,EPS)
 *
 * specify particle shape:
 *
-         CALL VARY(LAM,MRR,MRI,A,EPS,nanorod_cap_hr,
-     &              NP,NGAUSS,X,P,PPI,PIR,PII,R,
+         CALL VARY(LAM,MRR,MRI,A,EPS,
+     &              NGAUSS,X,P,PPI,PIR,PII,R,
      &              DR,DDR,DRR,DRI,NMAX)
 *
 * determine m=m'=0 elements of the T matrix
@@ -824,9 +823,9 @@ C
       END 
 C**********************************************************************
 
-      SUBROUTINE CONST (NGAUSS,NMAX,X,W,AN,ANN,S,SS,NP,EPS)
+      SUBROUTINE CONST (NGAUSS,NMAX,X,W,AN,ANN,S,SS,EPS)
 C--------/---------/---------/---------/---------/---------/---------/--
-C >>> NGAUSS,NMAX,NP,EPS
+C >>> NGAUSS,NMAX,EPS
 C <<< X,W,AN,ANN,S,SS
 C=====================
 C
@@ -1088,11 +1087,11 @@ c      CALL GAULEG(-1.D0,1.D0,X,W,NG)
  
 C**********************************************************************
  
-      SUBROUTINE VARY (LAM,MRR,MRI,A,EPS,nanorod_cap_hr,
-     &                 RSNM,HT,NP,NGAUSS,X,
+      SUBROUTINE VARY (LAM,MRR,MRI,A,EPS,
+     &                 rsnm,HT,NGAUSS,X,
      *                 P,PPI,PIR,PII,R,DR,DDR,DRR,DRI,NMAX)
 C--------/---------/---------/---------/---------/---------/---------/--
-C >>> LAM,MRR,MRI,A,EPS,NP,NGAUSS,X,P,NMAX
+C >>> LAM,MRR,MRI,A,EPS,NGAUSS,X,P,NMAX
 C <<< PPI,PIR,PII,R,DR,DDR,DRR,DRI
 C=========================
 C  LAM - wavelength of incident light in the ambient
@@ -1123,7 +1122,6 @@ C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       INCLUDE 'ampld.par.f'
       IMPLICIT real(dp) (A-H,O-Z)
-      real(dp) nanorod_cap_hr
       real(dp)  X(NPNG2),R(NPNG2),DR(NPNG2),MRR,MRI,LAM,
      *        Z(NPNG2),ZR(NPNG2),ZI(NPNG2),
      *        DDR(NPNG2),DRR(NPNG2),DRI(NPNG2)
@@ -1136,7 +1134,7 @@ cc      COMMON /CBESS/ J,Y,JR,JI,DJ,DY,DJR,DJI
 
 * decision tree to specify particle shape:
 
-      IF (NP.GT.0)  CALL RSP2(X,NG,A,EPS,NP,R,DR)       ! Chebyshev particle
+      IF (NP.GT.0)  CALL RSP2(X,NG,A,EPS,R,DR)       ! Chebyshev particle
       IF (NP.EQ.-1) CALL  RSP1(X,NG,NGAUSS,A,EPS,R,DR)   ! oblate/prolate spheroids
       IF (NP.EQ.-2) CALL RSP3(X,NG,NGAUSS,A,EPS,R,DR)   ! oblate/prolate cylinder
       IF (NP.EQ.-3) CALL RSP4(X,NG,A,R,DR)              ! a distorted Chebyshev droplet
@@ -1146,7 +1144,7 @@ cc      COMMON /CBESS/ J,Y,JR,JI,DJ,DY,DJR,DJI
 cc      IF (NP.EQ.-7) CALL RSP7(X,NG,RSNM,HT,R,DR)          ! cone cut on its top
 cc      IF (NP.EQ.-8) CALL RSP8(X,NG,RSNM,HT,R,DR)          ! cone on a cylinder
       IF (NP.EQ.-9) CALL RSP3nanorod (X,NG,NGAUSS,A,EPS,
-     &                                nanorod_cap_hr, R,DR) ! nanorod
+     &                                R,DR) ! nanorod
 
 *
       WV=P*2D0/LAM                 !wave vector
@@ -1400,7 +1398,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
 !     IMPLICIT real(dp) (A-H,O-Z)
       integer NG, NGAUSS, I
       real(dp) REV, EPS, CAP, H, A, CO, SI, RAD, RTHET, xstep
-      real(dp) aa, bb, valDR, c2, s2, alpha, beta, gamma, detsr,
+      real(dp) aa, bb, valDR, c2, s2, alpha1, beta1, gamma1, detsr,
      &  nom, psi, He, Hc, EPSe, EPSc
       real(dp) X(NG),R(NG),DR(NG)
 
@@ -1435,13 +1433,13 @@ C--------/---------/---------/---------/---------/---------/---------/--
             c2 = CO**2
             s2 = SI**2
 ! Solution of square euation of ellipse move from the origin
-            alpha = dsqrt( (EPSe**2 - EPSc**2)*s2 + c2)
-            beta = EPSe**2*s2 + c2
-            RAD = (Hc*CO + He*alpha) / beta
-            valDR = -((-alpha*Hc*SI
+            alpha1 = dsqrt( (EPSe**2 - EPSc**2)*s2 + c2)
+            beta1 = EPSe**2*s2 + c2
+            RAD = (Hc*CO + He*alpha1) / beta1
+            valDR = -((-alpha1*Hc*SI
      &                   + He*(EPSe**2-EPSc**2-1._dp)*SI*CO
-     &               )/(He*alpha**2 + alpha*Hc*CO)
-     &               - ( 2*(EPSe**2 - 1._dp)*SI*CO / beta ))
+     &               )/(He*alpha1**2 + alpha1*Hc*CO)
+     &               - ( 2*(EPSe**2 - 1._dp)*SI*CO / beta1 ))
 
          endif
          R(I)=RAD*RAD
@@ -3319,7 +3317,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       END
 
 
-      SUBROUTINE SAREAnanorod (EPS,RAT, nanorod_cap_hr)
+      SUBROUTINE SAREAnanorod (EPS,RAT)
 C--------/---------/---------/---------/---------/---------/---------/--
 C >>> EPS
 C <<< RAT
@@ -3327,7 +3325,6 @@ C=================
 C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       IMPLICIT real(dp) (A-H,O-Z)
-      real(dp) nanorod_cap_hr
 *
       RAT=(1.5D0/EPS)**(1D0/3D0)
       RAT=RAT/DSQRT( (EPS+2D0)/(2D0*EPS) )

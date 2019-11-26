@@ -92,11 +92,11 @@ C---------------------------------------------------------------------
 
       use libcylinder
       implicit none
-      integer LCS,ILCS,ikl,ieps,istep,ide,ndefp,itter
-      integer NOUT,NOUTI,NSTEP,NFIN,NMAT,NP,NPP,NDGS,NDGSP
-      real(dp) TOL,DEFP,DEFPP,DDELT,DDELTP,x_max,x_min
-      real(dp) hlength_max,hlength_min,rl_min,rl_max, nanorod_cap_hr
-      complex(dp) ZEPS0,CCEPS,CSEPS           !,ZARTAN
+      integer LCS,ILCS,ikl,ieps,istep,ide,itter
+      integer NOUT,NOUTI,NFIN,NMAT,NPP,NDGS,NDGSP
+      real(dp) TOL,DEFP,DEFPP,DDELT,DDELTP
+      real(dp) hlength_max,hlength_min
+      complex(dp) CSEPS           !,ZARTAN
       character(1) ync,yncv
       logical ynperfcon,ynperfconv,ynintens,ynoptth,ynbrug,yncheck
 cc      external ZARTAN
@@ -205,8 +205,8 @@ c Declarations:
       real(dp) enw,xstep,revf,revin,revinl,revl
       real(dp) omf(NFIN),omxf,reepsz,plasma,omxp
       real(dp) delo,omega0,omega,rsnm,hlength
-      real(dp) RAT,RATP,AXI,REV,REVP,ALPHA,BETA,ALPHAE,BETAE      !common block variables
-      real(dp) THET0,THET,THETV,PHI0,PHI     !common block variables
+      real(dp) RAT,RATP,AXI,REV,REVP,ALPHAE,BETAE      !common block variables
+      real(dp) THETV     !common block variables
       real(dp) ceps1real(NFIN),  ceps1imag(nfin)
 
 
@@ -514,6 +514,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
         write(6,*)'Auto-set amount of steps in length from *.ini',ndefp
       end if
 
+      rsnm = rsnm_par
       if (rsnm <= 0_dp) then
         write(6,*)'Enter cylinder radius:'
         read(5,*) rsnm
@@ -1668,7 +1669,7 @@ ctest
 
 C      write(90,*) lambda,  global_eps_r,
 C     & global_eps_i
-      call ampldr(yncheck,lmax,ichoice,npp,defpp,nanorod_cap_hr,
+      call ampldr(yncheck,lmax,ichoice,defpp,
      & rsnm,hlength,lambda,zeps(1),zeps0)
       end if
 *
@@ -1852,116 +1853,11 @@ C--------/---------/---------/---------/---------/---------/---------/--
 
       contains
 
-C--------/---------/---------/---------/---------/---------/---------/--
-      subroutine ini_parse()
-      character(len=:), allocatable :: items(:,:) !< Items pairs.
-      integer                       :: error
-      character(len=:), allocatable :: string         !< String option.
-      real(dp)                      :: double, d_re, d_im
-      integer                       :: num
-      write(6,*) 'Reading config from file: ', ini_config_file_name
-      call fini%load(filename=ini_config_file_name)
-
-      allocate(character(999) :: string)
-      string = repeat(' ', 999)
-
-      call fini%get(section_name='general', option_name='particle_type',
-     &  val=string, error=error)
-      NP = 0
-      if ((trim(string) .eq. 'cylinder').or.(trim(string)=='-2')) NP=-2
-      if ((trim(string) .eq. 'nanorod').or.(trim(string)=='-9')) NP=-9
-
-      call fini%get(section_name='nanorod',
-     &  option_name='nanorod_cap_hr', val=double, error=error)
-      nanorod_cap_hr = 1_dp ! default is round cap
-      if (error==0) nanorod_cap_hr = double
-
-      call fini%get(section_name='cylinder', option_name='rl_min',
-     &  val=double, error=error)
-      rl_min = -1_dp
-      if (error==0) rl_min = double
-
-      call fini%get(section_name='cylinder', option_name='rl_max',
-     &  val=double, error=error)
-      rl_max = -1_dp
-      if (error==0) rl_max = double
-
-      call fini%get(section_name='cylinder', option_name='rl_steps',
-     &  val=num, error=error)
-      ndefp = 0
-      if (error==0) ndefp = num
-
-      call fini%get(section_name='cylinder', option_name='radius',
-     &  val=double, error=error)
-      rsnm = -1_dp
-      if (error==0) rsnm = double
-
-      call fini%get(section_name='cylinder', option_name='alpha',
-     &  val=double, error=error)
-      alpha = 0_dp
-      if (error==0) alpha = double
-
-      call fini%get(section_name='cylinder', option_name='beta',
-     &  val=double, error=error)
-      beta = 0_dp
-      if (error==0) beta = double
-
-      call fini%get(section_name='general',
-     &  option_name='background_epsilon',
-     &  val=double, error=error)
-      zeps0 = 1_dp
-      if (error==0) zeps0 = double
-
-      d_re = 1_dp
-      call fini%get(section_name='cylinder', option_name='eps_real',
-     &  val=d_re, error=error)
-      d_im = 0_dp
-      call fini%get(section_name='cylinder', option_name='eps_imag',
-     &  val=d_im, error=error)
-      cceps = d_re + ci*d_im
-
-      call fini%get(section_name='beam', option_name='theta0',
-     &  val=double, error=error)
-      thet0 = 0_dp
-      if (error==0) thet0 = double
-
-      call fini%get(section_name='beam', option_name='phi0',
-     &  val=double, error=error)
-      phi0 = 0_dp
-      if (error==0) phi0 = double
-
-      call fini%get(section_name='beam', option_name='theta',
-     &  val=double, error=error)
-      thet = 0_dp
-      if (error==0) thet = double
-
-      call fini%get(section_name='beam', option_name='phi',
-     &  val=double, error=error)
-      phi = 0_dp
-      if (error==0) phi = double
-
-      call fini%get(section_name='beam', option_name='x_min',
-     &  val=double, error=error)
-      x_min = -1_dp
-      if (error==0) x_min = double
-
-      call fini%get(section_name='beam', option_name='x_max',
-     &  val=double, error=error)
-      x_max = -1_dp
-      if (error==0) x_max = double
-
-      call fini%get(section_name='beam', option_name='x_steps',
-     &  val=num, error=error)
-      nstep = 0
-      if (error==0) nstep = num
-
-      end subroutine ini_parse
-
 
 
 C**********************************************************************
 
-      SUBROUTINE AMPLDR(yncheck,nmax,ichoicev,np,eps,nanorod_cap_hr,
+      SUBROUTINE AMPLDR(yncheck,nmax,ichoicev,eps,
      &                  rsnm,ht,lambda,zeps1,zeps0)
 
 C Warning in module AMPLDR in file ampldr.f: Variables set but never used:
@@ -1986,7 +1882,7 @@ C    TMT(4,*)=-TMT(3,*)^t where t denotes transposed TMT(3,*) submatrix
 C
 C ICHOICE=1 if NAG library is available, otherwise ICHOICE=2
 C
-C NP,EPS: specifies the shape of particles within a given NP class:
+C EPS: specifies the shape of particles within a given NP class:
 C     NP.gt.0 - EPS = deformation parameter of a Chebyshev particle
 C     NP=-1 - EPS = the ratio of the horizontal to rotational axes. EPS is
 C             larger than 1 for oblate spheroids and smaller than 1 for
@@ -2028,9 +1924,8 @@ C--------/---------/---------/---------/---------/---------/---------/--
       IMPLICIT real(dp) (A-H,O-Z)
       INTEGER NOUT,NAXSM,ICHOICEV,ICHOICE
       LOGICAL YNCHECK
-      integer nmax, np, inm1, ixxx, m, m1, n, n1, n11, n2 ,n22, ncheck,
+      integer nmax,  inm1, ixxx, m, m1, n, n1, n11, n2 ,n22, ncheck,
      & ndgs, ngaus, ngauss, nm, nma, nn1, nn2, nnm, nnnggg
-      real(dp) nanorod_cap_hr
 
        INCLUDE 'ampld.par.f'
 * number of the output unit
@@ -2103,10 +1998,10 @@ cc      write(6,*)'LAM,LAMBDA in AMPL=', LAM, LAMBDA
 * accuracy of computing the optical cross sections.
 
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-1) CALL SAREA (EPS,RAT)
-      IF (DABS(RAT-1D0).GT.1D-8.AND.NP.GE.0) CALL SURFCH(NP,EPS,RAT)
+      IF (DABS(RAT-1D0).GT.1D-8.AND.NP.GE.0) CALL SURFCH(EPS,RAT)
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-2) CALL SAREAC (EPS,RAT)
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-9)
-     &  CALL SAREAnanorod (EPS,RAT,nanorod_cap_hr)
+     &  CALL SAREAnanorod (EPS,RAT)
       IF (NP.EQ.-3) CALL DROP (RAT)
 
       PRINT 7400, LAM,MRR,MRI
@@ -2163,11 +2058,11 @@ c
      &          '  EXECUTION TERMINATED')
 c 7334    FORMAT(' NMAX =', I3,'  DC2=',D8.2,'   DC1=',D8.2)
 *
-         CALL CONST(NGAUSS,NMAX,X,W,AN,ANN,S,SS,NP,EPS,RSNM,HT)      !In AMPLDR
+         CALL CONST(NGAUSS,NMAX,X,W,AN,ANN,S,SS,EPS,rsnm,HT)      !In AMPLDR
 *
 * specify particle shape:
-         CALL VARY(LAM,MRR,MRI,A,EPS,nanorod_cap_hr,
-     &              RSNM,HT,NP,NGAUSS,X,P,
+         CALL VARY(LAM,MRR,MRI,A,EPS,
+     &              rsnm,HT,NGAUSS,X,P,
      &              PPI,PIR,PII,R,DR,DDR,DRR,DRI,NMAX)
 *
 * determine m=m'=0 elements of the T matrix
@@ -2247,12 +2142,12 @@ cc         NGGG=2*NGAUSS
 *
 * GIF division points and weights + other numerical constants
 *
-         CALL CONST(NGAUSS,NMAX,X,W,AN,ANN,S,SS,NP,EPS,RSNM,HT)     !In AMPLDR
+         CALL CONST(NGAUSS,NMAX,X,W,AN,ANN,S,SS,EPS,rsnm,HT)     !In AMPLDR
 *
 * specify particle shape:
 *
-         CALL VARY(LAM,MRR,MRI,A,EPS,nanorod_cap_hr,
-     &              RSNM,HT,NP,NGAUSS,X,P,
+         CALL VARY(LAM,MRR,MRI,A,EPS,
+     &              rsnm,HT,NGAUSS,X,P,
      &              PPI,PIR,PII,R,DR,DDR,DRR,DRI,NMAX)
 *
 * determine m=m'=0 elements of the T matrix
@@ -2304,12 +2199,12 @@ c 7337    FORMAT(' NG=',I3,'  DC2=',D8.2,'   DC1=',D8.2)
 
 * GIF division points and weights + other numerical constants
 *
-         CALL CONST(NGAUSS,NMAX,X,W,AN,ANN,S,SS,NP,EPS,RSNM,HT)     !In AMPLDR
+         CALL CONST(NGAUSS,NMAX,X,W,AN,ANN,S,SS,EPS,rsnm,HT)     !In AMPLDR
 *
 * specify particle shape:
 *
-         CALL VARY(LAM,MRR,MRI,A,EPS,nanorod_cap_hr,
-     &             RSNM,HT,NP,NGAUSS,X,P,
+         CALL VARY(LAM,MRR,MRI,A,EPS,
+     &             rsnm,HT,NGAUSS,X,P,
      &              PPI,PIR,PII,R,DR,DDR,DRR,DRI,NMAX)
 *
 * determine m=m'=0 elements of the T matrix
@@ -2666,7 +2561,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
 *_
       COMMON /DIELF/ zeps0
       COMMON /REVF/ rev
-      COMMON /CYLPAR/ rsnm, hlength
+      COMMON /CYLPAR/  hlength
 
 *
 * transfers ZEPS0,REV here from the main
