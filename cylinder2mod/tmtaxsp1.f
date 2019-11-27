@@ -93,70 +93,68 @@ C--------/---------/---------/---------/---------/---------/---------/--
       PARAMETER (LMAXD=8,LMAX1D=LMAXD+1,LMTD=LMAX1D*LMAX1D-1)
 
       real(dp)  LAM,MRR,MRI,X(NPNG2),W(NPNG2),S(NPNG2),SS(NPNG2),
-     *        AN(NPN1),R(NPNG2),DR(NPNG2),
-     *        DDR(NPNG2),DRR(NPNG2),DRI(NPNG2),ANN(NPN1,NPN1)
+     &    AN(NPN1),R(NPNG2),DR(NPNG2),
+     &    DDR(NPNG2),DRR(NPNG2),DRI(NPNG2),ANN(NPN1,NPN1)
       real(dp) TR1(NPN2,NPN2),TI1(NPN2,NPN2)            
 c      real(dp) XALPHA(300),XBETA(300),WALPHA(300),WBETA(300)
 
 !     complex(dp) CZERO
       complex(dp) zeps1
       complex(dp) TMT(4,LMTD,LMTD)
-* 
+! 
       COMMON /CT/ TR1,TI1
-* transfers the real and imaginary part of the T matrix (2*NMAX,2*NMAX) 
-* array for a given value of M from TT via (TMATR0 and TMATR) to the main 
-*
+! transfers the real and imaginary part of the T matrix (2*NMAX,2*NMAX) 
+! array for a given value of M from TT via (TMATR0 and TMATR) to the main 
+!
 cc      COMMON /TMAT/ RT11,RT12,RT21,RT22,IT11,IT12,IT21,IT22
-* transfers T matrix arrays obtained from TR1,TI1 in the main to the 
-* AMPL routine --->  NOT USED HERE
-*
+! transfers T matrix arrays obtained from TR1,TI1 in the main to the 
+! AMPL routine --->  NOT USED HERE
+!
 
       COMMON /CHOICE/ ICHOICE
-* transfers the choice of inversion from here to TT
-*
+! transfers the choice of inversion from here to TT
+!
       COMMON/REVVAL/ A
-* 
-* transfers REV to CONST routine
-*
+! 
+! transfers REV to CONST routine
+!
       COMMON /TOITMT/ICHOICEV,NP,NCHECK,NAXSM,NDGS   
-*
-* transfers integers ICHOICEV,NP,NCHECK,NAXSM,NDGS from the main here
-*
+!
+! transfers integers ICHOICEV,NP,NCHECK,NAXSM,NDGS from the main here
+!
       COMMON /TOTMT/EPS,RAT,REV,ALPHA,BETA,DDELT   
-* 
-* transfers real(dp) RAT,A(REV),ALPHA,BETA,DDELT from the main here
-*     
-*****************************************************************
+! 
+! transfers real(dp) RAT,A(REV),ALPHA,BETA,DDELT from the main here
+!     
+!****************************************************************
 !     DATA CZERO/(0.D0,0.D0)/
-*
+!
       P=DACOS(-1D0)                 !local PI constant
-*
+!
       ICHOICE=ICHOICEV
       A=REV
       LAM=REV*SQRT(mpar%zeps0)/RAP       !vacuum wavelength times SQRT(mpar%zeps0)/
-*
-* the real part of the refractive index contrast 
-*      
+!
+! the real part of the refractive index contrast 
+!      
       MRR=DBLE(SQRT(ZEPS1/mpar%zeps0))
-*
-* the imaginary  part of the refractive index contrast 
-*
+!
+! the imaginary  part of the refractive index contrast 
+!
       MRI=aimag(SQRT(ZEPS1/mpar%zeps0))
-* 
+! 
       DDELT=0.1D0*DDELT               !conv. test is switched off now!!!
-*
-* DDELT is used to test the accuracy of computing the 
-* optical cross sections. This accuracy is usually better  
-* than the absolute accuracy of computing the expansion coefficients 
-* of a normalized scattering matrix by a factor of 10. Therefore,
-* the desired accuracy of computing the expansion coefficients 
-* is rescaled by a factor 0.1 before entering the test of the 
-* accuracy of computing the optical cross sections.
-
-
-*
-* Other local constants:
-*  
+!
+! DDELT is used to test the accuracy of computing the 
+! optical cross sections. This accuracy is usually better  
+! than the absolute accuracy of computing the expansion coefficients 
+! of a normalized scattering matrix by a factor of 10. Therefore,
+! the desired accuracy of computing the expansion coefficients 
+! is rescaled by a factor 0.1 before entering the test of the 
+! accuracy of computing the optical cross sections.
+!
+! Other local constants:
+!  
       LMTOT=(NMAX+1)**2-1
 
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-1) CALL SAREA (EPS,RAT)
@@ -166,34 +164,32 @@ cc      COMMON /TMAT/ RT11,RT12,RT21,RT22,IT11,IT12,IT21,IT22
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-9)
      &  CALL SAREAnanorod (EPS,RAT)
       IF (NP.EQ.-3) CALL DROP (RAT)
-
-*___________________________________________________
-* Determination of the Wiscombe value of the floating 
+!___________________________________________________
+! Determination of the Wiscombe value of the floating 
 C angular momentum cutoff NMAX:
 
       XEV=2D0*P*A/LAM
       IXXX=XEV+4.05D0*XEV**0.333333D0     !Wiscombe conv. criterion for NMAX
       INM1=MAX0(4,IXXX)
-*
+!
       IF (INM1.GE.NPN1) PRINT 7333, NPN1
       IF (INM1.GE.NPN1) STOP
  7333 FORMAT('CONVERGENCE IS NOT OBTAINED FOR NPN1=',I3,  
      &       '.  EXECUTION TERMINATED')
-
-*_______________________________________________________________ 
+!_______________________________________________________________ 
 
       NGAUSS=NMAX*NDGS 
 cc      NNNGGG=NGAUSS+1
 
       IF (NGAUSS.EQ.NPNG1) PRINT 7336
  7336    FORMAT('WARNING: NGAUSS=NPNG1')
-*
-* GIF division points and weights + other numerical constants
-*
+!
+! GIF division points and weights + other numerical constants
+!
          CALL CONST(NGAUSS,NMAX,X,W,AN,ANN,S,SS,NP,EPS)
-*
-* specify particle shape:
-*
+!
+! specify particle shape:
+!
          CALL VARY(LAM,MRR,MRI,A,EPS,
      &              RSNM,HT,NP,NGAUSS,X,P,PPI,PIR,PII,R,
      &              DR,DDR,DRR,DRI,NMAX)
@@ -203,12 +199,12 @@ cc      NNNGGG=NGAUSS+1
 !                   NP,NGAUSS,X,P,PPI,PIR,PII,R,
 !                   DR,DDR,DRR,DRI,NMAX)
 C
-*
-* determine m=m'=0 elements of the T matrix
-*
+!
+! determine m=m'=0 elements of the T matrix
+!
          CALL TMATR0 (NGAUSS,X,W,AN,ANN,PPI,PIR,PII,R,DR,
      &                 DDR,DRR,DRI,NMAX,NCHECK,NAXSM)
-*
+!
          QEXT=0D0
          QSCA=0D0
          
@@ -225,17 +221,16 @@ C
      &                    +TR1NN1*TR1NN1+TI1NN1*TI1NN1)
             QEXT=QEXT+(TR1NN+TR1NN1)*DN1
   104    CONTINUE
-
-*<<<  
+!<<<  
 cc      WRITE(NOUT,*)'NMAX=',NMAX
 cc      WRITE(NOUT,*)'NGAUSS=',NGAUSS
-*<<<
-*
-* TMT initialization:
+!<<<
+!
+! TMT initialization:
 
 cc         DO JA=1,LMTOT     
 cc         DO JB=1,LMTOT
-*                                         
+!                                         
 cc            TMT(1,JB,JA)=CZERO
 cc            TMT(2,JB,JA)=CZERO 
 cc            TMT(3,JB,JA)=CZERO
@@ -243,7 +238,7 @@ cc            TMT(4,JB,JA)=CZERO
 
 cc         ENDDO
 cc         ENDDO
-*
+!
 C
 C                         |  TMT(1,*) |  TMT(4,*)   |
 C                 TMT  =  | ----------+-------------|
@@ -254,8 +249,7 @@ C    TMT(4,*) terms corresponds to TEM scattering sub-matrix
 C    TMT(2,*) terms corresponds to TMM scattering sub-matrix
 C    TMT(3,*) terms corresponds to TME scattering sub-matrix
 C    TMT(4,*)=-TMT(3,*)^t where t denotes transposed TMT(3,*) submatrix
-
-*****************     Assign  m=m=0 elements of TMT matrix   ***********
+!****************     Assign  m=m=0 elements of TMT matrix   ***********
 
          DO L1=1,NMAX   
          DO L2=1,NMAX  
@@ -264,8 +258,8 @@ C    TMT(4,*)=-TMT(3,*)^t where t denotes transposed TMT(3,*) submatrix
  
             JA=L1*(L1+1)       ! (l,m) index with (1-1)=1
             JB=L2*(L2+1)       
-* 
-* see (5.39) of {MTL}:  !!!Iff plane of symmetry perpendicular to the
+! 
+! see (5.39) of {MTL}:  !!!Iff plane of symmetry perpendicular to the
                         !!!axis of rotation
 
         if ((NAXSM.eq.1).and.((-1)**(L1+L2).ne.1)) then
@@ -275,22 +269,22 @@ C    TMT(4,*)=-TMT(3,*)^t where t denotes transposed TMT(3,*) submatrix
             TMT(2,JA,JB)=cmplx_dp(TR1(L1,L2),TI1(L1,L2))
             TMT(1,JA,JB)=cmplx_dp(TR1(N1,N2),TI1(N1,N2))
         end if
-* see (5.37) of {MTL}:
+! see (5.37) of {MTL}:
             TMT(4,JA,JB)=CZERO         !cmplx_dp(TR1(N1,L2),TI1(N1,L2))
             TMT(3,JB,JA)=CZERO         !-TMT(4,JA,JB)  
                       
          ENDDO
          ENDDO
-*
-*****************    Assign  m=m'>0 elements of the T matrix   ***********
+!
+!****************    Assign  m=m'>0 elements of the T matrix   ***********
 
       DO 220 M=1,NMAX
-*
+!
          CALL TMATR(M,NGAUSS,X,W,AN,ANN,S,SS,PPI,PIR,PII,R,DR,
      &               DDR,DRR,DRI,NMAX,NCHECK,NAXSM)
-*
-* <<< returns  m=m'>0 elements of the T matrix
-*
+!
+! <<< returns  m=m'>0 elements of the T matrix
+!
         NM=NMAX-M+1             !size of a T block returned by TT
 
          DO L1=M,NMAX   
@@ -305,9 +299,9 @@ C    TMT(4,*)=-TMT(3,*)^t where t denotes transposed TMT(3,*) submatrix
             JBM=L2*(L2+1)-M  
             JA =L1*(L1+1)+M       ! (l,m) index with (1-1)=1
             JB =L2*(L2+1)+M        
-*
-* 
-* see (5.39) of {MTL}: !!!Iff plane of symmetry perpendicular to the
+!
+! 
+! see (5.39) of {MTL}: !!!Iff plane of symmetry perpendicular to the
                        !!!axis of rotation
 
           if ((NAXSM.eq.1).and.((-1)**(L1+L2).ne.1)) then
@@ -333,23 +327,23 @@ C    TMT(4,*)=-TMT(3,*)^t where t denotes transposed TMT(3,*) submatrix
             TMT(3,JB,JA)   =-TMT(4,JA,JB) 
             TMT(3,JBM,JAM) = TMT(4,JA,JB)    !=-TMT(3,JB,JA) 
           end if
-*    
-*  Using reciprocity (Eq. (15) of Ref. \ct{Mis97}):
-*
-*       T_{lm,l'm}^{ij}=(-1)^{i+j} T_{l'm,lm}^{ji}
-*
-*  and (see Eq. (36) \JQSRT{55}):
-*
-*       T_{lm,l'm'}^{ij}=(-1)^{m+m'} T_{l'-m',l-m}^{ji}
-*                      
-*  Moreover, for axially symmetric particles one has 
-*  (see Eq. (31),(36) \JQSRT{55}):
-*
-*  T_{lm,l'm}^{ij}=(-1)^{i+j} T_{l-m,l'-m}^{ij} = T_{l'-m',l-m}^{ji}
-*
+!    
+!  Using reciprocity (Eq. (15) of Ref. \ct{Mis97}):
+!
+!       T_{lm,l'm}^{ij}=(-1)^{i+j} T_{l'm,lm}^{ji}
+!
+!  and (see Eq. (36) \JQSRT{55}):
+!
+!       T_{lm,l'm'}^{ij}=(-1)^{m+m'} T_{l'-m',l-m}^{ji}
+!                      
+!  Moreover, for axially symmetric particles one has 
+!  (see Eq. (31),(36) \JQSRT{55}):
+!
+!  T_{lm,l'm}^{ij}=(-1)^{i+j} T_{l-m,l'-m}^{ij} = T_{l'-m',l-m}^{ji}
+!
          ENDDO
          ENDDO
-*
+!
   220 CONTINUE    !end of loop over m's
   
       RETURN
@@ -702,8 +696,7 @@ c      real(dp) DDV1(LMAXD1),DV1(LMAXD1),DV2(LMAXD1)
 
       integer n,nmax,M,I,I2
       real(dp) A,X,QS,D3,DER,DX,QMM
-
-* DDV1 and DV2 initialization
+! DDV1 and DV2 initialization
       DO 1 N=1,NMAX
           DDV1(N)=0.D0
          DV2(N) =0.D0
@@ -712,10 +705,10 @@ c      real(dp) DDV1(LMAXD1),DV1(LMAXD1),DV2(LMAXD1)
       DX=DABS(X)
       A=1.D0
       QS=DSQRT(1D0-X*X)                        !sin\theta
-*
+!
       IF (M.NE.0) then          ! M\neq 0 part
-*                          
-*    A_m*(sin\theta)**m   initialization - (33) and recurrence (34) of Ref. {Mis39}
+!                          
+!    A_m*(sin\theta)**m   initialization - (33) and recurrence (34) of Ref. {Mis39}
 
    20 QMM=dble(M*M)
 
@@ -725,12 +718,11 @@ c      real(dp) DDV1(LMAXD1),DV1(LMAXD1),DV2(LMAXD1)
    25 CONTINUE
 
       end if
-*
+!
       go to 100
-
-*********************************************************     
-*  (1-cos\theta) is very small:
-*
+!********************************************************     
+!  (1-cos\theta) is very small:
+!
 C   For theta=0 [see Eqs. above]:
 C              d_{00}^{(0)}(0)=1 
 C              d_{01}^{(1)}(0)=0
@@ -745,71 +737,67 @@ C
 C   (m/\sin\theta) d_{0m}^l(0)=(\delta_{m\pm 1}/2) \sqrt{l(l+1)}
 C      d d_{0m}^l(0)/d\beta   =(m\delta_{m\pm 1}/2) \sqrt{l(l+1)}
 C
-*
-*  (4.2.1) of \ct{Ed}:
-*   d_{0m}^{(l)}(pi) = (-1)^{l+m} \dt_{0,m}
-*  
-*  (4.2.3) of \ct{Ed}:
-*   d_{0m}^{(l)}(0) = (-1)^{m} \dt_{0,m} = \dt_{0,m}
-*=======================================
-*
-*  If X^l_m=(m/\sin\theta) d_{0m}^{(l)}, then, according to (3.29) of {TKS}:
-*
-*  X^{m+1}_{m+1}=\sin\theta \sqrt{\fr{2m+1}{2m+2}}
-*                           \left(\fr{m+1}{m}\right)X^{m}_{m}
-*
-*  According to (3.30) of {TKS}:
-*  X^{m+1}_{m}= -\sqrt{2m+1}\,\cos\theta X^{m}_{m}
-*
-* According to (3.31) of {TKS}:
-*  X^{l}_{m}=\fr{1}{\sqrt{l^2-m^2}}\,\left[(2l-1)\cos\theta
-*          X^{l-1}_{m} - \sqrt{(l-1)^2-m^2}}\,\X^{l-2}_{m} \right]
-* 
-* Initial recurrence values are X^1_1=\sqrt{2}/2 and X^l_0=0
-***********************************************************************
-*                   NONZERO DDV1/DV2 INITIALIZATION
-*                          M = 0
+!
+!  (4.2.1) of \ct{Ed}:
+!   d_{0m}^{(l)}(pi) = (-1)^{l+m} \dt_{0,m}
+!  
+!  (4.2.3) of \ct{Ed}:
+!   d_{0m}^{(l)}(0) = (-1)^{m} \dt_{0,m} = \dt_{0,m}
+!=======================================
+!
+!  If X^l_m=(m/\sin\theta) d_{0m}^{(l)}, then, according to (3.29) of {TKS}:
+!
+!  X^{m+1}_{m+1}=\sin\theta \sqrt{\fr{2m+1}{2m+2}}
+!                           \left(\fr{m+1}{m}\right)X^{m}_{m}
+!
+!  According to (3.30) of {TKS}:
+!  X^{m+1}_{m}= -\sqrt{2m+1}\,\cos\theta X^{m}_{m}
+!
+! According to (3.31) of {TKS}:
+!  X^{l}_{m}=\fr{1}{\sqrt{l^2-m^2}}\,\left[(2l-1)\cos\theta
+!          X^{l-1}_{m} - \sqrt{(l-1)^2-m^2}}\,\X^{l-2}_{m} \right]
+! 
+! Initial recurrence values are X^1_1=\sqrt{2}/2 and X^l_0=0
+!**********************************************************************
+!                   NONZERO DDV1/DV2 INITIALIZATION
+!                          M = 0
 
  100  IF (M.EQ.0) THEN     !all DDV1(N)=X^l_0=0; see (3.33) of {TKS}: 
-
-* According to (3.37) of {TKS}, DV2(0)=0.d0
+! According to (3.37) of {TKS}, DV2(0)=0.d0
 
       DV2(1)=QS
 
       IF (NMAX.GE.2) DV2(2)=3*X*DV2(1)
 
       IF (NMAX.LT.3) RETURN
-*
+!
       DO N=3,NMAX           !recurrence (3.36) of {TKS}, 
       DV2(N)=(2*N-1)*X*DV2(N-1)/(N-1)-N*DV2(N-2)/(N-1)
       ENDDO
-***********************************************************************
-*                           M > 0
+!**********************************************************************
+!                           M > 0
 
        ELSE IF (M.GT.0) THEN
-*
-* >>> Determine X^m_m according to Eq. (3.29) of {TKS}:
+!
+! >>> Determine X^m_m according to Eq. (3.29) of {TKS}:
 
       A=1.d0/DSQRT(2.D0)               !X^1_1=A_1
 
       DO I=1,M-1
       A=QS*DBLE(I+1)*DSQRT(2*I+1.d0)*A/(I*DSQRT(2*I+2.d0))
       ENDDO
-
-* <<< A is now X^m_m; see (3.29) of {TKS}
+! <<< A is now X^m_m; see (3.29) of {TKS}
 
       DDV1(M)=A
       DV2(M)=X*A                        !see (3.34) of {TKS}
-
-* >>> Determine X^{m+1}_m:
+! >>> Determine X^{m+1}_m:
 
       IF (M.EQ.NMAX)  GO TO 120
 
       DER=X*DSQRT(2*M+1.d0)*A          ! DER=X^{m+1}_m; see (3.30) of {TKS}
       DDV1(M+1)=DER
       DV2(M+1)=((M+1)*X*DER-A*DSQRT(2*M+1.d0))/DBLE(M)  !(3.35) of {TKS}
-
-* >>> Determine remaining X^{l}_m's
+! >>> Determine remaining X^{l}_m's
 
       IF ((M+2).EQ.NMAX)  GO TO 120
 
@@ -854,14 +842,14 @@ C--------/---------/---------/---------/---------/---------/---------/--
       real(dp) EE,EE1,CC,SI,XI1,XI2,XAV
       real(dp) XTHETA,THETA0,RX
       real(dp) X(NPNG2),W(NPNG2),X1(NPNG2),W1(NPNG2),
-     *        X2(NPNG2),W2(NPNG2),
-     *        S(NPNG2),SS(NPNG2),
-     *        AN(NPN1),ANN(NPN1,NPN1),DD(NPN1)
-*
+     &   X2(NPNG2),W2(NPNG2),
+     &   S(NPNG2),SS(NPNG2),
+     &   AN(NPN1),ANN(NPN1,NPN1),DD(NPN1)
+!
       COMMON/REVVAL/ RX
-*
+!
 !     DATA PI/3.141592653589793d0/
-*      
+!      
       DO N=1,NMAX
            NN=N*(N+1)
            AN(N)=dble(NN)
@@ -875,9 +863,9 @@ C--------/---------/---------/---------/---------/---------/---------/--
       end do
 
       NG=2*NGAUSS      
-*
-* GIF division points and weights
-* 
+!
+! GIF division points and weights
+! 
       NEPS=MAX(EPS,1.d0/EPS)      !number of Gauss integration
                                   !intervals from EPS
 
@@ -956,10 +944,9 @@ c_____ estimate integration intervals:
       ENDDO         !J
 
       ENDDO         !I
-
-*
-* Assuming mirror symmetry in the $\theta=\pi/2$ plane
-*
+!
+! Assuming mirror symmetry in the $\theta=\pi/2$ plane
+!
       DO  I=1,NGAUSS
          W(I)=W(NG-I+1)
          X(I)=-X(NG-I+1)
@@ -968,26 +955,25 @@ c_____ estimate integration intervals:
       ENDIF           !NEPS
 
       ELSE IF (NP.EQ.-2.or.NP.eq.-9) THEN  ! cylinder or nanorod
-
-******************   Only involves cylinders  ********************** 
+!*****************   Only involves cylinders  ********************** 
      
       NG1=dble(NGAUSS)/2D0
       NG2=NGAUSS-NG1
       XX=-DCOS(DATAN(EPS))        !-COS OF SEPARATION ANGLE BETWEEN
                                   !HORIZONTAL AND VERTICAL CYLINDER
                                   !FACES
-*
-* GIF division points and weights
-*
+!
+! GIF division points and weights
+!
       CALL GAUSS(NG1,0,0,X1,W1)         !for (0,NG1)
       CALL GAUSS(NG2,0,0,X2,W2)         !for (NG1+1,NGAUSS=NG1+NG2)
-*
+!
 C In GAUSS (N,IND1,IND2,Z,W):  
 C IND1 = 0 - INTERVAL (-1,1), 
 C IND1 = 1 - (0,1)
 C IND2 = 1 RESULTS ARE PRINTED.
-*
-*
+!
+!
       DO 12 I=1,NG1
          W(I)=0.5D0*(XX+1D0)*W1(I)
          X(I)=0.5D0*(XX+1D0)*X1(I)+0.5D0*(XX-1D0)
@@ -996,15 +982,14 @@ C IND2 = 1 RESULTS ARE PRINTED.
          W(I+NG1)=-0.5D0*XX*W2(I)
          X(I+NG1)=-0.5D0*XX*X2(I)+0.5D0*XX
    14 CONTINUE
-*
-* Assuming mirror symmetry in the $\theta=\pi/2$ plane
-*
+!
+! Assuming mirror symmetry in the $\theta=\pi/2$ plane
+!
       DO 16 I=1,NGAUSS
          W(NG-I+1)=W(I)
          X(NG-I+1)=-X(I)
    16 CONTINUE
-
-******************************************************************  
+!*****************************************************************  
       ELSE IF (NP.EQ.-4) THEN         ! cut sphere on top
            
       XTHETA=DACOS((EPS-RX)/RX)
@@ -1013,10 +998,10 @@ C IND2 = 1 RESULTS ARE PRINTED.
       NG1=NG-NG2
       THETA0=1.D0/SQRT(8.D0*RX/EPS-3.D0)  !cosine of the separation angle 
       XX=THETA0
-*
+!
       CALL GAULEG(-1.D0,THETA0,X1,W1,NG1)       !for (0,NG1)
       CALL GAULEG(THETA0,1.D0,X2,W2,NG2)        !for (NG2+1,NG=NG1+NG2)
-*
+!
       DO  I=1,NG1
          W(I)=W1(I)
          X(I)=X1(I)
@@ -1028,8 +1013,8 @@ C IND2 = 1 RESULTS ARE PRINTED.
          X(I+NG1)=X2(I)
 
       ENDDO
-*
-******************************************************************  
+!
+!*****************************************************************  
       ELSE IF (NP.EQ.-5) THEN            ! cut sphere on its bottom
            
       XTHETA=DACOS((EPS-RX)/RX)
@@ -1037,10 +1022,10 @@ C IND2 = 1 RESULTS ARE PRINTED.
       NG1=XX*DBLE(NG)
       NG2=NG-NG1
       THETA0=-1.D0/SQRT(8.D0*RX/EPS-3.D0)  !cosine of the separation angle 
-*
+!
       CALL GAULEG(-1.D0,THETA0,X1,W1,NG1)       !for (0,NG1)
       CALL GAULEG(THETA0,1.D0,X2,W2,NG2)        !for (NG2+1,NG=NG1+NG2)
-*
+!
       DO  I=1,NG1
          W(I)=W1(I)
          X(I)=X1(I)
@@ -1052,16 +1037,15 @@ C IND2 = 1 RESULTS ARE PRINTED.
          X(I+NG1)=X2(I)
 
       ENDDO
-
-****************************************************************** 
-*   
+!***************************************************************** 
+!   
       ELSE 
-*      
+!      
       CALL GAUSS(NG,0,0,X,W)
 c      CALL GAULEG(-1.D0,1.D0,X,W,NG)
-*     
+!     
       END IF
-*
+!
        if (np.gt.-4) then           !mirror symmetry present
 
        DO 20 I=1,NGAUSS
@@ -1085,7 +1069,7 @@ c      CALL GAULEG(-1.D0,1.D0,X,W,NG)
    30 CONTINUE
 
       END IF
-*
+!
       RETURN
       END
  
@@ -1093,7 +1077,7 @@ C**********************************************************************
  
       SUBROUTINE VARY (LAM,MRR,MRI,A,EPS,
      &                 RSNM,HT,NP,NGAUSS,X,
-     *                 P,PPI,PIR,PII,R,DR,DDR,DRR,DRI,NMAX)
+     &            P,PPI,PIR,PII,R,DR,DDR,DRR,DRI,NMAX)
 C--------/---------/---------/---------/---------/---------/---------/--
 C >>> LAM,MRR,MRI,A,EPS,NP,NGAUSS,X,P,NMAX
 C <<< PPI,PIR,PII,R,DR,DDR,DRR,DRI
@@ -1128,8 +1112,8 @@ C--------/---------/---------/---------/---------/---------/---------/--
       IMPLICIT real(dp) (A-H,O-Z)
       real(dp) rsnm, ht
       real(dp)  X(NPNG2),R(NPNG2),DR(NPNG2),MRR,MRI,LAM,
-     *        Z(NPNG2),ZR(NPNG2),ZI(NPNG2),
-     *        DDR(NPNG2),DRR(NPNG2),DRI(NPNG2)
+     &   Z(NPNG2),ZR(NPNG2),ZI(NPNG2),
+     &   DDR(NPNG2),DRR(NPNG2),DRI(NPNG2)
 cc     *        J(NPNG2,NPN1),Y(NPNG2,NPN1),JR(NPNG2,NPN1),
 cc     *        JI(NPNG2,NPN1),DJ(NPNG2,NPN1),DY(NPNG2,NPN1),
 cc     *        DJR(NPNG2,NPN1),DJI(NPNG2,NPN1)
@@ -1137,8 +1121,7 @@ cc      COMMON /CBESS/ J,Y,JR,JI,DJ,DY,DJR,DJI
 
       NG=NGAUSS*2
       ht = 0d0
-
-* decision tree to specify particle shape:
+! decision tree to specify particle shape:
 
       IF (NP.GT.0)  CALL RSP2(X,NG,A,EPS,NP,R,DR)       ! Chebyshev particle
       IF (NP.EQ.-1) CALL  RSP1(X,NG,NGAUSS,A,EPS,R,DR)   ! oblate/prolate spheroids
@@ -1151,8 +1134,7 @@ cc      IF (NP.EQ.-7) CALL RSP7(X,NG,RSNM,HT,R,DR)          ! cone cut on its to
 cc      IF (NP.EQ.-8) CALL RSP8(X,NG,RSNM,HT,R,DR)          ! cone on a cylinder
       IF (NP.EQ.-9) CALL RSP3nanorod (X,NG,NGAUSS,A,EPS,
      &                                mpar%nanorod_cap_hr, R,DR) ! nanorod
-
-*
+!
       WV=P*2D0/LAM                 !wave vector
       PPI=WV*WV
       PIR=PPI*MRR
@@ -1178,21 +1160,21 @@ cc      IF (NP.EQ.-8) CALL RSP8(X,NG,RSNM,HT,R,DR)          ! cone on a cylinder
       IF (NMAX.GT.NPN1) PRINT 9000,NMAX,NPN1
       IF (NMAX.GT.NPN1) STOP
  9000 FORMAT(' NMAX = ',I2,', i.e., greater than ',I3)
-*
-* TA is the ``max. size parameter", MAX(2*PI*SQRT(RI)/LAMBDA)
+!
+! TA is the ``max. size parameter", MAX(2*PI*SQRT(RI)/LAMBDA)
 
       TB=TA*DSQRT(MRR*MRR+MRI*MRI)     !=TA*EPSIN
       TB=DMAX1(TB,dble(NMAX))
-*
+!
       NNMAX1=1.2D0*DSQRT(DMAX1(TA,dble(NMAX)))+3D0
       NNMAX2=(TB+4D0*(TB**0.33333D0)+1.2D0*DSQRT(TB))  !Wiscombe bound
       NNMAX2=NNMAX2-NMAX+5
-*
-* generate arrays of Bessel functions at NGAUSS GIF division
-* points and store them in the common block /CBESS/
-*
+!
+! generate arrays of Bessel functions at NGAUSS GIF division
+! points and store them in the common block /CBESS/
+!
       CALL BESS(Z,ZR,ZI,NG,NMAX,NNMAX1)
-*
+!
       RETURN
       END
  
@@ -1289,7 +1271,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       I=(DNP+0.1D0)*0.5D0
       I=2*I
       IF (I.EQ.N) A=A-3D0*EPS*(1D0+0.25D0*EP)/
-     *              (DN-1D0)-0.25D0*EP*EPS/(9D0*DN-1D0)
+     &         (DN-1D0)-0.25D0*EP*EPS/(9D0*DN-1D0)
       R0=REV*A**(-1D0/3D0)
       DO 50 I=1,NG
          XI=DACOS(X(I))*DNP
@@ -1335,11 +1317,9 @@ C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       IMPLICIT real(dp) (A-H,O-Z)
       real(dp) X(NG),R(NG),DR(NG)
-
-* Determine half-length of the cylinder
+! Determine half-length of the cylinder
       H=REV*( (2D0/(3D0*EPS*EPS))**(1D0/3D0) )
-      
-* Determine cylinder radius:
+! Determine cylinder radius:
       A=H*EPS
       
       DO 50 I=1,NGAUSS
@@ -1347,13 +1327,11 @@ C--------/---------/---------/---------/---------/---------/---------/--
          SI=DSQRT(1D0-CO*CO)
          
          IF (SI/CO.GT.A/H) GO TO 20 
-
-* Along the plane cuts:  
+! Along the plane cuts:  
          RAD=H/CO
          RTHET=H*SI/(CO*CO)
          GO TO 30
-         
-* Along the circular surface:         
+! Along the circular surface:         
    20    CONTINUE
          RAD=A/SI
          RTHET=-A*CO/(SI*SI)
@@ -1429,12 +1407,12 @@ C--------/---------/---------/---------/---------/---------/---------/--
          SI=DSQRT(1_dp-CO*CO)
 
          IF ((Hc*SI).GT.(A*CO)) then
-* Along the circular surface:
+! Along the circular surface:
            RAD=A/SI
            RTHET=-A*CO/(SI*SI)
            valDR = -RTHET/RAD
          else
-*  Along elliptic cap
+!  Along elliptic cap
             c2 = CO**2
             s2 = SI**2
 ! Solution of square euation of ellipse move from the origin
@@ -1817,25 +1795,25 @@ C--------/---------/---------/---------/---------/---------/---------/--
       INCLUDE 'ampld.par.f'
       IMPLICIT real(dp) (A-H,O-Z)
       real(dp) X(NG),XR(NG),XI(NG),
-     *        J(NPNG2,NPN1),Y(NPNG2,NPN1),JR(NPNG2,NPN1),
-     *        JI(NPNG2,NPN1),DJ(NPNG2,NPN1),DY(NPNG2,NPN1),
-     *        DJR(NPNG2,NPN1),DJI(NPNG2,NPN1),
-     *        AJ(NPN1),AY(NPN1),AJR(NPN1),AJI(NPN1),
-     *        ADJ(NPN1),ADY(NPN1),ADJR(NPN1),
-     *        ADJI(NPN1)
+     &   J(NPNG2,NPN1),Y(NPNG2,NPN1),JR(NPNG2,NPN1),
+     &   JI(NPNG2,NPN1),DJ(NPNG2,NPN1),DY(NPNG2,NPN1),
+     &   DJR(NPNG2,NPN1),DJI(NPNG2,NPN1),
+     &   AJ(NPN1),AY(NPN1),AJR(NPN1),AJI(NPN1),
+     &   ADJ(NPN1),ADY(NPN1),ADJR(NPN1),
+     &   ADJI(NPN1)
       COMMON /CBESS/ J,Y,JR,JI,DJ,DY,DJR,DJI    !arrays of generated Bessel functions
-* 
+! 
       DO I=1,NG
            XX=X(I)
-*
+!
            CALL RJB(XX,AJ,ADJ,NMAX,NNMAX1)
            CALL RYB(XX,AY,ADY,NMAX)
-*
+!
            YR=XR(I)
            YI=XI(I)
-*
+!
            CALL CJB(YR,YI,AJR,AJI,ADJR,ADJI,NMAX,2)
-*
+!
            DO N=1,NMAX
                 J(I,N)=AJ(N)
                 Y(I,N)=AY(N)
@@ -1866,7 +1844,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       IMPLICIT real(dp) (A-H,O-Z)
       real(dp) Y(NMAX),U(NMAX),Z(800)
-*
+!
       L=NMAX+NNMAX
       XX=1D0/X
       Z(L)=1D0/(dble(2*L+1)*XX)
@@ -1903,7 +1881,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       IMPLICIT real(dp) (A-H,O-Z)
       real(dp) Y(NMAX),V(NMAX)
-*
+!
       C=DCOS(X)
       S=DSIN(X)
       X1=1D0/X
@@ -1947,7 +1925,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       real(dp) YR(NMAX),YI(NMAX),UR(NMAX),UI(NMAX)
       real(dp) CYR(NPN1),CYI(NPN1),CZR(1200),CZI(1200)
 c     *       CUR(NPN1),CUI(NPN1)
-*
+!
       L=NMAX+NNMAX
       XRXI=1D0/(XR*XR+XI*XI)
       CXXR=XR*XRXI             !Re [1/(XR+i*XI)]
@@ -2011,14 +1989,14 @@ c         CUI(I)=CUII
          UR(I)=CUIR
          UI(I)=CUII
       ENDDO 
-*  
+!  
       RETURN
       END
  
 C**********************************************************************
  
-      SUBROUTINE TMATR0 (NGAUSS,X,W,AN,ANN,PPI,PIR,PII,R,DR,DDR,
-     *                  DRR,DRI,NMAX,NCHECK,NAXSM)
+      SUBROUTINE TMATR0(NGAUSS,X,W,AN,ANN,PPI,PIR,PII,R,DR,DDR,
+     &                  DRR,DRI,NMAX,NCHECK,NAXSM)
 C--------/---------/---------/---------/---------/---------/---------/--
 C >>> NGAUSS,X,W,AN,ANN,PPI,PIR,PII,R,DR,DDR,DRR,DRI,NMAX,NCHECK
 C <<< common blocks /TMAT99/, /CT/ (for main),  and /CTT/ (for TT)
@@ -2072,83 +2050,80 @@ C--------/---------/---------/---------/---------/---------/---------/--
      & tgr12, tgr21, tppi, tpii, tpir, uri
 
       real(dp)  X(NPNG2),W(NPNG2),AN(NPN1),
-     *        R(NPNG2),DR(NPNG2),SIG(NPN2),
-     *        J(NPNG2,NPN1),Y(NPNG2,NPN1),
-     *        JR(NPNG2,NPN1),JI(NPNG2,NPN1),DJ(NPNG2,NPN1),
-     *        DY(NPNG2,NPN1),DJR(NPNG2,NPN1),
-     *        DJI(NPNG2,NPN1),DDR(NPNG2),DRR(NPNG2),
-     *        D1(NPNG2,NPN1),D2(NPNG2,NPN1),
-     *        DRI(NPNG2),RR(NPNG2),
-     *        DV1(NPN1),DV2(NPN1)
+     &   R(NPNG2),DR(NPNG2),SIG(NPN2),
+     &   J(NPNG2,NPN1),Y(NPNG2,NPN1),
+     &   JR(NPNG2,NPN1),JI(NPNG2,NPN1),DJ(NPNG2,NPN1),
+     &   DY(NPNG2,NPN1),DJR(NPNG2,NPN1),
+     &   DJI(NPNG2,NPN1),DDR(NPNG2),DRR(NPNG2),
+     &   D1(NPNG2,NPN1),D2(NPNG2,NPN1),
+     &   DRI(NPNG2),RR(NPNG2),
+     &   DV1(NPN1),DV2(NPN1)
  
       real(dp)  R11(NPN1,NPN1),R12(NPN1,NPN1),
-     *        R21(NPN1,NPN1),R22(NPN1,NPN1),
-     *        I11(NPN1,NPN1),I12(NPN1,NPN1),
-     *        I21(NPN1,NPN1),I22(NPN1,NPN1),
-     *        RG11(NPN1,NPN1),RG12(NPN1,NPN1),
-     *        RG21(NPN1,NPN1),RG22(NPN1,NPN1),
-     *        IG11(NPN1,NPN1),IG12(NPN1,NPN1),
-     *        IG21(NPN1,NPN1),IG22(NPN1,NPN1),
-     *        ANN(NPN1,NPN1),
-     *        QR(NPN2,NPN2),QI(NPN2,NPN2),
-     *        RGQR(NPN2,NPN2),RGQI(NPN2,NPN2),
-     *        TQR(NPN2,NPN2),TQI(NPN2,NPN2),
-     *        TRGQR(NPN2,NPN2),TRGQI(NPN2,NPN2)
+     &   R21(NPN1,NPN1),R22(NPN1,NPN1),
+     &   I11(NPN1,NPN1),I12(NPN1,NPN1),
+     &   I21(NPN1,NPN1),I22(NPN1,NPN1),
+     &   RG11(NPN1,NPN1),RG12(NPN1,NPN1),
+     &   RG21(NPN1,NPN1),RG22(NPN1,NPN1),
+     &   IG11(NPN1,NPN1),IG12(NPN1,NPN1),
+     &   IG21(NPN1,NPN1),IG22(NPN1,NPN1),
+     &   ANN(NPN1,NPN1),
+     &   QR(NPN2,NPN2),QI(NPN2,NPN2),
+     &   RGQR(NPN2,NPN2),RGQI(NPN2,NPN2),
+     &   TQR(NPN2,NPN2),TQI(NPN2,NPN2),
+     &   TRGQR(NPN2,NPN2),TRGQI(NPN2,NPN2)
 cc      real(dp) TR1(NPN2,NPN2),TI1(NPN2,NPN2)
-*      
+!      
       COMMON /TMAT99/ 
      &            R11,R12,R21,R22,I11,I12,I21,I22,RG11,RG12,RG21,RG22,
      &            IG11,IG12,IG21,IG22           !only between TMATR routines
       COMMON /CBESS/ J,Y,JR,JI,DJ,DY,DJR,DJI
 cc      COMMON /CT/ TR1,TI1                       !output from TT routine
       COMMON /CTT/ QR,QI,RGQR,RGQI              !input for TT routine
-*      
+!      
       MM1=1
       NNMAX=NMAX+NMAX
       NG=2*NGAUSS
       NGSS=NG
       FACTOR=1D0
-*
+!
       IF (NCHECK.EQ.1) THEN         !Theta=pi/2 is scatterer mirror symmetry plane
             NGSS=NGAUSS
             FACTOR=2D0
          ELSE                       !Theta=pi/2 is not a scatterer mirror symmetry plane
             CONTINUE
       ENDIF
-*
+!
       SI=1D0
       DO N=1,NNMAX
            SI=-SI
            SIG(N)=SI              !=(-1)**N
       end do
-*
-* Assigning Wigner d-matrices - assuming mirror symmetry 
-* in the \theta=\pi/2 plane:
+!
+! Assigning Wigner d-matrices - assuming mirror symmetry 
+! in the \theta=\pi/2 plane:
 
       DO I=1,NGAUSS
 
          I1=NGAUSS-I+1 
 cc         I2=NGAUSS+I 
          IF (NCHECK.EQ.0) I2=NGAUSS+I 
-*
+!
          CALL VIG ( X(I1), NMAX, 0, DV1, DV2)
-*
+!
          DO N=1,NMAX
 
             DD1=DV1(N)
             DD2=DV2(N)
             D1(I1,N)=DD1
             D2(I1,N)=DD2
-
-
-* If theta=pi/2 is not a scatterer mirror symmetry plane but 
-* Gauss abscissas are still chosen symmetrically:
+! If theta=pi/2 is not a scatterer mirror symmetry plane but 
+! Gauss abscissas are still chosen symmetrically:
 
          IF ((NCHECK.EQ.0).AND.(NAXSM.EQ.1)) THEN      
-        
-* using (4.2.4) and (4.2.6) of {Ed},  
-*           d_{0m}^{(l)}(\pi-\theta) = (-1)^{l+m} d_{0m}^{(l)}(\theta)
-* (4.2.5) of {Ed}:                   = (-1)^{l} d_{0 -m}^{(l)}(\theta)
+! using (4.2.4) and (4.2.6) of {Ed},  
+!           d_{0m}^{(l)}(\pi-\theta) = (-1)^{l+m} d_{0m}^{(l)}(\theta)
+! (4.2.5) of {Ed}:                   = (-1)^{l} d_{0 -m}^{(l)}(\theta)
 
             SI=SIG(N)                  !=(-1)**N           
             D1(I2,N)=DD1*SI       
@@ -2157,14 +2132,13 @@ cc         I2=NGAUSS+I
          END IF
             
          ENDDO 
-         
-* If neither scatterer nor Gauss abscissas have theta=pi/2 
-* as a mirror symmetry plane:   
+! If neither scatterer nor Gauss abscissas have theta=pi/2 
+! as a mirror symmetry plane:   
        
          IF ((NCHECK.EQ.0).AND.(NAXSM.EQ.0)) THEN                                 
-*
+!
          CALL VIG ( X(I2), NMAX, 0, DV1, DV2)
-*
+!
           DO N=1,NMAX           
             DD1=DV1(N)
             DD2=DV2(N)
@@ -2174,15 +2148,15 @@ cc         I2=NGAUSS+I
            
          END IF
       end do
-*
-*  Assigning r^2(\theta)*weight product:
+!
+!  Assigning r^2(\theta)*weight product:
 
       DO I=1,NGSS
            RR(I)=W(I)*R(I)
            
 cc           if (dr(i).eq.0.d0) RR(I)=0.d0   !temporarily only
       end do
-* 
+! 
       DO N1=MM1,NMAX
            AN1=AN(N1)
            DO N2=MM1,NMAX
@@ -2200,9 +2174,9 @@ cc           if (dr(i).eq.0.d0) RR(I)=0.d0   !temporarily only
 c        OPEN(NOUT+3,FILE='surfint.dat')   !Gauss convergence check
 
                 IF (NCHECK.EQ.1.AND.SIG(N1+N2).LT.0D0) GO TO 205
-*
-* Gauss integration loop:
-*
+!
+! Gauss integration loop:
+!
                 DO I=1,NGSS    !=NGAUSS   if NCHECK.EQ.1
                                    !=2*NGAUSS if NCHECK.EQ.0 
                 
@@ -2214,97 +2188,79 @@ c        OPEN(NOUT+3,FILE='surfint.dat')   !Gauss convergence check
                     A21=D2N1*D1N2
                     A22=D2N1*D2N2
 c                    AA1=A12+A21
- 
-* Vector spherical harmonics:
+! Vector spherical harmonics:
 C  Since refractive index is allowed to be complex in general,
 C  the Bessel function j_l(k_in*r) is complex. The code below 
 C  performs a separation of the complex integrand in Waterman's
 C  surface integral into its respective real and imaginary 
 C  parts:
-
-* Bessel functions of the exterior argument:
+! Bessel functions of the exterior argument:
 
                     QJ1=J(I,N1)
                     QY1=Y(I,N1)
                     QDJ1=DJ(I,N1)
                     QDY1=DY(I,N1)
-                    
-* Bessel functions of the interior argument:                                        
+! Bessel functions of the interior argument:                                        
                     
                     QJR2=JR(I,N2)
                     QJI2=JI(I,N2)
                     QDJR2=DJR(I,N2)
                     QDJI2=DJI(I,N2)                    
-*_____________________    
-                
-* Re and Im of j_{n2}(k_{in}r) j_{n1}(k_{out}r): 
+!_____________________    
+! Re and Im of j_{n2}(k_{in}r) j_{n1}(k_{out}r): 
 
                     C1R=QJR2*QJ1
                     C1I=QJI2*QJ1
-                    
-* Re and Im of j_{n2}(k_{in}r) h_{n1}(k_{out}r):
+! Re and Im of j_{n2}(k_{in}r) h_{n1}(k_{out}r):
                    
                     B1R=C1R-QJI2*QY1
                     B1I=C1I+QJR2*QY1
-
-* Re and Im of j_{n2}(k_{in}r) [k_{out}r j_{n1}(k_{out}r)]'/(k_{out}r): 
+! Re and Im of j_{n2}(k_{in}r) [k_{out}r j_{n1}(k_{out}r)]'/(k_{out}r): 
  
                     C2R=QJR2*QDJ1
                     C2I=QJI2*QDJ1
-
-* Re and Im of j_{n2}(k_{in}r) [k_{out}r h_{n1}(k_{out}r)]'/(k_{out}r):
+! Re and Im of j_{n2}(k_{in}r) [k_{out}r h_{n1}(k_{out}r)]'/(k_{out}r):
                    
                     B2R=C2R-QJI2*QDY1
                     B2I=C2I+QJR2*QDY1
  
                     DDRI=DDR(I)               !1/(k_{out}r)
-
-* Re and Im of [1/(k_{out}r)]*j_{n2}(k_{in}r) j_{n1}(k_{out}r)
+! Re and Im of [1/(k_{out}r)]*j_{n2}(k_{in}r) j_{n1}(k_{out}r)
 
                     C3R=DDRI*C1R
                     C3I=DDRI*C1I
-                    
-* Re and Im of [1/(k_{out}r)]*j_{n2}(k_{in}r) h_{n1}(k_{out}r):
+! Re and Im of [1/(k_{out}r)]*j_{n2}(k_{in}r) h_{n1}(k_{out}r):
                     
                     B3R=DDRI*B1R
                     B3I=DDRI*B1I
-
-* Re and Im of  [k_{in}r j_{n2}(k_{in}r)]'/(k_{in}r) 
-*                          * j_{n1}(k_{out}r): 
+! Re and Im of  [k_{in}r j_{n2}(k_{in}r)]'/(k_{in}r) 
+!                          * j_{n1}(k_{out}r): 
  
                     C4R=QDJR2*QJ1
                     C4I=QDJI2*QJ1
-                    
-* Re and Im of [k_{in}r j_{n2}(k_{in}r)]'/(k_{in}r) 
-*                          *  h_{n1}(k_{out}r): 
+! Re and Im of [k_{in}r j_{n2}(k_{in}r)]'/(k_{in}r) 
+!                          *  h_{n1}(k_{out}r): 
                    
                     B4R=C4R-QDJI2*QY1
                     B4I=C4I+QDJR2*QY1
  
                     DRRI=DRR(I)               !Re[1/(k_{in}r)]
                     DRII=DRI(I)               !Im[1/(k_{in}r)]
-                    
-* Re and Im of [1/(k_{in}r)] j_{n2}(k_{in}r) j_{n1}(k_{out}r):
+! Re and Im of [1/(k_{in}r)] j_{n2}(k_{in}r) j_{n1}(k_{out}r):
                     
                     C5R=C1R*DRRI-C1I*DRII
                     C5I=C1I*DRRI+C1R*DRII
-                    
-                    
-* Re and Im of [1/(k_{in}r)] j_{n2}(k_{in}r) h_{n1}(k_{out}r):
+! Re and Im of [1/(k_{in}r)] j_{n2}(k_{in}r) h_{n1}(k_{out}r):
 
                     B5R=B1R*DRRI-B1I*DRII
                     B5I=B1I*DRRI+B1R*DRII
-
-*%%%%%%%  Forming integrands of J-matrices (J^{11}=J^{22}=0 for m=0): %%%%%%%%
+!%%%%%%%  Forming integrands of J-matrices (J^{11}=J^{22}=0 for m=0): %%%%%%%%
  
                     URI=DR(I)        !dr/(d\theta)
                     RRI=RR(I)        !w(i)*r^2(\theta)
-                    
-* w(i)*r^2(\theta)*D2N1*D2N2:
+! w(i)*r^2(\theta)*D2N1*D2N2:
                     F1=RRI*A22      !prefactor containing r^2(\theta)<->hat{r} part
-
-                    
-* N1*(N1+1)*w(i)*r(\theta)*[dr/(d\theta)]*D1N1*D2N2:                    
+! N1*(N1+1)*w(i)*r(\theta)*[dr/(d\theta)]*D1N1*D2N2:                    
                     F2=RRI*URI*AN1*A12     !prefactor containing r(\theta)*[dr/(d\theta)]
                                            !hat{theta} part 
                        
@@ -2335,8 +2291,7 @@ c                write(nout+3,*)'GR12=', GR12
 c                write(nout+3,*)'GI12=', GI12 
 c                write(nout+3,*)'GR21=', GR21
 c                write(nout+3,*)'GI21=', GI21                
-
-*%%%%%%%%%%%%%  Forming J-matrices (J^{11}=J^{22}=0 for m=0):
+!%%%%%%%%%%%%%  Forming J-matrices (J^{11}=J^{22}=0 for m=0):
  
   205           AN12=ANN(N1,N2)*FACTOR
   
@@ -2353,8 +2308,7 @@ c                write(nout+3,*)'GI21=', GI21
       end do            !end of the loop over angular momenta
  
 c      close(nout+3)
-
-*%%%%%%%%%%%%%%%%%%%%%%%  Forming Q and RgQ -matrices
+!%%%%%%%%%%%%%%%%%%%%%%%  Forming Q and RgQ -matrices
  
       TPIR=PIR                 !Re [1/k_{in}^2]
       TPII=PII                 !Im [1/k_{in}^2]
@@ -2410,20 +2364,19 @@ c      close(nout+3)
                 RGQI(N1,N2)=TRGQI(N1,N2)
            end do
       end do
-
-*%%%%%%%%%%%%%%%%%%%%%%%  Forming resulting T-matrix 
-*
-* Calculate the product Q^{-1} Rg Q
-*
+!%%%%%%%%%%%%%%%%%%%%%%%  Forming resulting T-matrix 
+!
+! Calculate the product Q^{-1} Rg Q
+!
       CALL TT(NMAX)
-*
+!
       RETURN
       END
  
 C**********************************************************************
  
       SUBROUTINE TMATR (M,NGAUSS,X,W,AN,ANN,S,SS,PPI,PIR,PII,R,DR,DDR,
-     *                  DRR,DRI,NMAX,NCHECK,NAXSM)
+     &             DRR,DRI,NMAX,NCHECK,NAXSM)
 C--------/---------/---------/---------/---------/---------/---------/--
 C >>> NGAUSS,X,W,AN,ANN,S,SS,PPI,PIR,PII,R,DR,DDR,DRR,DRI,NMAX,NCHECK
 C <<< common blocks /TMAT99/, /CT/ (for main),  and /CTT/ (for TT) 
@@ -2468,51 +2421,51 @@ C--------/---------/---------/---------/---------/---------/---------/--
       INCLUDE 'ampld.par.f'
       IMPLICIT real(dp) (A-H,O-Z)
       real(dp)  X(NPNG2),W(NPNG2),AN(NPN1),S(NPNG2),SS(NPNG2),
-     *        R(NPNG2),DR(NPNG2),SIG(NPN2),
-     *        J(NPNG2,NPN1),Y(NPNG2,NPN1),
-     *        JR(NPNG2,NPN1),JI(NPNG2,NPN1),DJ(NPNG2,NPN1),
-     *        DY(NPNG2,NPN1),DJR(NPNG2,NPN1),
-     *        DJI(NPNG2,NPN1),DDR(NPNG2),DRR(NPNG2),
-     *        D1(NPNG2,NPN1),D2(NPNG2,NPN1),
-     *        DRI(NPNG2),DS(NPNG2),DSS(NPNG2),RR(NPNG2),
-     *        DV1(NPN1),DV2(NPN1)
+     &   R(NPNG2),DR(NPNG2),SIG(NPN2),
+     &   J(NPNG2,NPN1),Y(NPNG2,NPN1),
+     &   JR(NPNG2,NPN1),JI(NPNG2,NPN1),DJ(NPNG2,NPN1),
+     &   DY(NPNG2,NPN1),DJR(NPNG2,NPN1),
+     &   DJI(NPNG2,NPN1),DDR(NPNG2),DRR(NPNG2),
+     &   D1(NPNG2,NPN1),D2(NPNG2,NPN1),
+     &   DRI(NPNG2),DS(NPNG2),DSS(NPNG2),RR(NPNG2),
+     &   DV1(NPN1),DV2(NPN1)
  
       real(dp)  R11(NPN1,NPN1),R12(NPN1,NPN1),
-     *        R21(NPN1,NPN1),R22(NPN1,NPN1),
-     *        I11(NPN1,NPN1),I12(NPN1,NPN1),
-     *        I21(NPN1,NPN1),I22(NPN1,NPN1),
-     *        RG11(NPN1,NPN1),RG12(NPN1,NPN1),
-     *        RG21(NPN1,NPN1),RG22(NPN1,NPN1),
-     *        IG11(NPN1,NPN1),IG12(NPN1,NPN1),
-     *        IG21(NPN1,NPN1),IG22(NPN1,NPN1),
-     *        ANN(NPN1,NPN1),
-     *        QR(NPN2,NPN2),QI(NPN2,NPN2),
-     *        RGQR(NPN2,NPN2),RGQI(NPN2,NPN2),
-     *        TQR(NPN2,NPN2),TQI(NPN2,NPN2),
-     *        TRGQR(NPN2,NPN2),TRGQI(NPN2,NPN2)
+     &   R21(NPN1,NPN1),R22(NPN1,NPN1),
+     &   I11(NPN1,NPN1),I12(NPN1,NPN1),
+     &   I21(NPN1,NPN1),I22(NPN1,NPN1),
+     &   RG11(NPN1,NPN1),RG12(NPN1,NPN1),
+     &   RG21(NPN1,NPN1),RG22(NPN1,NPN1),
+     &   IG11(NPN1,NPN1),IG12(NPN1,NPN1),
+     &   IG21(NPN1,NPN1),IG22(NPN1,NPN1),
+     &   ANN(NPN1,NPN1),
+     &   QR(NPN2,NPN2),QI(NPN2,NPN2),
+     &   RGQR(NPN2,NPN2),RGQI(NPN2,NPN2),
+     &   TQR(NPN2,NPN2),TQI(NPN2,NPN2),
+     &   TRGQR(NPN2,NPN2),TRGQI(NPN2,NPN2)
 cc      real(dp) TR1(NPN2,NPN2),TI1(NPN2,NPN2)
-*________
+!________
       COMMON /TMAT99/ 
      &            R11,R12,R21,R22,I11,I12,I21,I22,RG11,RG12,RG21,RG22,
      &            IG11,IG12,IG21,IG22          !only between TMATR routines
       COMMON /CBESS/ J,Y,JR,JI,DJ,DY,DJR,DJI
 cc      COMMON /CT/ TR1,TI1                      !output from TT routine
       COMMON /CTT/ QR,QI,RGQR,RGQI             !input for TT routine
-*________
+!________
       MM1=M
       QM=dble(M)
       QMM=QM*QM
       NG=2*NGAUSS
       NGSS=NG
       FACTOR=1D0
-*      
+!      
       IF (NCHECK.EQ.1) THEN          !THETA=PI/2 is mirror symmetry plane
             NGSS=NGAUSS
             FACTOR=2D0
          ELSE                        !THETA=PI/2 is not a mirror symmetry plane
             CONTINUE
       ENDIF
-*
+!
       SI=1D0
       NM=NMAX+NMAX
       
@@ -2520,17 +2473,17 @@ cc      COMMON /CT/ TR1,TI1                      !output from TT routine
            SI=-SI
            SIG(N)=SI              !=(-1)**N
     5 CONTINUE
-*
-* Assigning Wigner d-matrices - assuming mirror symmetry 
-* in the \theta=\pi/2 plane:
+!
+! Assigning Wigner d-matrices - assuming mirror symmetry 
+! in the \theta=\pi/2 plane:
     
       DO 25 I=1,NGAUSS
       
          I1=NGAUSS-I+1
          I2=NGAUSS+I
-*
+!
          CALL VIG (X(I1),NMAX,M,DV1,DV2)
-*
+!
          DO N=1,NMAX
          
             DD1=DV1(N)
@@ -2539,9 +2492,8 @@ cc      COMMON /CT/ TR1,TI1                      !output from TT routine
             D2(I1,N)=DD2
 
          IF (NAXSM.EQ.1) THEN         !Gauss abscissas chosen +/- symmetric
-
-* using (4.2.4) and (4.2.6) of {Ed},  
-*           d_{0m}^{(l)}(\pi-\theta) = (-1)^{l+m} d_{0m}^{(l)}(\theta)
+! using (4.2.4) and (4.2.6) of {Ed},  
+!           d_{0m}^{(l)}(\pi-\theta) = (-1)^{l+m} d_{0m}^{(l)}(\theta)
 
             SI=SIG(N+M)                  !=(-1)**(N+M)
                                          !exactly what follows from {Ed}           
@@ -2550,11 +2502,11 @@ cc      COMMON /CT/ TR1,TI1                      !output from TT routine
            
          END IF            
          ENDDO 
-*         
+!         
          IF (NAXSM.EQ.0) THEN        !Gauss abscissas not chosen +/- symmetric
-*
+!
          CALL VIG ( X(I2), NMAX, M, DV1, DV2)
-*
+!
           DO N=1,NMAX               
             DD1=DV1(N)
             DD2=DV2(N)
@@ -2565,8 +2517,8 @@ cc      COMMON /CT/ TR1,TI1                      !output from TT routine
          END IF           
 
    25 CONTINUE
-*
-*  Assigning r^2(\theta)*weight product:
+!
+!  Assigning r^2(\theta)*weight product:
    
       DO I=1,NGSS
            WR=W(I)*R(I)
@@ -2577,7 +2529,7 @@ cc           if (dr(i).eq.0.d0) WR=0.d0   !temporarily only
            DSS(I)=SS(I)*QMM       !=dble(M)**2/(\sin^2\theta)
            RR(I)=WR
       end do
-* 
+! 
       DO N1=MM1,NMAX
            AN1=AN(N1)
            
@@ -2613,8 +2565,7 @@ cc           if (dr(i).eq.0.d0) WR=0.d0   !temporarily only
                     AA1=A12+A21            != D1N1*D2N2+D2N1*D1N2
                     AA2=A11*DSS(I)+A22     !=(D1N1*D1N2)*dble(M)**2/(\sin^2\theta)
                                            ! +D2N1*D2N2
-                    
-* Vector spherical harmonics:
+! Vector spherical harmonics:
 C  Since refractive index is allowed to be complex in general,
 C  the Bessel function j_l(k_in*r) is complex. The code below 
 C  performs a separation of the complex integrand in Waterman's
@@ -2629,45 +2580,37 @@ C  parts:
                     QDJI2=DJI(I,N2)
                     QDJ1=DJ(I,N1)
                     QDY1=DY(I,N1)
-
-* Re and Im of j_{n2}(k_{in}r) j_{n1}(k_{out}r): 
+! Re and Im of j_{n2}(k_{in}r) j_{n1}(k_{out}r): 
 
                     C1R=QJR2*QJ1
                     C1I=QJI2*QJ1
-                    
-* Re and Im of j_{n2}(k_{in}r) h_{n1}(k_{out}r):
+! Re and Im of j_{n2}(k_{in}r) h_{n1}(k_{out}r):
                     
                     B1R=C1R-QJI2*QY1
                     B1I=C1I+QJR2*QY1
- 
-* Re and Im of j_{n2}(k_{in}r) j_{n1}'(k_{out}r): 
+! Re and Im of j_{n2}(k_{in}r) j_{n1}'(k_{out}r): 
 
                     C2R=QJR2*QDJ1
                     C2I=QJI2*QDJ1
-
-* Re and Im of j_{n2}(k_{in}r) h_{n1}'(k_{out}r):                    
+! Re and Im of j_{n2}(k_{in}r) h_{n1}'(k_{out}r):                    
                     
                     B2R=C2R-QJI2*QDY1
                     B2I=C2I+QJR2*QDY1                    
  
                     DDRI=DDR(I)               !1/(k_{out}r)
-
-* Re and Im of [1/(k_{out}r)]*j_{n2}(k_{in}r) j_{n1}(k_{out}r) 
+! Re and Im of [1/(k_{out}r)]*j_{n2}(k_{in}r) j_{n1}(k_{out}r) 
     
                     C3R=DDRI*C1R
                     C3I=DDRI*C1I
-                    
-* Re and Im of [1/(k_{out}r)]*j_{n2}(k_{in}r) h_{n1}(k_{out}r):
+! Re and Im of [1/(k_{out}r)]*j_{n2}(k_{in}r) h_{n1}(k_{out}r):
                     
                     B3R=DDRI*B1R
                     B3I=DDRI*B1I
-
-* Re and Im of j_{n2}'(k_{in}r) j_{n1}(k_{out}r): 
+! Re and Im of j_{n2}'(k_{in}r) j_{n1}(k_{out}r): 
  
                     C4R=QDJR2*QJ1
                     C4I=QDJI2*QJ1
-                                        
-* Re and Im of j_{n2}'(k_{in}r) h_{n1}(k_{out}r): 
+! Re and Im of j_{n2}'(k_{in}r) h_{n1}(k_{out}r): 
                     
                     B4R=C4R-QDJI2*QY1
                     B4I=C4I+QDJR2*QY1
@@ -2675,58 +2618,46 @@ C  parts:
  
                     DRRI=DRR(I)               !Re[1/(k_{in}r)]
                     DRII=DRI(I)               !Im[1/(k_{in}r)]
-                    
-* Re and Im of [1/(k_{in}r)] j_{n2}(k_{in}r) j_{n1}(k_{out}r):  
+! Re and Im of [1/(k_{in}r)] j_{n2}(k_{in}r) j_{n1}(k_{out}r):  
                   
                     C5R=C1R*DRRI-C1I*DRII
                     C5I=C1I*DRRI+C1R*DRII
-                    
-* Re and Im of [1/(k_{in}r)] j_{n2}(k_{in}r) h_{n1}(k_{out}r):
+! Re and Im of [1/(k_{in}r)] j_{n2}(k_{in}r) h_{n1}(k_{out}r):
                     
                     B5R=B1R*DRRI-B1I*DRII
                     B5I=B1I*DRRI+B1R*DRII
-                    
-                    
-* Re and Im of j_{n2}'(k_{in}r) j_{n1}'(k_{out}r):  
+! Re and Im of j_{n2}'(k_{in}r) j_{n1}'(k_{out}r):  
 
                     C6R=QDJR2*QDJ1
                     C6I=QDJI2*QDJ1
-                    
-* Re and Im of j_{n2}'(k_{in}r) h_{n1}'(k_{out}r):
+! Re and Im of j_{n2}'(k_{in}r) h_{n1}'(k_{out}r):
 
                     B6R=C6R-QDJI2*QDY1
                     B6I=C6I+QDJR2*QDY1
-                    
-* Re and Im of [1/(k_{out}r)] j_{n2}'(k_{in}r) j_{n1}(k_{out}r): 
+! Re and Im of [1/(k_{out}r)] j_{n2}'(k_{in}r) j_{n1}(k_{out}r): 
  
                     C7R=C4R*DDRI
                     C7I=C4I*DDRI
-                    
-* Re and Im of [1/(k_{out}r)] j_{n2}'(k_{in}r) h_{n1}(k_{out}r): 
+! Re and Im of [1/(k_{out}r)] j_{n2}'(k_{in}r) h_{n1}(k_{out}r): 
                     
                     B7R=B4R*DDRI
                     B7I=B4I*DDRI
-
-* Re and Im of [1/(k_{in}r)] j_{n2}(k_{in}r) j_{n1}'(k_{out}r):  
+! Re and Im of [1/(k_{in}r)] j_{n2}(k_{in}r) j_{n1}'(k_{out}r):  
 
                     C8R=C2R*DRRI-C2I*DRII
                     C8I=C2I*DRRI+C2R*DRII
-
-* Re and Im of [1/(k_{in}r)] j_{n2}(k_{in}r) h_{n1}'(k_{out}r): 
+! Re and Im of [1/(k_{in}r)] j_{n2}(k_{in}r) h_{n1}'(k_{out}r): 
                     
                     B8R=B2R*DRRI-B2I*DRII
                     B8I=B2I*DRRI+B2R*DRII
-
-
-* %%%%%%%%%  Forming integrands of J-matrices (J^{11}=J^{22}=0 for m=0):
+! %%%%%%%%%  Forming integrands of J-matrices (J^{11}=J^{22}=0 for m=0):
  
                     URI=DR(I)
                     DSI=DS(I)
                     RRI=RR(I)
  
                     IF (NCHECK.EQ.1.AND.SI.GT.0D0) GO TO 150
-
-* [dble(M)*W(I)*r^2(I)/(|\sin\theta|)]*(D1N1*D2N2+D2N1*D1N2):
+! [dble(M)*W(I)*r^2(I)/(|\sin\theta|)]*(D1N1*D2N2+D2N1*D1N2):
                     E1=DSI*AA1
 
                     AR11=AR11+E1*B1R
@@ -2737,12 +2668,9 @@ C  parts:
                     IF (NCHECK.EQ.1) GO TO 160
  
   150               CONTINUE
-
-                    
-* w(i)*r^2(\theta)*[(D1N1*D1N2)*dble(M)**2/(\sin^2\theta)+D2N1*D2N2]:
+! w(i)*r^2(\theta)*[(D1N1*D1N2)*dble(M)**2/(\sin^2\theta)+D2N1*D2N2]:
                     F1=RRI*AA2            !prefactor containing r^2(\theta)<->hat{r} part
-                    
-* N1*(N1+1)*w(i)*r(\theta)*[dr/(d\theta)]*D1N1*D2N2:                     
+! N1*(N1+1)*w(i)*r(\theta)*[dr/(d\theta)]*D1N1*D2N2:                     
                     F2=RRI*URI*AN1*A12     !prefactor containing r(\theta)*[dr/(d\theta)]
                                            !hat{theta} part
                     
@@ -2751,8 +2679,7 @@ C  parts:
                     
                     GR12=GR12+F1*C2R+F2*C3R        !~Re Rg J^{12}
                     GI12=GI12+F1*C2I+F2*C3I        !~Im Rg J^{12}
-
-* N2*(N2+1)*w(i)*r(\theta)*[dr/(d\theta)]*D2N1*D1N2:   
+! N2*(N2+1)*w(i)*r(\theta)*[dr/(d\theta)]*D2N1*D1N2:   
                     F2=RRI*URI*AN2*A21     !prefactor containing r(\theta)*[dr/(d\theta)]
                                            !hat{theta} part
                     
@@ -2864,7 +2791,7 @@ C  parts:
       end do
 
       CALL TT(NM)
-* 
+! 
       RETURN
       END
  
@@ -2888,7 +2815,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
 
       real(dp)  QR(NPN2,NPN2),QI(NPN2,NPN2),EMACH,
-     *       RGQR(NPN2,NPN2),RGQI(NPN2,NPN2)
+     &  RGQR(NPN2,NPN2),RGQI(NPN2,NPN2)
 cc      real(dp) F(NPN2,NPN2),B(NPN2),WORK(NPN2),
 cc     *       A(NPN2,NPN2),C(NPN2,NPN2),D(NPN2,NPN2),E(NPN2,NPN2)
       real(dp) TR1(NPN2,NPN2),TI1(NPN2,NPN2)
@@ -2897,13 +2824,13 @@ cc     *       A(NPN2,NPN2),C(NPN2,NPN2),D(NPN2,NPN2),E(NPN2,NPN2)
       INTEGER IPIV(NPN2)
 !     integer, allocatable:: ipiv_crop(:)
       integer nnmax
-*
+!
       COMMON /CHOICE/ ICHOICE
       COMMON /CT/ TR1,TI1
       COMMON /CTT/ QR,QI,RGQR,RGQI
-*
+!
       DATA EMACH/0.D0/                 !/1.D-17/
-*
+!
       NNMAX=2*NMAX
 
       DO I=1,NNMAX
@@ -2913,8 +2840,7 @@ cc     *       A(NPN2,NPN2),C(NPN2,NPN2),D(NPN2,NPN2),E(NPN2,NPN2)
       ENDDO
 
       IF (ICHOICE.EQ.2) GOTO 5    ! NAG or not NAG decision tree
-
-********************************************************************
+!*******************************************************************
 C     Matrix inversion from LAPACK
 
       DO I=1,NNMAX
@@ -2936,11 +2862,10 @@ cc           CALL F07ARF(NNMAX,NNMAX,ZQ,NPN2,IPIV,INFO)
 cc           IF (INFO.NE.0) WRITE(NOUT,1100) INFO
 cc           CALL F07AWF(NNMAX,ZQ,NPN2,IPIV,ZX,NPN2,INFO)
 cc           IF (INFO.NE.0) WRITE(NOUT,1100) INFO
-*
+!
  1100      FORMAT ('WARNING:  info=', i2)
-
-* Calculate T-matrix = - RG(Q) * (Q**(-1))
-*
+! Calculate T-matrix = - RG(Q) * (Q**(-1))
+!
        DO I=1,NNMAX
           DO J=1,NNMAX
              TR=0D0
@@ -2959,8 +2884,7 @@ cc           IF (INFO.NE.0) WRITE(NOUT,1100) INFO
        ENDDO
 
        GOTO 70                        !Return
-
-*********************************************************************
+!********************************************************************
 
 C  Gaussian elimination             !NAG library not used
 
@@ -2985,14 +2909,14 @@ C  Gaussian elimination             !NAG library not used
                                                !backsubstition
                                                !(ZX overwritten on exit)
              DO K=1,NNMAX
-*
-* Assign T-matrix elements = - RG(Q) * (Q**(-1))
-*
+!
+! Assign T-matrix elements = - RG(Q) * (Q**(-1))
+!
                TR1(I,K)=-DBLE(ZX(K))
                TI1(I,K)=-aimag(ZX(K))
              ENDDO
       end do
-*
+!
    70 RETURN
       END
  
@@ -3006,7 +2930,7 @@ C=================
 C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       real(dp) A(NDIM,N),B(NDIM,N),C(NDIM,N),cij
-*
+!
       DO I=1,N
            DO J=1,N
                 CIJ=0d0
@@ -3016,7 +2940,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
                 C(I,J)=CIJ
            end do
       end do
-*
+!
       RETURN
       END
  
@@ -3033,14 +2957,14 @@ C--------/---------/---------/---------/---------/---------/---------/--
       IMPLICIT real(dp) (A-H,O-Z)
       INCLUDE 'ampld.par.f'
       real(dp)  A(NPN2,NPN2),F(NPN2,NPN2),B(NPN1),
-     *        WORK(NPN1),Q1(NPN1,NPN1),Q2(NPN1,NPN1),
+     &   WORK(NPN1),Q1(NPN1,NPN1),Q2(NPN1,NPN1),
      &        P1(NPN1,NPN1),P2(NPN1,NPN1)
       INTEGER IPVT(NPN1),IND1(NPN1),IND2(NPN1)
-*
+!
       NDIM=NPN1
       NN1=(dble(NMAX)-0.1D0)*0.5D0+1D0
       NN2=NMAX-NN1
-*
+!
       DO 5 I=1,NMAX
          IND1(I)=2*I-1
          IF(I.GT.NN1) IND1(I)=NMAX+2*(I-NN1)
@@ -3048,7 +2972,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
          IF(I.GT.NN2) IND2(I)=NMAX+2*(I-NN2)-1
     5 CONTINUE
       NNMAX=2*NMAX
-*
+!
       DO I=1,NMAX
          I1=IND1(I)
          I2=IND2(I)
@@ -3059,10 +2983,10 @@ C--------/---------/---------/---------/---------/---------/---------/--
             Q2(J,I)=F(J2,I2)
          end do
       end do
-*
+!
       CALL INVERT(NDIM,NMAX,Q1,P1,COND,IPVT,WORK,B)
       CALL INVERT(NDIM,NMAX,Q2,P2,COND,IPVT,WORK,B)
-*
+!
       A=0D0
 
       DO I=1,NMAX
@@ -3075,7 +2999,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
             A(J2,I2)=P2(J,I)
          end do
       end do
-*
+!
       RETURN
       END
  
@@ -3091,27 +3015,27 @@ C--------/---------/---------/---------/---------/---------/---------/--
       IMPLICIT real(dp) (A-H,O-Z)
       real(dp) A(NDIM,N),X(NDIM,N),WORK(N),B(N)
       INTEGER IPVT(N)
-*
+!
       CALL DECOMP (NDIM,N,A,COND,IPVT,WORK)
-*
+!
       IF (COND+1D0.EQ.COND) PRINT 5,COND
 C     IF (COND+1D0.EQ.COND) STOP
    5  FORMAT(' THE MATRIX IS SINGULAR FOR THE GIVEN NUMERICAL ACCURACY '
-     *      ,'COND = ',D12.6)
+     & ,'COND = ',D12.6)
 
       DO I=1,N
            DO J=1,N
                 B(J)=0D0
                 IF (J.EQ.I) B(J)=1D0
            end do
-*
+!
            CALL SOLVE (A,B,IPVT)
-*
+!
            DO J=1,N
                 X(J,I)=B(J)
            end do
       end do
-*
+!
       RETURN
       END
  
@@ -3136,7 +3060,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
      &   /E)
       R=DSQRT(R)
       RAT=1D0/R
-*
+!
       return
       END
  
@@ -3151,15 +3075,15 @@ C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       IMPLICIT real(dp) (A-H,O-Z)
       real(dp) X(60),W(60)
-*
+!
       DN=dble(N)
       EN=E*DN
       NG=60
-*
-* GIF division points and weights
-*
+!
+! GIF division points and weights
+!
       CALL GAUSS (NG,0,0,X,W)
-*
+!
       S=0D0
       V=0D0
       DO 10 I=1,NG
@@ -3178,7 +3102,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       RS=DSQRT(S*0.5D0)
       RV=(V*3D0/4D0)**(1D0/3D0)
       RAT=RV/RS
-*
+!
       RETURN
       END
  
@@ -3192,10 +3116,10 @@ C=================
 C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       IMPLICIT real(dp) (A-H,O-Z)
-*
+!
       RAT=(1.5D0/EPS)**(1D0/3D0)
       RAT=RAT/DSQRT( (EPS+2D0)/(2D0*EPS) )
-*
+!
       RETURN
       END
 
@@ -3208,12 +3132,11 @@ C=================
 C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       IMPLICIT real(dp) (A-H,O-Z)
-
-*
+!
       ! TODO replace with computation of the nanorod surface
       RAT=(1.5D0/EPS)**(1D0/3D0)
       RAT=RAT/DSQRT( (EPS+2D0)/(2D0*EPS) )
-*
+!
       RETURN
       END
 
@@ -3228,7 +3151,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       IMPLICIT real(dp) (A-H,O-Z)
       INTEGER NOUT
-* number of the output unit
+! number of the output unit
       PARAMETER (NOUT=35)  
       PARAMETER (NC=10, NG=60) 
                  
@@ -3245,11 +3168,11 @@ C--------/---------/---------/---------/---------/---------/---------/--
       C(8)=-0.0016 D0
       C(9)=-0.0002 D0
       C(10)= 0.0010 D0
-*
-* GIF division points and weights
-*
+!
+! GIF division points and weights
+!
       CALL GAUSS (NG,0,0,X,W)
-*
+!
       S=0D0
       V=0D0
       DO I=1,NG
@@ -3305,7 +3228,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       xm=0.5d0*(x2+x1)   !have to find half of them
       xl=0.5d0*(x2-x1)
 
-* Loop over the desired roots:
+! Loop over the desired roots:
 
       do 12 i=1,m
         z=cos(3.141592654d0*(i-.25d0)/(n+.5d0))
@@ -3321,20 +3244,18 @@ C--------/---------/---------/---------/---------/---------/---------/--
             p1=((2.d0*j-1.d0)*z*p2-(j-1.d0)*p3)/j
  11       continue
 
-* p1 is now the desired  Legendre polynomial. We next compute pp, its derivative,
-* by a standard relation involving also p2, the polynomial of one lower order:
+! p1 is now the desired  Legendre polynomial. We next compute pp, its derivative,
+! by a standard relation involving also p2, the polynomial of one lower order:
 
           pp=n*(z*p1-p2)/(z*z-1.d0)
           z1=z
           z=z1-p1/pp                   !Newton's method
 
         if (abs(z-z1).gt.EPS) goto 1
-
-* Scale the root to the desired interval, and put in its symmetric counterpart:
+! Scale the root to the desired interval, and put in its symmetric counterpart:
         x(i)=xm-xl*z                   
         x(n+1-i)=xm+xl*z               
-
-* Compute the weight and its symmetric counterpart:
+! Compute the weight and its symmetric counterpart:
         w(i)=2.d0*xl/((1.d0-z*z)*pp*pp)  
         w(n+1-i)=w(i)    
                
@@ -3370,7 +3291,7 @@ C
 C
 C ..  INTRINSIC FUNCTIONS  ..
 C
-*      INTRINSIC ABS
+!      INTRINSIC ABS
 C     ------------------------------------------------------------------
 C
       DO II=2,N
@@ -3382,16 +3303,16 @@ C
            X(IN)=X(I)
            X(I)=DUM
          end if
-*
-* Forming a matrix product
-*
+!
+! Forming a matrix product
+!
          DO J=II,N
            IF((ABS(A(I,J))-EMACH).gt.0) X(J)=X(J)-X(I)*A(I,J)
          end do
       end do
                   !the I-th row of A multiplied by X(I)
                              !subtracted from X
-*
+!
       DO II=1,N
         I=N-II+1
         IJ=I+1
@@ -3442,9 +3363,9 @@ C
       I=II-1
       YR=A(I,I)
       IN=I
-*
-* Finding an element with the largest magnitude in the I-th column
-* below the matrix diagonal (including the diag. element):
+!
+! Finding an element with the largest magnitude in the I-th column
+! below the matrix diagonal (including the diag. element):
 
       DO J=II,N
         IF((ABS(YR)-ABS(A(I,J))).lt.0) then
@@ -3457,7 +3378,7 @@ C
 
       INT(I)=IN      !The largest element in the I-th row above the matrix
                      !diagonal is in the IN-th row and is denoted by YR
-*
+!
       IF((IN-I).ne.0) then  !If IN.NE.I switch the I-th and IN-th columns to the
         DO J=I,N     !left of the matrix diagonal (including the diag. element)
           DUM=A(J,I)
@@ -3479,7 +3400,7 @@ C
         end if
       end do                   !The elements in the Ith row
                                !above diagonal are not set to zero
-*
+!
       end do                   !end of "column loop"
       RETURN
       END

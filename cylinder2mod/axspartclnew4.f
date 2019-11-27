@@ -1,11 +1,10 @@
        program axspartcl1
-
-* Warning in module AXSPARTCL in file axspartcl.f: Variables set but never used:
-*   RMF set at line 257 file axspartcl.f
-*    XS set at line 682 file axspartcl.f
-*
-*  If changing LMX, one has to adjust NPN1 in AMPLDR to the same value
-*                   NPNG1 is only within the AMPLDR
+! Warning in module AXSPARTCL in file axspartcl.f: Variables set but never used:
+!   RMF set at line 257 file axspartcl.f
+!    XS set at line 682 file axspartcl.f
+!
+!  If changing LMX, one has to adjust NPN1 in AMPLDR to the same value
+!                   NPNG1 is only within the AMPLDR
 c Extinction for a single homogeneous sphere of radius 300nm  (300.001/300)
 c host dielectric constant= (1.00000000000000,0.000000000000000E+000)
 c sphere diel. constant= (2.10250000000000,0.000000000000000E+000)
@@ -109,25 +108,25 @@ C ::: number of the output unit for the field intensity
 c Maximal number of spherical harmonics used. The floating number is
 c specified below by the value of LMAX parameter
 !     PARAMETER (lmx=100)
-*
-* If convergence test in the calculation of the scattering cross sections
-* is to be performed, yncheck=.true., otherwise yncheck=.false.
+!
+! If convergence test in the calculation of the scattering cross sections
+! is to be performed, yncheck=.true., otherwise yncheck=.false.
 !     parameter (yncheck=.false.)
       parameter (yncheck=.true.)
-*
-* If particle is coated, ync=y, otherwise ync=n
+!
+! If particle is coated, ync=y, otherwise ync=n
       parameter (ync='n')
-*
-* ynperfcon=.true. if core is a perfect conductor, otherwise
-* ynperfcon=.false.
-*
+!
+! ynperfcon=.true. if core is a perfect conductor, otherwise
+! ynperfcon=.false.
+!
       PARAMETER (ynperfcon=.false.)
-*
-* ynintens=.true. if the field intensity is to be calculated; otherwise
-* ynintens=.false.
-*
+!
+! ynintens=.true. if the field intensity is to be calculated; otherwise
+! ynintens=.false.
+!
       PARAMETER (ynintens=.false.)
-*
+!
 c number of coatings
       parameter (lcs=1)
 c The coating layer to which material data are read in
@@ -149,13 +148,12 @@ c      PARAMETER (CCEPS=(-70.720839d0,7.05596d0))   !-70.720839,7.05596   Au for
 c      PARAMETER (CCEPS=(-10.84D0,0.762d0))   !JAP89_5774   ellipsoid for ld=633
 c      PARAMETER (CCEPS=(-2.03D0,0.602d0))    !JAP89_5774   sphere for ld=354
 C >>>     SPHERE (OUTER SHELL SCATTERER) PERMITTIVITY                  <<<
-*  n(silica)=1.45  <--->    EPS(1)=2.1025D0
-*  n(ZnS)=2.       <--->    EPS(1)=4.D0
+!  n(silica)=1.45  <--->    EPS(1)=2.1025D0
+!  n(ZnS)=2.       <--->    EPS(1)=4.D0
       PARAMETER (CSEPS=(1.005d0,0.d0)**2)
 c      PARAMETER (CSEPS=(1.05d0,0.d0)**2)    !to test lisac
 c      PARAMETER (CSEPS=(-10.84D0,0.762d0))    !JAP89_5774
-
-* material code number
+! material code number
 c   NMAT=0             dispersionless dielectric
 c   NMAT=1             Drude metal
 c   NMAT=2             Ag
@@ -166,14 +164,14 @@ c   NMAT=6             Al
 c   NMAT=7             Pt
 c   NMAT=8             Si
 C  NMAT = 9           water
-*
+!
       PARAMETER(NMAT=0)
-*
+!
 c Temporarily option for reading of the real data for the dielectric constant
 c The number of the entries in a material data file to be read below
-* Data files for Au,Cu,Al,Pt should be ordered with the decreased wavelength
-* (omega increases in the loop and is oriented along the data file)
-*
+! Data files for Au,Cu,Al,Pt should be ordered with the decreased wavelength
+! (omega increases in the loop and is oriented along the data file)
+!
 c          AGC.DAT                NFIN=73       ! from Palik
 c          Audat.dat              NFIN=66       ! from Palik
 c          Au_2dat.dat            NFIN=76       ! from JAW
@@ -185,17 +183,17 @@ c          Nidat.dat              NFIN=68       ! from Palik
 c          Sidat.dat              NFIN=291
 c          sieps.dat              NFIN=117
 c          measured_Water_dispersion_T=24.txt       NFIN = 3600
-*
+!
       PARAMETER (NFIN=3600)
-*
+!
 C ::: relative error allowed for the TCS. If the convergence
-*     within TOL is not reached, program issues warning
+!     within TOL is not reached, program issues warning
       PARAMETER (TOL=1.d-3)
-*
+!
 c If ynbrug=.true., performs Bruggeman approximation for ZEPS1. Otherwise
 c ynbrug=false.
        parameter (ynbrug=.false.)
-******************************************************************
+!*****************************************************************
 c Declarations:
 
       integer ICHOICE,LMAX,NCHECK,NAXSM,NCHECKP,NAXSMP  !common block variables
@@ -213,37 +211,36 @@ c Declarations:
       complex(dp) ceps1(NFIN),ZEPS1,ZEPS0V,Z1,Z2
       complex(dp) zeps(lcs+1)
       real(dp) global_eps_r, global_eps_i
-*
+!
       COMMON /TOAMPLD/RAT,REV,ALPHA,BETA,DDELT
-*
-* transfers real(dp) RAT,REV,ALPHA,BETA,DDELT  from the main to AMPLDR
-*
+!
+! transfers real(dp) RAT,REV,ALPHA,BETA,DDELT  from the main to AMPLDR
+!
       COMMON /TOTAMPLD/THET0,THET,PHI0,PHI
-*
-* transfers real(dp) THET0,THET,PHI0,PHI from the main to AMPLDR
-*
+!
+! transfers real(dp) THET0,THET,PHI0,PHI from the main to AMPLDR
+!
       COMMON /TOIAMPLD/NCHECK,NAXSM,NDGS
-*
-* transfers integers NCHECK,NAXSM,NDGS from the main
-* to AMPLDR
-*
+!
+! transfers integers NCHECK,NAXSM,NDGS from the main
+! to AMPLDR
+!
       COMMON /TOITMT/ICHOICE,NPP,NCHECKP,NAXSMP,NDGSP
-
-* transfers integers ICHOICE,NP,NCHECK,NAXSM,NDGS from the main to TMTAXSPV
-*
+! transfers integers ICHOICE,NP,NCHECK,NAXSM,NDGS from the main to TMTAXSPV
+!
       COMMON /TOTMT/DEFPP,RATP,REVP,ALPHAE,BETAE,DDELTP
-*
-* transfers real(dp) DEFP,RAT,REV,ALPHAE,BETAE,DDELT from the main to TMTAXSPV
-*
+!
+! transfers real(dp) DEFP,RAT,REV,ALPHAE,BETAE,DDELT from the main to TMTAXSPV
+!
       COMMON /TOLTMT/ ynoptth
-*
-* transfers logical ynoptth from the main to TMTAXSP
-*
+!
+! transfers logical ynoptth from the main to TMTAXSP
+!
       COMMON /DIELF/ zeps0v
         COMMON /REVF/ revf
-*
-* transfers ZEPS0,REV from the main to AMPL
-*
+!
+! transfers ZEPS0,REV from the main to AMPL
+!
       COMMON /TOSPHERECR/ rmuf
       COMMON /TOSPHERECH/ yncv
       COMMON /TOSPHERECL/ ynperfconv
@@ -263,15 +260,14 @@ C--------/---------/---------/---------/---------/---------/---------/--
 c background dielectric constant
 !     PARAMETER (ZEPS0=1.D0) !set in ini_parse
 c
-
-*
-* From here to spherec
-*---------------------------------------------------------------
-* Convergence variable (has to be at least equal to 2):
-*
+!
+! From here to spherec
+!---------------------------------------------------------------
+! Convergence variable (has to be at least equal to 2):
+!
       lmax=25  !lmx
-*
-*  FCC parameters:
+!
+!  FCC parameters:
 
 c f=0.05  (--)
 c       RMUF=0.2879411911484862d0
@@ -331,26 +327,25 @@ c       RMUF=1.d0/DSQRT(2.D0)
       rmf(lcs)=rmuf
 
 CCCCCCCCCCCCCCCCCC    Assignement of common variables CCCCCCCCCCC
-*
-* ynoptth=.true. if you want to check optical theorem
+!
+! ynoptth=.true. if you want to check optical theorem
       ynoptth=.false.
-*
+!
       ynperfconv=ynperfcon
       yncv=ync
         zeps0v=zeps0
-
-* Preinitialization necessary since below rsnm,rev, and defp (all
-* feeded in evanesc) are not always specified:
-*
+! Preinitialization necessary since below rsnm,rev, and defp (all
+! feeded in evanesc) are not always specified:
+!
 !     rsnm=1.d0 ! Should be set in *.ini file
       rev=1.d0
       defp=1.d0
-*
+!
       write(6,*)'Chose particle shape'
       write(6,*)'Only axially symmetric particle shapes allowed'
       write(6,*)'(The axis of axial symmetry is Z-axis)'
       write(6,*)
-*
+!
 C--------/---------/---------/---------/---------/---------/---------/--
       write(6,*)'Chebyshev particles: type a positive number equal to
      1 the order of the Chebyshev polynomial=the number of wrinkles
@@ -366,7 +361,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       write(6,*)'intensity around homogeneous/coated sphere: type -50'
 
       Open(unit = 90,file = 'epsWater.txt', status = 'unknown')
-*
+!
       NP = mpar%np
       if (NP == 0) then
       write(6,*) 'Input the particle type:'
@@ -375,7 +370,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       write(6,*)'Auto-select from *.ini file: ', NP
       end if
 cz      NP=-1                      !temporarily
-*
+!
       NPP=NP
 C
 C     NP
@@ -391,10 +386,10 @@ C     -5                  sphere cut by a plane on its bottom
 C     -6                  cone
 C     -7                  conus on a finite cylinder (in preparation)
 !     -9                  nanorod (cylinder capped with half-spheroids)
-*
+!
 C      PARAMETER (NP=-1)
-*
-* specify the shape of particles within a given NP class:
+!
+! specify the shape of particles within a given NP class:
 C     NP.gt.0 - DEFP = deformation parameter of a Chebyshev particle
 C     NP=-1 - DEFP = the ratio of the horizontal to rotational axes. DEFP is
 C             larger than 1 for oblate spheroids and smaller than 1 for
@@ -417,28 +412,28 @@ C
 C Warning:
 C   In computations for spheres, use DEFP=1.000001 instead of DEFP=1.
 C   DEFP=1 can cause overflows in some rare cases.
-*
+!
 c      PARAMETER (DEFP=1.000001D0)
 c      DEFP=1.000001
-*
-*
+!
+!
 C--------/---------/---------/---------/---------/---------/---------/--
        Open(UNIT=10, FILE='test.txt')
-*
+!
       if (NP.gt.0) then
-*
+!
       write(6,*)'Radius of the undeformed Chebyshev particle in
      1 your units (in nm if dispersive data used)'
       read(5,*) rsnm
-*
+!
       write(6,*)'The amplitude of wrinkles on the sphere surface'
       read(5,*) defp
-*
+!
       write(6,*)'The equal-volume-sphere radius'
       read(5,*) rev
-*
+!
       RAT=1. D0
-*
+!
       else if (NP.eq.-50) then
 
       if(.not.ynintens) then
@@ -449,7 +444,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       write(6,*)'The (coated) sphere radius in your units'
       read(5,*) rsnm
       rev=rsnm
-*
+!
       else if (NP.eq.-1) then
 
       write(6,*)'The half-length of the spheroid along
@@ -463,19 +458,19 @@ cz      hlength=63.3d0
      2 (in nm if dispersive data used)'
       read(5,*) rsnm
 cz      rsnm=21.1d0
-*
+!
 C     NP=-1 - DEFP = the ratio of the horizontal to rotational axes. DEFP is
 C             larger than 1 for oblate spheroids and smaller than 1 for
 C             prolate spheroids.
-*
+!
       DEFP=rsnm/hlength              !always revolution axis length
-*                                    !in the denominator
-*
+!                                    !in the denominator
+!
       rev=rsnm/DEFP**(1.D0/3.D0)     !=equal-volume-sphere radius
                              !Room for improvement here - it would be
                                    !more resonable to replace rev
                                !by the size parameter k*rev
-*
+!
       if (lcs.gt.1) then
 
       write(6,*)'The ratio of the inner to outer spheroid half-length
@@ -489,14 +484,13 @@ C             prolate spheroids.
 
       revin=rev*revin
       end if               !lcs.gt.1
-
-*
+!
       RAT=1.D0
-*
+!
 C--------/---------/---------/---------/---------/---------/---------/--
-*
+!
       else if ((NP .eq. -2) .or. (NP .eq. -9)) then
-*
+!
       rl_max = mpar%rl_max
       if (rl_max < 0_dp) then
         write(6,*)'Enter cylinder maximal r/l:'
@@ -530,10 +524,9 @@ C--------/---------/---------/---------/---------/---------/---------/--
       end if
 
        rsnm =  rsnm*2
-
-* specify the shape:
+! specify the shape:
 C NP=-2 - DEFP = the ratio of the cylinder diameter to its length.
-*
+!
       hlength_max = rsnm/rl_min/2.d0
       hlength_min = rsnm/rl_max/2.d0
       DEFP=rsnm/hlength_max
@@ -543,7 +536,7 @@ C NP=-2 - DEFP = the ratio of the cylinder diameter to its length.
       rev=hlength_max*(3.D0*DEFP*DEFP/2.D0)**(1.D0/3.D0)  !=equal-volume-sphere radius
 
       RAT=1. D0
-*
+!
       else if (NP.eq.-3) then
 C     NP=-3 - no DEFP is specified
       write(6,*)'The length of in your units'
@@ -551,9 +544,9 @@ C     NP=-3 - no DEFP is specified
       rev=rsnm
 C      write(6,*)'rev(rsnm) not yet determined for NP=-3'
 C      stop
-*
+!
       RAT=1. D0
-*
+!
       else if ((NP.eq.-4).or.(NP.eq.-5))  then
 C     NP=-4,-5 - DEFP is the height (along the axial symmetry axis)
 C                 of the resulting cut sphere
@@ -561,15 +554,15 @@ C                 of the resulting cut sphere
 C--------/---------/---------/---------/---------/---------/---------/--
       read(5,*) rsnm
       rev=rsnm
-*
+!
       write(6,*)'The height of the cut sphere in your units'
       read(5,*) defp
       defp=defp/rsnm
-*
+!
       RAT=1. D0
-*
+!
       else if (NP.eq.-6) then
-*
+!
 C     NP=-6 -
 C
       write(6,*)'The cone base diameter in your units'
@@ -577,26 +570,26 @@ C
 
       write(6,*)'The cone heigth of in your units'
       read(5,*) hlength
-*
+!
       rsnm=rsnm/2.d0
       rev=(hlength*rsnm**2/4.d0)**(1.d0/3.d0)   !=equal-volume-sphere radius
       RAT=1. D0
-*
+!
       else if (NP.eq.-7) then
-*
+!
 C     NP=-7 -
 C
       write(6,*)'Not ready yet!'
       stop
 cc      write(6,*)'The length of in your units'
 cc      read(5,*) rsnm
-*
+!
       end if                         ! end NP if
-****************************************
-*
+!***************************************
+!
       defpp=defp
-*
-*
+!
+!
       if (RAT.eq.1.) then
       write(6,*)'Particle size specified in terms of
      1    the equal-volume-sphere radius'
@@ -604,33 +597,33 @@ cc      read(5,*) rsnm
       write(6,*)'Particle size specified in terms of
      1    the equal-surface-area-sphere radius'
       end if
-*
-* equivalent-(volume/surface-area)-sphere radius
-*
+!
+! equivalent-(volume/surface-area)-sphere radius
+!
 cc      write(6,*)'Read equal-volume-sphere radius in nm'
 cc      read(5,*) rev
-*
+!
 cc      rev=300.d0                         !feeded as REV to RSP* routines
-*
+!
       AXI=rev
       revf=rev
-*
+!
 C  Equivalent equal-(volume/surface-area)-sphere radius
-*
+!
 cc      REV=RAT*AXI                      !feeded as REV to RSP* routines
-*
+!
 
 C  NCHECK  -  .EQ.0  THEN  NGSS=2*NGAUSS, FACTOR=1D0
 C             .EQ.1  THEN  NGSS = NGAUSS, FACTOR=2D0: theta=pi/2 is mirror
 C                          symmetry plane as in the case of Chebysh. particle,
 C                          ellipsoid, and cylinder
-*
+!
       NCHECK=0
-*
+!
       !ellipsoid(sphere), cylinder, and nanorod
       IF (NP.EQ.-1.OR.NP.EQ.-2.OR.NP.EQ.-9) NCHECK=1
       IF (NP.GT.0.AND.(-1)**NP.EQ.1) NCHECK=1    !Chebysh. particle
-*
+!
 C If theta=pi/2 is not a scatterer mirror symmetry plane:
 C  NAXSM   -  .EQ.0 : Gauss abscissas do not have +/- theta symmetry
 C             .EQ.1 : Gauss abscissas have +/- theta symmetry
@@ -644,7 +637,7 @@ C
 C  ALPHA and BETA - Euler angles (in degrees) specifying the orientation
 C    of the scattering particle relative to the laboratory reference
 C    frame (Refs. 6 and 7).
-*
+!
 C       ALPHA=90.D0           !laboratory frame coincides with particle frame
 C      BETA=0.D0
 
@@ -658,22 +651,21 @@ C      BETA=0.D0
 
       if((ALPHA.eq.0).and.(BETA.eq.0))
      & write(6,*)'Laboratory frame coincides with particle frame'
-
-* DDELT - the desired absolute accuracy of computing the
-* expansion coefficients of a normalized scattering matrix.
-* (This accuracy is usually worse by a factor of 10 than
-* the accuracy of computing the optical cross sections.)
-* Since convergence test is only performed for the accuracy
-* of computing the optical cross sections, DDELT is reset
-* later on to DDELT=0.1D0*DDELT
-*
+! DDELT - the desired absolute accuracy of computing the
+! expansion coefficients of a normalized scattering matrix.
+! (This accuracy is usually worse by a factor of 10 than
+! the accuracy of computing the optical cross sections.)
+! Since convergence test is only performed for the accuracy
+! of computing the optical cross sections, DDELT is reset
+! later on to DDELT=0.1D0*DDELT
+!
       DDELT=TOL
-*
+!
 C      THET0 - zenith angle of the incident beam in degrees
 C      THET - zenith angle of the scattered beam in degrees
 C      PHI0 - azimuth angle of the incident beam in degrees
 C      PHI - azimuth angle of the scattered beam in degrees
-*
+!
       if (.not.ynintens) then
       write(6,*)'Specify (theta,phi) angles of the incident beam
      1             (in degrees)'
@@ -681,14 +673,14 @@ C      PHI - azimuth angle of the scattered beam in degrees
       thet0 = mpar%thet0
       phi0 = mpar%phi0
       write(6,*)'Auto-set from *.ini:', thet0, phi0
-*
+!
       write(6,*)'Specify (theta,phi) angles of the scattered beam
      1             (in degrees)'
 !     read(5,*) THET,PHI
       thet = mpar%thet
       phi = mpar%phi
       write(6,*)'Auto-set from *.ini', thet, phi
-*
+!
       else if (ynintens) then
       write(6,*)'PHI angle of incidence of the incident plane wave
      &  is for intensity calculations set to zero'
@@ -698,14 +690,14 @@ cz      THET0=90.d0
       PHI0=0.d0
       THETV=THET0
       end if
-*
+!
 C--------/---------/---------/---------/---------/---------/---------/--
 cc      THET0=56.D0
 cc      THET=65.D0
 cc      PHI0=114.D0
 cc      PHI=128.D0
-*
-* test setup:
+!
+! test setup:
 
       if ((thet0.gt.180.).or.(thet.gt.180.)) then
       write(6,*)'Theta angles has to be smaller than 180'
@@ -730,12 +722,11 @@ cc      PHI=128.D0
       END IF
 
 C--------/---------/---------/---------/---------/---------/---------/--
-*
-* If NAG library is available, set ICHOICE=1, otherwise ICHOICE=2
+!
+! If NAG library is available, set ICHOICE=1, otherwise ICHOICE=2
 
       ICHOICE=2
-
-*  controlling the number ND=NDGS*NMAX of division points in
+!  controlling the number ND=NDGS*NMAX of division points in
 C  computing integrals over the particle surface (Ref. 5).
 C  For compact particles, the
 C  recommended value is 2. For highly aspherical particles larger
@@ -743,9 +734,9 @@ C  values (3, 4,...) may be necessary to obtain convergence.
 C  The code does not check convergence over this parameter.
 C  Therefore, control comparisons of results obtained with
 C  different NDGS-values are recommended.
-*
-*  Check that NDGS*LAMXD does not exceed NPNG1 value in subroutines
-*  For a current values of LMAXD=50 and NPNG1=800 then NDGS<= 16!!!
+!
+!  Check that NDGS*LAMXD does not exceed NPNG1 value in subroutines
+!  For a current values of LMAXD=50 and NPNG1=800 then NDGS<= 16!!!
 
       IF ((NP.EQ.-4).or.(NP.EQ.-5)) THEN
          NDGS=16
@@ -760,9 +751,9 @@ C  different NDGS-values are recommended.
       ELSE
          NDGS=4
       END IF
-*
+!
       WRITE(6,*) 'NDGS=',NDGS
-*
+!
       IF (YNINTENS) THEN
 
           RATP=RAT
@@ -775,28 +766,28 @@ C  different NDGS-values are recommended.
           BETAE=BETA
 
       END IF
-*
+!
       IF (ICHOICE.EQ.1) THEN
       WRITE(6,*) 'NAG ROUTINES USED FOR THE MATRIX INVERSION'
       ELSE IF (ICHOICE.EQ.0) THEN
       WRITE(6,*) 'NAG ROUTINES (FOR THE MATRIX INVERSION) ARE NOT USED'
       END IF
       WRITE(6,*)
-*
+!
       IF (NCHECK.EQ.0) THEN
       WRITE(6,*) 'Particle without theta=pi/2 mirror symmetry'
       ELSE IF (NCHECK.EQ.1) THEN
       WRITE(6,*) 'Particle has  theta=pi/2 mirror symmetry'
       END IF
       WRITE(6,*)
-*
+!
       IF (NAXSM.EQ.0) THEN
       WRITE(6,*) 'Gauss abscissas not +/- theta symmetric'
       ELSE IF (NAXSM.EQ.1) THEN
       WRITE(6,*) 'Gauss abscissas +/- theta symmetric'
       END IF
       WRITE(6,*)
-*
+!
       WRITE(NOUT,5454) ICHOICE,NCHECK
  5454 FORMAT ('ICHOICE=',I1,'  NCHECK=',I1)
       WRITE(NOUT,*)'NAXSM=', NAXSM
@@ -824,64 +815,61 @@ C  different NDGS-values are recommended.
  8003 FORMAT('EQUAL-VOLUME-SPHERE RADIUS=',F8.4)
  8004 FORMAT('EQUAL-SURFACE-AREA-SPHERE RADIUS=',F8.4)
 C--------/---------/---------/---------/---------/---------/---------/--
-* Checking set up:
-
-*
+! Checking set up:
+!
       if((np.gt.0).and.(dabs(defp).ge.1.d0)) then
       write(6,*)'Absolute value of defp has to be less than 1.!!!'
       stop
       end if
-*
+!
       if((np.eq.-4).and.(defp.ge.2.d0*REV)) then
       WRITE(6,*)'Invalid parameters for a cut sphere!'
       WRITE(6,*)'Execution stopped!'
       write(6,*)'The defp has to be less than 2*(sphere radius) !!!'
       stop
       end if
-*
+!
       if((np.eq.-1).and.(defp.eq.1)) then
        write(6,*)'Use DEFP=1.000001 instead of DEFP=1'
       end if
-*
+!
       if (nmat.gt.1) then
         write(6,*)'Real material data are to be provided'
       if (ynbrug) write(6,*)'Bruggeman approx. used!'
       if (ynbrug) write(nout,*)'#Bruggeman approximation performed'
       end if
-*
+!
       if ((ync.eq.'y'.and.lcs.eq.1).or.(ync.eq.'n'.and.lcs.ne.1)) then
       write(6,*)'Check compatibility of YNC and LCS'
       stop
       end if
 
 C--------------------------------------------------------------------
-* Reading in the input data:
+! Reading in the input data:
 c      write(6,*)'Read the particle (core) dielectric constant'
 c      read(5,*) zeps(1)
-
-*  n(silica)=1.45  <--->    ZEPS(1)=2.1025D0
-*  n(ZnS)=2.       <--->    ZEPS(1)=4.D0
+!  n(silica)=1.45  <--->    ZEPS(1)=2.1025D0
+!  n(ZnS)=2.       <--->    ZEPS(1)=4.D0
       ZEPS(1)=cceps
       if(lcs.gt.1) zeps(lcs)=cseps
       zeps(lcs+1)=zeps0
-
-******************************
-*
+!*****************************
+!
       if (lcs.ge.2) then                  !coated particle
-*
+!
 cc      write(6,*)'Read equal-volume-core radius in nm'
 cc      read(5,*) rff(1)
 cc      rff(1)=204.9d0
 cc      rff(1)=rff(1)/rs
-*
+!
       if (np.eq.-50) then
-*
+!
       write(6,*)'Coated sphere core radii r(l) labelled from 1 for the
      & inner core till LCS for the outer shell
      &   ===> r(lcs) is the sphere radius'
 C--------/---------/---------/---------/---------/---------/---------/--
       do ikl=1,lcs-1
-*
+!
       write(6,*)'Read in r(l) for l=',ikl
       read (5,*) rff(ikl)
       rff(ikl)=rff(ikl)/rsnm
@@ -893,19 +881,19 @@ c      rff(1)=0.75d0
       write(6,*)'Read in the lth-sphere layer diel. const. for l=',ikl
       write(6,*)'(In case of dispersive component, give 1. )'
       read (5,*) zeps(ikl)
-*
+!
       end if         !lcs.ikl
 
       enddo          !ikl
-*
+!
       end if         !np.eq.-50
-*
+!
       end if         !lcs.ge.2
-*
-*oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-* Scanning over frequency interval:
-*-------------------------------------------------
-*
+!
+!oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+! Scanning over frequency interval:
+!-------------------------------------------------
+!
       if (ynintens) then
       write(6,*)'ELECTRIC FIELD INTENSITY CALCULATION'
       write(6,*)'Read lambda (in the vacuum) in nm'
@@ -925,14 +913,13 @@ C--------/---------/---------/---------/---------/---------/---------/--
 cv      lambda=633.d0                      !JAP89_5776 for gold ellipsod
 c      lambda=354.d0                      !JAP89_5776 for silver sphere
 cc      lambda=500d0
-
-*
-* size parameter is customarily defined as the ratio of
-* circumference of particle to the wavelength in the host medium
-* in which the particle is embedded
-*                    x=kr=\sg a=2*pi*r/lambda
-*      xs=2.d0*pi*rs*dble(sqrt(zeps0))/lambda
-* convert lambda to the lambda in vacuum:
+!
+! size parameter is customarily defined as the ratio of
+! circumference of particle to the wavelength in the host medium
+! in which the particle is embedded
+!                    x=kr=\sg a=2*pi*r/lambda
+!      xs=2.d0*pi*rs*dble(sqrt(zeps0))/lambda
+! convert lambda to the lambda in vacuum:
 c      lambda=lambda*dble(sqrt(zeps0))
 c  omega=2.d0*pi*rsnm/(lambda*rmuf)=xs/(rmuf*dble(sqrt(zeps0))),
 c where rs is the particle radius (in nm) and  lambda
@@ -949,15 +936,15 @@ c      if (1.eq.1) nstep=0             ! temporarily
 c      delo=0.d0
 c      omega0=omega
 c      go to 11
-*
-* Option for omega input:
+!
+! Option for omega input:
 c      write(6,*)'Read omega ='
 c      read(5,*) omega
-*
+!
 c      xs=RMUF*omega*dble(sqrt(zeps0))
-*
+!
 c       write(6,*)'Equiv. size parameter x=2*pi*rs*n_0/lambda=',xs
-*
+!
       if (.not.ynintens) then
       write(6,*)'Scan up to x-parameter (in nm)'
       x_max = mpar%x_max
@@ -979,7 +966,7 @@ c      enw=500
       end if
 c      xstep=5
       end if
-*
+!
 C ::: number of steps on frequency interval:
       if ((lambda.eq.enw).or.(ynintens)) then
        XSTEP=0
@@ -991,10 +978,10 @@ C ::: width of the searched frequency interval
        enw=enw-omega0
        delo=enw/dble(nstep-1)
       end if
-*
+!
 C--------/---------/---------/---------/---------/---------/---------/--
-*                  --------------------------------
-* output initial statements
+!                  --------------------------------
+! output initial statements
 
       OPEN(UNIT=NOUT,FILE='axs-scs.dat')
       rewind(NOUT)
@@ -1346,16 +1333,15 @@ C--------/---------/---------/---------/---------/---------/---------/--
 
 
       Open(10, File='maps.txt',status = 'unknown')
-
-*****************************   ZEPS1  ***********************************
-*                  --------------------------------
-* Sphere optical constants in the case of a dispersion
-* READING IN MATERIAL  DATA:
-* Reading real material data, e.g., according to Palik's  book
-* requires reading data files OMF and CEPS1 of dimension NFIN
-* OMF is reepsz/omega and CEPS1 contains the sphere EPS
-*                       material constant reading:
-*
+!****************************   ZEPS1  ***********************************
+!                  --------------------------------
+! Sphere optical constants in the case of a dispersion
+! READING IN MATERIAL  DATA:
+! Reading real material data, e.g., according to Palik's  book
+! requires reading data files OMF and CEPS1 of dimension NFIN
+! OMF is reepsz/omega and CEPS1 contains the sphere EPS
+!                       material constant reading:
+!
       if (nmat.le.1) then
 
         go to 2         !no reading of material data
@@ -1447,11 +1433,9 @@ c          ceps1(ieps) = CMPLX(ceps1real(ieps), ceps1imag(ieps))
       close(30)
 
       end if                      ! material constant reading
-
-*********************
-
-*                     --------------------------------
-* begin main scanning loop:
+!********************
+!                     --------------------------------
+! begin main scanning loop:
       write(6,*) 'begining of main loop'
    2   rev_beg = rev
 
@@ -1484,10 +1468,10 @@ cc      xs=RMUF*omega*dble(sqrt(zeps0))  !Equiv. size parameter
 
       if ((nmat.eq.0).or.(ynperfcon)) go to 8      !dispersionless dielectric
                                                    !or ideal metal
-* In case of a dispersion, EPSSPH is modified.
-* For ideal Drude metal
-*     plasma=2.d0*pi*sphere radius in nm/(lambda_z in nm*rmuf)
-* where lambda_z is the wavelength for which Re eps_s=0.
+! In case of a dispersion, EPSSPH is modified.
+! For ideal Drude metal
+!     plasma=2.d0*pi*sphere radius in nm/(lambda_z in nm*rmuf)
+! where lambda_z is the wavelength for which Re eps_s=0.
 
        reepsz=2.d0*pi*rev/(323.83d0*rmuf)
 
@@ -1497,25 +1481,24 @@ cc      xs=RMUF*omega*dble(sqrt(zeps0))  !Equiv. size parameter
         omxp=plasma/omega
         zeps1=1.d0-omxp**2/(1.d0+ci*plasma/(144.d0*omega))
       go to 5
-*
+!
         ELSE IF (nmat.eq.4) then             !Material decision IF - ZnS
-*
+!
        filfrac=0.62d0         ! filfrac of ZnS in ZnS core
        call  znsrefind(LAMBDA,FILFRAC,zeps1)
        go to 5
-*
+!
       ELSE IF (NMAT.EQ.2) THEN         !Material decision IF - Ag
 
 c >>> real material data:           !silver
-*                         lambda_z=323.83d0
-*                         lambda_p=164.d0
-* When real material data are used,
-* reepsz differs from plasma!!! The plasma wavelength is
-* calculated below:
+!                         lambda_z=323.83d0
+!                         lambda_p=164.d0
+! When real material data are used,
+! reepsz differs from plasma!!! The plasma wavelength is
+! calculated below:
 
        plasma=reepsz*7.2d0/3.8291d0
-
-* security trap - remainder (not optimized!)
+! security trap - remainder (not optimized!)
       omxf=omega/reepsz
       if (omxf.gt.omf(1)) then
        write(6,*)'Calculation of has to stop with'
@@ -1527,16 +1510,16 @@ c >>> real material data:           !silver
       if (omxf.lt.omf(nfin)) then
         omxp=plasma/omega
         zeps1=1.d0-omxp**2/(1.d0+ci*plasma/(144.d0*omega))
-* damping coefficient for silver is plasma/144 where plasma is different from
-* the Re eps zero crossing at 3.8291 eV according to Palik!!!
+! damping coefficient for silver is plasma/144 where plasma is different from
+! the Re eps zero crossing at 3.8291 eV according to Palik!!!
        go to 5
       else if (omxf.eq.omf(1)) then
        zeps1=ceps1(1)
        go to 5
       else
       do ieps=2,nfin
-* data file ordered with the increased wavelength
-* omxf increases in the loop and is oriented opposite to the data file
+! data file ordered with the increased wavelength
+! omxf increases in the loop and is oriented opposite to the data file
        if (omxf.gt.omf(ieps)) then     ! linear interpolation
        zeps1=ceps1(ieps)+(omxf-omf(ieps))*(ceps1(ieps-1)-ceps1(ieps))
      1 /(omf(ieps-1)-omf(ieps))
@@ -1548,18 +1531,18 @@ c >>> real material data:           !silver
       ELSE IF ((NMAT.GE.3).or.((nmat.ge.5).and.(nmat.le.7))) then   !Material decision IF
                                                                     !Au,Cu,Al,Pt
 c >>>
-* data file ordered with the decreased wavelength
-* omega increases in the loop and is oriented along the data file
-*
+! data file ordered with the decreased wavelength
+! omega increases in the loop and is oriented along the data file
+!
       if ( (omega.lt.omf(1)).or.(omega.gt.omf(nfin)) ) then
 cc       write(6,*)'Material data not available for this wavelength'
 cc       stop
-*
+!
       call sordalc(NMAT,lambda,ZEPS1)
       go to 5
-*
+!
       end if
-*
+!
       if (omega.eq.omf(nfin)) then
        zeps1=ceps1(nfin)
        go to 5
@@ -1575,15 +1558,15 @@ cc       stop
 
       ELSE IF (NMAT.EQ.8) then           !Material decision IF - Silicon
 c >>>
-* data file ordered with the decreased wavelength
-* omega increases in the loop and is oriented along the data file
-*
+! data file ordered with the decreased wavelength
+! omega increases in the loop and is oriented along the data file
+!
       if ( (omega.lt.omf(1)).or.(omega.gt.omf(nfin)) ) then
        write(6,*)'Material data not available for this wavelength'
        stop
-*
+!
       end if
-*
+!
       if (omega.eq.omf(nfin)) then
        zeps1=ceps1(nfin)
        go to 5
@@ -1599,15 +1582,15 @@ c >>>
 
       ELSE IF (NMAT.EQ.9) then           !Material decision IF - water
 c >>>
-* data file ordered with the decreased wavelength
-* omega increases in the loop and is oriented along the data file
-*
+! data file ordered with the decreased wavelength
+! omega increases in the loop and is oriented along the data file
+!
       if ( (omega.lt.omf(1)).or.(omega.gt.omf(nfin)) ) then
        write(6,*)'Material data not available for this wavelength'
        stop
-*
+!
       end if
-*
+!
       if (omega.eq.omf(nfin)) then
        zeps1=ceps1(nfin)
        go to 5
@@ -1623,10 +1606,9 @@ c >>>
 
 
       END IF                  ! END of Material decision IF
-
-* The end of reading real data according to Palik's  book
-*_____________________________________
-* activate Bruggeman:
+! The end of reading real data according to Palik's  book
+!_____________________________________
+! activate Bruggeman:
 
 
 
@@ -1635,7 +1617,7 @@ c >>>
       ff=0.8d0
       z1 = (3.d0*ff-1.d0)*zeps1+(2.d0 - 3.d0*ff)*zeps0
       z2 =  sqrt(z1*z1 + 8.d0*zeps1*zeps0)
-*
+!
        if (aIMAG(z2).GE.0.0) then
          zeps1= (z1 + z2)/4.d0
        else
@@ -1644,7 +1626,7 @@ c >>>
        end if
 
       zeps(ilcs)=zeps1
-*______________________________________
+!______________________________________
 
   8   continue
 
@@ -1653,7 +1635,7 @@ c >>>
 cc      write(6,*)'LAMBDA in AXSPARTCL=', LAMBDA
 
       IF (YNINTENS) goto 500
-*
+!
       if ((np.eq.-1).and.(lcs.gt.1)) then
 
         revinl=revin*2.d0*pi*sqrt(zeps0)/lambda
@@ -1687,7 +1669,7 @@ C     & global_eps_i
       call ampldr(yncheck,lmax,ichoice,npp,defpp,
      & rsnm,hlength,lambda,zeps(1),zeps0)
       end if
-*
+!
 C--------/---------/---------/---------/---------/---------/---------/--
 cc      if(nstep.gt.10) go to 200
 c      write(6,*) 'istep=', istep
@@ -1698,8 +1680,7 @@ cc      write(6,*)'tsc=', tsc
 
  200  continue
  199  continue
-
-* <<<
+! <<<
       close(nout)
       close(nout+1)
         close(nout+2)
@@ -1714,13 +1695,13 @@ cc      write(6,*)'tsc=', tsc
       close(nout+15)
       close(10)
       close(90)
-* <<<
+! <<<
       if (ync .eq.'n') then
         write(6,*)'Homogeneous particle'
       else if (ync.eq.'y') then
        write(6,*)'coated particle'
       end if
-*
+!
       write(6,*)'Particle parameters:'
       write(6,*)
       write(6,*)'Equivalent sphere radius =', rev
@@ -1741,13 +1722,13 @@ cc      write(6,*)'tsc=', tsc
       write(6,*)'Amplitude matrix vs wavelength in axsampmat.dat'
       write(6,*)'OA Dipole extinction in axs-dipolext.dat'
       write(6,*)'OA Quadrupole extinction in axs-quadrext.dat'
-*--------/---------/---------/---------/---------/---------/---------/--
+!--------/---------/---------/---------/---------/---------/---------/--
 
       IF (.NOT.YNINTENS) go to 1000
 
 C--------/---------/---------/---------/---------/---------/---------/--
-*
-* output initial statements
+!
+! output initial statements
 
  500  OPEN(UNIT=NOUTI,FILE='intnsty.dat')
       rewind(NOUTI)
@@ -1805,7 +1786,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       WRITE(NOUTI+1,*)'#phi,cos(theta),r(theta), E_r,E_theta,E_phi
      & in columns'
       write(NOUTI+1,*)
-*
+!
         OPEN(UNIT=NOUTI+2,FILE='elfscat.dat')
       rewind(NOUTI+2)
       WRITE(NOUTI+2,*)'#Scattered E-field components around a tip'
@@ -1834,10 +1815,10 @@ C--------/---------/---------/---------/---------/---------/---------/--
       WRITE(NOUTI+2,*)'#phi,cos(theta),r(theta), E_r,E_theta,E_phi
      & in columns'
       write(NOUTI+2,*)
-*
+!
       call evanesc(lmax,npp,lcs,revp,defpp,rsnm,hlength,lambda,thetv,
      & rmf,zeps)
-*
+!
       close(nouti)
       close(nouti+1)
       close(nouti+2)
@@ -1939,14 +1920,13 @@ C--------/---------/---------/---------/---------/---------/---------/--
       LOGICAL YNCHECK
       integer nmax, np, inm1, ixxx, m, m1, n, n1, n11, n2 ,n22, ncheck,
      & ndgs, ngaus, ngauss, nm, nma, nn1, nn2, nnm, nnnggg
-
-* number of the output unit
+! number of the output unit
       PARAMETER (NOUT=35)
-*
+!
       real(dp)  LAM,LAMBDA,MRR,MRI,RSNM,HT,DDELT,DDELTA,
-     *        X(NPNG2),W(NPNG2),
-     *        S(NPNG2),SS(NPNG2),AN(NPN1),R(NPNG2),DR(NPNG2),
-     *        DDR(NPNG2),DRR(NPNG2),DRI(NPNG2),ANN(NPN1,NPN1)
+     &    X(NPNG2),W(NPNG2),
+     &    S(NPNG2),SS(NPNG2),AN(NPN1),R(NPNG2),DR(NPNG2),
+     &    DDR(NPNG2),DRR(NPNG2),DRI(NPNG2),ANN(NPN1,NPN1)
       real(dp) TR1(NPN2,NPN2),TI1(NPN2,NPN2)
 c      real(dp) XALPHA(300),XBETA(300),WALPHA(300),WBETA(300)
       real(dp)
@@ -1956,58 +1936,57 @@ c      real(dp) XALPHA(300),XBETA(300),WALPHA(300),WBETA(300)
      &     IT21(NPN6,NPN4,NPN4),IT22(NPN6,NPN4,NPN4)
       complex(dp) S11,S12,S21,S22
       complex(dp) zeps1,zeps0
-*
+!
       COMMON /CT/ TR1,TI1
-* transfers the real and imaginary part of the T matrix (2*NMAX,2*NMAX)
-* array for a given value of M from TMATR0 and TMATR to the AMPLDR
-*
+! transfers the real and imaginary part of the T matrix (2*NMAX,2*NMAX)
+! array for a given value of M from TMATR0 and TMATR to the AMPLDR
+!
       COMMON /TMAT/ RT11,RT12,RT21,RT22,IT11,IT12,IT21,IT22
-* transfers T matrix arrays obtained from TR1,TI1 in the AMPLDR
-* to the AMPL routine
-*
+! transfers T matrix arrays obtained from TR1,TI1 in the AMPLDR
+! to the AMPL routine
+!
       COMMON /CHOICE/ ICHOICE
-* transfers the choice of inversion to relevant matrix inversion
-* routines
-*
+! transfers the choice of inversion to relevant matrix inversion
+! routines
+!
       COMMON /TOAMPLD/RAT,REV,ALPHA,BETA,DDELT
-*
-* transfers real(dp) RAT,A(REV),ALPHA,BETA,DDELT from the main here
-*
+!
+! transfers real(dp) RAT,A(REV),ALPHA,BETA,DDELT from the main here
+!
       COMMON /TOTAMPLD/THET0,THET,PHI0,PHI
-*
-* transfers real(dp) THET0,THET,PHI0,PHI from the main here
+!
+! transfers real(dp) THET0,THET,PHI0,PHI from the main here
 
       COMMON /TOIAMPLD/NCHECK,NAXSM,NDGS
-
-* transfers integers NCHECK,NAXSM,NDGS from the main here
-*
-*****************************************************************
-*
+! transfers integers NCHECK,NAXSM,NDGS from the main here
+!
+!****************************************************************
+!
       P=DACOS(-1D0)                   !local PI constant
-*
+!
       ICHOICE=ICHOICEV
       A=REV
       LAM=LAMBDA/SQRT(ZEPS0)          !wavelength in the ambient
 
 cc      write(6,*)'LAM,LAMBDA in AMPL=', LAM, LAMBDA
-*
-* the real part of the refractive index contrast
-*
+!
+! the real part of the refractive index contrast
+!
       MRR=DBLE(SQRT(ZEPS1/ZEPS0))
-*
-* the imaginary  part of the refractive index contrast
-*
+!
+! the imaginary  part of the refractive index contrast
+!
       MRI=aimag(SQRT(ZEPS1/ZEPS0))
-*
+!
       DDELTA=0.1D0*DDELT
-*
-* DDELT is used to test the accuracy of computing the
-* optical cross sections. This accuracy is usually better
-* than the absolute accuracy of computing the expansion coefficients
-* of a normalized scattering matrix by a factor of 10. Therefore,
-* the desired accuracy of computing the expansion coefficients
-* is rescaled by a factor 0.1 before entering the test of the
-* accuracy of computing the optical cross sections.
+!
+! DDELT is used to test the accuracy of computing the
+! optical cross sections. This accuracy is usually better
+! than the absolute accuracy of computing the expansion coefficients
+! of a normalized scattering matrix by a factor of 10. Therefore,
+! the desired accuracy of computing the expansion coefficients
+! is rescaled by a factor 0.1 before entering the test of the
+! accuracy of computing the optical cross sections.
 
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-1) CALL SAREA (EPS,RAT)
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.GE.0) CALL SURFCH(NP,EPS,RAT)
@@ -2019,9 +1998,9 @@ cc      write(6,*)'LAM,LAMBDA in AMPL=', LAM, LAMBDA
       PRINT 7400, LAM,MRR,MRI
 
  7400 FORMAT('LAM=',F12.6,3X,'MRR=',D10.4,3X,'MRI=',D10.4)
-*
-*___________________________________________________
-* Determination of the Wiscombe value of the floating
+!
+!___________________________________________________
+! Determination of the Wiscombe value of the floating
 C angular momentum cutoff NMAX:
 
       XEV=2D0*P*A/LAM
@@ -2032,13 +2011,12 @@ C angular momentum cutoff NMAX:
       INM1=2                 !The Bessel package routine RYB
                              !requires NMAX to be at least 2
       END IF
-*
+!
       IF (INM1.GE.NPN1) PRINT 7333, NPN1
       IF (INM1.GE.NPN1) STOP
  7333 FORMAT('CONVERGENCE IS NOT OBTAINED FOR NPN1=',I3,
      &       '.  EXECUTION TERMINATED')
-
-*_______________________________________________________________
+!_______________________________________________________________
 
       NGAUSS=NMAX*NDGS
 
@@ -2069,24 +2047,24 @@ c
  7340    FORMAT('NGAUSS =',I3,' I.E. IS GREATER THAN NPNG1.',
      &          '  EXECUTION TERMINATED')
 c 7334    FORMAT(' NMAX =', I3,'  DC2=',D8.2,'   DC1=',D8.2)
-*
+!
          CALL CONST(NGAUSS,NMAX,X,W,AN,ANN,S,SS,NP,EPS,RSNM,HT)      !In AMPLDR
-*
-* specify particle shape:
+!
+! specify particle shape:
          CALL VARY(LAM,MRR,MRI,A,EPS,
      &              RSNM,HT,NP,NGAUSS,X,P,
      &              PPI,PIR,PII,R,DR,DDR,DRR,DRI,NMAX)
-*
-* determine m=m'=0 elements of the T matrix
-*
+!
+! determine m=m'=0 elements of the T matrix
+!
          CALL TMATR0 (NGAUSS,X,W,AN,ANN,PPI,PIR,PII,R,DR,
      &                 DDR,DRR,DRI,NMAX,NCHECK,NAXSM)
-*
+!
          QEXT=0D0
          QSCA=0D0
-*
-* make convergence test {Mis32} for a given NMAX:
-*
+!
+! make convergence test {Mis32} for a given NMAX:
+!
          DO 4 N=1,NMAX
             N1=N+NMAX
             TR1NN=TR1(N,N)
@@ -2098,8 +2076,7 @@ c 7334    FORMAT(' NMAX =', I3,'  DC2=',D8.2,'   DC1=',D8.2)
      &                    +TR1NN1*TR1NN1+TI1NN1*TI1NN1)
             QEXT=QEXT+(TR1NN+TR1NN1)*DN1
     4    CONTINUE
-
-*>>> for debugging:
+!>>> for debugging:
 cc      OPEN(NOUT+1,FILE='tr1diag.dat')
 cc      OPEN(NOUT+2,FILE='ti1diag.dat')
 cc              DO N=1,2*NMAX
@@ -2108,14 +2085,14 @@ cc                  write(nout+2,*) TI1(N,N)
 cc              enddo
 cc      close(nout+1)
 cc      close(nout+2)
-*<<<
+!<<<
          write(6,*)'NMAX=',NMAX
          write(6,*)'NGAUSS=',NGAUSS
          write(6,*)'QSCA1=',QSCA1
          write(6,*)'QSCA=',QSCA
          write(6,*)'QEXT1=',QEXT1
          write(6,*)'QEXT=',QEXT
-*<<<
+!<<<
          DSCA=DABS((QSCA1-QSCA)/QSCA)
          DEXT=DABS((QEXT1-QEXT)/QEXT)
          QEXT1=QEXT
@@ -2128,8 +2105,7 @@ c        PRINT 7334, NMAX,DSCA,DEXT
          IF (NMA.EQ.NPN1) STOP
 
    50 CONTINUE                   !Successful L-convergence test exit
-
-* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
    55 CONTINUE                   !Begin NGAUSS-convergence test
 
@@ -2145,28 +2121,28 @@ c        PRINT 7334, NMAX,DSCA,DEXT
       IF (NGAUSS.EQ.NPNG1) GO TO 160
 
       DO 150 NGAUS=NNNGGG,NPNG1
-*
+!
          IF (NGAUS.gt.300.and.NGAUS.lt.2595) cycle
          IF (NGAUS.EQ.NPNG1) PRINT 7336
-*
+!
          NGAUSS=NGAUS
 cc         NGGG=2*NGAUSS
-*
-* GIF division points and weights + other numerical constants
-*
+!
+! GIF division points and weights + other numerical constants
+!
          CALL CONST(NGAUSS,NMAX,X,W,AN,ANN,S,SS,NP,EPS,RSNM,HT)     !In AMPLDR
-*
-* specify particle shape:
-*
+!
+! specify particle shape:
+!
          CALL VARY(LAM,MRR,MRI,A,EPS,
      &              RSNM,HT,NP,NGAUSS,X,P,
      &              PPI,PIR,PII,R,DR,DDR,DRR,DRI,NMAX)
-*
-* determine m=m'=0 elements of the T matrix
-*
+!
+! determine m=m'=0 elements of the T matrix
+!
          CALL TMATR0 (NGAUSS,X,W,AN,ANN,PPI,PIR,PII,R,DR,
      &                 DDR,DRR,DRI,NMAX,NCHECK,NAXSM)
-*
+!
          QEXT=0D0
          QSCA=0D0
 
@@ -2190,7 +2166,7 @@ cc         NGGG=2*NGAUSS
 
 c        PRINT 7337, NGGG,DSCA,DEXT
 c 7337    FORMAT(' NG=',I3,'  DC2=',D8.2,'   DC1=',D8.2)
-*<<<
+!<<<
          write(6,*)'NGAUSS=',NGAUSS
          write(6,*)'QSCA1=',QSCA1
          write(6,*)'QSCA=',QSCA
@@ -2199,55 +2175,49 @@ c 7337    FORMAT(' NG=',I3,'  DC2=',D8.2,'   DC1=',D8.2)
 
 
          IF(DSCA.LE.DDELTA.AND.DEXT.LE.DDELTA) GO TO 160
-*<<<
+!<<<
          QEXT1=QEXT
          QSCA1=QSCA
-*
+!
   150 CONTINUE
-
-* %%%%%%%%%%%%%%%%%% Successful NGAUSS-convergence test %%%%%%%%%%%%%%%
+! %%%%%%%%%%%%%%%%%% Successful NGAUSS-convergence test %%%%%%%%%%%%%%%
 
       ELSE  IF (.NOT.YNCHECK) THEN
-
-* GIF division points and weights + other numerical constants
-*
+! GIF division points and weights + other numerical constants
+!
          CALL CONST(NGAUSS,NMAX,X,W,AN,ANN,S,SS,NP,EPS,RSNM,HT)     !In AMPLDR
-*
-* specify particle shape:
-*
+!
+! specify particle shape:
+!
          CALL VARY(LAM,MRR,MRI,A,EPS,
      &             RSNM,HT,NP,NGAUSS,X,P,
      &              PPI,PIR,PII,R,DR,DDR,DRR,DRI,NMAX)
-*
-* determine m=m'=0 elements of the T matrix
-*
+!
+! determine m=m'=0 elements of the T matrix
+!
          CALL TMATR0 (NGAUSS,X,W,AN,ANN,PPI,PIR,PII,R,DR,
      &                 DDR,DRR,DRI,NMAX,NCHECK,NAXSM)
-*
-*<<<
-*
+!
+!<<<
+!
       END IF                     !YNCHECK
 
  160  CONTINUE
-*<<<
+!<<<
       WRITE(6,*)
       WRITE(6,*)'NMAX=',NMAX
       WRITE(6,*)'NGAUSS=',NGAUSS
       WRITE(6,*)
 cc      WRITE(NOUT,*)'NMAX=',NMAX
 cc      WRITE(NOUT,*)'NGAUSS=',NGAUSS
-
-*<<<
-
-*************   Calculation of scattering cross sections   *********
-
-*Initialization:
+!<<<
+!************   Calculation of scattering cross sections   *********
+!Initialization:
 
       QSCA=0D0
       QEXT=0D0
       NNM=2*NMAX
-
-*   >>>  DETERMINATION OF QEXT AND QSCA CONTRIBUTIONS FOR M=0
+!   >>>  DETERMINATION OF QEXT AND QSCA CONTRIBUTIONS FOR M=0
 
       DO 204 N=1,NNM
 
@@ -2259,11 +2229,9 @@ cc         write(nout+15,*) 'n, sin^2\eta_l', n, xx
 cc         end if
 
   204 CONTINUE
-
-
-* Given RT1 and IT1 matrices from TMATR0 routine,
-* assigning of RT^{ij} and IT^{ij} matrix entries to be
-* used later by AMPL routine
+! Given RT1 and IT1 matrices from TMATR0 routine,
+! assigning of RT^{ij} and IT^{ij} matrix entries to be
+! used later by AMPL routine
 
       DO N2=1,NMAX
          NN2=N2+NMAX
@@ -2285,15 +2253,13 @@ cc         end if
             RT22(1,N1,N2)=ZZ7
             ZZ8=TI1(NN1,NN2)
             IT22(1,N1,N2)=ZZ8
-*
+!
             QSCA=QSCA+ZZ1*ZZ1+ZZ2*ZZ2+ZZ3*ZZ3+ZZ4*ZZ4
      &           +ZZ5*ZZ5+ZZ6*ZZ6+ZZ7*ZZ7+ZZ8*ZZ8
          end do
       end do !end of the loop over orbital numbers
-*________________
-
-
-*<<<
+!________________
+!<<<
 
       if (abs(qsca).gt.(1.0001d0*abs(qext))) then
          write(6,*)'M=',0
@@ -2316,40 +2282,36 @@ cc         write(nout,*)'QSCA=',QSCA
 cc         write(nout,*)'QSC=',QSC
 cc         write(nout,*)'QEXT=',QEXT
 cc         write(nout,*)'QXT=',QXT
-*<<<
-
-*   >>>  DETERMINATION OF QEXT AND QSCA CONTRIBUTIONS FOR M >< 0
+!<<<
+!   >>>  DETERMINATION OF QEXT AND QSCA CONTRIBUTIONS FOR M >< 0
 
       DO 220 M=1,NMAX
-*
+!
 c         CALL TMATR(M,NGAUSS,X,W,AN,ANN,S,SS,PPI,PIR,PII,R,DR,
 c     &               DDR,DRR,DRI,NMAX,NCHECK,NAXSM)
 
          CALL TMTR(M,NGAUSS,X,W,AN,ANN,PPI,PIR,PII,R,DR,DDR,DRR,
      &               DRI,NMAX,NCHECK,NAXSM)
-*
-* <<< returns  m=m'>0 elements of the T matrix
-*
+!
+! <<< returns  m=m'>0 elements of the T matrix
+!
          NM=NMAX-M+1
          M1=M+1
          QSC=0D0
-
-* Given RT1 and IT1 matrices from TMATR routine,
-* assigning of RT^{ij} and IT^{ij} matrix entries to be
-* used later by AMPL routine.
-*
+! Given RT1 and IT1 matrices from TMATR routine,
+! assigning of RT^{ij} and IT^{ij} matrix entries to be
+! used later by AMPL routine.
+!
          DO N2=1,NM              !summation over orbital numbers
-
-* conversion of the N22 index of RT1 and IT1 matrices
-* to the index NN2 of RT^{ij} and IT^{ij} matrices
+! conversion of the N22 index of RT1 and IT1 matrices
+! to the index NN2 of RT^{ij} and IT^{ij} matrices
 
             NN2=N2+M-1        !from M to NMAX
             N22=N2+NM         !from NMAX+1 to 2*NMAX-M+1
 
             DO N1=1,NM           !summation over orbital numbers
-
-* conversion of the N11 index of RT1 and IT1 matrices
-* to the index NN1 of RT^{ij} and IT^{ij} matrices
+! conversion of the N11 index of RT1 and IT1 matrices
+! to the index NN1 of RT^{ij} and IT^{ij} matrices
 
                NN1=N1+M-1        !from M to NMAX
                N11=N1+NM         !from NMAX+1 to 2*NMAX-M+1
@@ -2370,12 +2332,12 @@ c     &               DDR,DRR,DRI,NMAX,NCHECK,NAXSM)
                RT22(M1,NN1,NN2)=ZZ7
                ZZ8=TI1(N11,N22)
                IT22(M1,NN1,NN2)=ZZ8
-*
+!
                QSC=QSC+(ZZ1*ZZ1+ZZ2*ZZ2+ZZ3*ZZ3+ZZ4*ZZ4
      &                 +ZZ5*ZZ5+ZZ6*ZZ6+ZZ7*ZZ7+ZZ8*ZZ8)*2D0
-*
-* multiplication by 2d0 here accounts for +/-M symmetry of resulting
-* expressions
+!
+! multiplication by 2d0 here accounts for +/-M symmetry of resulting
+! expressions
             end do
          end do     !end of the loop over orbital numbers
 
@@ -2388,14 +2350,12 @@ c     &               DDR,DRR,DRI,NMAX,NCHECK,NAXSM)
                                        !for +/-M symmetry of resulting
                                        !expressions
   215    CONTINUE
-
-*<<<
-* Summation over magnetic quantum number:
+!<<<
+! Summation over magnetic quantum number:
 
          QSCA=QSCA+QSC
          QEXT=QEXT+QXT
-
-*<<<
+!<<<
 
       if (abs(qsc).gt.(1.0001d0*abs(qxt))) then
          write(6,*)'M=',M
@@ -2419,20 +2379,18 @@ cc         write(nout,*)'QSCA=',QSCA
 cc         write(nout,*)'QSC=',QSC
 cc         write(nout,*)'QEXT=',QEXT
 cc         write(nout,*)'QXT=',QXT
-*
+!
 c        PRINT 7800,M,DABS(QXT),QSC,NMAX
 c 7800    FORMAT(' m=',I3,'  qxt=',D12.6,'  qsc=',D12.6,
 c     &          '  nmax=',I3)
 
   220 CONTINUE    !end of loop over m's
-
-*<<<
+!<<<
          write(6,*)'QSCA=',QSCA
          write(6,*)'QEXT=',QEXT
-
-*
-* 'QSCA' and '-QEXT' are now 'efficiency factors' for scattering
-* and extinction (=\sum_{AL} \sin^2\eta_{AL}).
+!
+! 'QSCA' and '-QEXT' are now 'efficiency factors' for scattering
+! and extinction (=\sum_{AL} \sin^2\eta_{AL}).
 
 
       QABS=-QEXT-QSCA       !absorption
@@ -2444,8 +2402,7 @@ c     &          '  nmax=',I3)
  9111 FORMAT ('WARNING: THE ALBEDO WALB IS GREATER THAN 1')
       WRITE(6,*)'WALB=',WALB
       END IF
-
-*<<<
+!<<<
 C In order to convert the efficiencies 'QSCA' and '-QEXT' into
 C normalized (per scatterer effective surface S=pi*rev**2)
 C cross-sections
@@ -2468,15 +2425,14 @@ c         FAC=LAM**2/(2.d0*P**2*REV**2)     !=2/xs**2
 cc         write(nout+12,*) lambda
 cc         write(nout+13,*) lambda
 cc         write(nout+16,*) -qext
-
-*<<<
-*_________________________________________________________
+!<<<
+!_________________________________________________________
 C  COMPUTATION OF THE AMPLITUDE AND PHASE MATRICES
 C  AMPLITUDE MATRIX [Eqs. (2)-(4) of Ref. 6]
-*
+!
       CALL AMPL (NMAX,LAM,THET0,THET,PHI0,PHI,ALPHA,BETA,
      &           S11,S12,S21,S22)
-*
+!
 C  PHASE MATRIX [Eqs. (13)-(29) of Ref. 6]
       Z11=0.5D0*(S11*conjg(S11)+S12*conjg(S12)
      &          +S21*conjg(S21)+S22*conjg(S22))
@@ -2553,14 +2509,13 @@ C--------/---------/---------/---------/---------/---------/---------/--
       IMPLICIT complex(dp) (C)
       INTEGER NOUT
       integer nmax, i, j, k, m, m1, n, nmin, nn
-
-* number of the output unit
+! number of the output unit
       PARAMETER (NOUT=35)
       INCLUDE 'ampld.par.f'
       real(dp) DLAM,LAMBDA,CEXT,CEXT1,CEXT2
       real(dp) AL(3,2),AL1(3,2),AP(2,3),AP1(2,3),B(3,3),
-     *       R(2,2),R1(2,2),C(3,2),CA,CB,CT,CP,CTP,CPP,CT1,CP1,
-     *       CTP1,CPP1
+     &  R(2,2),R1(2,2),C(3,2),CA,CB,CT,CP,CTP,CPP,CT1,CP1,
+     &  CTP1,CPP1
       real(dp) DV1(NPN6),DV2(NPN6),DV01(NPN6),DV02(NPN6)
       REAL(dp)
      &     TR11(NPN6,NPN4,NPN4),TR12(NPN6,NPN4,NPN4),
@@ -2568,17 +2523,16 @@ C--------/---------/---------/---------/---------/---------/---------/--
      &     TI11(NPN6,NPN4,NPN4),TI12(NPN6,NPN4,NPN4),
      &     TI21(NPN6,NPN4,NPN4),TI22(NPN6,NPN4,NPN4)
       complex(dp) CAL(NPN4,NPN4),VV,VH,HV,HH,ZEPS0
-*_____
+!_____
       COMMON /TMAT/ TR11,TR12,TR21,TR22,TI11,TI12,TI21,TI22
-*_
+!_
       COMMON /DIELF/ zeps0
       COMMON /REVF/ rev
       COMMON /CYLPAR/ rsnm, hlength
-
-*
-* transfers ZEPS0,REV here from the main
-*____
-*
+!
+! transfers ZEPS0,REV here from the main
+!____
+!
 C Checking the initial set of angles TL,TL1,PL,PL1,ALPHA,BETA
 C for allowability
 
@@ -2595,22 +2549,19 @@ C for allowability
       ENDIF
  2000 FORMAT ('AN ANGULAR PARAMETER IS OUTSIDE ITS',
      &        ' ALLOWABLE RANGE')
-
-* SPECIFYING NUMERICAL CONSTANTS:
+! SPECIFYING NUMERICAL CONSTANTS:
 
       PIN=DACOS(-1D0)         !=PI
       PIN2=PIN*0.5D0          !=PI/2
       PIgrad=PIN/180D0            !=PI/180
-
-* conversion from degrees to radians:
+! conversion from degrees to radians:
       ALPH=ALPHA*PIgrad
       BET=BETA*PIgrad
       THETL=TL*PIgrad
       PHIL=PL*PIgrad
       THETL1=TL1*PIgrad
       PHIL1=PL1*PIgrad
-
-* initialization of the vacuum wavelength LAMBDA
+! initialization of the vacuum wavelength LAMBDA
 
       LAMBDA=DLAM*SQRT(ZEPS0)         !vacuum wavelength
 
@@ -2805,8 +2756,7 @@ C     (following Eq. (28))
       DCTH0=CTP             !\cos\vartheta_{inc}^P
       DCTH=CTP1             !\cos\vartheta_{sca}^P
       PH=PHIP1-PHIP         !(\varphi_{sca}^P-\varphi_{inc}^P)
-
-* amplitude scattering matrix elements S11,S12,S21,S22 initialization
+! amplitude scattering matrix elements S11,S12,S21,S22 initialization
 
       VV=(0D0,0D0)
       VH=(0D0,0D0)
@@ -2818,15 +2768,15 @@ C Main summation loop:
       DO M=0,NMAX
          M1=M+1
          NMIN=MAX(M,1)
-*
-* Specify pi- and tau- scattering functions:
+!
+! Specify pi- and tau- scattering functions:
 
          CALL VIGAMPL (DCTH, NMAX, M, DV1, DV2)
          CALL VIGAMPL (DCTH0, NMAX, M, DV01, DV02)
-*
+!
          FC=2D0*DCOS(M*PH)    !takes into account +/- m contribution
          FS=2D0*DSIN(M*PH)
-*
+!
          DO NN=NMIN,NMAX
 
             DV1NN=DV01(NN)           !\pi-functions
@@ -2850,12 +2800,11 @@ C Main summation loop:
 
                   CT12=cmplx_dp(TR12(M1,N,NN),TI12(M1,N,NN))
                   CT21=cmplx_dp(TR21(M1,N,NN),TI21(M1,N,NN))
-
-* complete \alpha-factors (Eq. (28)) taking
-* into account w.r.t. summation over +/- m in particle frame:
-*
-*     T^{11}_{-mnn'} = T^{11}_{mnn'}; T^{22}_{-mnn'} = T^{22}_{mnn'}
-*  T^{12}_{-mnn'} = - T^{12}_{mnn'}; T^{21}_{-mnn'} = - T^{21}_{mnn'}
+! complete \alpha-factors (Eq. (28)) taking
+! into account w.r.t. summation over +/- m in particle frame:
+!
+!     T^{11}_{-mnn'} = T^{11}_{mnn'}; T^{22}_{-mnn'} = T^{22}_{mnn'}
+!  T^{12}_{-mnn'} = - T^{12}_{mnn'}; T^{21}_{-mnn'} = - T^{21}_{mnn'}
 
                   CN1=CAL(N,NN)*FC
                   CN2=CAL(N,NN)*FS
@@ -2908,8 +2857,7 @@ c LABORATORY FRAME:
       PRINT 1102, VH
       PRINT 1103, HV
       PRINT 1104, HH
-
-* For particles with plane of symmetry:
+! For particles with plane of symmetry:
 C If THET0=THET=90, then the incidence is perpendicular to
 C the axis of axial symmetry  ===> E_\theta is along the axis
 C of axial symmetry, whereas E_\phi is perpendicular to
@@ -2959,7 +2907,7 @@ cc      FAC=lambda**2/(2.d0*PIN**2*REV**2)     !=2/xs**2
 
 C********************************************************************
       SUBROUTINE TMTR (M,NGAUSS,X,W,AN,ANN,PPI,PIR,PII,R,DR,DDR,
-     *                  DRR,DRI,NMAX,NCHECK,NAXSM)
+     &              DRR,DRI,NMAX,NCHECK,NAXSM)
 C--------/---------/---------/---------/---------/---------/---------/--
 C >>> M,NGAUSS,X,W,AN,ANN,S,SS,PPI,PIR,PII,R,DR,DDR,DRR,DRI,NMAX,NCHECK
 C <<< common blocks /TMAT99/, /CT/ (for main),  and /CTT/ (for TT)
@@ -3006,65 +2954,65 @@ C--------/---------/---------/---------/---------/---------/---------/--
       integer m, ngauss, nmax, ncheck, naxsm, i, i1, i2, k1, k2, kk1,
      & kk2, mm1, n, n1, n2, ng, ngss, nm, nnmax
       real(dp)  X(NPNG2),W(NPNG2),AN(NPN1),
-     *        R(NPNG2),DR(NPNG2),SIG(NPN2),
-     *        J(NPNG2,NPN1),Y(NPNG2,NPN1),
-     *        JR(NPNG2,NPN1),JI(NPNG2,NPN1),DJ(NPNG2,NPN1),
-     *        DY(NPNG2,NPN1),DJR(NPNG2,NPN1),
-     *        DJI(NPNG2,NPN1),DDR(NPNG2),DRR(NPNG2),
-     *        D1(NPNG2,NPN1),D2(NPNG2,NPN1),D3(NPNG2,NPN1),
-     *        DRI(NPNG2),RR(NPNG2),
-     *        DV1(NPN3),DDV1(NPN3),DV2(NPN3),
-     *        DD1,DD2,DD3
+     &   R(NPNG2),DR(NPNG2),SIG(NPN2),
+     &   J(NPNG2,NPN1),Y(NPNG2,NPN1),
+     &   JR(NPNG2,NPN1),JI(NPNG2,NPN1),DJ(NPNG2,NPN1),
+     &   DY(NPNG2,NPN1),DJR(NPNG2,NPN1),
+     &   DJI(NPNG2,NPN1),DDR(NPNG2),DRR(NPNG2),
+     &   D1(NPNG2,NPN1),D2(NPNG2,NPN1),D3(NPNG2,NPN1),
+     &   DRI(NPNG2),RR(NPNG2),
+     &   DV1(NPN3),DDV1(NPN3),DV2(NPN3),
+     &   DD1,DD2,DD3
 
       real(dp)  R11(NPN1,NPN1),R12(NPN1,NPN1),
-     *        R21(NPN1,NPN1),R22(NPN1,NPN1),
-     *        I11(NPN1,NPN1),I12(NPN1,NPN1),
-     *        I21(NPN1,NPN1),I22(NPN1,NPN1),
-     *        RG11(NPN1,NPN1),RG12(NPN1,NPN1),
-     *        RG21(NPN1,NPN1),RG22(NPN1,NPN1),
-     *        IG11(NPN1,NPN1),IG12(NPN1,NPN1),
-     *        IG21(NPN1,NPN1),IG22(NPN1,NPN1),
-     *        ANN(NPN1,NPN1),
-     *        QR(NPN2,NPN2),QI(NPN2,NPN2),
-     *        RGQR(NPN2,NPN2),RGQI(NPN2,NPN2),
-     *        TQR(NPN2,NPN2),TQI(NPN2,NPN2),
-     *        TRGQR(NPN2,NPN2),TRGQI(NPN2,NPN2)
+     &   R21(NPN1,NPN1),R22(NPN1,NPN1),
+     &   I11(NPN1,NPN1),I12(NPN1,NPN1),
+     &   I21(NPN1,NPN1),I22(NPN1,NPN1),
+     &   RG11(NPN1,NPN1),RG12(NPN1,NPN1),
+     &   RG21(NPN1,NPN1),RG22(NPN1,NPN1),
+     &   IG11(NPN1,NPN1),IG12(NPN1,NPN1),
+     &   IG21(NPN1,NPN1),IG22(NPN1,NPN1),
+     &   ANN(NPN1,NPN1),
+     &   QR(NPN2,NPN2),QI(NPN2,NPN2),
+     &   RGQR(NPN2,NPN2),RGQI(NPN2,NPN2),
+     &   TQR(NPN2,NPN2),TQI(NPN2,NPN2),
+     &   TRGQR(NPN2,NPN2),TRGQI(NPN2,NPN2)
 cc      real(dp) TR1(NPN2,NPN2),TI1(NPN2,NPN2)
-*________
+!________
       COMMON /TMAT99/
      &            R11,R12,R21,R22,I11,I12,I21,I22,RG11,RG12,RG21,RG22,
      &            IG11,IG12,IG21,IG22          !only between TMATR routines
       COMMON /CBESS/ J,Y,JR,JI,DJ,DY,DJR,DJI
 cc      COMMON /CT/ TR1,TI1                      !output from TT routine
       COMMON /CTT/ QR,QI,RGQR,RGQI             !input for TT routine
-*________
+!________
       MM1=M
       QM=dble(M)
       QMM=QM*QM
       NG=2*NGAUSS
       NM=NMAX+NMAX
       FACTOR=1D0
-*
+!
       IF (NCHECK.EQ.1) THEN          !Theta=pi/2 is scatterer mirror symmetry plane
             NGSS=NGAUSS
             FACTOR=2D0
       ELSE IF (NCHECK.EQ.0) THEN     !Theta=pi/2 is not a scatterer mirror symmetry plane
             NGSS=NG
       ENDIF
-*
+!
       SI=1D0
       DO N=1,NM                 !NM=2*NMAX
            SI=-SI
            SIG(N)=SI              !=(-1)**N
       end do
-*
-* Assigning Wigner d-matrices:
+!
+! Assigning Wigner d-matrices:
 
       DO I=1,NGAUSS
 
          I1=NGAUSS-I+1
          I2=NGAUSS+I
-*
+!
       CALL VIGF(X(I1),NMAX,M,DV1,DV2,DDV1)
 C--------/---------/---------/---------/---------/---------/---------/--
 C >>> X,NMAX,M (only nonnegative)
@@ -3092,7 +3040,7 @@ C  \tau scattering function:
 C     DV2(N)=[d/d(arccos x)] dvig(0,m,n,arccos x)
 C                              = d d_{0m}^{(l)}/d\theta
 C--------/---------/---------/---------/---------/---------/---------/--
-*
+!
          DO N=1,NMAX
 
             DD1=DDV1(N)
@@ -3103,9 +3051,9 @@ C--------/---------/---------/---------/---------/---------/---------/--
             D3(I1,N)=DD3
 
          IF (NAXSM.EQ.1) THEN         !Gauss abscissas chosen +/- symmetric
-*
-* using (4.2.4) and (4.2.6) of {Ed},
-*           d_{0m}^{(l)}(\pi-\theta) = (-1)^{l+m} d_{0m}^{(l)}(\theta)
+!
+! using (4.2.4) and (4.2.6) of {Ed},
+!           d_{0m}^{(l)}(\pi-\theta) = (-1)^{l+m} d_{0m}^{(l)}(\theta)
 
             SI=SIG(N+M)           !=(-1)**(N+M)
                                   !exactly what follows from {Ed}
@@ -3117,9 +3065,9 @@ C--------/---------/---------/---------/---------/---------/---------/--
          ENDDO
 
          IF (NAXSM.EQ.0) THEN        !Gauss abscissas not chosen +/- symmetric
-*
+!
          CALL VIGF(X(I2),NMAX,M,DV1,DV2,DDV1)
-*
+!
           DO N=1,NMAX
             DD1=DDV1(N)
             DD2=DV2(N)
@@ -3131,8 +3079,8 @@ C--------/---------/---------/---------/---------/---------/---------/--
 
           END IF
       end do
-*
-*  Assigning r^2(\theta)*weight product:
+!
+!  Assigning r^2(\theta)*weight product:
 
       DO I=1,NGSS
            WR=W(I)*R(I)
@@ -3141,7 +3089,7 @@ cc          if (dr(i).eq.0.d0) WR=0.d0   !temporarily only
 
            RR(I)=WR            !W(I)*r^2(\theta)
       end do
-*
+!
       DO N1=MM1,NMAX         !MM1=M below
            AN1=AN(N1)
 
@@ -3179,125 +3127,102 @@ cc          if (dr(i).eq.0.d0) WR=0.d0   !temporarily only
                     A22=D2N1*D2N2            !tau(N1)*tau(N2)
                     AA1=D1N1*D2N2+D2N1*D1N2  !pi(N1)*tau(N2)+tau(N1)*pi(N2)
                     AA2=D1N1*D1N2 +A22       !pi(N1)*pi(N2)+tau(N1)*tau(N2)
-
-* Vector spherical harmonics:
+! Vector spherical harmonics:
 C  Since refractive index is allowed to be complex in general,
 C  the Bessel function j_l(k_in*r) is complex. The code below
 C  performs a separation of the complex integrand in Waterman's
 C  surface integral into its respective real and imaginary
 C  parts:
-
-* Bessel functions of the exterior argument:
+! Bessel functions of the exterior argument:
 
                     QJ1=J(I,N1)
                     QY1=Y(I,N1)
                     QDJ1=DJ(I,N1)
                     QDY1=DY(I,N1)
-
-* Bessel functions of the interior argument:
+! Bessel functions of the interior argument:
 
                     QJR2=JR(I,N2)
                     QJI2=JI(I,N2)
                     QDJR2=DJR(I,N2)
                     QDJI2=DJI(I,N2)
-
-* Re and Im of j_{n2}(k_{in}r) j_{n1}(k_{out}r):
+! Re and Im of j_{n2}(k_{in}r) j_{n1}(k_{out}r):
 
                     C1R=QJR2*QJ1
                     C1I=QJI2*QJ1
-
-* Re and Im of j_{n2}(k_{in}r) h_{n1}(k_{out}r):
+! Re and Im of j_{n2}(k_{in}r) h_{n1}(k_{out}r):
 
                     B1R=C1R-QJI2*QY1
                     B1I=C1I+QJR2*QY1
-
-* Re and Im of j_{n2}(k_{in}r) j_{n1}'(k_{out}r)/(k_{out}r):
+! Re and Im of j_{n2}(k_{in}r) j_{n1}'(k_{out}r)/(k_{out}r):
 
                     C2R=QJR2*QDJ1
                     C2I=QJI2*QDJ1
-
-* Re and Im of j_{n2}(k_{in}r) h_{n1}'(k_{out}r)/(k_{out}r):
+! Re and Im of j_{n2}(k_{in}r) h_{n1}'(k_{out}r)/(k_{out}r):
 
                     B2R=C2R-QJI2*QDY1
                     B2I=C2I+QJR2*QDY1
 
                     DDRI=DDR(I)               !1/(k_{out}r)
-
-* Re and Im of [1/(k_{out}r)]*j_{n2}(k_{in}r) j_{n1}(k_{out}r)
+! Re and Im of [1/(k_{out}r)]*j_{n2}(k_{in}r) j_{n1}(k_{out}r)
 
                     C3R=DDRI*C1R
                     C3I=DDRI*C1I
-
-* Re and Im of [1/(k_{out}r)]*j_{n2}(k_{in}r) h_{n1}(k_{out}r):
+! Re and Im of [1/(k_{out}r)]*j_{n2}(k_{in}r) h_{n1}(k_{out}r):
 
                     B3R=DDRI*B1R
                     B3I=DDRI*B1I
-
-* Re and Im of [k_{in}r j_{n2}(k_{in}r)]'/(k_{in}r)
-*                          * j_{n1}(k_{out}r):
+! Re and Im of [k_{in}r j_{n2}(k_{in}r)]'/(k_{in}r)
+!                          * j_{n1}(k_{out}r):
 
                     C4R=QDJR2*QJ1
                     C4I=QDJI2*QJ1
-
-* Re and Im of [k_{in}r j_{n2}(k_{in}r)]'/(k_{in}r)
-*                          *  h_{n1}(k_{out}r):
+! Re and Im of [k_{in}r j_{n2}(k_{in}r)]'/(k_{in}r)
+!                          *  h_{n1}(k_{out}r):
 
                     B4R=C4R-QDJI2*QY1
                     B4I=C4I+QDJR2*QY1
 
                     DRRI=DRR(I)               !Re[1/(k_{in}r)]
                     DRII=DRI(I)               !Im[1/(k_{in}r)]
-
-* Re and Im of [1/(k_{in}r)] j_{n2}(k_{in}r) j_{n1}(k_{out}r):
+! Re and Im of [1/(k_{in}r)] j_{n2}(k_{in}r) j_{n1}(k_{out}r):
 
                     C5R=C1R*DRRI-C1I*DRII
                     C5I=C1I*DRRI+C1R*DRII
-
-* Re and Im of [1/(k_{in}r)] j_{n2}(k_{in}r) h_{n1}(k_{out}r):
+! Re and Im of [1/(k_{in}r)] j_{n2}(k_{in}r) h_{n1}(k_{out}r):
 
                     B5R=B1R*DRRI-B1I*DRII
                     B5I=B1I*DRRI+B1R*DRII
-
-
-* Re and Im of j_{n2}'(k_{in}r) j_{n1}'(k_{out}r):
+! Re and Im of j_{n2}'(k_{in}r) j_{n1}'(k_{out}r):
 
                     C6R=QDJR2*QDJ1
                     C6I=QDJI2*QDJ1
-
-* Re and Im of j_{n2}'(k_{in}r) h_{n1}'(k_{out}r):
+! Re and Im of j_{n2}'(k_{in}r) h_{n1}'(k_{out}r):
 
                     B6R=C6R-QDJI2*QDY1
                     B6I=C6I+QDJR2*QDY1
-
-* Re and Im of [1/(k_{out}r)] j_{n2}'(k_{in}r) j_{n1}(k_{out}r):
+! Re and Im of [1/(k_{out}r)] j_{n2}'(k_{in}r) j_{n1}(k_{out}r):
 
                     C7R=C4R*DDRI
                     C7I=C4I*DDRI
-
-* Re and Im of [1/(k_{out}r)] j_{n2}'(k_{in}r) h_{n1}(k_{out}r):
+! Re and Im of [1/(k_{out}r)] j_{n2}'(k_{in}r) h_{n1}(k_{out}r):
 
                     B7R=B4R*DDRI
                     B7I=B4I*DDRI
-
-* Re and Im of [1/(k_{in}r)] j_{n2}(k_{in}r) j_{n1}'(k_{out}r):
+! Re and Im of [1/(k_{in}r)] j_{n2}(k_{in}r) j_{n1}'(k_{out}r):
 
                     C8R=C2R*DRRI-C2I*DRII
                     C8I=C2I*DRRI+C2R*DRII
-
-* Re and Im of [1/(k_{in}r)] j_{n2}(k_{in}r) h_{n1}'(k_{out}r):
+! Re and Im of [1/(k_{in}r)] j_{n2}(k_{in}r) h_{n1}'(k_{out}r):
 
                     B8R=B2R*DRRI-B2I*DRII
                     B8I=B2I*DRRI+B2R*DRII
-
-
-* %%%%%%%%%  Forming integrands of J-matrices (J^{11}=J^{22}=0 for m.eq.0):
+! %%%%%%%%%  Forming integrands of J-matrices (J^{11}=J^{22}=0 for m.eq.0):
 
                     URI=DR(I)
                     RRI=RR(I)
 
                     IF (NCHECK.EQ.1.AND.SI.GT.0D0) GO TO 150
-
-* W(I)*r^2(I)*(pi(N1)*tau(N2)+tau(N1)*pi(N2):
+! W(I)*r^2(I)*(pi(N1)*tau(N2)+tau(N1)*pi(N2):
 
                     E1=RR(I)*AA1             ! <-- AA1
 
@@ -3309,15 +3234,12 @@ C  parts:
                     IF (NCHECK.EQ.1) GO TO 160
 
   150               CONTINUE
-
-
-* w(i)*r^2(\theta)*[pi(N1)*pi(N2)+tau(N1)*tau(N2)]
-* (prefactor containing r^2(\theta)<->hat{r} part)
+! w(i)*r^2(\theta)*[pi(N1)*pi(N2)+tau(N1)*tau(N2)]
+! (prefactor containing r^2(\theta)<->hat{r} part)
 
                     F1=RRI*AA2             ! <-- AA2
-
-* N1*(N1+1)*w(i)*r(\theta)*[dr/(d\theta)]*D(N1)*tau(N2):
-*  (prefactor containing r(\theta)*[dr/(d\theta)] - hat{theta} part)
+! N1*(N1+1)*w(i)*r(\theta)*[dr/(d\theta)]*D(N1)*tau(N2):
+!  (prefactor containing r(\theta)*[dr/(d\theta)] - hat{theta} part)
 
                     F2=RRI*URI*AN1*A12             ! <-- A12
 
@@ -3326,9 +3248,8 @@ C  parts:
 
                     GR12=GR12+F1*C2R+F2*C3R        !~Re Rg J^{12}
                     GI12=GI12+F1*C2I+F2*C3I        !~Im Rg J^{12}
-
-* N2*(N2+1)*w(i)*r(\theta)*[dr/(d\theta)]*tau(N1)*D(N2):
-* (!prefactor containing r(\theta)*[dr/(d\theta)] - hat{theta} part)
+! N2*(N2+1)*w(i)*r(\theta)*[dr/(d\theta)]*tau(N1)*D(N2):
+! (!prefactor containing r(\theta)*[dr/(d\theta)] - hat{theta} part)
 
                     F2=RRI*URI*AN2*A21             ! <-- A21
 
@@ -3341,9 +3262,8 @@ C  parts:
                     IF (NCHECK.EQ.1) cycle
 
   160  CONTINUE
-
-* w(i)*r^2(\theta)*[dr/(d\theta)]*pi(N1)*D(N2):
-* (!prefactor containing r^2(\theta)*[dr/(d\theta)] - hat{theta} part)
+! w(i)*r^2(\theta)*[dr/(d\theta)]*pi(N1)*D(N2):
+! (!prefactor containing r^2(\theta)*[dr/(d\theta)] - hat{theta} part)
 
                     E2=RRI*URI*A11
                     E3=E2*AN2
@@ -3356,7 +3276,7 @@ C  parts:
                     GI22=GI22+E1*C6I+E2*C7I+E3*C8I
 
                 end do   !Gauss integration
-*%%%%%%%%%%%%%  Forming J-matrices (J^{11}=J^{22}=0 for m.eq.0):
+!%%%%%%%%%%%%%  Forming J-matrices (J^{11}=J^{22}=0 for m.eq.0):
 
                 AN12=ANN(N1,N2)*FACTOR
 
@@ -3381,8 +3301,7 @@ C  parts:
   300 CONTINUE
       end do
       end do
-
-*%%%%%%%%%%%%%%%%%%%%%%%  Forming Q and RgQ -matrices
+!%%%%%%%%%%%%%%%%%%%%%%%  Forming Q and RgQ -matrices
 
       TPIR=PIR                 !Re [1/k_{in}^2]
       TPII=PII                 !Im [1/k_{in}^2]
@@ -3448,9 +3367,9 @@ C  parts:
                 RGQI(N1,N2)=TRGQI(N1,N2)
            end do
       end do
-*
+!
       CALL TT(NM)
-*
+!
       RETURN
       END
 

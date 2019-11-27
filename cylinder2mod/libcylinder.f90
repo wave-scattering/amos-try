@@ -48,7 +48,10 @@ contains
         integer i,k, ind,j,m,niter
         real(dp) x, a,b,c, check, dj,f, pa,pb,pc,zz
         real(dp), intent(out) :: z(:), w(:)
-        data a, b, c /1d0, 2d0, 3d0/
+        a = 1d0
+        b = 2d0
+        c = 3d0
+!        data a, b, c /1d0, 2d0, 3d0/
         ind = mod(n, 2)
         k = n / 2 + ind
         f = dble(n)
