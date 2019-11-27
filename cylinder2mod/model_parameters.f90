@@ -11,13 +11,16 @@ module model_parameters
 
     implicit none
 
-    real(dp), public :: rsnm_par, x_min, x_max, rl_min, rl_max, nanorod_cap_hr, &
-            alpha, beta, thet, thet0, phi, phi0
-    integer, public :: np, nstep, ndefp
-    complex(dp), public :: cceps, zeps0
+    type, public :: model_parameters_type
+        real(dp) :: rsnm, x_min, x_max, rl_min, rl_max, nanorod_cap_hr, &
+                alpha, beta, thet, thet0, phi, phi0
+        integer :: np, nstep, ndefp
+        complex(dp) :: cceps, zeps0
+    end type model_parameters_type
+    type(model_parameters_type), public :: mpar
 
-    character(999), public        :: ini_config_file_name  !< Name of INI file.
-    type(file_ini), public        :: fini       !< INI file handler.
+    character(999), private        :: ini_config_file_name  !< Name of INI file.
+    type(file_ini), private        :: fini       !< INI file handler.
 
     type, private :: particle_type_values
         integer :: spheroid, cylinder, droplet, sphere_cut_top, sphere_cut_bottom, &
@@ -26,7 +29,7 @@ module model_parameters
     type(particle_type_values), public, parameter :: particle_type = particle_type_values( &
             -1, -2, -3, -4, -5, -6, -7, -8, -9)
 
-    public cli_parse
+    public cli_parse, ini_parse
 !    TYPE Point
 !        REAL :: x, y
 !    END TYPE Point
@@ -58,50 +61,50 @@ module model_parameters
 
         call fini%get(section_name = 'general', option_name = 'particle_type', &
                 val = string, error = error)
-        np = 0
-        if ((trim(string) .eq. 'cylinder').or.(trim(string)=='-2')) np = -2
-        if ((trim(string) .eq. 'nanorod').or.(trim(string)=='-9')) np = -9
+        mpar%np = 0
+        if ((trim(string) .eq. 'cylinder').or.(trim(string)=='-2')) mpar%np = -2
+        if ((trim(string) .eq. 'nanorod').or.(trim(string)=='-9')) mpar%np = -9
 
         call fini%get(section_name = 'nanorod', &
                 option_name = 'nanorod_cap_hr', val = double, error = error)
-        nanorod_cap_hr = 1_dp ! default is round cap
-        if (error==0) nanorod_cap_hr = double
+        mpar%nanorod_cap_hr = 1_dp ! default is round cap
+        if (error==0) mpar%nanorod_cap_hr = double
 
         call fini%get(section_name = 'cylinder', option_name = 'rl_min', &
                 val = double, error = error)
-        rl_min = -1_dp
-        if (error==0) rl_min = double
+        mpar%rl_min = -1_dp
+        if (error==0) mpar%rl_min = double
 
         call fini%get(section_name = 'cylinder', option_name = 'rl_max', &
                 val = double, error = error)
-        rl_max = -1_dp
-        if (error==0) rl_max = double
+        mpar%rl_max = -1_dp
+        if (error==0) mpar%rl_max = double
 
         call fini%get(section_name = 'cylinder', option_name = 'rl_steps', &
                 val = num, error = error)
-        ndefp = 0
-        if (error==0) ndefp = num
+        mpar%ndefp = 0
+        if (error==0) mpar%ndefp = num
 
         call fini%get(section_name = 'cylinder', option_name = 'radius', &
                 val = double, error = error)
-        rsnm_par = -1_dp
-        if (error==0) rsnm_par = double
+        mpar%rsnm = -1_dp
+        if (error==0) mpar%rsnm = double
 
         call fini%get(section_name = 'cylinder', option_name = 'alpha', &
                 val = double, error = error)
-        alpha = 0_dp
-        if (error==0) alpha = double
+        mpar%alpha = 0_dp
+        if (error==0) mpar%alpha = double
 
         call fini%get(section_name = 'cylinder', option_name = 'beta', &
                 val = double, error = error)
-        beta = 0_dp
-        if (error==0) beta = double
+        mpar%beta = 0_dp
+        if (error==0) mpar%beta = double
 
         call fini%get(section_name = 'general', &
                 option_name = 'background_epsilon', &
                 val = double, error = error)
-        zeps0 = 1_dp
-        if (error==0) zeps0 = double
+        mpar%zeps0 = 1_dp
+        if (error==0) mpar%zeps0 = double
 
         d_re = 1_dp
         call fini%get(section_name = 'cylinder', option_name = 'eps_real', &
@@ -109,42 +112,42 @@ module model_parameters
         d_im = 0_dp
         call fini%get(section_name = 'cylinder', option_name = 'eps_imag', &
                 val = d_im, error = error)
-        cceps = d_re + ci * d_im
+        mpar%cceps = d_re + ci * d_im
 
         call fini%get(section_name = 'beam', option_name = 'theta0', &
                 val = double, error = error)
-        thet0 = 0_dp
-        if (error==0) thet0 = double
+        mpar%thet0 = 0_dp
+        if (error==0) mpar%thet0 = double
 
         call fini%get(section_name = 'beam', option_name = 'phi0', &
                 val = double, error = error)
-        phi0 = 0_dp
-        if (error==0) phi0 = double
+        mpar%phi0 = 0_dp
+        if (error==0) mpar%phi0 = double
 
         call fini%get(section_name = 'beam', option_name = 'theta', &
                 val = double, error = error)
-        thet = 0_dp
-        if (error==0) thet = double
+        mpar%thet = 0_dp
+        if (error==0) mpar%thet = double
 
         call fini%get(section_name = 'beam', option_name = 'phi', &
                 val = double, error = error)
-        phi = 0_dp
-        if (error==0) phi = double
+        mpar%phi = 0_dp
+        if (error==0) mpar%phi = double
 
         call fini%get(section_name = 'beam', option_name = 'x_min', &
                 val = double, error = error)
-        x_min = -1_dp
-        if (error==0) x_min = double
+        mpar%x_min = -1_dp
+        if (error==0) mpar%x_min = double
 
         call fini%get(section_name = 'beam', option_name = 'x_max', &
                 val = double, error = error)
-        x_max = -1_dp
-        if (error==0) x_max = double
+        mpar%x_max = -1_dp
+        if (error==0) mpar%x_max = double
 
         call fini%get(section_name = 'beam', option_name = 'x_steps', &
                 val = num, error = error)
-        nstep = 0
-        if (error==0) nstep = num
+        mpar%nstep = 0
+        if (error==0) mpar%nstep = num
 
     end subroutine ini_parse
     !--------/---------/---------/---------/---------/---------/---------/--

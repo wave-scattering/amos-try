@@ -92,11 +92,11 @@ C---------------------------------------------------------------------
 
       use libcylinder
       implicit none
-      integer LCS,ILCS,ikl,ieps,istep,ide,itter
-      integer NOUT,NOUTI,NFIN,NMAT,NPP,NDGS,NDGSP
-      real(dp) TOL,DEFP,DEFPP,DDELT,DDELTP
-      real(dp) hlength_max,hlength_min
-      complex(dp) CSEPS           !,ZARTAN
+      integer LCS,ILCS,ikl,ieps,istep,ide,ndefp,itter
+      integer NOUT,NOUTI,NSTEP,NFIN,NMAT,NP,NPP,NDGS,NDGSP
+      real(dp) TOL,DEFP,DEFPP,DDELT,DDELTP,x_max,x_min
+      real(dp) hlength_max,hlength_min,rl_min,rl_max, nanorod_cap_hr
+      complex(dp) ZEPS0,CCEPS,CSEPS           !,ZARTAN
       character(1) ync,yncv
       logical ynperfcon,ynperfconv,ynintens,ynoptth,ynbrug,yncheck
 cc      external ZARTAN
@@ -205,8 +205,8 @@ c Declarations:
       real(dp) enw,xstep,revf,revin,revinl,revl
       real(dp) omf(NFIN),omxf,reepsz,plasma,omxp
       real(dp) delo,omega0,omega,rsnm,hlength
-      real(dp) RAT,RATP,AXI,REV,REVP,ALPHAE,BETAE      !common block variables
-      real(dp) THETV     !common block variables
+      real(dp) RAT,RATP,AXI,REV,REVP,ALPHA,BETA,ALPHAE,BETAE      !common block variables
+      real(dp) THET0,THET,THETV,PHI0,PHI     !common block variables
       real(dp) ceps1real(NFIN),  ceps1imag(nfin)
 
 
@@ -256,6 +256,10 @@ C--------/---------/---------/---------/---------/---------/---------/--
 
       call cli_parse
       call ini_parse
+
+      nanorod_cap_hr = mpar%nanorod_cap_hr
+      CCEPS = mpar%cceps
+      ZEPS0 = mpar%ZEPS0
 
 c background dielectric constant
 !     PARAMETER (ZEPS0=1.D0) !set in ini_parse
@@ -364,6 +368,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
 
       Open(unit = 90,file = 'epsWater.txt', status = 'unknown')
 *
+      NP = mpar%np
       if (NP == 0) then
       write(6,*) 'Input the particle type:'
       read(5,*) NP
@@ -493,6 +498,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
 *
       else if ((NP .eq. -2) .or. (NP .eq. -9)) then
 *
+      rl_max = mpar%rl_max
       if (rl_max < 0_dp) then
         write(6,*)'Enter cylinder maximal r/l:'
         read(5,*) rl_max
@@ -500,6 +506,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
         write(6,*)'Auto-set cylinder maximal r/l from *.ini', rl_max
       end if
 
+      rl_min = mpar%rl_min
       if (rl_min < 0_dp) then
         write(6,*)'Enter cylinder minimal r/l:'
         read(5,*) rl_min
@@ -507,6 +514,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
         write(6,*)'Auto-set cylinder minimal r/l from *.ini', rl_min
       end if
 
+      ndefp = mpar%ndefp
       if (ndefp <= 0) then
         write(6,*)'Enter amount of steps in length:'
         read(5,*) ndefp
@@ -514,7 +522,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
         write(6,*)'Auto-set amount of steps in length from *.ini',ndefp
       end if
 
-      rsnm = rsnm_par
+      rsnm = mpar%rsnm
       if (rsnm <= 0_dp) then
         write(6,*)'Enter cylinder radius:'
         read(5,*) rsnm
@@ -645,6 +653,8 @@ C      BETA=0.D0
      &    the orientation  of the scattering particle relative to the
      & laboratory reference  frame'
 !     READ(5,*)  ALPHA, BETA
+      ALPHA = mpar%alpha
+      BETA = mpar%beta
       write(6,*)'Auto-set ALPHA and BETA',ALPHA,BETA
 
       if((ALPHA.eq.0).and.(BETA.eq.0))
@@ -669,11 +679,15 @@ C      PHI - azimuth angle of the scattered beam in degrees
       write(6,*)'Specify (theta,phi) angles of the incident beam
      1             (in degrees)'
 !     read(5,*) THET0,PHI0
+      thet0 = mpar%thet0
+      phi0 = mpar%phi0
       write(6,*)'Auto-set from *.ini:', thet0, phi0
 *
       write(6,*)'Specify (theta,phi) angles of the scattered beam
      1             (in degrees)'
 !     read(5,*) THET,PHI
+      thet = mpar%thet
+      phi = mpar%phi
       write(6,*)'Auto-set from *.ini', thet, phi
 *
       else if (ynintens) then
@@ -900,7 +914,7 @@ c      rff(1)=0.75d0
       write(6,*)'READ INITIAL (MINIMAL) x-parameter'
       end if
 C--------/---------/---------/---------/---------/---------/---------/--
-
+      x_min = mpar%x_min
       if (x_min < 0) then
         write(6,*)'Enter minimum value of x-parameter:'
         read(5,*) x_min
@@ -947,6 +961,7 @@ c       write(6,*)'Equiv. size parameter x=2*pi*rs*n_0/lambda=',xs
 *
       if (.not.ynintens) then
       write(6,*)'Scan up to x-parameter (in nm)'
+      x_max = mpar%x_max
       if (x_max < 0) then
         write(6,*)'Enter maximum value of x-parameter:'
         read(5,*) x_max
@@ -956,6 +971,7 @@ c       write(6,*)'Equiv. size parameter x=2*pi*rs*n_0/lambda=',xs
 
       enw = 2*pi*rsnm/x_max
 c      enw=500
+      nstep = mpar%nstep
       if (nstep <= 0) then
         write(6,*)'Enter amount of scanning steps:'
         read(5,*) nstep
@@ -1669,7 +1685,7 @@ ctest
 
 C      write(90,*) lambda,  global_eps_r,
 C     & global_eps_i
-      call ampldr(yncheck,lmax,ichoice,defpp,
+      call ampldr(yncheck,lmax,ichoice,npp,defpp,nanorod_cap_hr,
      & rsnm,hlength,lambda,zeps(1),zeps0)
       end if
 *
@@ -1853,11 +1869,9 @@ C--------/---------/---------/---------/---------/---------/---------/--
 
       contains
 
-
-
 C**********************************************************************
 
-      SUBROUTINE AMPLDR(yncheck,nmax,ichoicev,eps,
+      SUBROUTINE AMPLDR(yncheck,nmax,ichoicev,np,eps,nanorod_cap_hr,
      &                  rsnm,ht,lambda,zeps1,zeps0)
 
 C Warning in module AMPLDR in file ampldr.f: Variables set but never used:
@@ -1882,7 +1896,7 @@ C    TMT(4,*)=-TMT(3,*)^t where t denotes transposed TMT(3,*) submatrix
 C
 C ICHOICE=1 if NAG library is available, otherwise ICHOICE=2
 C
-C EPS: specifies the shape of particles within a given NP class:
+C NP,EPS: specifies the shape of particles within a given NP class:
 C     NP.gt.0 - EPS = deformation parameter of a Chebyshev particle
 C     NP=-1 - EPS = the ratio of the horizontal to rotational axes. EPS is
 C             larger than 1 for oblate spheroids and smaller than 1 for
@@ -1924,8 +1938,9 @@ C--------/---------/---------/---------/---------/---------/---------/--
       IMPLICIT real(dp) (A-H,O-Z)
       INTEGER NOUT,NAXSM,ICHOICEV,ICHOICE
       LOGICAL YNCHECK
-      integer nmax,  inm1, ixxx, m, m1, n, n1, n11, n2 ,n22, ncheck,
+      integer nmax, np, inm1, ixxx, m, m1, n, n1, n11, n2 ,n22, ncheck,
      & ndgs, ngaus, ngauss, nm, nma, nn1, nn2, nnm, nnnggg
+      real(dp) nanorod_cap_hr
 
        INCLUDE 'ampld.par.f'
 * number of the output unit
@@ -1998,10 +2013,10 @@ cc      write(6,*)'LAM,LAMBDA in AMPL=', LAM, LAMBDA
 * accuracy of computing the optical cross sections.
 
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-1) CALL SAREA (EPS,RAT)
-      IF (DABS(RAT-1D0).GT.1D-8.AND.NP.GE.0) CALL SURFCH(EPS,RAT)
+      IF (DABS(RAT-1D0).GT.1D-8.AND.NP.GE.0) CALL SURFCH(NP,EPS,RAT)
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-2) CALL SAREAC (EPS,RAT)
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-9)
-     &  CALL SAREAnanorod (EPS,RAT)
+     &  CALL SAREAnanorod (EPS,RAT,nanorod_cap_hr)
       IF (NP.EQ.-3) CALL DROP (RAT)
 
       PRINT 7400, LAM,MRR,MRI
@@ -2058,11 +2073,11 @@ c
      &          '  EXECUTION TERMINATED')
 c 7334    FORMAT(' NMAX =', I3,'  DC2=',D8.2,'   DC1=',D8.2)
 *
-         CALL CONST(NGAUSS,NMAX,X,W,AN,ANN,S,SS,EPS,rsnm,HT)      !In AMPLDR
+         CALL CONST(NGAUSS,NMAX,X,W,AN,ANN,S,SS,NP,EPS,RSNM,HT)      !In AMPLDR
 *
 * specify particle shape:
-         CALL VARY(LAM,MRR,MRI,A,EPS,
-     &              rsnm,HT,NGAUSS,X,P,
+         CALL VARY(LAM,MRR,MRI,A,EPS,nanorod_cap_hr,
+     &              RSNM,HT,NP,NGAUSS,X,P,
      &              PPI,PIR,PII,R,DR,DDR,DRR,DRI,NMAX)
 *
 * determine m=m'=0 elements of the T matrix
@@ -2142,12 +2157,12 @@ cc         NGGG=2*NGAUSS
 *
 * GIF division points and weights + other numerical constants
 *
-         CALL CONST(NGAUSS,NMAX,X,W,AN,ANN,S,SS,EPS,rsnm,HT)     !In AMPLDR
+         CALL CONST(NGAUSS,NMAX,X,W,AN,ANN,S,SS,NP,EPS,RSNM,HT)     !In AMPLDR
 *
 * specify particle shape:
 *
-         CALL VARY(LAM,MRR,MRI,A,EPS,
-     &              rsnm,HT,NGAUSS,X,P,
+         CALL VARY(LAM,MRR,MRI,A,EPS,nanorod_cap_hr,
+     &              RSNM,HT,NP,NGAUSS,X,P,
      &              PPI,PIR,PII,R,DR,DDR,DRR,DRI,NMAX)
 *
 * determine m=m'=0 elements of the T matrix
@@ -2199,12 +2214,12 @@ c 7337    FORMAT(' NG=',I3,'  DC2=',D8.2,'   DC1=',D8.2)
 
 * GIF division points and weights + other numerical constants
 *
-         CALL CONST(NGAUSS,NMAX,X,W,AN,ANN,S,SS,EPS,rsnm,HT)     !In AMPLDR
+         CALL CONST(NGAUSS,NMAX,X,W,AN,ANN,S,SS,NP,EPS,RSNM,HT)     !In AMPLDR
 *
 * specify particle shape:
 *
-         CALL VARY(LAM,MRR,MRI,A,EPS,
-     &             rsnm,HT,NGAUSS,X,P,
+         CALL VARY(LAM,MRR,MRI,A,EPS,nanorod_cap_hr,
+     &             RSNM,HT,NP,NGAUSS,X,P,
      &              PPI,PIR,PII,R,DR,DDR,DRR,DRI,NMAX)
 *
 * determine m=m'=0 elements of the T matrix
@@ -2561,7 +2576,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
 *_
       COMMON /DIELF/ zeps0
       COMMON /REVF/ rev
-      COMMON /CYLPAR/  hlength
+      COMMON /CYLPAR/ rsnm, hlength
 
 *
 * transfers ZEPS0,REV here from the main
