@@ -3101,17 +3101,18 @@ C     IF (COND+1D0.EQ.COND) STOP
    5  FORMAT(' THE MATRIX IS SINGULAR FOR THE GIVEN NUMERICAL ACCURACY '
      *      ,'COND = ',D12.6)
 
-      DO 30 I=1,N
-           DO 10 J=1,N
+      DO I=1,N
+           DO J=1,N
                 B(J)=0D0
                 IF (J.EQ.I) B(J)=1D0
-  10       CONTINUE
+           end do
 *
            CALL SOLVE (NDIM,N,A,B,IPVT)
 *
-           DO 30 J=1,N
+           DO J=1,N
                 X(J,I)=B(J)
-  30  CONTINUE
+           end do
+      end do
 *
       RETURN
       END
@@ -3454,11 +3455,12 @@ C--------/---------/---------/---------/---------/---------/---------/--
           CHECK=CHECK*10D0
    15     PC=X
           DJ=A
-          DO 20 J=2,N
+          DO J=2,N
               DJ=DJ+A
               PA=PB
               PB=PC
-   20         PC=X*PB+(X*PB-PA)*(DJ-A)/DJ
+              PC=X*PB+(X*PB-PA)*(DJ-A)/DJ
+          end do
           PA=A/((PB-X*PC)*F)
           PB=PA*PC*(A-X*X)
           X=X-PB
@@ -3474,9 +3476,10 @@ C--------/---------/---------/---------/---------/---------/---------/--
       PRINT 1100,N
  1100 FORMAT(' ***  POINTS AND WEIGHTS OF GAUSSIAN QUADRATURE FORMULA',
      * ' OF ',I4,'-TH ORDER')
-      DO 105 I=1,K
+      DO I=1,K
           ZZ=-Z(I)
-  105     PRINT 1200,I,ZZ,I,W(I)
+          PRINT 1200,I,ZZ,I,W(I)
+      end do
  1200 FORMAT(' ',4X,'X(',I4,') = ',F17.14,5X,'W(',I4,') = ',F17.14)
       GO TO 115
   110 CONTINUE
@@ -3484,8 +3487,9 @@ C     PRINT 1300,N
 C 1300 FORMAT(' GAUSSIAN QUADRATURE FORMULA OF ',I4,'-TH ORDER IS USED')
   115 CONTINUE
       IF(IND1.EQ.0) GO TO 140
-      DO 120 I=1,N
-  120     Z(I)=(A+Z(I))/B
+      DO I=1,N
+          Z(I)=(A+Z(I))/B
+      end do
   140 CONTINUE
   
       RETURN
@@ -3591,10 +3595,9 @@ C
 *
 * Forming a matrix product
 *
-   2  DO 4 J=II,N
-      IF(ABS(A(I,J))-EMACH)4,4,3
-   3  X(J)=X(J)-X(I)*A(I,J)
-   4  CONTINUE
+   2  DO J=II,N
+        IF((ABS(A(I,J))-EMACH).gt.0) X(J)=X(J)-X(I)*A(I,J)
+      end do
 
    5  CONTINUE               !the I-th row of A multiplied by X(I)
                              !subtracted from X
@@ -3603,8 +3606,9 @@ C
       I=N-II+1
       IJ=I+1
       IF(I-N)6,8,6
-   6  DO 7 J=IJ,N
-   7  X(I)=X(I)-X(J)*A(J,I)
+   6  DO J=IJ,N
+          X(I)=X(I)-X(J)*A(J,I)
+      end do
    8  IF(ABS(A(I,I))-EMACH*1.0D-7)9,10,10
    9  A(I,I)=EMACH*1.0D-7*(1.D0,1.D0)
   10  X(I)=X(I)/A(I,I)
