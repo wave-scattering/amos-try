@@ -269,13 +269,13 @@ C    TMT(4,*)=-TMT(3,*)^t where t denotes transposed TMT(3,*) submatrix
 * see (5.39) of {MTL}:  !!!Iff plane of symmetry perpendicular to the
                         !!!axis of rotation
 
-	    if ((NAXSM.eq.1).and.((-1)**(L1+L2).ne.1)) then
+        if ((NAXSM.eq.1).and.((-1)**(L1+L2).ne.1)) then
             TMT(2,JA,JB)=CZERO
             TMT(1,JA,JB)=CZERO  
-		else                                         
+        else
             TMT(2,JA,JB)=cmplx_dp(TR1(L1,L2),TI1(L1,L2))
             TMT(1,JA,JB)=cmplx_dp(TR1(N1,N2),TI1(N1,N2))
-	    end if
+        end if
 * see (5.37) of {MTL}:
             TMT(4,JA,JB)=CZERO         !cmplx_dp(TR1(N1,L2),TI1(N1,L2))
             TMT(3,JB,JA)=CZERO         !-TMT(4,JA,JB)  
@@ -3647,10 +3647,6 @@ C ..  LOCAL SCALARS  ..
 C
       INTEGER    I,II,IN,J,K
       complex(dp) YR,DUM
-C
-C ..  INTRINSIC FUNCTIONS  ..
-C
-*      INTRINSIC ABS
 C     ------------------------------------------------------------------
 C
       DO II=2,N
@@ -3681,22 +3677,21 @@ C
         end do
       end if
 
-   5  IF(ABS(YR)-EMACH)10,10,6
+      IF((ABS(YR)-EMACH).le.0) exit
       ! Gaussian elemination of matrix elements above the matrix diagonal.
       ! Subtraction of (A(I,J)/A(I,I)) multiple of the Ith column from the Jth column
       ! in the sub-matrix beginning with the (I+1,I+1) diag. element
-   6  DO 9 J=II,N
-      IF((ABS(A(I,J))-EMACH).gt.0) then
-        A(I,J)=A(I,J)/YR
-        DO K=II,N
-          A(K,J)=A(K,J)-A(I,J)*A(K,I)   !k-t element of j-th column
-        end do
-      end if
-   9  CONTINUE                 !The elements in the Ith row
+      DO J=II,N
+        IF((ABS(A(I,J))-EMACH).gt.0) then
+          A(I,J)=A(I,J)/YR
+          DO K=II,N
+            A(K,J)=A(K,J)-A(I,J)*A(K,I)   !k-t element of j-th column
+          end do
+        end if
+      end do                   !The elements in the Ith row
                                !above diagonal are not set to zero
 *
-      end do
-  10  CONTINUE                 !end of "column loop"
+      end do                   !end of "column loop"
       RETURN
       END
 
