@@ -196,7 +196,7 @@ cc      NNNGGG=NGAUSS+1
 * specify particle shape:
 *
          CALL VARY(LAM,MRR,MRI,A,EPS,nanorod_cap_hr,
-     &              NP,NGAUSS,X,P,PPI,PIR,PII,R,
+     &              RSNM,HT,NP,NGAUSS,X,P,PPI,PIR,PII,R,
      &              DR,DDR,DRR,DRI,NMAX)
 
 !         SUBROUTINE VARY (LAM,MRR,MRI,A,EPS,nanorod_cap_hr,
@@ -1127,7 +1127,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       INCLUDE 'ampld.par.f'
       IMPLICIT real(dp) (A-H,O-Z)
-      real(dp) nanorod_cap_hr
+      real(dp) nanorod_cap_hr, rsnm, ht
       real(dp)  X(NPNG2),R(NPNG2),DR(NPNG2),MRR,MRI,LAM,
      *        Z(NPNG2),ZR(NPNG2),ZI(NPNG2),
      *        DDR(NPNG2),DRR(NPNG2),DRI(NPNG2)
@@ -1915,11 +1915,13 @@ C--------/---------/---------/---------/---------/---------/---------/--
       Y(1)=Y1
       Y(2)=(-3D0*X3+X1)*C-3D0*X2*S
       NMAX1=NMAX-1
-      DO 5 I=2,NMAX1
-    5     Y(I+1)=dble(2*I+1)*X1*Y(I)-Y(I-1)
+      DO I=2,NMAX1
+        Y(I+1)=dble(2*I+1)*X1*Y(I)-Y(I-1)
+      end do
       V(1)=-X1*(C+Y1)
-      DO 10 I=2,NMAX
-  10       V(I)=Y(I-1)-dble(I)*X1*Y(I)
+      DO  I=2,NMAX
+         V(I)=Y(I-1)-dble(I)*X1*Y(I)
+      end do
       RETURN
       END
 
@@ -2973,7 +2975,6 @@ C  Gaussian elimination             !NAG library not used
 !     ZQ(1:NNMAX, 1:NNMAX) = ZQcrop
 !     deallocate(ZQcrop)
 
-!     call zgetrf_wrap(ZQ, IPIV)
       DO I=1,NNMAX
               DO K=1,NNMAX    !Initialization of the right-hand side ZB
                               !(a row vector) of the matrix equation ZX*ZQ=ZB
