@@ -2937,68 +2937,6 @@ C********************************************************************
 
 C**********************************************************************
 
-      SUBROUTINE DROP (RAT)
-C--------/---------/---------/---------/---------/---------/---------/--
-C >>> EPS
-C <<< RAT
-C=================
-C--------/---------/---------/---------/---------/---------/---------/--      
-      use libcylinder
-      IMPLICIT real(dp) (A-H,O-Z)
-      INTEGER NOUT
-! number of the output unit
-      PARAMETER (NOUT=35)  
-      PARAMETER (NC=10, NG=60) 
-                 
-      real(dp) X(NG),W(NG),C(0:NC)
-      COMMON /CDROP/ C,R0V
-      C(0)=-0.0481 D0
-      C(1)= 0.0359 D0
-      C(2)=-0.1263 D0
-      C(3)= 0.0244 D0
-      C(4)= 0.0091 D0
-      C(5)=-0.0099 D0
-      C(6)= 0.0015 D0
-      C(7)= 0.0025 D0
-      C(8)=-0.0016 D0
-      C(9)=-0.0002 D0
-      C(10)= 0.0010 D0
-!
-! GIF division points and weights
-!
-      CALL GAUSS (NG,0,0,X,W)
-!
-      S=0D0
-      V=0D0
-      DO I=1,NG
-         XI=DACOS(X(I))
-         WI=W(I)
-         RI=1D0+C(0)
-         DRI=0D0
-         DO N=1,NC
-            XIN=XI*N
-            RI=RI+C(N)*DCOS(XIN)
-            DRI=DRI-C(N)*N*DSIN(XIN)
-         ENDDO
-         SI=DSIN(XI)
-         cki=X(I)
-         RISI=RI*SI
-         S=S+WI*RI*DSQRT(RI*RI+DRI*DRI)
-         V=V+WI*RI*RISI*(RISI-DRI*cki)
-      ENDDO
-      RS=DSQRT(S*0.5D0)
-      RV=(V*3D0*0.25D0)**(1D0/3D0)
-      IF (DABS(RAT-1D0).GT.1D-8) RAT=RV/RS
-      R0V=1D0/RV
-      WRITE(NOUT,1000) R0V
-      DO N=0,NC
-         WRITE(NOUT,1001) N,C(N)
-      ENDDO
- 1000 FORMAT ('r_0/r_ev=',F7.4)
- 1001 FORMAT ('c_',I2,'=',F7.4)
- 
-      RETURN
-      END
 
 C********************************************************************
  

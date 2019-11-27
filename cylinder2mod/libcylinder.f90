@@ -25,6 +25,63 @@ contains
     !=======================================================================
     !=======================================================================
     !=======================================================================
+    subroutine drop (rat)
+        !=================
+        integer nout, nc, ng, i, n
+        real(dp) s, v, rat, cki, dri, r0v, rv, ri, si, risi, rs, wi, xi, xin
+        ! number of the output unit
+        parameter (nout = 35)
+        parameter (nc = 10, ng = 60)
+
+        real(dp) x(ng), w(ng), c(0:nc)
+        common /cdrop/ c, r0v ! TODO remove common block
+        c(0) = -0.0481_dp
+        c(1) = 0.0359_dp
+        c(2) = -0.1263_dp
+        c(3) = 0.0244_dp
+        c(4) = 0.0091_dp
+        c(5) = -0.0099_dp
+        c(6) = 0.0015_dp
+        c(7) = 0.0025_dp
+        c(8) = -0.0016_dp
+        c(9) = -0.0002_dp
+        c(10) = 0.0010_dp
+        !
+        ! gif division points and weights
+        !
+        call gauss (ng, 0, 0, x, w)
+        !
+        s = 0d0
+        v = 0d0
+        do i = 1, ng
+            xi = dacos(x(i))
+            wi = w(i)
+            ri = 1d0 + c(0)
+            dri = 0d0
+            do n = 1, nc
+                xin = xi * n
+                ri = ri + c(n) * dcos(xin)
+                dri = dri - c(n) * n * dsin(xin)
+            enddo
+            si = dsin(xi)
+            cki = x(i)
+            risi = ri * si
+            s = s + wi * ri * dsqrt(ri * ri + dri * dri)
+            v = v + wi * ri * risi * (risi - dri * cki)
+        enddo
+        rs = dsqrt(s * 0.5d0)
+        rv = (v * 3d0 * 0.25d0)**(1d0 / 3d0)
+        if (dabs(rat - 1d0).gt.1d-8) rat = rv / rs
+        r0v = 1d0 / rv
+        write(nout, 1000) r0v
+        do n = 0, nc
+            write(nout, 1001) n, c(n)
+        enddo
+        1000 format ('r_0/r_ev=', f7.4)
+        1001 format ('c_', i2, '=', f7.4)
+
+        return
+    end
     !=======================================================================
     subroutine sareac (eps, rat)
         !--------/---------/---------/---------/---------/---------/---------/--
