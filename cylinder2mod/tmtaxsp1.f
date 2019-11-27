@@ -3584,34 +3584,38 @@ C
 *      INTRINSIC ABS
 C     ------------------------------------------------------------------
 C
-      DO 5 II=2,N
-      I=II-1
-      IF(INT(I)-I)1,2,1    !If INT(I).NE.I switch the I-th and INT(I)-th
-                           !elements of the vector X
-   1  IN=INT(I)
-      DUM=X(IN)
-      X(IN)=X(I)
-      X(I)=DUM
+      DO II=2,N
+         I=II-1
+         IF((INT(I)-I).ne.0) then    !If INT(I).NE.I switch the I-th and INT(I)-th
+                                !elements of the vector X
+           IN=INT(I)
+           DUM=X(IN)
+           X(IN)=X(I)
+           X(I)=DUM
+         end if
 *
 * Forming a matrix product
 *
-   2  DO J=II,N
-        IF((ABS(A(I,J))-EMACH).gt.0) X(J)=X(J)-X(I)*A(I,J)
+         DO J=II,N
+           IF((ABS(A(I,J))-EMACH).gt.0) X(J)=X(J)-X(I)*A(I,J)
+         end do
       end do
-
-   5  CONTINUE               !the I-th row of A multiplied by X(I)
+                  !the I-th row of A multiplied by X(I)
                              !subtracted from X
 *
-      DO 10 II=1,N
-      I=N-II+1
-      IJ=I+1
-      IF(I-N)6,8,6
-   6  DO J=IJ,N
-          X(I)=X(I)-X(J)*A(J,I)
+      DO II=1,N
+        I=N-II+1
+        IJ=I+1
+        IF((I-N).ne.0) then
+          DO J=IJ,N
+              X(I)=X(I)-X(J)*A(J,I)
+          end do
+        end if
+        IF((ABS(A(I,I))-EMACH*1.0D-7).lt.0)  then
+          A(I,I)=EMACH*(1.0D-7)*(1.D0,1.D0)
+        end if
+        X(I)=X(I)/A(I,I)
       end do
-   8  IF(ABS(A(I,I))-EMACH*1.0D-7)9,10,10
-   9  A(I,I)=EMACH*1.0D-7*(1.D0,1.D0)
-  10  X(I)=X(I)/A(I,I)
       RETURN
       END
 
