@@ -17,7 +17,7 @@ def detect_is_fixed_form(file_lines):
         file_line = file_line.lower()
         if file_line[0] == '!' or file_line[0] == 'c':
             continue
-        if len(file_line[:-1]) > 72:
+        if len(file_line[:-1]) > 72 and file_line[:-1].find('!') == -1:
             print(file_line)
             return False
         lablel_loc = file_line[0:5].strip()
