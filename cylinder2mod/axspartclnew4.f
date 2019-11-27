@@ -1992,7 +1992,7 @@ cc      write(6,*)'LAM,LAMBDA in AMPL=', LAM, LAMBDA
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.GE.0) CALL SURFCH(NP,EPS,RAT)
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-2) CALL SAREAC (EPS,RAT)
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-9)
-     &  CALL SAREAnanorod (EPS,RAT,mpar%nanorod_cap_hr)
+     &  CALL SAREAnanorod (EPS,RAT)
       IF (NP.EQ.-3) CALL DROP (RAT)
 
       PRINT 7400, LAM,MRR,MRI
