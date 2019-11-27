@@ -15,8 +15,14 @@ add_library(constants constants.f90)
 add_library(model_parameters model_parameters.f90)
 target_link_libraries(model_parameters constants FiNeR::FiNeR)
 
+add_library(special_functions special_functions.f90)
+target_link_libraries(special_functions constants)
+
 add_library(libcylinder libcylinder.f90)
-target_link_libraries(libcylinder constants model_parameters)
+target_link_libraries(libcylinder
+        constants
+        special_functions
+        model_parameters)
 
 ADD_EXECUTABLE(${PROJECTNAME}
         tmtaxsp1.f
