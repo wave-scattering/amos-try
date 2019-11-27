@@ -3105,7 +3105,7 @@ C     IF (COND+1D0.EQ.COND) STOP
                 IF (J.EQ.I) B(J)=1D0
            end do
 *
-           CALL SOLVE (NDIM,N,A,B,IPVT)
+           CALL SOLVE (A,B,IPVT)
 *
            DO J=1,N
                 X(J,I)=B(J)
@@ -3116,7 +3116,7 @@ C     IF (COND+1D0.EQ.COND) STOP
       END
  
 C********************************************************************
- 
+
       SUBROUTINE DECOMP (NDIM,N,A,COND,IPVT,WORK)
 C--------/---------/---------/---------/---------/---------/---------/--
 C >>> EPS
@@ -3195,7 +3195,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
           YNORM=YNORM+DABS(WORK(I))
    65 CONTINUE
 *
-      CALL SOLVE (NDIM,N,A,WORK,IPVT)
+      CALL SOLVE (A,WORK,IPVT)
 *
       ZNORM=0D0
       DO 70 I=1,N
@@ -3212,44 +3212,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       END
  
 C**********************************************************************
- 
-      SUBROUTINE SOLVE (NDIM,N,A,B,IPVT)
-C--------/---------/---------/---------/---------/---------/---------/--
-C >>> EPS
-C <<< RAT
-C=================
-C--------/---------/---------/---------/---------/---------/---------/--
-      use libcylinder
-      IMPLICIT real(dp) (A-H,O-Z)
-      real(dp) A(NDIM,N),B(N)
-      INTEGER IPVT(N)
-*
-      IF (N.EQ.1) GO TO 50
-      NM1=N-1
-      DO 20 K=1,NM1
-          KP1=K+1
-          M=IPVT(K)
-          T=B(M)
-          B(M)=B(K)
-          B(K)=T
-          DO 10 I=KP1,N
-              B(I)=B(I)+A(I,K)*T
-   10     CONTINUE
-   20 CONTINUE
-      DO 40 KB=1,NM1
-          KM1=N-KB
-          K=KM1+1
-          B(K)=B(K)/A(K,K)
-          T=-B(K)
-          DO 30 I=1,KM1
-              B(I)=B(I)+A(I,K)*T
-   30     CONTINUE
-   40 CONTINUE
-   50 B(1)=B(1)/A(1,1)
-*
-      RETURN
-      END
- 
+
 C*****************************************************************
  
       SUBROUTINE SAREA (D,RAT)
