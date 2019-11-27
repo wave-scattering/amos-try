@@ -2953,46 +2953,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
  
 c****************************************************************
  
-      SUBROUTINE SURFCH (N,E,RAT)
-C--------/---------/---------/---------/---------/---------/---------/--
-C >>> N,E,RAT
-C <<< RAT
-C=================
-C--------/---------/---------/---------/---------/---------/---------/--
-      use libcylinder
-      IMPLICIT real(dp) (A-H,O-Z)
-      real(dp) X(60),W(60)
-!
-      DN=dble(N)
-      EN=E*DN
-      NG=60
-!
-! GIF division points and weights
-!
-      CALL GAUSS (NG,0,0,X,W)
-!
-      S=0D0
-      V=0D0
-      DO 10 I=1,NG
-         XI=X(I)
-         DX=DACOS(XI)
-         DXN=DN*DX
-         DS=DSIN(DX)
-         DSN=DSIN(DXN)
-         DCN=DCOS(DXN)
-         A=1D0+E*DCN
-         A2=A*A
-         ENS=EN*DSN
-         S=S+W(I)*A*DSQRT(A2+ENS*ENS)
-         V=V+W(I)*(DS*A+XI*ENS)*DS*A2
-   10 CONTINUE
-      RS=DSQRT(S*0.5D0)
-      RV=(V*3D0/4D0)**(1D0/3D0)
-      RAT=RV/RS
-!
-      RETURN
-      END
- 
+
 C********************************************************************
  
       SUBROUTINE SAREAC (EPS,RAT)

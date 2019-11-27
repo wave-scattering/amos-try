@@ -28,6 +28,46 @@ contains
     !=======================================================================
     !=======================================================================
     !=======================================================================
+    subroutine surfch (n, e, rat)
+        !--------/---------/---------/---------/---------/---------/---------/--
+        ! >>> n,e,rat
+        ! <<< rat
+        !=================
+        !--------/---------/---------/---------/---------/---------/---------/--
+!        implicit real(dp) (a-h, o-z)
+        integer n, ng, i
+        real(dp) e, rat, dn, s, v, xi, dx, dxn, ds, dsn, dcn, a, a2, en, ens, rs, rv
+        real(dp) x(60), w(60)
+        !
+        dn = dble(n)
+        en = e * dn
+        ng = 60
+        !
+        ! gif division points and weights
+        !
+        call gauss (ng, 0, 0, x, w)
+        !
+        s = 0d0
+        v = 0d0
+        do i = 1, ng
+            xi = x(i)
+            dx = dacos(xi)
+            dxn = dn * dx
+            ds = dsin(dx)
+            dsn = dsin(dxn)
+            dcn = dcos(dxn)
+            a = 1d0 + e * dcn
+            a2 = a * a
+            ens = en * dsn
+            s = s + w(i) * a * dsqrt(a2 + ens * ens)
+            v = v + w(i) * (ds * a + xi * ens) * ds * a2
+        end do
+        rs = dsqrt(s * 0.5d0)
+        rv = (v * 3d0 / 4d0)**(1d0 / 3d0)
+        rat = rv / rs
+        !
+        return
+    end
     !=======================================================================
     subroutine gauleg(x1, x2, x, w, n)
         !--------/---------/---------/---------/---------/---------/---------/--
