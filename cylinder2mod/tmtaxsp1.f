@@ -2570,7 +2570,7 @@ cc      COMMON /CT/ TR1,TI1                      !output from TT routine
 *
 *  Assigning r^2(\theta)*weight product:
    
-      DO 40 I=1,NGSS
+      DO I=1,NGSS
            WR=W(I)*R(I)
            
 cc           if (dr(i).eq.0.d0) WR=0.d0   !temporarily only
@@ -2578,13 +2578,12 @@ cc           if (dr(i).eq.0.d0) WR=0.d0   !temporarily only
            DS(I)=S(I)*QM*WR       !=dble(M)*W(I)*r^2(\theta)/(|\sin\theta|)
            DSS(I)=SS(I)*QMM       !=dble(M)**2/(\sin^2\theta)
            RR(I)=WR
-                      
-   40 CONTINUE
+      end do
 * 
-      DO 300  N1=MM1,NMAX
+      DO N1=MM1,NMAX
            AN1=AN(N1)
            
-           DO 300 N2=MM1,NMAX
+           DO N2=MM1,NMAX
                 AN2=AN(N2)
                 AR11=0D0
                 AR12=0D0
@@ -2604,7 +2603,7 @@ cc           if (dr(i).eq.0.d0) WR=0.d0   !temporarily only
                 GI22=0D0
                 SI=SIG(N1+N2)
  
-                DO 200 I=1,NGSS
+                DO I=1,NGSS
                     D1N1=D1(I,N1)
                     D2N1=D2(I,N1)
                     D1N2=D1(I,N2)
@@ -2777,7 +2776,7 @@ C  parts:
                     GR22=GR22+E1*C6R+E2*C7R+E3*C8R
                     GI22=GI22+E1*C6I+E2*C7I+E3*C8I
                     
-  200           CONTINUE
+  200           end do
   
                 AN12=ANN(N1,N2)*FACTOR
                 
@@ -2798,19 +2797,19 @@ C  parts:
                 IG12(N1,N2)=GI12*AN12
                 IG21(N1,N2)=GI21*AN12
                 IG22(N1,N2)=GI22*AN12
- 
-  300 CONTINUE
-  
+           end do
+      end do
+
       TPIR=PIR                 !Re [1/k_{in}^2]
       TPII=PII                 !Im [1/k_{in}^2]
       TPPI=PPI                 !1/k_{out}^2   
       
       NM=NMAX-MM1+1
-      DO 310 N1=MM1,NMAX
+      DO N1=MM1,NMAX
            K1=N1-MM1+1
            KK1=K1+NM
            
-           DO 310 N2=MM1,NMAX
+           DO N2=MM1,NMAX
                 K2=N2-MM1+1
                 KK2=K2+NM
  
@@ -2853,18 +2852,19 @@ C  parts:
                 TQI(KK1,KK2)=TPIR*TAI12+TPII*TAR12+TPPI*TAI21
                 TRGQR(KK1,KK2)=TPIR*TGR12-TPII*TGI12+TPPI*TGR21
                 TRGQI(KK1,KK2)=TPIR*TGI12+TPII*TGR12+TPPI*TGI21
-                
-  310 CONTINUE
- 
+           end do
+      end do
+
       NNMAX=2*NM
-      DO 320 N1=1,NNMAX
-           DO 320 N2=1,NNMAX
+      DO N1=1,NNMAX
+           DO N2=1,NNMAX
                 QR(N1,N2)=TQR(N1,N2)
                 QI(N1,N2)=TQI(N1,N2)
                 RGQR(N1,N2)=TRGQR(N1,N2)
                 RGQI(N1,N2)=TRGQI(N1,N2)
-  320 CONTINUE
-* 
+           end do
+      end do
+
       CALL TT(NM)
 * 
       RETURN
@@ -3009,14 +3009,15 @@ C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       real(dp) A(NDIM,N),B(NDIM,N),C(NDIM,N),cij
 *
-      DO 10 I=1,N
-           DO 10 J=1,N
+      DO I=1,N
+           DO J=1,N
                 CIJ=0d0
-                DO 5 K=1,N
+                DO K=1,N
                      CIJ=CIJ+A(I,K)*B(K,J)
-    5           CONTINUE
+                end do
                 C(I,J)=CIJ
-   10 CONTINUE
+           end do
+      end do
 *
       RETURN
       END
@@ -3050,32 +3051,32 @@ C--------/---------/---------/---------/---------/---------/---------/--
     5 CONTINUE
       NNMAX=2*NMAX
 *
-      DO 15 I=1,NMAX
+      DO I=1,NMAX
          I1=IND1(I)
          I2=IND2(I)
-         DO 15 J=1,NMAX
+         DO J=1,NMAX
             J1=IND1(J)
             J2=IND2(J)
             Q1(J,I)=F(J1,I1)
             Q2(J,I)=F(J2,I2)
-  15  CONTINUE
+         end do
+      end do
 *
       CALL INVERT(NDIM,NMAX,Q1,P1,COND,IPVT,WORK,B)
       CALL INVERT(NDIM,NMAX,Q2,P2,COND,IPVT,WORK,B)
 *
-      DO 30 I=1,NNMAX
-         DO 30 J=1,NNMAX
-            A(J,I)=0D0
-  30  CONTINUE
-      DO 40 I=1,NMAX
+      A=0D0
+
+      DO I=1,NMAX
          I1=IND1(I)
          I2=IND2(I)
-         DO 40 J=1,NMAX
+         DO J=1,NMAX
             J1=IND1(J)
             J2=IND2(J)
             A(J1,I1)=P1(J,I)
             A(J2,I2)=P2(J,I)
-  40  CONTINUE
+         end do
+      end do
 *
       RETURN
       END
