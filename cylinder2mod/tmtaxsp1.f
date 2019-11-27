@@ -1,4 +1,4 @@
-      SUBROUTINE TMTAXSP(nmax,nanorod_cap_hr,RAP,zeps1,zeps0,TMT)
+      SUBROUTINE TMTAXSP(nmax,nanorod_cap_hr,RAP,zeps1,TMT)
 
 c Warning in module TMTAXSP in file tmtaxsp.f: Variables set but never used:
 c    NGGG set at line 182 file tmtaxsp.f
@@ -54,7 +54,7 @@ C  In computations for spheres, use EPS=1.000001 instead of EPS=1.
 C  EPS=1 can cause overflows in some rare cases.  
 C
 C  LAM - the (vacuum) wavelength of incident light. Changed to
-C                       LAM=LAM*SQRT(ZEPS0) here
+C                       LAM=LAM*SQRT(mpar%zeps0) here
 C
 C  RAT = 1 - particle size is specified in terms of the            
 C                equal-volume-sphere radius                             
@@ -92,9 +92,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       INTEGER NAXSM,ICHOICEV,ICHOICE
 
       PARAMETER (LMAXD=8,LMAX1D=LMAXD+1,LMTD=LMAX1D*LMAX1D-1)
-      INCLUDE 'ampld.par.f'
-* number of the output unit
-*
+
       real(dp)  LAM,MRR,MRI,X(NPNG2),W(NPNG2),S(NPNG2),SS(NPNG2),
      *        AN(NPN1),R(NPNG2),DR(NPNG2),
      *        DDR(NPNG2),DRR(NPNG2),DRI(NPNG2),ANN(NPN1,NPN1)
@@ -102,7 +100,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
 c      real(dp) XALPHA(300),XBETA(300),WALPHA(300),WBETA(300)
 
 !     complex(dp) CZERO
-      complex(dp) zeps1,zeps0
+      complex(dp) zeps1
       complex(dp) TMT(4,LMTD,LMTD)
 * 
       COMMON /CT/ TR1,TI1
@@ -136,15 +134,15 @@ cc      COMMON /TMAT/ RT11,RT12,RT21,RT22,IT11,IT12,IT21,IT22
 *
       ICHOICE=ICHOICEV
       A=REV
-      LAM=REV*SQRT(ZEPS0)/RAP       !vacuum wavelength times SQRT(ZEPS0)/
+      LAM=REV*SQRT(mpar%zeps0)/RAP       !vacuum wavelength times SQRT(mpar%zeps0)/
 *
 * the real part of the refractive index contrast 
 *      
-      MRR=DBLE(SQRT(ZEPS1/ZEPS0))
+      MRR=DBLE(SQRT(ZEPS1/mpar%zeps0))
 *
 * the imaginary  part of the refractive index contrast 
 *
-      MRI=aimag(SQRT(ZEPS1/ZEPS0))
+      MRI=aimag(SQRT(ZEPS1/mpar%zeps0))
 * 
       DDELT=0.1D0*DDELT               !conv. test is switched off now!!!
 *
@@ -200,6 +198,12 @@ cc      NNNGGG=NGAUSS+1
          CALL VARY(LAM,MRR,MRI,A,EPS,nanorod_cap_hr,
      &              NP,NGAUSS,X,P,PPI,PIR,PII,R,
      &              DR,DDR,DRR,DRI,NMAX)
+
+!         SUBROUTINE VARY (LAM,MRR,MRI,A,EPS,nanorod_cap_hr,
+!    &                 RSNM,HT,
+!                   NP,NGAUSS,X,P,PPI,PIR,PII,R,
+!                   DR,DDR,DRR,DRI,NMAX)
+C
 *
 * determine m=m'=0 elements of the T matrix
 *
@@ -1133,6 +1137,7 @@ cc     *        DJR(NPNG2,NPN1),DJI(NPNG2,NPN1)
 cc      COMMON /CBESS/ J,Y,JR,JI,DJ,DY,DJR,DJI
 
       NG=NGAUSS*2
+      ht = 0d0
 
 * decision tree to specify particle shape:
 
@@ -1750,6 +1755,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       real(dp) :: HT,MA,CO,SI,CC,SS,RAD,REV,THETA0,RTHET
       real(dp) :: X(NG),R(NG),DR(NG)
 
+      if (HT.lt.1e-8) stop 'HT should be more than zero'
       MA=DSQRT(HT**2+REV**2)              !=the length of the cone slant
       MA=dsqrt(ma**2+8.d0*rev**2)/2.d0    !=the length of the median of the slant
 
@@ -2356,10 +2362,10 @@ c      close(nout+3)
  
       NM=NMAX
       
-      DO 310 N1=MM1,NMAX
+      DO N1=MM1,NMAX
            K1=N1-MM1+1
            KK1=K1+NM
-           DO 310 N2=MM1,NMAX
+           DO N2=MM1,NMAX
                 K2=N2-MM1+1
                 KK2=K2+NM
  
@@ -2392,17 +2398,19 @@ c      close(nout+3)
                 TQI(KK1,KK2)=TPIR*TAI12+TPII*TAR12+TPPI*TAI21
                 TRGQR(KK1,KK2)=TPIR*TGR12-TPII*TGI12+TPPI*TGR21
                 TRGQI(KK1,KK2)=TPIR*TGI12+TPII*TGR12+TPPI*TGI21
-  310 CONTINUE
- 
+           end do
+      end do
+
       NNMAX=2*NM
-      DO 320 N1=1,NNMAX
-           DO 320 N2=1,NNMAX
+      DO N1=1,NNMAX
+           DO N2=1,NNMAX
                 QR(N1,N2)=TQR(N1,N2)
                 QI(N1,N2)=TQI(N1,N2)
                 RGQR(N1,N2)=TRGQR(N1,N2)
                 RGQI(N1,N2)=TRGQI(N1,N2)
-  320 CONTINUE
-  
+           end do
+      end do
+
 *%%%%%%%%%%%%%%%%%%%%%%%  Forming resulting T-matrix 
 *
 * Calculate the product Q^{-1} Rg Q
@@ -2958,7 +2966,14 @@ C  Gaussian elimination             !NAG library not used
 
   5   CALL ZGER(ZQ,IPIV,NNMAX,NPN2,EMACH)  !Gauss elimination of ZQ to
                                            !a lower diagonal matrix
-! 5   call zgetrf_wrap(ZQ, IPIV)
+! 5   continue
+!     allocate(ZQcrop(1:NNMAX, 1:NNMAX))
+!     ZQcrop = ZQ(1:NNMAX, 1:NNMAX)
+!     call zgetrf_wrap(ZQcrop, IPIV)
+!     ZQ(1:NNMAX, 1:NNMAX) = ZQcrop
+!     deallocate(ZQcrop)
+
+!     call zgetrf_wrap(ZQ, IPIV)
       DO I=1,NNMAX
               DO K=1,NNMAX    !Initialization of the right-hand side ZB
                               !(a row vector) of the matrix equation ZX*ZQ=ZB
