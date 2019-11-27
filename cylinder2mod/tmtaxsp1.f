@@ -3653,7 +3653,7 @@ C
 *      INTRINSIC ABS
 C     ------------------------------------------------------------------
 C
-      DO 10 II=2,N
+      DO II=2,N
       I=II-1
       YR=A(I,I)
       IN=I
@@ -3661,35 +3661,41 @@ C
 * Finding an element with the largest magnitude in the I-th column
 * below the matrix diagonal (including the diag. element):
 
-      DO 2 J=II,N
-      IF(ABS(YR)-ABS(A(I,J)))1,2,2
-   1  YR=A(I,J)
-      IN=J
-   2  CONTINUE
+      DO J=II,N
+        IF((ABS(YR)-ABS(A(I,J))).lt.0) then
+          YR=A(I,J)
+        else
+          exit
+        end if
+        IN=J
+      end do
+
       INT(I)=IN      !The largest element in the I-th row above the matrix
                      !diagonal is in the IN-th row and is denoted by YR
 *
-      IF(IN-I)3,5,3  !If IN.NE.I switch the I-th and IN-th columns to the
-   3  DO 4 J=I,N     !left of the matrix diagonal (including the diag. element)
-      DUM=A(J,I)
-      A(J,I)=A(J,IN)
-   4  A(J,IN)=DUM
+      IF((IN-I).ne.0) then  !If IN.NE.I switch the I-th and IN-th columns to the
+        DO J=I,N     !left of the matrix diagonal (including the diag. element)
+          DUM=A(J,I)
+          A(J,I)=A(J,IN)
+          A(J,IN)=DUM
+        end do
+      end if
 
    5  IF(ABS(YR)-EMACH)10,10,6
-
-*
-* Gaussian elemination of matrix elements above the matrix diagonal.
-* Subtraction of (A(I,J)/A(I,I)) multiple of the Ith column from the Jth column
-* in the sub-matrix beginning with the (I+1,I+1) diag. element
-*
+      ! Gaussian elemination of matrix elements above the matrix diagonal.
+      ! Subtraction of (A(I,J)/A(I,I)) multiple of the Ith column from the Jth column
+      ! in the sub-matrix beginning with the (I+1,I+1) diag. element
    6  DO 9 J=II,N
-      IF(ABS(A(I,J))-EMACH)9,9,7
-   7  A(I,J)=A(I,J)/YR
-      DO 8 K=II,N
-   8  A(K,J)=A(K,J)-A(I,J)*A(K,I)   !k-t element of j-th column
+      IF((ABS(A(I,J))-EMACH).gt.0) then
+        A(I,J)=A(I,J)/YR
+        DO K=II,N
+          A(K,J)=A(K,J)-A(I,J)*A(K,I)   !k-t element of j-th column
+        end do
+      end if
    9  CONTINUE                 !The elements in the Ith row
                                !above diagonal are not set to zero
 *
+      end do
   10  CONTINUE                 !end of "column loop"
       RETURN
       END
