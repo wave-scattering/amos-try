@@ -95,7 +95,7 @@ C---------------------------------------------------------------------
       integer LCS,ILCS,ikl,ieps,istep,ide,ndefp,itter
       integer NOUT,NOUTI,NSTEP,NFIN,NMAT,NP,NPP,NDGS,NDGSP
       real(dp) TOL,DEFP,DEFPP,DDELT,DDELTP,x_max,x_min
-      real(dp) hlength_max,hlength_min,rl_min,rl_max, nanorod_cap_hr
+      real(dp) hlength_max,hlength_min,rl_min,rl_max
       complex(dp) ZEPS0,CCEPS,CSEPS           !,ZARTAN
       character(1) ync,yncv
       logical ynperfcon,ynperfconv,ynintens,ynoptth,ynbrug,yncheck
@@ -257,7 +257,6 @@ C--------/---------/---------/---------/---------/---------/---------/--
       call cli_parse
       call ini_parse
 
-      nanorod_cap_hr = mpar%nanorod_cap_hr
       CCEPS = mpar%cceps
       ZEPS0 = mpar%ZEPS0
 
@@ -1685,7 +1684,7 @@ ctest
 
 C      write(90,*) lambda,  global_eps_r,
 C     & global_eps_i
-      call ampldr(yncheck,lmax,ichoice,npp,defpp,nanorod_cap_hr,
+      call ampldr(yncheck,lmax,ichoice,npp,defpp,
      & rsnm,hlength,lambda,zeps(1),zeps0)
       end if
 *
@@ -1871,7 +1870,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
 
 C**********************************************************************
 
-      SUBROUTINE AMPLDR(yncheck,nmax,ichoicev,np,eps,nanorod_cap_hr,
+      SUBROUTINE AMPLDR(yncheck,nmax,ichoicev,np,eps,
      &                  rsnm,ht,lambda,zeps1,zeps0)
 
 C Warning in module AMPLDR in file ampldr.f: Variables set but never used:
@@ -1940,9 +1939,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       LOGICAL YNCHECK
       integer nmax, np, inm1, ixxx, m, m1, n, n1, n11, n2 ,n22, ncheck,
      & ndgs, ngaus, ngauss, nm, nma, nn1, nn2, nnm, nnnggg
-      real(dp) nanorod_cap_hr
 
-       INCLUDE 'ampld.par.f'
 * number of the output unit
       PARAMETER (NOUT=35)
 *
@@ -2016,7 +2013,7 @@ cc      write(6,*)'LAM,LAMBDA in AMPL=', LAM, LAMBDA
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.GE.0) CALL SURFCH(NP,EPS,RAT)
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-2) CALL SAREAC (EPS,RAT)
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-9)
-     &  CALL SAREAnanorod (EPS,RAT,nanorod_cap_hr)
+     &  CALL SAREAnanorod (EPS,RAT,mpar%nanorod_cap_hr)
       IF (NP.EQ.-3) CALL DROP (RAT)
 
       PRINT 7400, LAM,MRR,MRI
@@ -2076,7 +2073,7 @@ c 7334    FORMAT(' NMAX =', I3,'  DC2=',D8.2,'   DC1=',D8.2)
          CALL CONST(NGAUSS,NMAX,X,W,AN,ANN,S,SS,NP,EPS,RSNM,HT)      !In AMPLDR
 *
 * specify particle shape:
-         CALL VARY(LAM,MRR,MRI,A,EPS,nanorod_cap_hr,
+         CALL VARY(LAM,MRR,MRI,A,EPS,
      &              RSNM,HT,NP,NGAUSS,X,P,
      &              PPI,PIR,PII,R,DR,DDR,DRR,DRI,NMAX)
 *
@@ -2161,7 +2158,7 @@ cc         NGGG=2*NGAUSS
 *
 * specify particle shape:
 *
-         CALL VARY(LAM,MRR,MRI,A,EPS,nanorod_cap_hr,
+         CALL VARY(LAM,MRR,MRI,A,EPS,
      &              RSNM,HT,NP,NGAUSS,X,P,
      &              PPI,PIR,PII,R,DR,DDR,DRR,DRI,NMAX)
 *
@@ -2218,7 +2215,7 @@ c 7337    FORMAT(' NG=',I3,'  DC2=',D8.2,'   DC1=',D8.2)
 *
 * specify particle shape:
 *
-         CALL VARY(LAM,MRR,MRI,A,EPS,nanorod_cap_hr,
+         CALL VARY(LAM,MRR,MRI,A,EPS,
      &             RSNM,HT,NP,NGAUSS,X,P,
      &              PPI,PIR,PII,R,DR,DDR,DRR,DRI,NMAX)
 *

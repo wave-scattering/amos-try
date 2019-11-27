@@ -48,7 +48,7 @@ module model_parameters
 
     !--------/---------/---------/---------/---------/---------/---------/--
     subroutine ini_parse()
-        character(len = :), allocatable :: items(:, :) !< items pairs.
+!        character(len = :), allocatable :: items(:, :) !< items pairs.
         integer :: error
         character(len = :), allocatable :: string         !< string option.
         real(dp) :: double, d_re, d_im

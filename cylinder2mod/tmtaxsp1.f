@@ -1,4 +1,4 @@
-      SUBROUTINE TMTAXSP(nmax,nanorod_cap_hr,RAP,zeps1,TMT)
+      SUBROUTINE TMTAXSP(nmax,RAP,zeps1,TMT)
 
 c Warning in module TMTAXSP in file tmtaxsp.f: Variables set but never used:
 c    NGGG set at line 182 file tmtaxsp.f
@@ -87,7 +87,6 @@ C
 C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       IMPLICIT REAL(dp) (A-H,O-Z)
-      real(dp) nanorod_cap_hr
       INTEGER LMAXD,LMAX1D,LMTD
       INTEGER NAXSM,ICHOICEV,ICHOICE
 
@@ -165,7 +164,7 @@ cc      COMMON /TMAT/ RT11,RT12,RT21,RT22,IT11,IT12,IT21,IT22
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-2) CALL SAREAC (EPS,RAT)
       ! TODO make a correct evaluation of SAREAC for nanorod
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-9)
-     &  CALL SAREAnanorod (EPS,RAT, nanorod_cap_hr)
+     &  CALL SAREAnanorod (EPS,RAT)
       IF (NP.EQ.-3) CALL DROP (RAT)
 
 *___________________________________________________
@@ -195,11 +194,11 @@ cc      NNNGGG=NGAUSS+1
 *
 * specify particle shape:
 *
-         CALL VARY(LAM,MRR,MRI,A,EPS,nanorod_cap_hr,
+         CALL VARY(LAM,MRR,MRI,A,EPS,
      &              RSNM,HT,NP,NGAUSS,X,P,PPI,PIR,PII,R,
      &              DR,DDR,DRR,DRI,NMAX)
 
-!         SUBROUTINE VARY (LAM,MRR,MRI,A,EPS,nanorod_cap_hr,
+!         SUBROUTINE VARY (LAM,MRR,MRI,A,EPS,mpar%nanorod_cap_hr,
 !    &                 RSNM,HT,
 !                   NP,NGAUSS,X,P,PPI,PIR,PII,R,
 !                   DR,DDR,DRR,DRI,NMAX)
@@ -1092,7 +1091,7 @@ c      CALL GAULEG(-1.D0,1.D0,X,W,NG)
  
 C**********************************************************************
  
-      SUBROUTINE VARY (LAM,MRR,MRI,A,EPS,nanorod_cap_hr,
+      SUBROUTINE VARY (LAM,MRR,MRI,A,EPS,
      &                 RSNM,HT,NP,NGAUSS,X,
      *                 P,PPI,PIR,PII,R,DR,DDR,DRR,DRI,NMAX)
 C--------/---------/---------/---------/---------/---------/---------/--
@@ -1127,7 +1126,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       INCLUDE 'ampld.par.f'
       IMPLICIT real(dp) (A-H,O-Z)
-      real(dp) nanorod_cap_hr, rsnm, ht
+      real(dp) rsnm, ht
       real(dp)  X(NPNG2),R(NPNG2),DR(NPNG2),MRR,MRI,LAM,
      *        Z(NPNG2),ZR(NPNG2),ZI(NPNG2),
      *        DDR(NPNG2),DRR(NPNG2),DRI(NPNG2)
@@ -1151,7 +1150,7 @@ cc      COMMON /CBESS/ J,Y,JR,JI,DJ,DY,DJR,DJI
 cc      IF (NP.EQ.-7) CALL RSP7(X,NG,RSNM,HT,R,DR)          ! cone cut on its top
 cc      IF (NP.EQ.-8) CALL RSP8(X,NG,RSNM,HT,R,DR)          ! cone on a cylinder
       IF (NP.EQ.-9) CALL RSP3nanorod (X,NG,NGAUSS,A,EPS,
-     &                                nanorod_cap_hr, R,DR) ! nanorod
+     &                                mpar%nanorod_cap_hr, R,DR) ! nanorod
 
 *
       WV=P*2D0/LAM                 !wave vector
@@ -1404,9 +1403,8 @@ C--------/---------/---------/---------/---------/---------/---------/--
       implicit none
 !     IMPLICIT real(dp) (A-H,O-Z)
       integer NG, NGAUSS, I
-      real(dp) REV, EPS, CAP, H, A, CO, SI, RAD, RTHET, xstep
-      real(dp) aa, bb, valDR, c2, s2, alpha, beta, gamma, detsr,
-     &  nom, psi, He, Hc, EPSe, EPSc
+      real(dp) REV, EPS, H, A, CO, SI, RAD, RTHET
+      real(dp) valDR, c2, s2, alpha, beta, He, Hc, EPSe, EPSc
       real(dp) X(NG),R(NG),DR(NG)
 
 !     REV = 2._dp
@@ -2895,9 +2893,9 @@ cc      real(dp) F(NPN2,NPN2),B(NPN2),WORK(NPN2),
 cc     *       A(NPN2,NPN2),C(NPN2,NPN2),D(NPN2,NPN2),E(NPN2,NPN2)
       real(dp) TR1(NPN2,NPN2),TI1(NPN2,NPN2)
       complex(dp) ZQ(NPN2,NPN2),ZX(NPN2)
-      complex(dp), allocatable :: ZQcrop(:,:)
+!     complex(dp), allocatable :: ZQcrop(:,:)
       INTEGER IPIV(NPN2)
-      integer, allocatable:: ipiv_crop(:)
+!     integer, allocatable:: ipiv_crop(:)
       integer nnmax
 *
       COMMON /CHOICE/ ICHOICE
@@ -3337,7 +3335,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       END
 
 
-      SUBROUTINE SAREAnanorod (EPS,RAT, nanorod_cap_hr)
+      SUBROUTINE SAREAnanorod (EPS,RAT)
 C--------/---------/---------/---------/---------/---------/---------/--
 C >>> EPS
 C <<< RAT
@@ -3345,8 +3343,9 @@ C=================
 C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       IMPLICIT real(dp) (A-H,O-Z)
-      real(dp) nanorod_cap_hr
+
 *
+      ! TODO replace with computation of the nanorod surface
       RAT=(1.5D0/EPS)**(1D0/3D0)
       RAT=RAT/DSQRT( (EPS+2D0)/(2D0*EPS) )
 *
