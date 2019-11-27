@@ -8,7 +8,7 @@ module cylinder_blas
     implicit none
     ! This subroutines are not used in the main code at the moment,
     ! so they are private in the module and commented out
-!    private solve, zge, zsu, inv1, invert, decomp
+!    private solve, zge, zsu, inv1, invert, decomp, prod
 
 
 contains
@@ -19,7 +19,27 @@ contains
     !=======================================================================
     !=======================================================================
     !=======================================================================
-    !=======================================================================
+!    subroutine prod(a, b, c, ndim, n)
+!        !--------/---------/---------/---------/---------/---------/---------/--
+!        ! >>> a,b,ndim,n
+!        ! <<< c=a*b
+!        !=================
+!        !--------/---------/---------/---------/---------/---------/---------/--
+!        integer ndim, n, i,j,k
+!        real(dp) a(ndim, n), b(ndim, n), c(ndim, n), cij
+!        !
+!        do i = 1, n
+!            do j = 1, n
+!                cij = 0d0
+!                do k = 1, n
+!                    cij = cij + a(i, k) * b(k, j)
+!                end do
+!                c(i, j) = cij
+!            end do
+!        end do
+!        !
+!        return
+!    end
     !=======================================================================
 !    subroutine inv1 (nmax, f, a)
 !        !--------/---------/---------/---------/---------/---------/---------/--

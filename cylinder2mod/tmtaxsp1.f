@@ -2922,28 +2922,7 @@ C  Gaussian elimination             !NAG library not used
  
 C********************************************************************
  
-      SUBROUTINE PROD(A,B,C,NDIM,N)
-C--------/---------/---------/---------/---------/---------/---------/--
-C >>> A,B,NDIM,N
-C <<< C=A*B
-C=================
-C--------/---------/---------/---------/---------/---------/---------/--
-      use libcylinder
-      real(dp) A(NDIM,N),B(NDIM,N),C(NDIM,N),cij
-!
-      DO I=1,N
-           DO J=1,N
-                CIJ=0d0
-                DO K=1,N
-                     CIJ=CIJ+A(I,K)*B(K,J)
-                end do
-                C(I,J)=CIJ
-           end do
-      end do
-!
-      RETURN
-      END
- 
+
 C**********************************************************************
 
 
