@@ -11,7 +11,7 @@ module model_parameters
 
     implicit none
 
-    type, public :: model_parameters_type
+    type, private :: model_parameters_type
         real(dp) :: rsnm, x_min, x_max, rl_min, rl_max, nanorod_cap_hr, &
                 alpha, beta, thet, thet0, phi, phi0
         integer :: np, nstep, ndefp

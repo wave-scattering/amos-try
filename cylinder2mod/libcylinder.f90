@@ -9,6 +9,11 @@ module libcylinder
 !    use errfun, only : wpop
 
     implicit none
+    type, private :: cdrop_values
+        real(dp) :: c(0:10), r0v
+    end type cdrop_values
+    type(cdrop_values), public :: cdrop
+
     public cmplx_dp
 
 
@@ -28,24 +33,24 @@ contains
     subroutine drop (rat)
         !=================
         integer nout, nc, ng, i, n
-        real(dp) s, v, rat, cki, dri, r0v, rv, ri, si, risi, rs, wi, xi, xin
+        real(dp) s, v, rat, cki, dri, rv, ri, si, risi, rs, wi, xi, xin
         ! number of the output unit
         parameter (nout = 35)
-        parameter (nc = 10, ng = 60)
+        parameter (ng = 60)
 
-        real(dp) x(ng), w(ng), c(0:nc)
-        common /cdrop/ c, r0v ! TODO remove common block
-        c(0) = -0.0481_dp
-        c(1) = 0.0359_dp
-        c(2) = -0.1263_dp
-        c(3) = 0.0244_dp
-        c(4) = 0.0091_dp
-        c(5) = -0.0099_dp
-        c(6) = 0.0015_dp
-        c(7) = 0.0025_dp
-        c(8) = -0.0016_dp
-        c(9) = -0.0002_dp
-        c(10) = 0.0010_dp
+        real(dp) x(ng), w(ng)
+        nc = 10
+        cdrop%c(0) = -0.0481_dp
+        cdrop%c(1) = 0.0359_dp
+        cdrop%c(2) = -0.1263_dp
+        cdrop%c(3) = 0.0244_dp
+        cdrop%c(4) = 0.0091_dp
+        cdrop%c(5) = -0.0099_dp
+        cdrop%c(6) = 0.0015_dp
+        cdrop%c(7) = 0.0025_dp
+        cdrop%c(8) = -0.0016_dp
+        cdrop%c(9) = -0.0002_dp
+        cdrop%c(10) = 0.0010_dp
         !
         ! gif division points and weights
         !
@@ -56,12 +61,12 @@ contains
         do i = 1, ng
             xi = dacos(x(i))
             wi = w(i)
-            ri = 1d0 + c(0)
+            ri = 1d0 + cdrop%c(0)
             dri = 0d0
             do n = 1, nc
                 xin = xi * n
-                ri = ri + c(n) * dcos(xin)
-                dri = dri - c(n) * n * dsin(xin)
+                ri = ri + cdrop%c(n) * dcos(xin)
+                dri = dri - cdrop%c(n) * n * dsin(xin)
             enddo
             si = dsin(xi)
             cki = x(i)
@@ -72,10 +77,10 @@ contains
         rs = dsqrt(s * 0.5d0)
         rv = (v * 3d0 * 0.25d0)**(1d0 / 3d0)
         if (dabs(rat - 1d0).gt.1d-8) rat = rv / rs
-        r0v = 1d0 / rv
-        write(nout, 1000) r0v
+        cdrop%r0v = 1d0 / rv
+        write(nout, 1000) cdrop%r0v
         do n = 0, nc
-            write(nout, 1001) n, c(n)
+            write(nout, 1001) n, cdrop%c(n)
         enddo
         1000 format ('r_0/r_ev=', f7.4)
         1001 format ('c_', i2, '=', f7.4)

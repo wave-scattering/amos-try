@@ -1462,17 +1462,16 @@ C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       PARAMETER (NC=10)
       IMPLICIT real(dp) (A-H,O-Z)
-      real(dp) X(NG),R(NG),DR(NG),C(0:NC)
-      COMMON /CDROP/ C,R0V
-      R0=REV*R0V
+      real(dp) X(NG),R(NG),DR(NG)
+      R0=REV*cdrop%R0V
       DO I=1,NG
          XI=DACOS(X(I))
-         RI=1D0+C(0)
+         RI=1D0+cdrop%C(0)
          DRI=0D0
          DO N=1,NC
             XIN=XI*N
-            RI=RI+C(N)*DCOS(XIN)
-            DRI=DRI-C(N)*N*DSIN(XIN)
+            RI=RI+cdrop%C(N)*DCOS(XIN)
+            DRI=DRI-cdrop%C(N)*N*DSIN(XIN)
          ENDDO
          RI=RI*R0
          DRI=DRI*R0
