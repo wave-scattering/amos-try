@@ -3145,10 +3145,10 @@ cc          if (dr(i).eq.0.d0) WR=0.d0   !temporarily only
            RR(I)=WR            !W(I)*r^2(\theta)
       end do
 *
-      DO 300  N1=MM1,NMAX         !MM1=M below
+      DO N1=MM1,NMAX         !MM1=M below
            AN1=AN(N1)
 
-           DO 300 N2=MM1,NMAX
+           DO N2=MM1,NMAX
                 AN2=AN(N2)
                 AR11=0D0
                 AR12=0D0
@@ -3168,7 +3168,7 @@ cc          if (dr(i).eq.0.d0) WR=0.d0   !temporarily only
                 GI22=0D0
                 SI=SIG(N1+N2)
 
-                DO 200 I=1,NGSS    !=NGAUSS   if NCHECK.EQ.1
+                DO I=1,NGSS    !=NGAUSS   if NCHECK.EQ.1
                                    !=2*NGAUSS if NCHECK.EQ.0
                     D1N1=D1(I,N1)
                     D2N1=D2(I,N1)
@@ -3341,7 +3341,7 @@ C  parts:
                     GR21=GR21+F1*C4R+F2*C5R
                     GI21=GI21+F1*C4I+F2*C5I
 
-                    IF (NCHECK.EQ.1) GO TO 200
+                    IF (NCHECK.EQ.1) cycle
 
   160  CONTINUE
 
@@ -3358,8 +3358,7 @@ C  parts:
                     GR22=GR22+E1*C6R+E2*C7R+E3*C8R
                     GI22=GI22+E1*C6I+E2*C7I+E3*C8I
 
-  200           CONTINUE           !Gauss integration
-
+                end do   !Gauss integration
 *%%%%%%%%%%%%%  Forming J-matrices (J^{11}=J^{22}=0 for m.eq.0):
 
                 AN12=ANN(N1,N2)*FACTOR
@@ -3383,6 +3382,8 @@ C  parts:
                 IG22(N1,N2)=GI22*AN12       !Im (Rg J^{22})
 
   300 CONTINUE
+      end do
+      end do
 
 *%%%%%%%%%%%%%%%%%%%%%%%  Forming Q and RgQ -matrices
 
@@ -3391,11 +3392,11 @@ C  parts:
       TPPI=PPI                 !1/k_{out}^2
 
       NM=NMAX-MM1+1
-      DO 310 N1=MM1,NMAX
+      DO N1=MM1,NMAX
            K1=N1-MM1+1                !from 1 to NMAX-MM1+1
            KK1=K1+NM                  !from NMAX-MM1+2 to 2*(NMAX-MM1+1)
 
-           DO 310 N2=MM1,NMAX
+           DO N2=MM1,NMAX
                 K2=N2-MM1+1           !from 1 to NMAX-MM1+1
                 KK2=K2+NM             !from NMAX-MM1+2 to 2*(NMAX-MM1+1)
 
@@ -3438,17 +3439,18 @@ C  parts:
                 TQI(KK1,KK2)=TPIR*TAI12+TPII*TAR12+TPPI*TAI21
                 TRGQR(KK1,KK2)=TPIR*TGR12-TPII*TGI12+TPPI*TGR21
                 TRGQI(KK1,KK2)=TPIR*TGI12+TPII*TGR12+TPPI*TGI21
-
-  310 CONTINUE
+           end do
+      end do
 
       NNMAX=2*NM
-      DO 320 N1=1,NNMAX
-           DO 320 N2=1,NNMAX
+      DO N1=1,NNMAX
+           DO N2=1,NNMAX
                 QR(N1,N2)=TQR(N1,N2)
                 QI(N1,N2)=TQI(N1,N2)
                 RGQR(N1,N2)=TRGQR(N1,N2)
                 RGQI(N1,N2)=TRGQI(N1,N2)
-  320 CONTINUE
+           end do
+      end do
 *
       CALL TT(NM)
 *
