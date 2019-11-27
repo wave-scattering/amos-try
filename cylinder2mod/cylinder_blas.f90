@@ -19,7 +19,108 @@ contains
     !=======================================================================
     !=======================================================================
     !=======================================================================
+    subroutine inv1 (nmax, f, a)
+        !--------/---------/---------/---------/---------/---------/---------/--
+        ! >>> eps
+        ! <<< rat
+        !=================
+        !  nmax - angular momentum cutoff
+        !--------/---------/---------/---------/---------/---------/---------/--
+        real(dp), intent(out):: a(:, :) !npn2
+        real(dp), intent(in) :: f(:, :) !npn2
+        integer, intent(in) :: nmax
+        integer npn1, npn2, i, i1, i2, j, j1, j2, ndim, nn1, nn2, nnmax
+        real(dp) cond
+        !npn1 = npn2/2
+        real(dp), allocatable :: b(:), &
+                work(:), q1(:, :), q2(:, :), &
+                p1(:, :), p2(:, :)
+        integer, allocatable :: ipvt(:), ind1(:), ind2(:)
+        integer :: array_shape(2)
+
+        array_shape = shape(f)
+        npn2 = array_shape(1)
+        npn1 = npn2/2
+        allocate(b(npn1), work(npn1), q1(npn1,npn1), q2(npn1,npn1), &
+                p1(npn1,npn1), p2(npn1,npn1), ipvt(npn1), ind1(npn1), ind2(npn1))
+
+        ndim = npn1
+        nn1 = (dble(nmax) - 0.1d0) * 0.5d0 + 1d0
+        nn2 = nmax - nn1
+        !
+        do i = 1, nmax
+            ind1(i) = 2 * i - 1
+            if(i.gt.nn1) ind1(i) = nmax + 2 * (i - nn1)
+            ind2(i) = 2 * i
+            if(i.gt.nn2) ind2(i) = nmax + 2 * (i - nn2) - 1
+        end do
+        nnmax = 2 * nmax
+        !
+        do i = 1, nmax
+            i1 = ind1(i)
+            i2 = ind2(i)
+            do j = 1, nmax
+                j1 = ind1(j)
+                j2 = ind2(j)
+                q1(j, i) = f(j1, i1)
+                q2(j, i) = f(j2, i2)
+            end do
+        end do
+        !
+        call invert(ndim, nmax, q1, p1, cond, ipvt, work, b)
+        call invert(ndim, nmax, q2, p2, cond, ipvt, work, b)
+        !
+        a = 0d0
+
+        do i = 1, nmax
+            i1 = ind1(i)
+            i2 = ind2(i)
+            do j = 1, nmax
+                j1 = ind1(j)
+                j2 = ind2(j)
+                a(j1, i1) = p1(j, i)
+                a(j2, i2) = p2(j, i)
+            end do
+        end do
+        !
+        deallocate(b, work, q1, q2, p1, p2, ipvt, ind1, ind2)
+
+        return
+    end
     !=======================================================================
+    subroutine invert (ndim, n, a, x, cond, ipvt, work, b)
+        !--------/---------/---------/---------/---------/---------/---------/--
+        ! >>> eps
+        ! <<< rat
+        !=================
+        !--------/---------/---------/---------/---------/---------/---------/--
+        integer n, ndim, i, j
+        real(dp) cond
+        real(dp) a(ndim, n), x(ndim, n), work(n), b(n)
+        integer ipvt(n)
+        !
+        call decomp (ndim, n, a, cond, ipvt, work)
+        !
+        if (cond + 1d0.eq.cond) print 5, cond
+        !     if (cond+1d0.eq.cond) stop
+        5  format(' the matrix is singular for the given numerical accuracy '&
+                , 'cond = ', d12.6)
+
+        do i = 1, n
+            do j = 1, n
+                b(j) = 0d0
+                if (j.eq.i) b(j) = 1d0
+            end do
+            !
+            call solve (a, b, ipvt)
+            !
+            do j = 1, n
+                x(j, i) = b(j)
+            end do
+        end do
+        !
+        return
+    end
     !=======================================================================
     subroutine decomp (ndim, n, a, cond, ipvt, work)
         integer n, ndim, i,j,k,kb,km1,kp1, m, nm1
