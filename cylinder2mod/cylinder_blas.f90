@@ -1,6 +1,8 @@
 module cylinder_blas
     use constants
-!    use dense_solve
+    use model_parameters
+
+    !    use dense_solve
 !    use multem_blas
 !    use amos
 !    use errfun, only : wpop

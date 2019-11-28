@@ -196,7 +196,7 @@ c ynbrug=false.
 !*****************************************************************
 c Declarations:
 
-      integer ICHOICE,LMAX,NCHECK,NAXSM,NCHECKP,NAXSMP  !common block variables
+      integer LMAX,NCHECK,NAXSM,NCHECKP,NAXSMP  !common block variables
 
       real(dp) RMF(lcs),rff(lcs),RMUF,ff,filfrac   !ff for Bruggemann; filfrac for ZnS
       real(dp) lambda,rev_beg
@@ -225,8 +225,8 @@ c Declarations:
 ! transfers integers NCHECK,NAXSM,NDGS from the main
 ! to AMPLDR
 !
-      COMMON /TOITMT/ICHOICE,NPP,NCHECKP,NAXSMP,NDGSP
-! transfers integers ICHOICE,NP,NCHECK,NAXSM,NDGS from the main to TMTAXSPV
+      COMMON /TOITMT/NPP,NCHECKP,NAXSMP,NDGSP
+! transfers integers NP,NCHECK,NAXSM,NDGS from the main to TMTAXSPV
 !
       COMMON /TOTMT/DEFPP,RATP,REVP,ALPHAE,BETAE,DDELTP
 !
@@ -723,9 +723,9 @@ cc      PHI=128.D0
 
 C--------/---------/---------/---------/---------/---------/---------/--
 !
-! If NAG library is available, set ICHOICE=1, otherwise ICHOICE=2
+! If NAG library is available, set mpar%ICHOICE=1, otherwise mpar%ICHOICE=2
 
-      ICHOICE=2
+      mpar%ichoice=2
 !  controlling the number ND=NDGS*NMAX of division points in
 C  computing integrals over the particle surface (Ref. 5).
 C  For compact particles, the
@@ -767,10 +767,10 @@ C  different NDGS-values are recommended.
 
       END IF
 !
-      IF (ICHOICE.EQ.1) THEN
-      WRITE(6,*) 'NAG ROUTINES USED FOR THE MATRIX INVERSION'
-      ELSE IF (ICHOICE.EQ.0) THEN
-      WRITE(6,*) 'NAG ROUTINES (FOR THE MATRIX INVERSION) ARE NOT USED'
+      IF (mpar%ICHOICE.EQ.1) THEN
+      WRITE(6,*) 'LAPACK ROUTINES ARE USED FOR THE MATRIX INVERSION'
+      ELSE IF (mpar%ICHOICE.EQ.2) THEN
+      WRITE(6,*) 'ZGER and ZSUR (FOR THE MATRIX INVERSION) ARE USED'
       END IF
       WRITE(6,*)
 !
@@ -788,7 +788,7 @@ C  different NDGS-values are recommended.
       END IF
       WRITE(6,*)
 !
-      WRITE(NOUT,5454) ICHOICE,NCHECK
+      WRITE(NOUT,5454) mpar%ICHOICE,NCHECK
  5454 FORMAT ('ICHOICE=',I1,'  NCHECK=',I1)
       WRITE(NOUT,*)'NAXSM=', NAXSM
 
@@ -1666,7 +1666,7 @@ ctest
 
 C      write(90,*) lambda,  global_eps_r,
 C     & global_eps_i
-      call ampldr(yncheck,lmax,ichoice,npp,defpp,
+      call ampldr(yncheck,lmax,npp,defpp,
      & rsnm,hlength,lambda,zeps(1),zeps0)
       end if
 !
@@ -1851,7 +1851,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
 
 C**********************************************************************
 
-      SUBROUTINE AMPLDR(yncheck,nmax,ichoicev,np,eps,
+      SUBROUTINE AMPLDR(yncheck,nmax,np,eps,
      &                  rsnm,ht,lambda,zeps1,zeps0)
 
 C Warning in module AMPLDR in file ampldr.f: Variables set but never used:
@@ -1916,7 +1916,7 @@ C  PHI0 - azimuth angle of the incident beam in degrees
 C  PHI - azimuth angle of the scattered beam in degrees
 C--------/---------/---------/---------/---------/---------/---------/--
       IMPLICIT real(dp) (A-H,O-Z)
-      INTEGER NOUT,NAXSM,ICHOICEV,ICHOICE
+      INTEGER NOUT,NAXSM
       LOGICAL YNCHECK
       integer nmax, np, inm1, ixxx, m, m1, n, n1, n11, n2 ,n22, ncheck,
      & ndgs, ngaus, ngauss, nm, nma, nn1, nn2, nnm, nnnggg
@@ -1945,7 +1945,7 @@ c      real(dp) XALPHA(300),XBETA(300),WALPHA(300),WBETA(300)
 ! transfers T matrix arrays obtained from TR1,TI1 in the AMPLDR
 ! to the AMPL routine
 !
-      COMMON /CHOICE/ ICHOICE
+!     COMMON /CHOICE/ ICHOICE
 ! transfers the choice of inversion to relevant matrix inversion
 ! routines
 !
@@ -1964,7 +1964,6 @@ c      real(dp) XALPHA(300),XBETA(300),WALPHA(300),WBETA(300)
 !
       P=DACOS(-1D0)                   !local PI constant
 !
-      ICHOICE=ICHOICEV
       A=REV
       LAM=LAMBDA/SQRT(ZEPS0)          !wavelength in the ambient
 

@@ -19,7 +19,7 @@ add_library(special_functions special_functions.f90)
 target_link_libraries(special_functions constants)
 
 add_library(cylinder_blas cylinder_blas.f90)
-target_link_libraries(cylinder_blas constants)
+target_link_libraries(cylinder_blas constants model_parameters)
 
 add_library(libcylinder libcylinder.f90)
 target_link_libraries(libcylinder

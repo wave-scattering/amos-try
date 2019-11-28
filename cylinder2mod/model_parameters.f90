@@ -16,6 +16,10 @@ module model_parameters
                 alpha, beta, thet, thet0, phi, phi0
         integer :: np, nstep, ndefp
         complex(dp) :: cceps, zeps0
+
+        !Select the solver between Lapack or custom routines (ichoice = 1 or 2)
+        integer, public :: ichoice
+
     end type model_parameters_type
     type(model_parameters_type), public :: mpar
 

@@ -34,7 +34,7 @@ C______________________________
 C
 C LOCAL VARIABLES:
 C ===============
-C ICHOICE=1 if NAG library is available, otherwise ICHOICE=2 
+C mpar%ICHOICE=1 if NAG library is available, otherwise mpar%ICHOICE=2
 C
 C NP,EPS: specifies the shape of particles within a given NP class:
 C     NP.gt.0 - EPS = deformation parameter of a Chebyshev particle
@@ -88,7 +88,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       IMPLICIT REAL(dp) (A-H,O-Z)
       INTEGER LMAXD,LMAX1D,LMTD
-      INTEGER NAXSM,ICHOICEV,ICHOICE
+      INTEGER NAXSM
 
       PARAMETER (LMAXD=8,LMAX1D=LMAXD+1,LMTD=LMAX1D*LMAX1D-1)
 
@@ -111,16 +111,16 @@ cc      COMMON /TMAT/ RT11,RT12,RT21,RT22,IT11,IT12,IT21,IT22
 ! AMPL routine --->  NOT USED HERE
 !
 
-      COMMON /CHOICE/ ICHOICE
+!     COMMON /CHOICE/ ICHOICE
 ! transfers the choice of inversion from here to TT
 !
       COMMON/REVVAL/ A
 ! 
 ! transfers REV to CONST routine
 !
-      COMMON /TOITMT/ICHOICEV,NP,NCHECK,NAXSM,NDGS   
+      COMMON /TOITMT/NP,NCHECK,NAXSM,NDGS
 !
-! transfers integers ICHOICEV,NP,NCHECK,NAXSM,NDGS from the main here
+! transfers integers NP,NCHECK,NAXSM,NDGS from the main here
 !
       COMMON /TOTMT/EPS,RAT,REV,ALPHA,BETA,DDELT   
 ! 
@@ -131,7 +131,6 @@ cc      COMMON /TMAT/ RT11,RT12,RT21,RT22,IT11,IT12,IT21,IT22
 !
       P=DACOS(-1D0)                 !local PI constant
 !
-      ICHOICE=ICHOICEV
       A=REV
       LAM=REV*SQRT(mpar%zeps0)/RAP       !vacuum wavelength times SQRT(mpar%zeps0)/
 !
@@ -2569,9 +2568,6 @@ C  parts:
 C**********************************************************************
  
       SUBROUTINE TT(NMAX)
-C--------/---------/---------/---------/---------/---------/---------/--
-C >>> NMAX,NCHECK
-C <<< COMMON BLOCKS
 C=================
 C  NMAX=NMAX-M+1 here, where NMAX is the angular momentum cutoff in main
 C  NCHECK -
@@ -2586,14 +2582,11 @@ C--------/---------/---------/---------/---------/---------/---------/--
 
       real(dp)  QR(NPN2,NPN2),QI(NPN2,NPN2),EMACH,
      &  RGQR(NPN2,NPN2),RGQI(NPN2,NPN2)
-cc      real(dp) F(NPN2,NPN2),B(NPN2),WORK(NPN2),
-cc     *       A(NPN2,NPN2),C(NPN2,NPN2),D(NPN2,NPN2),E(NPN2,NPN2)
       real(dp) TR1(NPN2,NPN2),TI1(NPN2,NPN2)
       complex(dp), allocatable :: ZQ(:,:), ZX(:), ZW(:)
       integer, allocatable:: ipiv(:)
       integer nnmax
 !
-      COMMON /CHOICE/ ICHOICE
       COMMON /CT/ TR1,TI1
       COMMON /CTT/ QR,QI,RGQR,RGQI
 !
@@ -2608,7 +2601,7 @@ cc     *       A(NPN2,NPN2),C(NPN2,NPN2),D(NPN2,NPN2),E(NPN2,NPN2)
        ENDDO
       ENDDO
 
-      IF (ICHOICE.EQ.2) GOTO 5    ! NAG or not NAG decision tree
+      IF (mpar%ichoice.EQ.2) GOTO 5    ! NAG or not NAG decision tree
 !*******************************************************************
 C     Matrix inversion from LAPACK
 
