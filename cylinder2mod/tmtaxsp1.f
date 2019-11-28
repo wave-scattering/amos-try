@@ -1795,43 +1795,44 @@ C--------/---------/---------/---------/---------/---------/---------/--
       real(dp) X(NG),XR(NG),XI(NG),
      &   J(NPNG2,NPN1),Y(NPNG2,NPN1),JR(NPNG2,NPN1),
      &   JI(NPNG2,NPN1),DJ(NPNG2,NPN1),DY(NPNG2,NPN1),
-     &   DJR(NPNG2,NPN1),DJI(NPNG2,NPN1),
-     &   AJR(NPN1),AJI(NPN1),
-     &   ADJR(NPN1),
-     &   ADJI(NPN1)
+     &   DJR(NPNG2,NPN1),DJI(NPNG2,NPN1)
       COMMON /CBESS/ J,Y,JR,JI,DJ,DY,DJR,DJI    !arrays of generated Bessel functions
 !
       if (allocated(abess%AY)) then
         nmax_old = size(abess%AY)
-        if (nmax_old.ne.nmax) then
+        if (nmax_old.lt.nmax) then
         deallocate(abess%AY, abess%ADY,abess%AJ, abess%ADJ)
+        deallocate(abess%AJR, abess%ADJR,abess%AJI, abess%ADJI)
         endif
       endif
       if (.not.allocated(abess%AY)) then
       allocate(abess%AY(nmax), abess%ADY(nmax),
      &         abess%AJ(nmax), abess%ADJ(nmax))
+      allocate(abess%AJR(nmax), abess%ADJR(nmax),
+     &         abess%AJI(nmax), abess%ADJI(nmax))
       endif
       NG = size(X)
       DO I=1,NG
            XX=X(I)
 !
-           CALL RJB(XX,abess%AJ,abess%ADJ,NNMAX1)
-           CALL RYB(XX,abess%AY,abess%ADY)
+           CALL RJB(XX,abess%AJ,abess%ADJ,nmax,NNMAX1)
+           CALL RYB(XX,abess%AY,abess%ADY,nmax)
 !
            YR=XR(I)
            YI=XI(I)
 !
-           CALL CJB(YR,YI,AJR,AJI,ADJR,ADJI,NMAX,2)
+           CALL CJB(YR,YI,abess%AJR,abess%AJI,
+     &              abess%ADJR,abess%ADJI,NMAX,2)
 !
            DO N=1,NMAX
                 J(I,N)=abess%AJ(N)
                 Y(I,N)=abess%AY(N)
-                JR(I,N)=AJR(N)
-                JI(I,N)=AJI(N)
+                JR(I,N)=abess%AJR(N)
+                JI(I,N)=abess%AJI(N)
                 DJ(I,N)=abess%ADJ(N)
                 DY(I,N)=abess%ADY(N)
-                DJR(I,N)=ADJR(N)
-                DJI(I,N)=ADJI(N)
+                DJR(I,N)=abess%ADJR(N)
+                DJI(I,N)=abess%ADJI(N)
            end do
       end do
 !     deallocate(AY, ADY, AJ, ADJ)
@@ -1841,96 +1842,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
 C**********************************************************************
  
 
-      SUBROUTINE CJB (XR,XI,YR,YI,UR,UI,NMAX,NNMAX)
-C--------/---------/---------/---------/---------/---------/---------/--
-C                                                                     
-C   CALCULATION OF SPHERICAL BESSEL FUNCTIONS OF THE FIRST KIND       
-C   J=JR+I*JI OF COMPLEX ARGUMENT X=XR+I*XI OF ORDERS FROM 1 TO NMAX  
-C   BY USING BACKWARD RECURSION. PARAMETER NNMAX DETERMINES NUMERICAL  
-C   ACCURACY. U=UR+I*UI - FUNCTION (1/X)(D/DX)(X*J(X))=J(X)/X + J'(X)                
-C
-C  XR=(2\pi/\lambda)*r*MRR, MRR ... real part of the rel. refractive index
-C  XI=(2\pi/\lambda)*r*MRI, MRI ... imag. part of the rel. refractive index
-C
-C   NMAX  - angular momentum cutoff 
-C   NNMAX - angular momentum cutoff - DETERMINES NUMERICAL ACCURACY                
-                                                 
-C--------/---------/---------/---------/---------/---------/---------/--
-      use libcylinder
-      INCLUDE 'ampld.par.f'
-      IMPLICIT real(dp) (A-H,O-Z)
-      
-      real(dp) YR(NMAX),YI(NMAX),UR(NMAX),UI(NMAX)
-      real(dp) CYR(NPN1),CYI(NPN1),CZR(1200),CZI(1200)
-c     *       CUR(NPN1),CUI(NPN1)
-!
-      L=NMAX+NNMAX
-      XRXI=1D0/(XR*XR+XI*XI)
-      CXXR=XR*XRXI             !Re [1/(XR+i*XI)]
-      CXXI=-XI*XRXI            !Im [1/(XR+i*XI)] 
-      QF=1D0/dble(2*L+1)
-      CZR(L)=XR*QF
-      CZI(L)=XI*QF
-      L1=L-1
-      DO I=1,L1
-         I1=L-I
-         QF=dble(2*I1+1)
-         AR=QF*CXXR-CZR(I1+1)
-         AI=QF*CXXI-CZI(I1+1)
-         ARI=1D0/(AR*AR+AI*AI)
-         CZR(I1)=AR*ARI
-         CZI(I1)=-AI*ARI
-      ENDDO   
-      
-      AR=CXXR-CZR(1)
-      AI=CXXI-CZI(1)
-      ARI=1D0/(AR*AR+AI*AI)
-      CZ0R=AR*ARI
-      CZ0I=-AI*ARI
-      CR=DCOS(XR)*DCOSH(XI)
-      CCI=-DSIN(XR)*DSINH(XI)
-      AR=CZ0R*CR-CZ0I*CCI
-      AI=CZ0I*CR+CZ0R*CCI
-      CY0R=AR*CXXR-AI*CXXI
-      CY0I=AI*CXXR+AR*CXXI
-      CY1R=CY0R*CZR(1)-CY0I*CZI(1)
-      CY1I=CY0I*CZR(1)+CY0R*CZI(1)
-      AR=CY1R*CXXR-CY1I*CXXI
-      AI=CY1I*CXXR+CY1R*CXXI
-      CU1R=CY0R-AR
-      CU1I=CY0I-AI
-      CYR(1)=CY1R
-      CYI(1)=CY1I
-c      CUR(1)=CU1R
-c      CUI(1)=CU1I
-      YR(1)=CY1R
-      YI(1)=CY1I
-      UR(1)=CU1R
-      UI(1)=CU1I
-      
-      DO I=2,NMAX
-         QI=dble(I)
-         CYI1R=CYR(I-1)
-         CYI1I=CYI(I-1)
-         CYIR=CYI1R*CZR(I)-CYI1I*CZI(I)
-         CYII=CYI1I*CZR(I)+CYI1R*CZI(I)
-         AR=CYIR*CXXR-CYII*CXXI            !Re [J/(XR+i*XI)]
-         AI=CYII*CXXR+CYIR*CXXI            !Im [J/(XR+i*XI)]
-         CUIR=CYI1R-QI*AR
-         CUII=CYI1I-QI*AI
-         CYR(I)=CYIR
-         CYI(I)=CYII
-c         CUR(I)=CUIR
-c         CUI(I)=CUII
-         YR(I)=CYIR
-         YI(I)=CYII
-         UR(I)=CUIR
-         UI(I)=CUII
-      ENDDO 
-!  
-      RETURN
-      END
- 
+
 C**********************************************************************
  
       SUBROUTINE TMATR0(NGAUSS,X,W,AN,ANN,PPI,PIR,PII,R,DR,DDR,

@@ -7,8 +7,10 @@ module special_functions
     implicit none
 
     type, private :: abess_values
-        real(dp), allocatable ::AY(:), ADY(:), AJ(:), ADJ(:)
+        real(dp), allocatable ::AY(:), ADY(:), AJ(:), ADJ(:), &
+                AJR(:), ADJR(:),AJI(:), ADJI(:)
     end type abess_values
+    real(dp), allocatable, private :: z(:)
     type(abess_values), public :: abess
     public vig, vigf !,zartan
 
@@ -19,8 +21,97 @@ contains
     !=======================================================================
     !=======================================================================
     !=======================================================================
+    subroutine cjb (xr, xi, yr, yi, ur, ui, nmax, nnmax)
+        !--------/---------/---------/---------/---------/---------/---------/--
+        !
+        !   calculation of spherical bessel functions of the first kind
+        !   j=jr+i*ji of complex argument x=xr+i*xi of orders from 1 to nmax
+        !   by using backward recursion. parameter nnmax determines numerical
+        !   accuracy. u=ur+i*ui - function (1/x)(d/dx)(x*j(x))=j(x)/x + j'(x)
+        !
+        !  xr=(2\pi/\lambda)*r*mrr, mrr ... real part of the rel. refractive index
+        !  xi=(2\pi/\lambda)*r*mri, mri ... imag. part of the rel. refractive index
+        !
+        !   nmax  - angular momentum cutoff
+        !   nnmax - angular momentum cutoff - determines numerical accuracy
+
+        !--------/---------/---------/---------/---------/---------/---------/--
+        integer nmax, nnmax, l, l1, i, i1
+        real(dp) xr, xi, xrxi, cxxr, xcci, qf, ar, ai, ari, cz0r, cz0i, cr, cci, &
+         cy0r, cy0i, cy1r, cy1i, cu1r, cu1i, qi, cuii, cuir, cxxi, cyi1i, cyi1r, cyii,&
+                cyir
+        real(dp) yr(nmax), yi(nmax), ur(nmax), ui(nmax)
+        real(dp) cyr(npn1), cyi(npn1), czr(1200), czi(1200)
+        !     *       cur(npn1),cui(npn1)
+        !
+        l = nmax + nnmax
+        xrxi = 1d0 / (xr * xr + xi * xi)
+        cxxr = xr * xrxi             !re [1/(xr+i*xi)]
+        cxxi = -xi * xrxi            !im [1/(xr+i*xi)]
+        qf = 1d0 / dble(2 * l + 1)
+        czr(l) = xr * qf
+        czi(l) = xi * qf
+        l1 = l - 1
+        do i = 1, l1
+            i1 = l - i
+            qf = dble(2 * i1 + 1)
+            ar = qf * cxxr - czr(i1 + 1)
+            ai = qf * cxxi - czi(i1 + 1)
+            ari = 1d0 / (ar * ar + ai * ai)
+            czr(i1) = ar * ari
+            czi(i1) = -ai * ari
+        enddo
+
+        ar = cxxr - czr(1)
+        ai = cxxi - czi(1)
+        ari = 1d0 / (ar * ar + ai * ai)
+        cz0r = ar * ari
+        cz0i = -ai * ari
+        cr = dcos(xr) * dcosh(xi)
+        cci = -dsin(xr) * dsinh(xi)
+        ar = cz0r * cr - cz0i * cci
+        ai = cz0i * cr + cz0r * cci
+        cy0r = ar * cxxr - ai * cxxi
+        cy0i = ai * cxxr + ar * cxxi
+        cy1r = cy0r * czr(1) - cy0i * czi(1)
+        cy1i = cy0i * czr(1) + cy0r * czi(1)
+        ar = cy1r * cxxr - cy1i * cxxi
+        ai = cy1i * cxxr + cy1r * cxxi
+        cu1r = cy0r - ar
+        cu1i = cy0i - ai
+        cyr(1) = cy1r
+        cyi(1) = cy1i
+        !      cur(1)=cu1r
+        !      cui(1)=cu1i
+        yr(1) = cy1r
+        yi(1) = cy1i
+        ur(1) = cu1r
+        ui(1) = cu1i
+
+        do i = 2, nmax
+            qi = dble(i)
+            cyi1r = cyr(i - 1)
+            cyi1i = cyi(i - 1)
+            cyir = cyi1r * czr(i) - cyi1i * czi(i)
+            cyii = cyi1i * czr(i) + cyi1r * czi(i)
+            ar = cyir * cxxr - cyii * cxxi            !re [j/(xr+i*xi)]
+            ai = cyii * cxxr + cyir * cxxi            !im [j/(xr+i*xi)]
+            cuir = cyi1r - qi * ar
+            cuii = cyi1i - qi * ai
+            cyr(i) = cyir
+            cyi(i) = cyii
+            !         cur(i)=cuir
+            !         cui(i)=cuii
+            yr(i) = cyir
+            yi(i) = cyii
+            ur(i) = cuir
+            ui(i) = cuii
+        enddo
+        !
+        return
+    end
     !=======================================================================
-    subroutine rjb(x, y, u, nnmax)
+    subroutine rjb(x, y, u, nmax, nnmax)
         !=================
         !  x =(2\pi/\lambda)*r
         !  y ...
@@ -30,9 +121,6 @@ contains
         integer nmax, nnmax, l, l1, i, i1
         real(dp) x, xx, z0, y0, y1, yi, yi1
         real(dp) :: y(:), u(:)
-        real(dp), allocatable :: z(:)
-        !
-        nmax = size(y)
         l = nmax + nnmax
         allocate(z(l))
         xx = 1d0 / x
@@ -59,7 +147,7 @@ contains
 
     end
     !=======================================================================
-    subroutine ryb(x, y, v)
+    subroutine ryb(x, y, v, nmax)
         !=================
         !  x =(2\pi/\lambda)*r
         !  nmax - angular momentum cutoff
@@ -68,7 +156,6 @@ contains
         real(dp) :: c,s, x, x1, x2, x3, y1
         real(dp) y(:), v(:)
         !
-        nmax = size(y)
         c = dcos(x)
         s = dsin(x)
         x1 = 1d0 / x
