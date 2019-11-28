@@ -2818,10 +2818,8 @@ C--------/---------/---------/---------/---------/---------/---------/--
 cc      real(dp) F(NPN2,NPN2),B(NPN2),WORK(NPN2),
 cc     *       A(NPN2,NPN2),C(NPN2,NPN2),D(NPN2,NPN2),E(NPN2,NPN2)
       real(dp) TR1(NPN2,NPN2),TI1(NPN2,NPN2)
-      complex(dp) ZQ(NPN2,NPN2),ZX(NPN2)
-      complex(dp), allocatable :: ZQcrop(:,:)
-      INTEGER IPIV(NPN2)
-      integer, allocatable:: ipiv_crop(:)
+      complex(dp), allocatable :: ZQ(:,:), ZX(:), ZW(:)
+      integer, allocatable:: ipiv(:)
       integer nnmax
 !
       COMMON /CHOICE/ ICHOICE
@@ -2831,7 +2829,8 @@ cc     *       A(NPN2,NPN2),C(NPN2,NPN2),D(NPN2,NPN2),E(NPN2,NPN2)
       DATA EMACH/0.D0/                 !/1.D-17/
 !
       NNMAX=2*NMAX
-
+      allocate(ZQ(1:NNMAX, 1:NNMAX), IPIV(1:NNMAX),
+     &   ZX(1:NNMAX), ZW(1:NNMAX))
       DO I=1,NNMAX
        DO J=1,NNMAX
           ZQ(I,J)=cmplx_dp(QR(I,J),QI(I,J))
@@ -2848,20 +2847,12 @@ C     Matrix inversion from LAPACK
            ENDDO
       ENDDO
       INFO=0
-!     allocate(ZQcrop(1:NNMAX, 1:NNMAX))
-!     ZQcrop = ZQ(1:NNMAX, 1:NNMAX)
 !     call zgetrf_wrap(ZQ, IPIV)
-!     ZQ(1:NNMAX, 1:NNMAX) = ZQcrop
-      CALL ZGETRF(NNMAX,NNMAX,ZQ,NPN2,IPIV,INFO)
+      CALL ZGETRF(NNMAX,NNMAX,ZQ,NNMAX,IPIV,INFO)
       IF (INFO.NE.0) WRITE (6,1100) INFO
-      CALL ZGETRI(NNMAX,ZQ,NPN2,IPIV,ZW,NPN2,INFO)
+      CALL ZGETRI(NNMAX,ZQ,NNMAX,IPIV,ZW,NNMAX,INFO)
       IF (INFO.NE.0) WRITE (6,1100) INFO
 
-cc           CALL F07ARF(NNMAX,NNMAX,ZQ,NPN2,IPIV,INFO)
-cc           IF (INFO.NE.0) WRITE(NOUT,1100) INFO
-cc           CALL F07AWF(NNMAX,ZQ,NPN2,IPIV,ZX,NPN2,INFO)
-cc           IF (INFO.NE.0) WRITE(NOUT,1100) INFO
-!
  1100      FORMAT ('WARNING:  info=', i2)
 ! Calculate T-matrix = - RG(Q) * (Q**(-1))
 !
@@ -2888,103 +2879,30 @@ cc           IF (INFO.NE.0) WRITE(NOUT,1100) INFO
 C  Gaussian elimination             !NAG library not used
 
 ! 5   continue
-  5   allocate(ZQcrop(1:NNMAX, 1:NNMAX), IPIV_crop(1:NNMAX))
-      ZQcrop = ZQ(1:NNMAX, 1:NNMAX)
-      CALL ZGER(ZQcrop,IPIV_crop,EMACH)  !Gauss elimination of ZQ to
-                                           !a lower diagonal matrix
-!     call zgetrf_wrap(ZQcrop, IPIV)
-      ZQ(1:NNMAX, 1:NNMAX) = ZQcrop
-      IPIV(1:NNMAX) = IPIV_crop
-      deallocate(ZQcrop, IPIV_crop)
+  5   CALL ZGER(ZQ,IPIV,EMACH)  !Gauss elimination of ZQ to
+                                !a lower diagonal matrix
 
       DO I=1,NNMAX
               DO K=1,NNMAX    !Initialization of the right-hand side ZB
                               !(a row vector) of the matrix equation ZX*ZQ=ZB
-
                 ZX(K)=cmplx_dp(RGQR(I,K),RGQI(I,K))
               ENDDO
-!     call zgetrs_wrap(ZQ, ZX, IPIV)
-              CALL ZSUR(ZQ,IPIV,ZX,NNMAX,NPN2,EMACH)
-                                               !Solving ZX*ZQ=ZB by
-                                               !backsubstition
-                                               !(ZX overwritten on exit)
+              !Solving ZX*ZQ=ZB by backsubstition (ZX overwritten on exit)
+              CALL ZSUR(ZQ,IPIV,ZX,EMACH)
              DO K=1,NNMAX
-!
-! Assign T-matrix elements = - RG(Q) * (Q**(-1))
-!
+               ! Assign T-matrix elements = - RG(Q) * (Q**(-1))
                TR1(I,K)=-DBLE(ZX(K))
                TI1(I,K)=-aimag(ZX(K))
              ENDDO
       end do
-!
+
+      deallocate(ZQ, IPIV, ZX, ZW)
    70 RETURN
       END
  
 C********************************************************************
 C********************************************************************
 
-      SUBROUTINE ZSUR(A,INT,X,N,NC,EMACH)
-C     ------------------------------------------------------------------
-C     ZSUR IS  A STANDARD BACK-SUBSTITUTION  SUBROUTINE  USING THE
-C     OUTPUT OF ZGE TO CALCULATE X TIMES A-INVERSE, RETURNED IN X
-C     ------------------------------------------------------------------
-      use libcylinder
-      IMPLICIT NONE
-C
-C ..  SCALAR ARGUMENTS  ..
-C
-      INTEGER N,NC
-      real(dp) EMACH
-C
-C ..  ARRAY ARGUMENTS  ..
-C
-      INTEGER    INT(NC)
-      complex(dp) A(NC,NC),X(NC)
-C
-C ..  LOCAL SCALARS  ..
-C
-      INTEGER    I,II,IN,J,IJ
-      complex(dp) DUM
-C
-C ..  INTRINSIC FUNCTIONS  ..
-C
-!      INTRINSIC ABS
-C     ------------------------------------------------------------------
-C
-      DO II=2,N
-         I=II-1
-         IF((INT(I)-I).ne.0) then    !If INT(I).NE.I switch the I-th and INT(I)-th
-                                !elements of the vector X
-           IN=INT(I)
-           DUM=X(IN)
-           X(IN)=X(I)
-           X(I)=DUM
-         end if
-!
-! Forming a matrix product
-!
-         DO J=II,N
-           IF((ABS(A(I,J))-EMACH).gt.0) X(J)=X(J)-X(I)*A(I,J)
-         end do
-      end do
-                  !the I-th row of A multiplied by X(I)
-                             !subtracted from X
-!
-      DO II=1,N
-        I=N-II+1
-        IJ=I+1
-        IF((I-N).ne.0) then
-          DO J=IJ,N
-              X(I)=X(I)-X(J)*A(J,I)
-          end do
-        end if
-        IF((ABS(A(I,I))-EMACH*1.0D-7).lt.0)  then
-          A(I,I)=EMACH*(1.0D-7)*(1.D0,1.D0)
-        end if
-        X(I)=X(I)/A(I,I)
-      end do
-      RETURN
-      END
 
 C********************************************************************
 

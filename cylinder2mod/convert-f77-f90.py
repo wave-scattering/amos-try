@@ -84,6 +84,8 @@ def reformat_do(lines):
             if len(splited)==0 : break
             if len(splited)==1 and splited[0] != 'do': break
             if splited[0] != 'do' and splited[1] != 'do': break
+            if splited[0] == 'end': break
+            # print(splited)
             if splited[0] == 'do': label = splited[1]
             else: label = splited[2]
             try:

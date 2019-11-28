@@ -17,6 +17,57 @@ contains
     !=======================================================================
     !=======================================================================
     !=======================================================================
+    subroutine zsur(a, int, x, emach)
+        !     ------------------------------------------------------------------
+        !     zsur is  a standard back-substitution  subroutine  using the
+        !     output of zge to calculate x times a-inverse, returned in x
+        !     ------------------------------------------------------------------
+        implicit none
+        integer n
+        real(dp) emach
+        integer    int(:)
+        complex(dp) a(:, :), x(:)
+        integer    i, ii, in, j, ij
+        complex(dp) dum
+        integer :: array_shape(2)
+        !     ------------------------------------------------------------------
+        array_shape = shape(a)
+        n = array_shape(1)
+        do ii = 2, n
+            i = ii - 1
+            if((int(i) - i).ne.0) then    !if int(i).ne.i switch the i-th and
+                !                               int(i)-th
+                !                               !elements of the vector x
+                in = int(i)
+                dum = x(in)
+                x(in) = x(i)
+                x(i) = dum
+            end if
+            !
+            ! forming a matrix product
+            !
+            do j = ii, n
+                if((abs(a(i, j)) - emach).gt.0) x(j) = x(j) - x(i) * a(i, j)
+            end do
+        end do
+        !                 !the i-th row of a multiplied by x(i)
+        !                            !subtracted from x
+        !
+        do ii = 1, n
+            i = n - ii + 1
+            ij = i + 1
+            if((i - n).ne.0) then
+                do j = ij, n
+                    x(i) = x(i) - x(j) * a(j, i)
+                end do
+            end if
+            if((abs(a(i, i)) - emach * 1.0d-7).lt.0)  then
+                a(i, i) = emach * (1.0d-7) * (1.d0, 1.d0)
+            end if
+            x(i) = x(i) / a(i, i)
+        end do
+        return
+    end
     !=======================================================================
     subroutine zger(a, int, emach)
         !     ------------------------------------------------------------------
@@ -301,50 +352,50 @@ contains
 !        return
 !    end
 !    !=======================================================================
-    subroutine solve (a, b, ipvt)
-        !--------/---------/---------/---------/---------/---------/---------/--
-        ! >>> eps
-        ! <<< rat
-        !=================
-        !--------/---------/---------/---------/---------/---------/---------/--
-        integer ndim, n, nm1, k, kp1, i, kb, km1, m
-        real(dp) t
-        real(dp), intent(in) :: a(:, :)
-        real(dp), intent(out) :: b(:)
-        integer :: array_shape(2)
-        integer, intent(in) :: ipvt(:)
-        !
-        array_shape = shape(a)
-        ndim = array_shape(1)
-        n = array_shape(2)
-        if (n.eq.1) then
-            b(1) = b(1) / a(1, 1)
-            return
-        end if
-        nm1 = n - 1
-        do k = 1, nm1
-            kp1 = k + 1
-            m = ipvt(k)
-            t = b(m)
-            b(m) = b(k)
-            b(k) = t
-            do i = kp1, n
-                b(i) = b(i) + a(i, k) * t
-            end do
-        end do
-        do kb = 1, nm1
-            km1 = n - kb
-            k = km1 + 1
-            b(k) = b(k) / a(k, k)
-            t = -b(k)
-            do i = 1, km1
-                b(i) = b(i) + a(i, k) * t
-            end do
-        end do
-        b(1) = b(1) / a(1, 1)
-        !
-        return
-    end
+!    subroutine solve (a, b, ipvt)
+!        !--------/---------/---------/---------/---------/---------/---------/--
+!        ! >>> eps
+!        ! <<< rat
+!        !=================
+!        !--------/---------/---------/---------/---------/---------/---------/--
+!        integer ndim, n, nm1, k, kp1, i, kb, km1, m
+!        real(dp) t
+!        real(dp), intent(in) :: a(:, :)
+!        real(dp), intent(out) :: b(:)
+!        integer :: array_shape(2)
+!        integer, intent(in) :: ipvt(:)
+!        !
+!        array_shape = shape(a)
+!        ndim = array_shape(1)
+!        n = array_shape(2)
+!        if (n.eq.1) then
+!            b(1) = b(1) / a(1, 1)
+!            return
+!        end if
+!        nm1 = n - 1
+!        do k = 1, nm1
+!            kp1 = k + 1
+!            m = ipvt(k)
+!            t = b(m)
+!            b(m) = b(k)
+!            b(k) = t
+!            do i = kp1, n
+!                b(i) = b(i) + a(i, k) * t
+!            end do
+!        end do
+!        do kb = 1, nm1
+!            km1 = n - kb
+!            k = km1 + 1
+!            b(k) = b(k) / a(k, k)
+!            t = -b(k)
+!            do i = 1, km1
+!                b(i) = b(i) + a(i, k) * t
+!            end do
+!        end do
+!        b(1) = b(1) / a(1, 1)
+!        !
+!        return
+!    end
 !    !=======================================================================
 !    subroutine zge(a, int, n, nc, emach)
 !
