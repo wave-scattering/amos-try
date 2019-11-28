@@ -1766,66 +1766,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
 
 C*********************************************************************
  
-      SUBROUTINE BESS (X,XR,XI,NG,NMAX,NNMAX1)
-C--------/---------/---------/---------/---------/---------/---------/--
-C >>> X,XR,XI,NG,NMAX,NNMAX1,NNMAX2
-C <<< Output J,Y,JR,JI,DJ,DY,DJR,DJI  to common block CBESS
-C==========================================================
-C  Generates Bessel functions for each Gauss integration point
-C
-C  X =(2\pi/\lambda)*r
-C  XR=(2\pi/\lambda)*r*MRR, MRR ... real part of the rel. refractive index
-C  XI=(2\pi/\lambda)*r*MRI, MRI ... imag. part of the rel. refractive index
-C  NG=2*NGAUSS or 60 ... the number of Gauss integration points
-C  J,Y,JR,JI ... arrays of Bessel functions
-C  DJ,DY,DJR,DJI  ... arrays of Bessel functions derivatives of the form
-C                           [xf(x)]'/x                   (A)
-C                 where prime denotes derivative with respect to x.
-C                 (Note that Bessel function derivatives enter Eqs. (39)
-C                  \cite{TKS} only in the (A) combination!!!!)
-C  NMAX   ... angular momentum cutoff
-C  NNMAX1 ... angular momentum cutoff - DETERMINES NUMERICAL ACCURACY 
-C  NNMAX2 ... angular momentum cutoff - DETERMINES NUMERICAL ACCURACY 
-C--------/---------/---------/---------/---------/---------/---------/--
-      use libcylinder
-      INCLUDE 'ampld.par.f'
-      IMPLICIT real(dp) (A-H,O-Z)
-      integer, intent(in) :: NMAX
-      real(dp) X(NG),XR(NG),XI(NG),
-     &   J(NPNG2,NPN1),Y(NPNG2,NPN1),JR(NPNG2,NPN1),
-     &   JI(NPNG2,NPN1),DJ(NPNG2,NPN1),DY(NPNG2,NPN1),
-     &   DJR(NPNG2,NPN1),DJI(NPNG2,NPN1)
-      COMMON /CBESS/ J,Y,JR,JI,DJ,DY,DJR,DJI    !arrays of generated Bessel functions
-!
-      call reallocate_abess(nmax)
-      NG = size(X)
-      DO I=1,NG
-           XX=X(I)
-!
-           CALL RJB(XX,abess%AJ,abess%ADJ,nmax,NNMAX1)
-           CALL RYB(XX,abess%AY,abess%ADY,nmax)
-!
-           YR=XR(I)
-           YI=XI(I)
-!
-           CALL CJB(YR,YI,abess%AJR,abess%AJI,
-     &              abess%ADJR,abess%ADJI,NMAX,2)
-!
-           DO N=1,NMAX
-                J(I,N)=abess%AJ(N)
-                Y(I,N)=abess%AY(N)
-                JR(I,N)=abess%AJR(N)
-                JI(I,N)=abess%AJI(N)
-                DJ(I,N)=abess%ADJ(N)
-                DY(I,N)=abess%ADY(N)
-                DJR(I,N)=abess%ADJR(N)
-                DJI(I,N)=abess%ADJI(N)
-           end do
-      end do
-!     deallocate(AY, ADY, AJ, ADJ)
-      RETURN
-      END
- 
+
 C**********************************************************************
  
 

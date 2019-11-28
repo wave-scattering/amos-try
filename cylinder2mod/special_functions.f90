@@ -10,7 +10,13 @@ module special_functions
         real(dp), allocatable ::AY(:), ADY(:), AJ(:), ADJ(:), &
                 AJR(:), ADJR(:),AJI(:), ADJI(:)
     end type abess_values
-    type(abess_values), public :: abess
+    type(abess_values), private :: abess
+
+    type, private :: cbess_values
+        real(dp), allocatable :: J(:,:), Y(:,:), JR(:,:), JI(:,:), &
+                DJ(:,:),DY(:,:),DJR(:,:),DJI(:,:)
+    end type cbess_values
+    type(cbess_values), public :: cbess
 
     public vig, vigf !,zartan
 
@@ -19,6 +25,63 @@ contains
     !=======================================================================
     !=======================================================================
     !=======================================================================
+    subroutine bess (x, xr, xi, ng, nmax, nnmax1)
+        !--------/---------/---------/---------/---------/---------/---------/--
+        ! >>> x,xr,xi,ng,nmax,nnmax1,nnmax2
+        ! <<< output j,y,jr,ji,dj,dy,djr,dji  to common block cbess
+        !==========================================================
+        !  generates bessel functions for each gauss integration point
+        !
+        !  x =(2\pi/\lambda)*r
+        !  xr=(2\pi/\lambda)*r*mrr, mrr ... real part of the rel. refractive index
+        !  xi=(2\pi/\lambda)*r*mri, mri ... imag. part of the rel. refractive index
+        !  ng=2*ngauss or 60 ... the number of gauss integration points
+        !  j,y,jr,ji ... arrays of bessel functions
+        !  dj,dy,djr,dji  ... arrays of bessel functions derivatives of the form
+        !                           [xf(x)]'/x                   (a)
+        !                 where prime denotes derivative with respect to x.
+        !                 (note that bessel function derivatives enter eqs. (39)
+        !                  \cite{tks} only in the (a) combination!!!!)
+        !  nmax   ... angular momentum cutoff
+        !  nnmax1 ... angular momentum cutoff - determines numerical accuracy
+        !  nnmax2 ... angular momentum cutoff - determines numerical accuracy
+        !--------/---------/---------/---------/---------/---------/---------/--
+        integer ng, nnmax1, i, n
+        real(dp) xx, yi, yr
+        integer, intent(in) :: nmax
+        real(dp) x(ng), xr(ng), xi(ng), &
+                j(npng2, npn1), y(npng2, npn1), jr(npng2, npn1), &
+                ji(npng2, npn1), dj(npng2, npn1), dy(npng2, npn1), &
+                djr(npng2, npn1), dji(npng2, npn1)
+        common /cbess/ j, y, jr, ji, dj, dy, djr, dji    !arrays of generated bessel functions
+        !
+        call reallocate_abess(nmax)
+        ng = size(x)
+        do i = 1, ng
+            xx = x(i)
+            !
+            call rjb(xx, abess%aj, abess%adj, nmax, nnmax1)
+            call ryb(xx, abess%ay, abess%ady, nmax)
+            !
+            yr = xr(i)
+            yi = xi(i)
+            !
+            call cjb(yr, yi, abess%ajr, abess%aji, &
+                    abess%adjr, abess%adji, nmax, 2)
+            !
+            do n = 1, nmax
+                j(i, n) = abess%aj(n)
+                y(i, n) = abess%ay(n)
+                jr(i, n) = abess%ajr(n)
+                ji(i, n) = abess%aji(n)
+                dj(i, n) = abess%adj(n)
+                dy(i, n) = abess%ady(n)
+                djr(i, n) = abess%adjr(n)
+                dji(i, n) = abess%adji(n)
+            end do
+        end do
+        return
+    end
     !=======================================================================
     subroutine reallocate_abess(nmax)
         integer nmax,nmax_old
