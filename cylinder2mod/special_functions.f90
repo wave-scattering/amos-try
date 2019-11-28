@@ -49,13 +49,10 @@ contains
         integer ng, nnmax1, i, n
         real(dp) xx, yi, yr
         integer, intent(in) :: nmax
-        real(dp) x(ng), xr(ng), xi(ng), &
-                j(npng2, npn1), y(npng2, npn1), jr(npng2, npn1), &
-                ji(npng2, npn1), dj(npng2, npn1), dy(npng2, npn1), &
-                djr(npng2, npn1), dji(npng2, npn1)
-        common /cbess/ j, y, jr, ji, dj, dy, djr, dji    !arrays of generated bessel functions
+        real(dp) x(ng), xr(ng), xi(ng)
         !
         call reallocate_abess(nmax)
+        call reallocate_cbess(ng, nmax)
         ng = size(x)
         do i = 1, ng
             xx = x(i)
@@ -70,23 +67,53 @@ contains
                     abess%adjr, abess%adji, nmax, 2)
             !
             do n = 1, nmax
-                j(i, n) = abess%aj(n)
-                y(i, n) = abess%ay(n)
-                jr(i, n) = abess%ajr(n)
-                ji(i, n) = abess%aji(n)
-                dj(i, n) = abess%adj(n)
-                dy(i, n) = abess%ady(n)
-                djr(i, n) = abess%adjr(n)
-                dji(i, n) = abess%adji(n)
+                cbess%j(i, n) = abess%aj(n)
+                cbess%y(i, n) = abess%ay(n)
+                cbess%jr(i, n) = abess%ajr(n)
+                cbess%ji(i, n) = abess%aji(n)
+                cbess%dj(i, n) = abess%adj(n)
+                cbess%dy(i, n) = abess%ady(n)
+                cbess%djr(i, n) = abess%adjr(n)
+                cbess%dji(i, n) = abess%adji(n)
             end do
         end do
         return
     end
     !=======================================================================
+    subroutine reallocate_cbess(ng, nmax)
+        integer nmax,nmax_old, ng, ng_old
+        integer :: array_shape(2)
+        integer :: i, k
+        !     ------------------------------------------------------------------
+        ng_old = ng;             nmax_old = nmax
+        i = 1;                   k = 1
+        if (allocated(cbess%J)) then
+            ! reallocate only if needed, so to increase the computational speed
+            array_shape = shape(cbess%J)
+            ng_old = array_shape(1)
+            nmax_old = array_shape(2)
+            if (ng_old < ng) i = 2
+            if (nmax_old < nmax) k = 2
+            if (nmax_old < nmax .or. ng_old < ng) then
+                deallocate(cbess%J, cbess%Y, cbess%JR, cbess%JI, &
+                          cbess%DJ,cbess%DY,cbess%DJR,cbess%DJI)
+            endif
+        endif
+        if (.not.allocated(cbess%J)) then
+            ! Overallocate to reduce number of allocations
+            allocate(cbess%J(ng*i,nmax*k), cbess%Y(ng*i,nmax*k), &
+                    cbess%JR(ng*i,nmax*k), cbess%JI(ng*i,nmax*k), &
+                    cbess%DJ(ng*i,nmax*k),cbess%DY(ng*i,nmax*k), &
+                    cbess%DJR(ng*i,nmax*k),cbess%DJI(ng*i,nmax*k))
+        endif
+    end
+
+    !=======================================================================
     subroutine reallocate_abess(nmax)
         integer nmax,nmax_old
+        integer, parameter :: g = 2
         if (allocated(abess%AY)) then
-            ! reallocate only if needed to increase the computational speed
+            ! reallocate only if needed, so to increase the computational speed
             nmax_old = size(abess%AY)
             if (nmax_old.lt.nmax) then
                 deallocate(abess%AY, abess%ADY,abess%AJ, abess%ADJ)
@@ -94,8 +121,9 @@ contains
             endif
         endif
         if (.not.allocated(abess%AY)) then
-            allocate(abess%AY(nmax), abess%ADY(nmax), abess%AJ(nmax), abess%ADJ(nmax))
-            allocate(abess%AJR(nmax), abess%ADJR(nmax), abess%AJI(nmax), abess%ADJI(nmax))
+            ! Overallocate to reduce number of allocations
+            allocate(abess%AY(nmax*g), abess%ADY(nmax*g), abess%AJ(nmax*g), abess%ADJ(nmax*g))
+            allocate(abess%AJR(nmax*g), abess%ADJR(nmax*g), abess%AJI(nmax*g), abess%ADJI(nmax*g))
         endif
     end
     !=======================================================================
@@ -115,7 +143,7 @@ contains
 
         !--------/---------/---------/---------/---------/---------/---------/--
         integer nmax, nnmax, l, l1, i, i1
-        real(dp) xr, xi, xrxi, cxxr, xcci, qf, ar, ai, ari, cz0r, cz0i, cr, cci, &
+        real(dp) xr, xi, xrxi, cxxr, qf, ar, ai, ari, cz0r, cz0i, cr, cci, &
          cy0r, cy0i, cy1r, cy1i, cu1r, cu1i, qi, cuii, cuir, cxxi, cyi1i, cyi1r, cyii,&
                 cyir
         real(dp) yr(nmax), yi(nmax), ur(nmax), ui(nmax)

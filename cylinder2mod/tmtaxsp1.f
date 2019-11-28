@@ -1829,10 +1829,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
 
       real(dp)  X(NPNG2),W(NPNG2),AN(NPN1),
      &   R(NPNG2),DR(NPNG2),SIG(NPN2),
-     &   J(NPNG2,NPN1),Y(NPNG2,NPN1),
-     &   JR(NPNG2,NPN1),JI(NPNG2,NPN1),DJ(NPNG2,NPN1),
-     &   DY(NPNG2,NPN1),DJR(NPNG2,NPN1),
-     &   DJI(NPNG2,NPN1),DDR(NPNG2),DRR(NPNG2),
+     &   DDR(NPNG2),DRR(NPNG2),
      &   D1(NPNG2,NPN1),D2(NPNG2,NPN1),
      &   DRI(NPNG2),RR(NPNG2),
      &   DV1(NPN1),DV2(NPN1)
@@ -1855,7 +1852,6 @@ cc      real(dp) TR1(NPN2,NPN2),TI1(NPN2,NPN2)
       COMMON /TMAT99/ 
      &            R11,R12,R21,R22,I11,I12,I21,I22,RG11,RG12,RG21,RG22,
      &            IG11,IG12,IG21,IG22           !only between TMATR routines
-      COMMON /CBESS/ J,Y,JR,JI,DJ,DY,DJR,DJI
 cc      COMMON /CT/ TR1,TI1                       !output from TT routine
       COMMON /CTT/ QR,QI,RGQR,RGQI              !input for TT routine
 !      
@@ -1974,16 +1970,16 @@ C  surface integral into its respective real and imaginary
 C  parts:
 ! Bessel functions of the exterior argument:
 
-                    QJ1=J(I,N1)
-                    QY1=Y(I,N1)
-                    QDJ1=DJ(I,N1)
-                    QDY1=DY(I,N1)
+                    QJ1=cbess%J(I,N1)
+                    QY1=cbess%Y(I,N1)
+                    QDJ1=cbess%DJ(I,N1)
+                    QDY1=cbess%DY(I,N1)
 ! Bessel functions of the interior argument:                                        
                     
-                    QJR2=JR(I,N2)
-                    QJI2=JI(I,N2)
-                    QDJR2=DJR(I,N2)
-                    QDJI2=DJI(I,N2)                    
+                    QJR2=cbess%JR(I,N2)
+                    QJI2=cbess%JI(I,N2)
+                    QDJR2=cbess%DJR(I,N2)
+                    QDJI2=cbess%DJI(I,N2)
 !_____________________    
 ! Re and Im of j_{n2}(k_{in}r) j_{n1}(k_{out}r): 
 
@@ -2200,10 +2196,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       IMPLICIT real(dp) (A-H,O-Z)
       real(dp)  X(NPNG2),W(NPNG2),AN(NPN1),S(NPNG2),SS(NPNG2),
      &   R(NPNG2),DR(NPNG2),SIG(NPN2),
-     &   J(NPNG2,NPN1),Y(NPNG2,NPN1),
-     &   JR(NPNG2,NPN1),JI(NPNG2,NPN1),DJ(NPNG2,NPN1),
-     &   DY(NPNG2,NPN1),DJR(NPNG2,NPN1),
-     &   DJI(NPNG2,NPN1),DDR(NPNG2),DRR(NPNG2),
+     &   DDR(NPNG2),DRR(NPNG2),
      &   D1(NPNG2,NPN1),D2(NPNG2,NPN1),
      &   DRI(NPNG2),DS(NPNG2),DSS(NPNG2),RR(NPNG2),
      &   DV1(NPN1),DV2(NPN1)
@@ -2226,7 +2219,6 @@ cc      real(dp) TR1(NPN2,NPN2),TI1(NPN2,NPN2)
       COMMON /TMAT99/ 
      &            R11,R12,R21,R22,I11,I12,I21,I22,RG11,RG12,RG21,RG22,
      &            IG11,IG12,IG21,IG22          !only between TMATR routines
-      COMMON /CBESS/ J,Y,JR,JI,DJ,DY,DJR,DJI
 cc      COMMON /CT/ TR1,TI1                      !output from TT routine
       COMMON /CTT/ QR,QI,RGQR,RGQI             !input for TT routine
 !________
@@ -2350,14 +2342,14 @@ C  performs a separation of the complex integrand in Waterman's
 C  surface integral into its respective real and imaginary 
 C  parts:
                      
-                    QJ1=J(I,N1)
-                    QY1=Y(I,N1)
-                    QJR2=JR(I,N2)
-                    QJI2=JI(I,N2)
-                    QDJR2=DJR(I,N2)
-                    QDJI2=DJI(I,N2)
-                    QDJ1=DJ(I,N1)
-                    QDY1=DY(I,N1)
+                    QJ1=cbess%J(I,N1)
+                    QY1=cbess%Y(I,N1)
+                    QJR2=cbess%JR(I,N2)
+                    QJI2=cbess%JI(I,N2)
+                    QDJR2=cbess%DJR(I,N2)
+                    QDJI2=cbess%DJI(I,N2)
+                    QDJ1=cbess%DJ(I,N1)
+                    QDY1=cbess%DY(I,N1)
 ! Re and Im of j_{n2}(k_{in}r) j_{n1}(k_{out}r): 
 
                     C1R=QJR2*QJ1
