@@ -1114,10 +1114,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
       real(dp)  X(NPNG2),R(NPNG2),DR(NPNG2),MRR,MRI,LAM,
      &   Z(NPNG2),ZR(NPNG2),ZI(NPNG2),
      &   DDR(NPNG2),DRR(NPNG2),DRI(NPNG2)
-cc     *        J(NPNG2,NPN1),Y(NPNG2,NPN1),JR(NPNG2,NPN1),
-cc     *        JI(NPNG2,NPN1),DJ(NPNG2,NPN1),DY(NPNG2,NPN1),
-cc     *        DJR(NPNG2,NPN1),DJI(NPNG2,NPN1)
-cc      COMMON /CBESS/ J,Y,JR,JI,DJ,DY,DJR,DJI
+
 
       NG=NGAUSS*2
       ht = 0d0
@@ -1793,20 +1790,24 @@ C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       INCLUDE 'ampld.par.f'
       IMPLICIT real(dp) (A-H,O-Z)
+      integer, intent(in) :: NMAX
       real(dp) X(NG),XR(NG),XI(NG),
      &   J(NPNG2,NPN1),Y(NPNG2,NPN1),JR(NPNG2,NPN1),
      &   JI(NPNG2,NPN1),DJ(NPNG2,NPN1),DY(NPNG2,NPN1),
      &   DJR(NPNG2,NPN1),DJI(NPNG2,NPN1),
-     &   AJ(NPN1),AY(NPN1),AJR(NPN1),AJI(NPN1),
-     &   ADJ(NPN1),ADY(NPN1),ADJR(NPN1),
+     &   AJ(NPN1),AJR(NPN1),AJI(NPN1),
+     &   ADJ(NPN1),ADJR(NPN1),
      &   ADJI(NPN1)
+      real(dp), allocatable ::AY(:), ADY(:)
       COMMON /CBESS/ J,Y,JR,JI,DJ,DY,DJR,DJI    !arrays of generated Bessel functions
 ! 
+      allocate(AY(nmax), ADY(nmax))
+      NG = size(X)
       DO I=1,NG
            XX=X(I)
 !
            CALL RJB(XX,AJ,ADJ,NMAX,NNMAX1)
-           CALL RYB(XX,AY,ADY,NMAX)
+           CALL RYB(XX,AY,ADY)
 !
            YR=XR(I)
            YI=XI(I)
@@ -1824,7 +1825,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
                 DJI(I,N)=ADJI(N)
            end do
       end do
-
+      deallocate(AY, ADY)
       RETURN
       END
  
@@ -1864,39 +1865,6 @@ C--------/---------/---------/---------/---------/---------/---------/--
          Y(I)=YI
    10 CONTINUE
 
-      RETURN
-      END
- 
-C**********************************************************************
- 
-      SUBROUTINE RYB(X,Y,V,NMAX)
-C--------/---------/---------/---------/---------/---------/---------/--
-C >>> EPS
-C <<< RAT
-C=================
-C  X =(2\pi/\lambda)*r
-C  NMAX - angular momentum cutoff
-C--------/---------/---------/---------/---------/---------/---------/--
-      use libcylinder
-      IMPLICIT real(dp) (A-H,O-Z)
-      real(dp) Y(NMAX),V(NMAX)
-!
-      C=DCOS(X)
-      S=DSIN(X)
-      X1=1D0/X
-      X2=X1*X1
-      X3=X2*X1
-      Y1=-C*X2-S*X1
-      Y(1)=Y1
-      Y(2)=(-3D0*X3+X1)*C-3D0*X2*S
-      NMAX1=NMAX-1
-      DO I=2,NMAX1
-        Y(I+1)=dble(2*I+1)*X1*Y(I)-Y(I-1)
-      end do
-      V(1)=-X1*(C+Y1)
-      DO  I=2,NMAX
-         V(I)=Y(I-1)-dble(I)*X1*Y(I)
-      end do
       RETURN
       END
 
