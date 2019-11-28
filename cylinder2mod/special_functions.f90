@@ -10,8 +10,8 @@ module special_functions
         real(dp), allocatable ::AY(:), ADY(:), AJ(:), ADJ(:), &
                 AJR(:), ADJR(:),AJI(:), ADJI(:)
     end type abess_values
-    real(dp), allocatable, private :: z(:)
     type(abess_values), public :: abess
+
     public vig, vigf !,zartan
 
 
@@ -20,6 +20,21 @@ contains
     !=======================================================================
     !=======================================================================
     !=======================================================================
+    subroutine reallocate_abess(nmax)
+        integer nmax,nmax_old
+        if (allocated(abess%AY)) then
+            ! reallocate only if needed to increase the computational speed
+            nmax_old = size(abess%AY)
+            if (nmax_old.lt.nmax) then
+                deallocate(abess%AY, abess%ADY,abess%AJ, abess%ADJ)
+                deallocate(abess%AJR, abess%ADJR,abess%AJI, abess%ADJI)
+            endif
+        endif
+        if (.not.allocated(abess%AY)) then
+            allocate(abess%AY(nmax), abess%ADY(nmax), abess%AJ(nmax), abess%ADJ(nmax))
+            allocate(abess%AJR(nmax), abess%ADJR(nmax), abess%AJI(nmax), abess%ADJI(nmax))
+        endif
+    end
     !=======================================================================
     subroutine cjb (xr, xi, yr, yi, ur, ui, nmax, nnmax)
         !--------/---------/---------/---------/---------/---------/---------/--
@@ -121,6 +136,8 @@ contains
         integer nmax, nnmax, l, l1, i, i1
         real(dp) x, xx, z0, y0, y1, yi, yi1
         real(dp) :: y(:), u(:)
+        real(dp), allocatable :: z(:)
+
         l = nmax + nnmax
         allocate(z(l))
         xx = 1d0 / x

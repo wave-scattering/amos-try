@@ -1791,26 +1791,13 @@ C--------/---------/---------/---------/---------/---------/---------/--
       INCLUDE 'ampld.par.f'
       IMPLICIT real(dp) (A-H,O-Z)
       integer, intent(in) :: NMAX
-      integer nmax_old
       real(dp) X(NG),XR(NG),XI(NG),
      &   J(NPNG2,NPN1),Y(NPNG2,NPN1),JR(NPNG2,NPN1),
      &   JI(NPNG2,NPN1),DJ(NPNG2,NPN1),DY(NPNG2,NPN1),
      &   DJR(NPNG2,NPN1),DJI(NPNG2,NPN1)
       COMMON /CBESS/ J,Y,JR,JI,DJ,DY,DJR,DJI    !arrays of generated Bessel functions
 !
-      if (allocated(abess%AY)) then
-        nmax_old = size(abess%AY)
-        if (nmax_old.lt.nmax) then
-        deallocate(abess%AY, abess%ADY,abess%AJ, abess%ADJ)
-        deallocate(abess%AJR, abess%ADJR,abess%AJI, abess%ADJI)
-        endif
-      endif
-      if (.not.allocated(abess%AY)) then
-      allocate(abess%AY(nmax), abess%ADY(nmax),
-     &         abess%AJ(nmax), abess%ADJ(nmax))
-      allocate(abess%AJR(nmax), abess%ADJR(nmax),
-     &         abess%AJI(nmax), abess%ADJI(nmax))
-      endif
+      call reallocate_abess(nmax)
       NG = size(X)
       DO I=1,NG
            XX=X(I)
