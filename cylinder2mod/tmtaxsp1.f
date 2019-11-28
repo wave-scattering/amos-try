@@ -1791,23 +1791,32 @@ C--------/---------/---------/---------/---------/---------/---------/--
       INCLUDE 'ampld.par.f'
       IMPLICIT real(dp) (A-H,O-Z)
       integer, intent(in) :: NMAX
+      integer nmax_old
       real(dp) X(NG),XR(NG),XI(NG),
      &   J(NPNG2,NPN1),Y(NPNG2,NPN1),JR(NPNG2,NPN1),
      &   JI(NPNG2,NPN1),DJ(NPNG2,NPN1),DY(NPNG2,NPN1),
      &   DJR(NPNG2,NPN1),DJI(NPNG2,NPN1),
-     &   AJ(NPN1),AJR(NPN1),AJI(NPN1),
-     &   ADJ(NPN1),ADJR(NPN1),
+     &   AJR(NPN1),AJI(NPN1),
+     &   ADJR(NPN1),
      &   ADJI(NPN1)
-      real(dp), allocatable ::AY(:), ADY(:)
       COMMON /CBESS/ J,Y,JR,JI,DJ,DY,DJR,DJI    !arrays of generated Bessel functions
-! 
-      allocate(AY(nmax), ADY(nmax))
+!
+      if (allocated(abess%AY)) then
+        nmax_old = size(abess%AY)
+        if (nmax_old.ne.nmax) then
+        deallocate(abess%AY, abess%ADY,abess%AJ, abess%ADJ)
+        endif
+      endif
+      if (.not.allocated(abess%AY)) then
+      allocate(abess%AY(nmax), abess%ADY(nmax),
+     &         abess%AJ(nmax), abess%ADJ(nmax))
+      endif
       NG = size(X)
       DO I=1,NG
            XX=X(I)
 !
-           CALL RJB(XX,AJ,ADJ,NMAX,NNMAX1)
-           CALL RYB(XX,AY,ADY)
+           CALL RJB(XX,abess%AJ,abess%ADJ,NNMAX1)
+           CALL RYB(XX,abess%AY,abess%ADY)
 !
            YR=XR(I)
            YI=XI(I)
@@ -1815,61 +1824,23 @@ C--------/---------/---------/---------/---------/---------/---------/--
            CALL CJB(YR,YI,AJR,AJI,ADJR,ADJI,NMAX,2)
 !
            DO N=1,NMAX
-                J(I,N)=AJ(N)
-                Y(I,N)=AY(N)
+                J(I,N)=abess%AJ(N)
+                Y(I,N)=abess%AY(N)
                 JR(I,N)=AJR(N)
                 JI(I,N)=AJI(N)
-                DJ(I,N)=ADJ(N)
-                DY(I,N)=ADY(N)
+                DJ(I,N)=abess%ADJ(N)
+                DY(I,N)=abess%ADY(N)
                 DJR(I,N)=ADJR(N)
                 DJI(I,N)=ADJI(N)
            end do
       end do
-      deallocate(AY, ADY)
+!     deallocate(AY, ADY, AJ, ADJ)
       RETURN
       END
  
 C**********************************************************************
  
-      SUBROUTINE RJB(X,Y,U,NMAX,NNMAX)
-C--------/---------/---------/---------/---------/---------/---------/--
-C >>> EPS
-C <<< RAT
-C=================
-C  X =(2\pi/\lambda)*r
-C  Y ... 
-C  NMAX - angular momentum cutoff
-C  NNMAX - angular momentum cutoff - DETERMINES NUMERICAL ACCURACY  
-C--------/---------/---------/---------/---------/---------/---------/--
-      use libcylinder
-      IMPLICIT real(dp) (A-H,O-Z)
-      real(dp) Y(NMAX),U(NMAX),Z(800)
-!
-      L=NMAX+NNMAX
-      XX=1D0/X
-      Z(L)=1D0/(dble(2*L+1)*XX)
-      L1=L-1
-      DO 5 I=1,L1
-         I1=L-I
-         Z(I1)=1D0/(dble(2*I1+1)*XX-Z(I1+1))
-    5 CONTINUE
-      Z0=1D0/(XX-Z(1))
-      Y0=Z0*DCOS(X)*XX
-      Y1=Y0*Z(1)
-      U(1)=Y0-Y1*XX
-      Y(1)=Y1
-      DO 10 I=2,NMAX
-         YI1=Y(I-1)
-         YI=YI1*Z(I)
-         U(I)=YI1-dble(I)*YI*XX
-         Y(I)=YI
-   10 CONTINUE
 
-      RETURN
-      END
-
-C**********************************************************************
- 
       SUBROUTINE CJB (XR,XI,YR,YI,UR,UI,NMAX,NNMAX)
 C--------/---------/---------/---------/---------/---------/---------/--
 C                                                                     

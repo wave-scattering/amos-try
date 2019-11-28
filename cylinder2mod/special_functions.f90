@@ -4,8 +4,12 @@ module special_functions
 !    use multem_blas
 !    use amos
 !    use errfun, only : wpop
-
     implicit none
+
+    type, private :: abess_values
+        real(dp), allocatable ::AY(:), ADY(:), AJ(:), ADJ(:)
+    end type abess_values
+    type(abess_values), public :: abess
     public vig, vigf !,zartan
 
 
@@ -16,6 +20,44 @@ contains
     !=======================================================================
     !=======================================================================
     !=======================================================================
+    subroutine rjb(x, y, u, nnmax)
+        !=================
+        !  x =(2\pi/\lambda)*r
+        !  y ...
+        !  nmax - angular momentum cutoff
+        !  nnmax - angular momentum cutoff - determines numerical accuracy
+        !--------/---------/---------/---------/---------/---------/---------/--
+        integer nmax, nnmax, l, l1, i, i1
+        real(dp) x, xx, z0, y0, y1, yi, yi1
+        real(dp) :: y(:), u(:)
+        real(dp), allocatable :: z(:)
+        !
+        nmax = size(y)
+        l = nmax + nnmax
+        allocate(z(l))
+        xx = 1d0 / x
+        z(l) = 1d0 / (dble(2 * l + 1) * xx)
+        l1 = l - 1
+        do i = 1, l1
+            i1 = l - i
+            z(i1) = 1d0 / (dble(2 * i1 + 1) * xx - z(i1 + 1))
+        end do
+        z0 = 1d0 / (xx - z(1))
+        y0 = z0 * dcos(x) * xx
+        y1 = y0 * z(1)
+        u(1) = y0 - y1 * xx
+        y(1) = y1
+        do i = 2, nmax
+            yi1 = y(i - 1)
+            yi = yi1 * z(i)
+            u(i) = yi1 - dble(i) * yi * xx
+            y(i) = yi
+        end do
+
+        deallocate(z)
+        return
+
+    end
     !=======================================================================
     subroutine ryb(x, y, v)
         !=================
