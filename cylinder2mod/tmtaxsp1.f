@@ -2819,9 +2819,9 @@ cc      real(dp) F(NPN2,NPN2),B(NPN2),WORK(NPN2),
 cc     *       A(NPN2,NPN2),C(NPN2,NPN2),D(NPN2,NPN2),E(NPN2,NPN2)
       real(dp) TR1(NPN2,NPN2),TI1(NPN2,NPN2)
       complex(dp) ZQ(NPN2,NPN2),ZX(NPN2)
-!     complex(dp), allocatable :: ZQcrop(:,:)
+      complex(dp), allocatable :: ZQcrop(:,:)
       INTEGER IPIV(NPN2)
-!     integer, allocatable:: ipiv_crop(:)
+      integer, allocatable:: ipiv_crop(:)
       integer nnmax
 !
       COMMON /CHOICE/ ICHOICE
@@ -2887,14 +2887,15 @@ cc           IF (INFO.NE.0) WRITE(NOUT,1100) INFO
 
 C  Gaussian elimination             !NAG library not used
 
-  5   CALL ZGER(ZQ,IPIV,NNMAX,NPN2,EMACH)  !Gauss elimination of ZQ to
-                                           !a lower diagonal matrix
 ! 5   continue
-!     allocate(ZQcrop(1:NNMAX, 1:NNMAX))
-!     ZQcrop = ZQ(1:NNMAX, 1:NNMAX)
+  5   allocate(ZQcrop(1:NNMAX, 1:NNMAX), IPIV_crop(1:NNMAX))
+      ZQcrop = ZQ(1:NNMAX, 1:NNMAX)
+      CALL ZGER(ZQcrop,IPIV_crop,EMACH)  !Gauss elimination of ZQ to
+                                           !a lower diagonal matrix
 !     call zgetrf_wrap(ZQcrop, IPIV)
-!     ZQ(1:NNMAX, 1:NNMAX) = ZQcrop
-!     deallocate(ZQcrop)
+      ZQ(1:NNMAX, 1:NNMAX) = ZQcrop
+      IPIV(1:NNMAX) = IPIV_crop
+      deallocate(ZQcrop, IPIV_crop)
 
       DO I=1,NNMAX
               DO K=1,NNMAX    !Initialization of the right-hand side ZB
@@ -2920,27 +2921,6 @@ C  Gaussian elimination             !NAG library not used
       END
  
 C********************************************************************
- 
-
-C**********************************************************************
-
-
-C*****************************************************************
- 
-
-c****************************************************************
- 
-
-C********************************************************************
- 
-
-C**********************************************************************
-
-
-C********************************************************************
- 
-C********************************************************************
-
 C********************************************************************
 
       SUBROUTINE ZSUR(A,INT,X,N,NC,EMACH)
@@ -3008,78 +2988,5 @@ C
 
 C********************************************************************
 
-      SUBROUTINE ZGER(A,INT,N,NC,EMACH)
-C     ------------------------------------------------------------------
-C     ZGE IS A STANDARD SUBROUTINE TO PERFORM GAUSSIAN ELIMINATION ON
-C     A NC*NC MATRIX 'A' PRIOR  TO INVERSION, DETAILS STORED IN 'INT'
-C                   MAKES AN LOWER DIAGONAL MATRIX
-C     THIS ROUTINE DOES NOT BOTHER ABOUT ELEMENTS DIRECTLY ABOVE
-C     THE MATRIX DIAGONAL AS THEY ARE NOT USED EXPLICITLY IN AN
-C     ACCOMAPANYING ZSE ROUTINE
-C     ------------------------------------------------------------------
-      use libcylinder
-      IMPLICIT NONE
-C
-C ..  SCALAR ARGUMENTS  ..
-C
-      INTEGER N,NC
-      real(dp) EMACH
-C
-C ..  ARRAY ARGUMENTS  ..
-C
-      INTEGER    INT(NC)
-      complex(dp) A(NC,NC)
-C
-C ..  LOCAL SCALARS  ..
-C
-      INTEGER    I,II,IN,J,K
-      complex(dp) YR,DUM
-C     ------------------------------------------------------------------
-C
-      DO II=2,N
-      I=II-1
-      YR=A(I,I)
-      IN=I
-!
-! Finding an element with the largest magnitude in the I-th column
-! below the matrix diagonal (including the diag. element):
-
-      DO J=II,N
-        IF((ABS(YR)-ABS(A(I,J))).lt.0) then
-          YR=A(I,J)
-        else
-          exit
-        end if
-        IN=J
-      end do
-
-      INT(I)=IN      !The largest element in the I-th row above the matrix
-                     !diagonal is in the IN-th row and is denoted by YR
-!
-      IF((IN-I).ne.0) then  !If IN.NE.I switch the I-th and IN-th columns to the
-        DO J=I,N     !left of the matrix diagonal (including the diag. element)
-          DUM=A(J,I)
-          A(J,I)=A(J,IN)
-          A(J,IN)=DUM
-        end do
-      end if
-
-      IF((ABS(YR)-EMACH).le.0) exit
-      ! Gaussian elemination of matrix elements above the matrix diagonal.
-      ! Subtraction of (A(I,J)/A(I,I)) multiple of the Ith column from the Jth column
-      ! in the sub-matrix beginning with the (I+1,I+1) diag. element
-      DO J=II,N
-        IF((ABS(A(I,J))-EMACH).gt.0) then
-          A(I,J)=A(I,J)/YR
-          DO K=II,N
-            A(K,J)=A(K,J)-A(I,J)*A(K,I)   !k-t element of j-th column
-          end do
-        end if
-      end do                   !The elements in the Ith row
-                               !above diagonal are not set to zero
-!
-      end do                   !end of "column loop"
-      RETURN
-      END
 
 C (C) Copr. 03/2003  Alexander Moroz

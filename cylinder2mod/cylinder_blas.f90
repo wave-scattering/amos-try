@@ -18,6 +18,71 @@ contains
     !=======================================================================
     !=======================================================================
     !=======================================================================
+    subroutine zger(a, int, emach)
+        !     ------------------------------------------------------------------
+        !     zge is a standard subroutine to perform gaussian elimination on
+        !     a nc*nc matrix 'a' prior  to inversion, details stored in 'int'
+        !                   makes an lower diagonal matrix
+        !     this routine does not bother about elements directly above
+        !     the matrix diagonal as they are not used explicitly in an
+        !     accomapanying zse routine
+        !     ------------------------------------------------------------------
+        integer n
+        real(dp), intent(in) :: emach
+        integer, intent(out)  ::  int(:)
+        complex(dp), intent(inout) :: a(:, :)
+        integer    i, ii, in, j, k
+        complex(dp) yr, dum
+        integer :: array_shape(2)
+
+        !     ------------------------------------------------------------------
+        array_shape = shape(a)
+        n = array_shape(1)
+        do ii = 2, n
+            i = ii - 1
+            yr = a(i, i)
+            in = i
+            !
+            ! finding an element with the largest magnitude in the i-th column
+            ! below the matrix diagonal (including the diag. element):
+
+            do j = ii, n
+                if((abs(yr) - abs(a(i, j))).lt.0) then
+                    yr = a(i, j)
+                else
+                    exit
+                end if
+                in = j
+            end do
+
+            int(i) = in      !the largest element in the i-th row above the matrix
+            !                    !diagonal is in the in-th row and is denoted by yr
+            !
+            if((in - i).ne.0) then  !if in.ne.i switch the i-th and in-th columns to the
+                do j = i, n     !left of the matrix diagonal (including the diag. element)
+                    dum = a(j, i)
+                    a(j, i) = a(j, in)
+                    a(j, in) = dum
+                end do
+            end if
+
+            if((abs(yr) - emach).le.0) exit
+            !     ! gaussian elemination of matrix elements above the matrix diagonal.
+            !     ! subtraction of (a(i,j)/a(i,i)) multiple of the ith column from the jth column
+            !     ! in the sub-matrix beginning with the (i+1,i+1) diag. element
+            do j = ii, n
+                if((abs(a(i, j)) - emach).gt.0) then
+                    a(i, j) = a(i, j) / yr
+                    do k = ii, n
+                        a(k, j) = a(k, j) - a(i, j) * a(k, i)   !k-t element of j-th column
+                    end do
+                end if
+            end do                   !the elements in the ith row
+            !                              !above diagonal are not set to zero
+            !
+        end do                   !end of "column loop"
+        return
+    end
     !=======================================================================
 !    subroutine prod(a, b, c, ndim, n)
 !        !--------/---------/---------/---------/---------/---------/---------/--
@@ -236,50 +301,50 @@ contains
 !        return
 !    end
 !    !=======================================================================
-!    subroutine solve (a, b, ipvt)
-!        !--------/---------/---------/---------/---------/---------/---------/--
-!        ! >>> eps
-!        ! <<< rat
-!        !=================
-!        !--------/---------/---------/---------/---------/---------/---------/--
-!        integer ndim, n, nm1, k, kp1, i, kb, km1, m
-!        real(dp) t
-!        real(dp), intent(in) :: a(:, :)
-!        real(dp), intent(out) :: b(:)
-!        integer :: array_shape(2)
-!        integer, intent(in) :: ipvt(:)
-!        !
-!        array_shape = shape(a)
-!        ndim = array_shape(1)
-!        n = array_shape(2)
-!        if (n.eq.1) then
-!            b(1) = b(1) / a(1, 1)
-!            return
-!        end if
-!        nm1 = n - 1
-!        do k = 1, nm1
-!            kp1 = k + 1
-!            m = ipvt(k)
-!            t = b(m)
-!            b(m) = b(k)
-!            b(k) = t
-!            do i = kp1, n
-!                b(i) = b(i) + a(i, k) * t
-!            end do
-!        end do
-!        do kb = 1, nm1
-!            km1 = n - kb
-!            k = km1 + 1
-!            b(k) = b(k) / a(k, k)
-!            t = -b(k)
-!            do i = 1, km1
-!                b(i) = b(i) + a(i, k) * t
-!            end do
-!        end do
-!        b(1) = b(1) / a(1, 1)
-!        !
-!        return
-!    end
+    subroutine solve (a, b, ipvt)
+        !--------/---------/---------/---------/---------/---------/---------/--
+        ! >>> eps
+        ! <<< rat
+        !=================
+        !--------/---------/---------/---------/---------/---------/---------/--
+        integer ndim, n, nm1, k, kp1, i, kb, km1, m
+        real(dp) t
+        real(dp), intent(in) :: a(:, :)
+        real(dp), intent(out) :: b(:)
+        integer :: array_shape(2)
+        integer, intent(in) :: ipvt(:)
+        !
+        array_shape = shape(a)
+        ndim = array_shape(1)
+        n = array_shape(2)
+        if (n.eq.1) then
+            b(1) = b(1) / a(1, 1)
+            return
+        end if
+        nm1 = n - 1
+        do k = 1, nm1
+            kp1 = k + 1
+            m = ipvt(k)
+            t = b(m)
+            b(m) = b(k)
+            b(k) = t
+            do i = kp1, n
+                b(i) = b(i) + a(i, k) * t
+            end do
+        end do
+        do kb = 1, nm1
+            km1 = n - kb
+            k = km1 + 1
+            b(k) = b(k) / a(k, k)
+            t = -b(k)
+            do i = 1, km1
+                b(i) = b(i) + a(i, k) * t
+            end do
+        end do
+        b(1) = b(1) / a(1, 1)
+        !
+        return
+    end
 !    !=======================================================================
 !    subroutine zge(a, int, n, nc, emach)
 !
