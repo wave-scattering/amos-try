@@ -691,4 +691,71 @@ contains
         return
     end
 
+    !=======================================================================
+
+    subroutine vig_1v (x, nmax, m, dv1, dv2)
+        !--------/---------/---------/---------/---------/---------/---------/--
+        ! Similar to vig(), but return values just for nmax
+        !--------/---------/---------/---------/---------/---------/---------/--
+        implicit none
+        real(dp) dv1, dv2
+        integer n, nmax, m, i, i2
+        real(dp) a, x, qs, qs1, d1, d2, d3, der, qn, qn1, qn2, &
+                qnm, qnm1, qmm
+
+
+        a = 1d0
+        qs = dsqrt(1d0 - x * x)
+        qs1 = 1d0 / qs
+        dv1 = 0d0
+        dv2 = 0d0
+
+        if (m.ne.0) go to 20
+
+        d1 = 1d0
+        d2 = x
+        do n = 1, nmax
+            qn = dble(n)
+            qn1 = dble(n + 1)
+            qn2 = dble(2 * n + 1)
+            !        !recurrence (31) of ref. {mis39}
+            d3 = (qn2 * x * d2 - qn * d1) / qn1
+            !        !recurrence (35) of ref. {mis39}
+            der = qs1 * (qn1 * qn / qn2) * (-d1 + d3)
+            dv1 = d2
+            dv2 = der
+            d1 = d2
+            d2 = d3
+        enddo
+        return
+
+        20 qmm = dble(m * m)
+        !*a_m initialization - recurrence (34) of ref. {mis39}
+        do i = 1, m
+            i2 = i * 2
+            a = a * dsqrt(dble(i2 - 1) / dble(i2)) * qs
+        enddo
+        !*
+        d1 = 0d0
+        d2 = a
+
+        do n = m, nmax
+            qn = dble(n)
+            qn2 = dble(2 * n + 1)
+            qn1 = dble(n + 1)
+            qnm = dsqrt(qn * qn - qmm)
+            qnm1 = dsqrt(qn1 * qn1 - qmm)
+            !        !recurrence (31) of ref. {mis39}
+            d3 = (qn2 * x * d2 - qnm * d1) / qnm1
+            !        !recurrence (35) of ref. {mis39}
+            der = qs1 * (-qn1 * qnm * d1 + qn * qnm1 * d3) / qn2
+            dv1 = d2
+            dv2 = der
+            d1 = d2
+            d2 = d3
+        enddo
+        !*
+        return
+    end
+
 end module special_functions

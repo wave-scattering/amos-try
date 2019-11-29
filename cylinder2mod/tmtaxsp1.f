@@ -1947,25 +1947,20 @@ cc           if (dr(i).eq.0.d0) RR(I)=0.d0   !temporarily only
 c        OPEN(NOUT+3,FILE='surfint.dat')   !Gauss convergence check
 
                 IF (NCHECK.EQ.1.AND.SIG(N1+N2).LT.0D0) GO TO 205
-!
+!+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ! Gauss integration loop for AR12 only:
-!
+!+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                 DO I=1,NGSS    !=NGAUSS   if NCHECK.EQ.1
                                    !=2*NGAUSS if NCHECK.EQ.0
+
+!                   CALL VIG_1v ( X(I), N1, 0, D1N1, D2N1)
+!                   CALL VIG_1v ( X(I), N2, 0, D1N2, D2N2)
 
                     D1N1=D1(I,N1)
                     D2N1=D2(I,N1)
                     D2N2=D2(I,N2)
                     A12=D1N1*D2N2
                     A22=D2N1*D2N2
-c                    AA1=A12+A21
-! Vector spherical harmonics:
-C  Since refractive index is allowed to be complex in general,
-C  the Bessel function j_l(k_in*r) is complex. The code below
-C  performs a separation of the complex integrand in Waterman's
-C  surface integral into its respective real and imaginary
-C  parts:
-! Bessel functions of the exterior argument:
 
                     QJ1=cbess%J(I,N1)
                     QY1=cbess%Y(I,N1)
