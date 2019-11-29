@@ -34,20 +34,7 @@ module model_parameters
             -1, -2, -3, -4, -5, -6, -7, -8, -9)
 
     public cli_parse, ini_parse
-!    TYPE Point
-!        REAL :: x, y
-!    END TYPE Point
 
-    !    TYPE Circle
-!        TYPE (point) :: Center
-!        REAL :: Radius
-!    END TYPE Circle
-
-!    TYPE Circle :: round
-
-!    round%Radius = 10.
-!    round%Center%x = 0
-!    round%Center%y = 10
     contains
 
     !--------/---------/---------/---------/---------/---------/---------/--

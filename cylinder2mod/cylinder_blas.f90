@@ -19,7 +19,7 @@ contains
     !=======================================================================
     !=======================================================================
     !=======================================================================
-    subroutine zsur(a, int, x, emach)
+    subroutine zsur(a, int, x, emach) !TODO add intent specs
         !     ------------------------------------------------------------------
         !     zsur is  a standard back-substitution  subroutine  using the
         !     output of zge to calculate x times a-inverse, returned in x

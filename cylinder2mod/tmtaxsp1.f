@@ -1955,10 +1955,8 @@ c        OPEN(NOUT+3,FILE='surfint.dat')   !Gauss convergence check
 
                     D1N1=D1(I,N1)
                     D2N1=D2(I,N1)
-                    D1N2=D1(I,N2)
                     D2N2=D2(I,N2)
                     A12=D1N1*D2N2
-                    A21=D2N1*D1N2
                     A22=D2N1*D2N2
 c                    AA1=A12+A21
 ! Vector spherical harmonics:
@@ -1974,61 +1972,21 @@ C  parts:
                     QDJ1=cbess%DJ(I,N1)
                     QDY1=cbess%DY(I,N1)
 ! Bessel functions of the interior argument:
-
                     QJR2=cbess%JR(I,N2)
                     QJI2=cbess%JI(I,N2)
-                    QDJR2=cbess%DJR(I,N2)
-                    QDJI2=cbess%DJI(I,N2)
-!_____________________
 ! Re and Im of j_{n2}(k_{in}r) j_{n1}(k_{out}r):
 
                     C1R=QJR2*QJ1
-                    C1I=QJI2*QJ1
 ! Re and Im of j_{n2}(k_{in}r) h_{n1}(k_{out}r):
-
                     B1R=C1R-QJI2*QY1
-                    B1I=C1I+QJR2*QY1
 ! Re and Im of j_{n2}(k_{in}r) [k_{out}r j_{n1}(k_{out}r)]'/(k_{out}r):
-
                     C2R=QJR2*QDJ1
-                    C2I=QJI2*QDJ1
 ! Re and Im of j_{n2}(k_{in}r) [k_{out}r h_{n1}(k_{out}r)]'/(k_{out}r):
-
                     B2R=C2R-QJI2*QDY1
-                    B2I=C2I+QJR2*QDY1
-
                     DDRI=DDR(I)               !1/(k_{out}r)
-! Re and Im of [1/(k_{out}r)]*j_{n2}(k_{in}r) j_{n1}(k_{out}r)
-
-                    C3R=DDRI*C1R
-                    C3I=DDRI*C1I
 ! Re and Im of [1/(k_{out}r)]*j_{n2}(k_{in}r) h_{n1}(k_{out}r):
-
                     B3R=DDRI*B1R
-                    B3I=DDRI*B1I
-! Re and Im of  [k_{in}r j_{n2}(k_{in}r)]'/(k_{in}r)
-!                          * j_{n1}(k_{out}r):
-
-                    C4R=QDJR2*QJ1
-                    C4I=QDJI2*QJ1
-! Re and Im of [k_{in}r j_{n2}(k_{in}r)]'/(k_{in}r)
-!                          *  h_{n1}(k_{out}r):
-
-                    B4R=C4R-QDJI2*QY1
-                    B4I=C4I+QDJR2*QY1
-
-                    DRRI=DRR(I)               !Re[1/(k_{in}r)]
-                    DRII=DRI(I)               !Im[1/(k_{in}r)]
-! Re and Im of [1/(k_{in}r)] j_{n2}(k_{in}r) j_{n1}(k_{out}r):
-
-                    C5R=C1R*DRRI-C1I*DRII
-                    C5I=C1I*DRRI+C1R*DRII
-! Re and Im of [1/(k_{in}r)] j_{n2}(k_{in}r) h_{n1}(k_{out}r):
-
-                    B5R=B1R*DRRI-B1I*DRII
-                    B5I=B1I*DRRI+B1R*DRII
 !%%%%%%%  Forming integrands of J-matrices (J^{11}=J^{22}=0 for m=0): %%%%%%%%
-
                     URI=DR(I)        !dr/(d\theta)
                     RRI=RR(I)        !w(i)*r^2(\theta)
 ! w(i)*r^2(\theta)*D2N1*D2N2:
@@ -2036,8 +1994,6 @@ C  parts:
 ! N1*(N1+1)*w(i)*r(\theta)*[dr/(d\theta)]*D1N1*D2N2:
                     F2=RRI*URI*AN1*A12     !prefactor containing r(\theta)*[dr/(d\theta)]
                                            !hat{theta} part
-
-
                     AR12=AR12+F1*B2R+F2*B3R        !~Re J^{12}
                 end do               !end of Gauss integration
 

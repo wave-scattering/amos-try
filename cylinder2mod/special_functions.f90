@@ -49,7 +49,7 @@ contains
         integer ng, nnmax1, i, n
         real(dp) xx, yi, yr
         integer, intent(in) :: nmax
-        real(dp) x(ng), xr(ng), xi(ng)
+        real(dp) x(ng), xr(ng), xi(ng) ! TODO make them as x(:), etc.
         !
         call reallocate_abess(nmax)
         call reallocate_cbess(ng, nmax)
@@ -115,7 +115,7 @@ contains
         if (allocated(abess%AY)) then
             ! reallocate only if needed, so to increase the computational speed
             nmax_old = size(abess%AY)
-            if (nmax_old.lt.nmax) then
+            if (nmax_old < nmax) then
                 deallocate(abess%AY, abess%ADY,abess%AJ, abess%ADJ)
                 deallocate(abess%AJR, abess%ADJR,abess%AJI, abess%ADJI)
             endif
