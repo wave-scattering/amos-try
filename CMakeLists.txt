@@ -66,5 +66,6 @@ set(CMAKE_Fortran_FLAGS_DEBUG   "${common} ${warn} -g -fbounds-check -fcheck-arr
 
 add_subdirectory(multem2mod)
 add_subdirectory(read-nk)
+add_subdirectory(quadpack)
 #add_subdirectory(mishchenko_dp_fixed_particles)
 add_subdirectory(cylinder2mod)
