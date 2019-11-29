@@ -84,7 +84,7 @@ subroutine dqag_test ( )
   real ( kind = 8 ) abserr
   real ( kind = 8 ) b
   real ( kind = 8 ), parameter :: epsabs = 0.0D+00
-  real ( kind = 8 ), parameter :: epsrel = 0.001D+00
+  real ( kind = 8 ), parameter :: epsrel = 1.0D-13
   real ( kind = 8 ), external :: f02
   integer ( kind = 4 ) ier
   integer ( kind = 4 ) iwork(limit)
@@ -227,7 +227,7 @@ subroutine dqagp_test ( )
   real ( kind = 8 ) abserr
   real ( kind = 8 ), parameter :: b = 3.0D+00
   real ( kind = 8 ), parameter :: epsabs = 0.0D+00
-  real ( kind = 8 ), parameter :: epsrel = 0.001D+00
+  real ( kind = 8 ), parameter :: epsrel = 1.0D-13
   real ( kind = 8 ), external :: f04
   integer ( kind = 4 ) ier
   integer ( kind = 4 ) iwork(leniw)
