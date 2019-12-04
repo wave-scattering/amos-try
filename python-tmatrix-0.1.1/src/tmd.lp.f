@@ -544,7 +544,7 @@ C      OPEN (10,FILE='tmatr.write')
 
 C  INPUT DATA ********************************************************
 
-C      RAT=0.5 D0
+C      RAT=0.5D0
 C      NDISTR=3
 C      AXMAX=1D0
 C      NPNAX=2
@@ -576,7 +576,7 @@ C      WRITE (6,5454) NCHECK
 C 5454 FORMAT ('NCHECK=',I1)
       DAX=AXMAX/NPNAX
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-1) CALL SAREA (EPS,RAT)
-      if (DABS(RAT-1D0).GT.1D-8.AND.NP.GE.0) CALL SURFCH(NP,EPS,RAT)
+      IF (DABS(RAT-1D0).GT.1D-8.AND.NP.GE.0) CALL SURFCH(NP,EPS,RAT)
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-2) CALL SAREAC (EPS,RAT)
       IF (DABS(RAT-1D0).GT.1D-8.AND.NP.EQ.-9) then
       errcode = 99
@@ -908,7 +908,25 @@ C      STOP
       END
 
 C**********************************************************************
-
+C                                                                     *
+C   INPUT PARAMETERS:                                                 *
+C                                                                     *
+C   NG = 2*NGAUSS - number of quadrature points on the                *
+C                   interval  (-1,1). NGAUSS.LE.NPNG1                 *
+C   NMAX,MMAX - maximum dimensions of the arrays.  NMAX.LE.NPN1       *
+C               MMAX.LE.NPN1                                          *
+C   P - pi                                                            *
+C                                                                     *
+C   OUTPUT PARAMETERS:                                                *
+C                                                                     *
+C   X,W - points and weights of the quadrature formula                *
+C   AN(N) = n*(n+1)                                                   *
+C   ANN(N1,N2) = (1/2)*sqrt((2*n1+1)*(2*n2+1)/(n1*(n1+1)*n2*(n2+1)))  *
+C   S(I)=1/sin(arccos(x(i)))                                          *
+C   SS(I)=S(I)**2                                                     *
+C                                                                     *
+C**********************************************************************
+ 
       SUBROUTINE CONST (NGAUSS,NMAX,MMAX,P,X,W,AN,ANN,S,SS,NP,EPS)
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'tmd.par.f'
@@ -961,7 +979,32 @@ C**********************************************************************
       END
 
 C**********************************************************************
-
+C                                                                     *
+C   INPUT PARAMETERS:                                                 *
+C                                                                     *
+C   LAM - wavelength of light                                         *
+C   MRR and MRI - real and imaginary parts of the refractive index    *
+C   A,EPS,NP - specify shape of the particle                          *
+C              (see subroutines RSP1, RSP2, and RSP3)                 *
+C   NG = NGAUSS*2 - number of gaussian quadrature points on the       *
+C                   interval  (-1,1)                                  *
+C   X - gaussian division points                                      *
+C   P - pi                                                            *
+C                                                                     *
+C   OUTPUT INFORMATION:                                               *
+C                                                                     *
+C   PPI = PI**2 , where PI = (2*P)/LAM (wavenumber)                   *
+C   PIR = PPI*MRR                                                     *
+C   PII = PPI*MRI                                                     *
+C   R and DR - see subroutines RSP1, RSP2, and RSP3                   *
+C   DDR=1/(PI*SQRT(R))                                                *
+C   DRR+I*DRI=DDR/(MRR+I*MRI)                                         *
+C   NMAX - dimension of T(m)-matrices                                 *
+C   arrays  J,Y,JR,JI,DJ,DY,DJR,DJI are transferred through           *
+C         COMMON /CBESS/ - see subroutine BESS                        *
+C                                                                     *
+C**********************************************************************
+ 
       SUBROUTINE VARY (LAM,MRR,MRI,A,EPS,NP,NGAUSS,X,P,PPI,PIR,PII,
      *                 R,DR,DDR,DRR,DRI,NMAX,ERRCODE)
       INCLUDE 'tmd.par.f'
@@ -1019,7 +1062,17 @@ C 9000 FORMAT(' NMAX = ',I2,', i.e., greater than ',I3)
       END
 
 C**********************************************************************
-
+C                                                                     *
+C   Calculation of the functions R(I)=r(y(I))**2 and                  *
+C   DR(I)=((d/dy)r(y))/r(y) and horizontal semi-axis A                *
+C   for a spheroid specified by the parameters REV (equal-volume-     *
+C   sphere radius) and EPS=A/B (ratio of the semi-axes).              *
+C   Y(I)=arccos(X(I))                                                 *
+C   1.LE.I.LE.NG                                                      *
+C   X - arguments                                                     *
+C                                                                     *
+C**********************************************************************
+ 
       SUBROUTINE RSP1 (X,NG,NGAUSS,REV,EPS,NP,R,DR)
       IMPLICIT REAL*8 (A-H,O-Z)
       REAL*8 X(NG),R(NG),DR(NG)
@@ -1042,7 +1095,17 @@ C**********************************************************************
       END
 
 C**********************************************************************
-
+C                                                                     *
+C   Calculation of the functions R(I)=r(y(i))**2 and                  *
+C   DR(I)=((d/dy)r(y))/r(y) and parameter R0 for a Chebyshev          *
+C   particle specified by the parameters REV (equal-volume-sphere     *
+C   radius), EPS, and N.                                              *
+C   Y(I)=arccos(X(I))                                                 *
+C   1.LE.I.LE.NG                                                      *
+C   X - arguments                                                     *
+C                                                                     *
+C**********************************************************************
+ 
       SUBROUTINE RSP2 (X,NG,REV,EPS,N,R,DR)
       IMPLICIT REAL*8 (A-H,O-Z)
       REAL*8 X(NG),R(NG),DR(NG)
@@ -1066,7 +1129,17 @@ C**********************************************************************
       END
 
 C**********************************************************************
-
+C                                                                     *
+C   Calculation of the functions R(I)=R(Y(I))**2 and                  *
+C   DR(I)=((d/dy)r(y))/r(y)                                           *
+C   for a cylinder specified by the parameters REV (equal-volume-     *
+C   sphere radius) and EPS=A/H (ratio of radius to semi-length)       *
+C   Y(I)=arccos(X(I))                                                 *
+C   1.LE.I.LE.NG                                                      *
+C   X - arguments                                                     *
+C                                                                     *
+C**********************************************************************
+ 
       SUBROUTINE RSP3 (X,NG,NGAUSS,REV,EPS,R,DR)
       IMPLICIT REAL*8 (A-H,O-Z)
       REAL*8 X(NG),R(NG),DR(NG)
@@ -1176,8 +1249,28 @@ C--------/---------/---------/---------/---------/---------/---------/--
       RETURN
       END
 
-
-C************************************************************************
+C**********************************************************************
+C                                                                     *
+C   Calculation of spherical Bessel functions of the first kind       *
+C   J(I,N) = j_n(x) and second kind Y(I,N) = y_n(x)                   *
+C   of real-valued argument X(I) and first kind JR(I,N)+I*JI(I,N) =   *
+C   = j_n(z) of complex argument Z(I)=XR(I)+I*XI(I), as well as       *
+C   the functions                                                     *
+C                                                                     *
+C   DJ(I,N) = (1/x)(d/dx)(x*j_n(x)) ,                                 *
+C   DY(I,N) = (1/x)(d/dx)(x*y_n(x)) ,                                 *
+C   DJR(I,N) = Re ((1/z)(d/dz)(z*j_n(x)) ,                            *
+C   DJI(I,N) = Im ((1/z)(d/dz)(z*j_n(x)) .                            *
+C                                                                     *
+C   1.LE.N.LE.NMAX                                                    *
+C   NMAX.LE.NPN1                                                      *
+C   X,XR,XI - arguments                                               *
+C   1.LE.I.LE.NG                                                      *
+C   Arrays  J,Y,JR,JI,DJ,DY,DJR,DJI are in                            *
+C         COMMON /CBESS/                                              *
+C   Parameters NNMAX1 and NMAX2 determine computational accuracy      *
+C                                                                     *
+C**********************************************************************
 
       SUBROUTINE BESS (X,XR,XI,NG,NMAX,NNMAX1,NNMAX2)
       INCLUDE 'tmd.par.f'
@@ -1212,7 +1305,14 @@ C************************************************************************
       END
 
 C**********************************************************************
-
+C                                                                     *
+C   Calculation of spherical Bessel functions of the first kind j     *
+C   of real-valued argument x of orders from 1 to NMAX by using       *
+C   backward recursion. Parametr NNMAX determines numerical accuracy. *
+C   U - function (1/x)(d/dx)(x*j(x))                                  *
+C                                                                     *
+C**********************************************************************
+ 
       SUBROUTINE RJB(X,Y,U,NMAX,NNMAX)
       IMPLICIT REAL*8 (A-H,O-Z)
       REAL*8 Y(NMAX),U(NMAX),Z(800)
@@ -1239,7 +1339,13 @@ C**********************************************************************
       END
 
 C**********************************************************************
-
+C                                                                     *
+C   Calculation of spherical Bessel functions of the second kind y    *
+C   of real-valued argument x of orders from 1 to NMAX by using upward*
+C   recursion. V - function (1/x)(d/dx)(x*y(x))                       *
+C                                                                     *
+C**********************************************************************
+ 
       SUBROUTINE RYB(X,Y,V,NMAX)
       IMPLICIT REAL*8 (A-H,O-Z)
       REAL*8 Y(NMAX),V(NMAX)
@@ -1262,10 +1368,10 @@ C**********************************************************************
 
 C**********************************************************************
 C                                                                     *
-C   CALCULATION OF SPHERICAL BESSEL FUNCTIONS OF THE FIRST KIND       *
-C   J=JR+I*JI OF COMPLEX ARGUMENT X=XR+I*XI OF ORDERS FROM 1 TO NMAX  *
-C   BY USING BACKWARD RECURSION. PARAMETR NNMAX DETERMINES NUMERICAL  *
-C   ACCURACY. U=UR+I*UI - FUNCTION (1/X)(D/DX)(X*J(X))                *
+C   Calculation of spherical Bessel functions of the first kind       *
+C   j=JR+I*JI of complex argument x=XR+I*XI of orders from 1 to NMAX  *
+C   by using backward recursion. Parametr NNMAX determines numerical  *
+C   accuracy. U=UR+I*UI - function (1/x)(d/dx)(x*j(x))                *
 C                                                                     *
 C**********************************************************************
 
@@ -1340,7 +1446,16 @@ C**********************************************************************
       END
 
 C**********************************************************************
-
+C                                                                     *
+C   calculation of the T(0) matrix for an axially symmetric particle  *
+C                                                                     *
+C   Output information:                                               *
+C                                                                     *
+C   Arrays  TR1 and TI1 (real and imaginary parts of the              *
+C   T(0) matrix) are in COMMON /CT/                                   *
+C                                                                     *
+C**********************************************************************
+ 
       SUBROUTINE TMATR0 (NGAUSS,X,W,AN,ANN,S,SS,PPI,PIR,PII,R,DR,DDR,
      *                  DRR,DRI,NMAX,NCHECK)
       INCLUDE 'tmd.par.f'
@@ -1395,7 +1510,7 @@ C**********************************************************************
    20 DO 25 I=1,NGAUSS
          I1=NGAUSS+I
          I2=NGAUSS-I+1
-         CALL VIG ( X(I1), NMAX, 0, DV1, DV2)
+         CALL VIG (X(I1),NMAX,0,DV1,DV2)
          DO 25 N=1,NMAX
             SI=SIG(N)
             DD1=DV1(N)
@@ -1554,7 +1669,34 @@ C**********************************************************************
       END
 
 C**********************************************************************
-
+C                                                                     *
+C   Calculation of the T(M) matrix, M.GE.1, for an axially symmetric  *
+C   particle                                                          *
+C                                                                     *
+C   Input parameters:                                                 *
+C                                                                     *
+C   M.GE.1                                                            *
+C   NG = NGAUSS*2 - number of gaussian division points on the         *
+C        interval  (-1,1)                                             *
+C   W - quadrature weights                                            *
+C   AN,ANN - see subroutine   CONST                                   *
+C   S,SS - see subroutine   CONST                                     *
+C   ARRAYS  DV1,DV2,DV3,DV4 are in COMMON /DV/ -                      *
+C         see subroutine   DVIG                                       *
+C   PPI,PIR,PII - see subroutine   VARY                               *
+C   R J DR - see subroutines RSP1 and RSP2                            *
+C   DDR,DRR,DRI - see subroutine   VARY                               *
+C   NMAX - dimension of the T(M) matrix                               *
+C   Arrays  J,Y,JR,JI,DJ,DY,DJR,DJI are in                            *
+C        COMMON /CBESS/ - see subroutine   BESS                       *
+C                                                                     *
+C   Output parameters:                                                *
+C                                                                     *
+C   Arrays  TR1,TI1 (real and imaginary parts of the T(M) matrix)     *
+C   are in COMMON /CT/                                                *
+C                                                                     *
+C**********************************************************************
+ 
       SUBROUTINE TMATR (M,NGAUSS,X,W,AN,ANN,S,SS,PPI,PIR,PII,R,DR,DDR,
      *                  DRR,DRI,NMAX,NCHECK)
       INCLUDE 'tmd.par.f'
@@ -1835,8 +1977,15 @@ C**********************************************************************
       END
 
 C*****************************************************************
-
-      SUBROUTINE VIG (X, NMAX, M, DV1, DV2)
+C
+C     Calculation of the functiONS
+C     DV1(n)=dvig(0,m,n,arccos x)
+C     and
+C     DV2(n)=[d/d(arccos x)] dvig(0,m,n,arccos x)
+C     1.LE.N.LE.NMAX
+C     0.LE.x.LE.1
+C*****************************************************************
+      SUBROUTINE VIG (X,NMAX,M,DV1,DV2)
       INCLUDE 'tmd.par.f'
       IMPLICIT REAL*8 (A-H,O-Z)
       REAL*8 DV1(NPN1),DV2(NPN1)
@@ -1888,10 +2037,10 @@ C*****************************************************************
 
 C**********************************************************************
 C                                                                     *
-C   CALCULATION OF THE MATRIX    T = - RG(Q) * (Q**(-1))              *
+C   Calculation of the matrix    T = - RG(Q) * (Q**(-1))              *
 C                                                                     *
-C   INPUT INFORTMATION IS IN COMMON /CTT/                             *
-C   OUTPUT INFORMATION IS IN COMMON /CT/                              *
+C   Input infortmation is in COMMON /CTT/                             *
+C   Output information is in COMMON /CT/                              *
 C                                                                     *
 C**********************************************************************
 
@@ -1945,21 +2094,21 @@ C 1100 FORMAT ('WARNING:  info=', i2)
 
 C********************************************************************
 C                                                                   *
-C   CALCULATION OF THE EXPANSION COEFFICIENTS FOR (I,Q,U,V) -       *
-C   REPRESENTATION.                                                 *
+C   Calculation of the expansion coefficients for the (I,Q,U,V)     *
+C   representation.                                                 *
 C                                                                   *
-C   INPUT PARAMETERS:                                               *
+C   Input parameters:                                               *
 C                                                                   *
-C      LAM - WAVELENGTH OF LIGHT                                    *
-C      CSCA - SCATTERING CROSS SECTION                              *
-C      TR AND TI - ELEMENTS OF THE T-MATRIX. TRANSFERRED THROUGH    *
+C      LAM - wavelength of light                                    *
+C      CSCA - scattering cross section                              *
+C      TR and TI - elements of the t-matrix. Transferred through    *
 C                  COMMON /CTM/                                     *
-C      NMAX - DIMENSION OF T(M)-MATRICES                            *
+C      NMAX - dimension of T(M) matrices                            *
 C                                                                   *
-C   OUTPUT INFORTMATION:                                            *
+C   Output infortmation:                                            *
 C                                                                   *
-C      ALF1,...,ALF4,BET1,BET2 - EXPANSION COEFFICIENTS             *
-C      LMAX - NUMBER OF COEFFICIENTS MINUS 1                        *
+C      ALF1,...,ALF4,BET1,BET2 - expansion coefficients             *
+C      LMAX - number of coefficients minus 1                        *
 C                                                                   *
 C********************************************************************
 
@@ -2040,11 +2189,10 @@ C *****  CALCULATION OF THE ARRAYS B1 AND B2  *****
       K6=2
 
 C     PRINT 3300, B1,B2
-C 3300 FORMAT (' B1 AND B2')
+C 3300 FORMAT (' b1 and b2')
       DO 100 N=1,NMAX
 
 C *****  CALCULATION OF THE ARRAYS T1 AND T2  *****
-
 
          DO 10 NN=1,NMAX
             M1MAX=MIN0(N,NN)+1
@@ -2314,7 +2462,7 @@ C 3303 FORMAT (' G1, G2, ...')
 
 C****************************************************************
 
-C   CALCULATION OF THE QUANTITIES F(N+1)=0.5*LN(N!)
+C   Calculation of the quantities F(N+1)=0.5*ln(n!)
 C   0.LE.N.LE.899
 
       SUBROUTINE FACT
@@ -2331,7 +2479,7 @@ C   0.LE.N.LE.899
 
 C************************************************************
 
-C   CALCULATION OF THE ARRAY SSIGN(N+1)=SIGN(N)
+C   Calculation of the array SSIGN(N+1)=sign(n)
 C   0.LE.N.LE.899
 
       SUBROUTINE SIGNUM
@@ -2346,24 +2494,23 @@ C   0.LE.N.LE.899
 
 C******************************************************************
 C
-C   CALCULATION OF CLEBSCH-GORDAN COEFFICIENTS
-C   (N,M:N1,M1/NN,MM)
-C   FOR GIVEN N AND N1. M1=MM-M, INDEX MM IS FOUND FROM M AS
-C   MM=M*K1+K2
+C   Calculation of Clebsch-Gordan coefficients
+C   (n,m:n1,m1/nn,mm)
+C   for given n and n1. m1=mm-m, index mm is found from m as
+C   mm=m*k1+k2
 C
-C   INPUT PARAMETERS :  N,N1,NMAX,K1,K2
+C   Input parameters :  N,N1,NMAX,K1,K2
 C                               N.LE.NMAX
 C                               N.GE.1
 C                               N1.GE.0
 C                               N1.LE.N+NMAX
-C   OUTPUT PARAMETERS : GG(M+NPN6,NN+1) - ARRAY OF THE CORRESPONDING
-C                                       COEFFICIENTS
+C   Output parameters : GG(M+NPN6,NN+1) - array of the corresponding
+C                                       coefficients
 C                               /M/.LE.N
 C                               /M1/=/M*(K1-1)+K2/.LE.N1
 C                               NN.LE.MIN(N+N1,NMAX)
 C                               NN.GE.MAX(/MM/,/N-N1/)
-C   IF K1=1 AND K2=0, THEN 0.LE.M.LE.N
-
+C   If K1=1 and K2=0, then 0.LE.M.LE.N
 
       SUBROUTINE CCG(N,N1,NMAX,K1,K2,GG,ERRCODE)
       INCLUDE 'tmd.par.f'
@@ -2472,9 +2619,9 @@ C*********************************************************************
 
 C*********************************************************************
 C
-C   CALCULATION OF THE CLEBCSH-GORDAN COEFFICIENTS
-C   G=(N,M:N1,MM-M/NN,MM)
-C   FOR GIVEN N,N1,M,MM, WHERE NN=MAX(/MM/,/N-N1/)
+C   Calculation of the Clebcsh-Gordan coefficients
+C   G=(n,m:n1,mm-m/nn,mm)
+C   for given n,n1,m,mm, where NN=MAX(/MM/,/N-N1/)
 C                               /M/.LE.N
 C                               /MM-M/.LE.N1
 C                               /MM/.LE.N+N1
@@ -2593,10 +2740,10 @@ C********************************************************************
       END
 
 C********************************************************************
-
-C  COMPUTATION OF R1 AND R2 FOR A POWER LAW SIZE DISTRIBUTION WITH
-C  EFFECTIVE RADIUS A AND EFFECTIVE VARIANCE B
-
+ 
+C  Computation of R1 and R2 for a power law size distribution with
+C  effective radius A and effective variance B
+ 
       SUBROUTINE POWER (A,B,R1,R2)
       IMPLICIT REAL*8 (A-H,O-Z)
       EXTERNAL F
@@ -2793,6 +2940,7 @@ C 1003 FORMAT('POWER LAW DISTRIBUTION OF HANSEN & TRAVIS 1974')
   250 CONTINUE
       GO TO 400
 C  300 PRINT 1004,AA,BB
+
 C 1004 FORMAT ('GAMMA DISTRIBUTION,  a=',F6.3,'  b=',F6.4)
   300 CONTINUE
       B2=(1D0-3D0*BB)/BB

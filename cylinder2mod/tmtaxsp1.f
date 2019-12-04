@@ -1121,7 +1121,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
 
       IF (NP.GT.0)  CALL RSP2(X,NG,A,EPS,NP,R,DR)       ! Chebyshev particle
       IF (NP.EQ.-1) CALL  RSP1(X,NG,NGAUSS,A,EPS,R,DR)   ! oblate/prolate spheroids
-      IF (NP.EQ.-2) CALL RSP3(X,NG,NGAUSS,A,EPS,R,DR)   ! oblate/prolate cylinder
+      IF (NP.EQ.-2) CALL RSP3(X,R,DR)   ! oblate/prolate cylinder
       IF (NP.EQ.-3) CALL RSP4(X,NG,A,R,DR)              ! a distorted Chebyshev droplet
       IF (NP.EQ.-4) CALL RSP5(X,NG,RSNM,EPS,R,DR)       ! sphere cut by a plane on its top
       IF (NP.EQ.-5) CALL RSPI5(X,NG,RSNM,EPS,R,DR)      ! sphere cut by a plane on its bottom
@@ -1284,69 +1284,6 @@ c        WRITE(NOUT,*) I,R(I),DR(I)
       END
  
 C**********************************************************************
- 
-      SUBROUTINE RSP3 (X,NG,NGAUSS,REV,EPS,R,DR)
-C--------/---------/---------/---------/---------/---------/---------/-- 
-C >>> X,NG,NGAUSS,REV,EPS
-C <<< R,DR
-C=========================
-C   Activated for NP=-2
-C
-C   Calculation of the functions R(I)=r(y)**2 and                     
-C   DR(I)=((d/dy)r(y))/r(y) for an oblate/prolate cylinder  
-C   specified by the parameters REV and EPS  at NGAUSS  Gauss 
-C   integration points in the integral over theta.  
-C
-C   X - GIF division points \cos\theta_j -  Y = arccos X 
-C   REV ... equal-volume-sphere radius r_ev
-C   EPS ... the ratio of the cylinder diameter to its length
-C   H   ... half-length of the cylinder
-C   A=H*EPS  ... cylinder radius   ====>
-C
-C   4*PI*REV**3/3=2*H*PI*A**2=2*PI*H**3*EPS**2 <====> 
-C                H=REV*( (2D0/(3D0*EPS*EPS))**(1D0/3D0) )  
-C
-C
-C   NGAUSS ... the number of GIF division points
-C   NG=2*NGAUSS  
-C                                                       
-C   1.LE.I.LE.NGAUSS                                                  
-C  
-C--------/---------/---------/---------/---------/---------/---------/--
-      use libcylinder
-      IMPLICIT real(dp) (A-H,O-Z)
-      real(dp) X(NG),R(NG),DR(NG)
-! Determine half-length of the cylinder
-      H=REV*( (2D0/(3D0*EPS*EPS))**(1D0/3D0) )
-! Determine cylinder radius:
-      A=H*EPS
-      
-      DO 50 I=1,NGAUSS
-         CO=-X(I)
-         SI=DSQRT(1D0-CO*CO)
-         
-         IF (SI/CO.GT.A/H) GO TO 20 
-! Along the plane cuts:  
-         RAD=H/CO
-         RTHET=H*SI/(CO*CO)
-         GO TO 30
-! Along the circular surface:         
-   20    CONTINUE
-         RAD=A/SI
-         RTHET=-A*CO/(SI*SI)
-cc         RAD=1.D-10
-cc         RTHET=0.D0
-         
-   30    R(I)=RAD*RAD
-         R(NG-I+1)=R(I)          !using mirror symmetry
-                  
-         DR(I)=-RTHET/RAD
-         DR(NG-I+1)=-DR(I)       !using mirror symmetry
-         
-   50 CONTINUE
-
-      RETURN
-      END
 
       SUBROUTINE RSP3nanorod (X,NG,NGAUSS,REV,EPS, EPSe, R,DR)
 C--------/---------/---------/---------/---------/---------/---------/--
