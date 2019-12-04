@@ -1132,6 +1132,7 @@ cc      IF (NP.EQ.-8) CALL RSP8(X,NG,RSNM,HT,R,DR)          ! cone on a cylinder
      &                                mpar%nanorod_cap_hr, R,DR) ! nanorod
 !
       WV=P*2D0/LAM                 !wave vector
+      cbess%wv = WV
       PPI=WV*WV
       PIR=PPI*MRR
       PII=PPI*MRI
@@ -1814,6 +1815,7 @@ C
 C--------/---------/---------/---------/---------/---------/---------/--
       use libcylinder
       IMPLICIT none
+      real(dp) :: qqj1, qqdj1
       integer ngauss, nmax, ncheck, naxsm, i, i1, i2, k1, k2, kk1, kk2,
      & mm1, n, n1, n2, ng, ngss, nm, nnmax
       real(dp) :: PPI, PIR, PII, D1N1, A12, A21, A22, AI12, AI21, AN1,
@@ -1953,19 +1955,12 @@ c        OPEN(NOUT+3,FILE='surfint.dat')   !Gauss convergence check
                 DO I=1,NGSS    !=NGAUSS   if NCHECK.EQ.1
                                    !=2*NGAUSS if NCHECK.EQ.0
 
-!                   CALL VIG_1v ( X(I), N1, 0, D1N1, D2N1)
-!                   CALL VIG_1v ( X(I), N2, 0, D1N2, D2N2)
-
-                    D1N1=D1(I,N1)
-                    D2N1=D2(I,N1)
-                    D2N2=D2(I,N2)
+                    CALL VIG_1v ( X(I), N1, 0, D1N1, D2N1)
+                    CALL VIG_1v ( X(I), N2, 0, D1N2, D2N2)
                     A12=D1N1*D2N2
                     A22=D2N1*D2N2
-
-                    QJ1=cbess%J(I,N1)
-                    QY1=cbess%Y(I,N1)
-                    QDJ1=cbess%DJ(I,N1)
-                    QDY1=cbess%DY(I,N1)
+                    call cbessjdj(r(i),N1, qj1, qdj1)
+                    call cbessydy(r(i),N1, qy1, qdy1)
 ! Bessel functions of the interior argument:
                     QJR2=cbess%JR(I,N2)
                     QJI2=cbess%JI(I,N2)

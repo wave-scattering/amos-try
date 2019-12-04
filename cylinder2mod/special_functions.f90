@@ -2,19 +2,21 @@ module special_functions
     use constants
 !    use dense_solve
 !    use multem_blas
-!    use amos
+    use amos
 !    use errfun, only : wpop
     implicit none
 
     type, private :: abess_values
         real(dp), allocatable ::AY(:), ADY(:), AJ(:), ADJ(:), &
                 AJR(:), ADJR(:),AJI(:), ADJI(:)
+        integer nnmax1
     end type abess_values
     type(abess_values), private :: abess
 
     type, private :: cbess_values
         real(dp), allocatable :: J(:,:), Y(:,:), JR(:,:), JI(:,:), &
                 DJ(:,:),DY(:,:),DJR(:,:),DJI(:,:)
+        real(dp) :: wv ! wave vector = 2*pi/lambda
     end type cbess_values
     type(cbess_values), public :: cbess
 
@@ -24,6 +26,29 @@ module special_functions
 contains
     !=======================================================================
     !=======================================================================
+    subroutine cbessydy(x, nmax, y, dy)
+        real(dp) x, xx, y, dy
+        integer nmax
+        !
+        call reallocate_abess(nmax)
+        xx = sqrt(x)*cbess%wv
+        call ryb(xx, abess%ay, abess%ady, nmax)
+        y = abess%ay(nmax)
+        dy = abess%ady(nmax)
+        return
+    end subroutine cbessydy
+    !=======================================================================
+    subroutine cbessjdj(x, nmax, j, dj)
+        real(dp) x, xx, j, dj
+        integer nmax
+        !
+        call reallocate_abess(nmax)
+        xx = sqrt(x)*cbess%wv
+        call rjb(xx, abess%aj, abess%adj, nmax, abess%nnmax1)
+        j = abess%aj(nmax)
+        dj = abess%adj(nmax)
+        return
+    end subroutine cbessjdj
     !=======================================================================
     subroutine bess (x, xr, xi, ng, nmax, nnmax1)
         !--------/---------/---------/---------/---------/---------/---------/--
@@ -53,6 +78,7 @@ contains
         !
         call reallocate_abess(nmax)
         call reallocate_cbess(ng, nmax)
+        abess%nnmax1 = nnmax1
         ng = size(x)
         do i = 1, ng
             xx = x(i)
@@ -226,7 +252,7 @@ contains
         !--------/---------/---------/---------/---------/---------/---------/--
         integer nmax, nnmax, l, l1, i, i1
         real(dp) x, xx, z0, y0, y1, yi, yi1
-        real(dp) :: y(:), u(:)
+        real(dp), intent(out) :: y(:), u(:)
         real(dp), allocatable :: z(:)
 
         l = nmax + nnmax
