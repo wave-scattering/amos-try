@@ -16,6 +16,8 @@ module model_parameters
                 alpha, beta, thet, thet0, phi, phi0
         integer :: np, nstep, ndefp
         complex(dp) :: cceps, zeps0
+        real(dp) :: eps  ! deformation parameter as entered to ampldr(...)
+        real(dp) :: rev  ! equivalent sphere radius as entered to ampldr(...)
 
         !Select the solver between Lapack or custom routines (ichoice = 1 or 2)
         integer, public :: ichoice

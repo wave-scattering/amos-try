@@ -1962,6 +1962,8 @@ c      real(dp) XALPHA(300),XBETA(300),WALPHA(300),WBETA(300)
 !
 !****************************************************************
 !
+      mpar%eps = eps
+      mpar%rev = rev
       P=DACOS(-1D0)                   !local PI constant
 !
       A=REV

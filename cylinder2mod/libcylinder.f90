@@ -29,6 +29,73 @@ contains
     !=======================================================================
     !=======================================================================
     !=======================================================================
+    subroutine rsp3 (x, r, dr)
+        !--------/---------/---------/---------/---------/---------/---------/--
+        ! >>> x,ng,ngauss,rev,eps
+        ! <<< r,dr
+        !=========================
+        !   activated for np=-2
+        !
+        !   calculation of the functions r(i)=r(y)**2 and
+        !   dr(i)=((d/dy)r(y))/r(y) for an oblate/prolate cylinder
+        !   specified by the parameters rev and eps  at ngauss  gauss
+        !   integration points in the integral over theta.
+        !
+        !   x - gif division points \cos\theta_j -  y = arccos x
+        !   rev ... equal-volume-sphere radius r_ev
+        !   eps ... the ratio of the cylinder diameter to its length
+        !   h   ... half-length of the cylinder
+        !   a=h*eps  ... cylinder radius   ====>
+        !
+        !   4*pi*rev**3/3=2*h*pi*a**2=2*pi*h**3*eps**2 <====>
+        !                h=rev*( (2d0/(3d0*eps*eps))**(1d0/3d0) )
+        !
+        !
+        !   ngauss ... the number of gif division points
+        !   ng=2*ngauss
+        !
+        !   1.le.i.le.ngauss
+        !
+        !--------/---------/---------/---------/---------/---------/---------/--
+        !TODO: convert to f90
+        real(dp) rev, eps, h, a, si, co, rthet, rad
+        integer ng, ngauss, i
+        real(dp) x(:), r(:), dr(:)
+        rev = mpar%rev
+        eps = mpar%eps
+        ! determine half-length of the cylinder
+        h = rev * ((2d0 / (3d0 * eps * eps))**(1d0 / 3d0))
+        ! determine cylinder radius:
+        a = h * eps
+        ng = size(x)
+        ngauss = ng / 2
+        if (ng == 1) ngauss = 1
+        do i = 1, ngauss
+            co = -x(i)
+            si = dsqrt(1d0 - co * co)
+
+            if (si / co.gt.a / h) go to 20
+            ! along the plane cuts:
+            rad = h / co
+            rthet = h * si / (co * co)
+            go to 30
+            ! along the circular surface:
+            20      continue
+            rad = a / si
+            rthet = -a * co / (si * si)
+            !c         rad=1.d-10
+            !c         rthet=0.d0
+
+            30      r(i) = rad * rad
+            r(ng - i + 1) = r(i)          !using mirror symmetry
+
+            dr(i) = -rthet / rad
+            dr(ng - i + 1) = -dr(i)       !using mirror symmetry
+
+        end do
+
+        return
+    end
     !=======================================================================
     subroutine drop (rat)
         !=================
