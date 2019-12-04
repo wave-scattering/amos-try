@@ -1,20 +1,20 @@
 module special_functions
     use constants
-!    use dense_solve
-!    use multem_blas
-!    use amos
-!    use errfun, only : wpop
+    !use dense_solve
+    !use multem_blas
+    !use amos
+    !use errfun, only : wpop
     implicit none
 
     type, private :: abess_values
-        real(dp), allocatable ::AY(:), ADY(:), AJ(:), ADJ(:), &
-                AJR(:), ADJR(:),AJI(:), ADJI(:)
+        real(dp), allocatable :: AY(:), ADY(:), AJ(:), ADJ(:), &
+                AJR(:), ADJR(:), AJI(:), ADJI(:)
     end type abess_values
     type(abess_values), private :: abess
 
     type, private :: cbess_values
-        real(dp), allocatable :: J(:,:), Y(:,:), JR(:,:), JI(:,:), &
-                DJ(:,:),DY(:,:),DJR(:,:),DJI(:,:)
+        real(dp), allocatable :: J(:, :), Y(:, :), JR(:, :), JI(:, :), &
+                DJ(:, :), DY(:, :), DJR(:, :), DJI(:, :)
     end type cbess_values
     type(cbess_values), public :: cbess
 
@@ -81,7 +81,7 @@ contains
     end
     !=======================================================================
     subroutine reallocate_cbess(ng, nmax)
-        integer nmax,nmax_old, ng, ng_old
+        integer nmax, nmax_old, ng, ng_old
         integer :: array_shape(2)
         integer :: i, k
         !     ------------------------------------------------------------------
@@ -96,34 +96,34 @@ contains
             if (nmax_old < nmax) k = 2
             if (nmax_old < nmax .or. ng_old < ng) then
                 deallocate(cbess%J, cbess%Y, cbess%JR, cbess%JI, &
-                          cbess%DJ,cbess%DY,cbess%DJR,cbess%DJI)
+                        cbess%DJ, cbess%DY, cbess%DJR, cbess%DJI)
             endif
         endif
         if (.not.allocated(cbess%J)) then
             ! Overallocate to reduce number of allocations
-            allocate(cbess%J(ng*i,nmax*k), cbess%Y(ng*i,nmax*k), &
-                    cbess%JR(ng*i,nmax*k), cbess%JI(ng*i,nmax*k), &
-                    cbess%DJ(ng*i,nmax*k),cbess%DY(ng*i,nmax*k), &
-                    cbess%DJR(ng*i,nmax*k),cbess%DJI(ng*i,nmax*k))
+            allocate(cbess%J(ng * i, nmax * k), cbess%Y(ng * i, nmax * k), &
+                    cbess%JR(ng * i, nmax * k), cbess%JI(ng * i, nmax * k), &
+                    cbess%DJ(ng * i, nmax * k), cbess%DY(ng * i, nmax * k), &
+                    cbess%DJR(ng * i, nmax * k), cbess%DJI(ng * i, nmax * k))
         endif
     end
 
     !=======================================================================
     subroutine reallocate_abess(nmax)
-        integer nmax,nmax_old
+        integer nmax, nmax_old
         integer, parameter :: g = 2
         if (allocated(abess%AY)) then
             ! reallocate only if needed, so to increase the computational speed
             nmax_old = size(abess%AY)
             if (nmax_old < nmax) then
-                deallocate(abess%AY, abess%ADY,abess%AJ, abess%ADJ)
-                deallocate(abess%AJR, abess%ADJR,abess%AJI, abess%ADJI)
+                deallocate(abess%AY, abess%ADY, abess%AJ, abess%ADJ)
+                deallocate(abess%AJR, abess%ADJR, abess%AJI, abess%ADJI)
             endif
         endif
         if (.not.allocated(abess%AY)) then
             ! Overallocate to reduce number of allocations
-            allocate(abess%AY(nmax*g), abess%ADY(nmax*g), abess%AJ(nmax*g), abess%ADJ(nmax*g))
-            allocate(abess%AJR(nmax*g), abess%ADJR(nmax*g), abess%AJI(nmax*g), abess%ADJI(nmax*g))
+            allocate(abess%AY(nmax * g), abess%ADY(nmax * g), abess%AJ(nmax * g), abess%ADJ(nmax * g))
+            allocate(abess%AJR(nmax * g), abess%ADJR(nmax * g), abess%AJI(nmax * g), abess%ADJI(nmax * g))
         endif
     end
     !=======================================================================
@@ -144,7 +144,7 @@ contains
         !--------/---------/---------/---------/---------/---------/---------/--
         integer nmax, nnmax, l, l1, i, i1
         real(dp) xr, xi, xrxi, cxxr, qf, ar, ai, ari, cz0r, cz0i, cr, cci, &
-         cy0r, cy0i, cy1r, cy1i, cu1r, cu1i, qi, cuii, cuir, cxxi, cyi1i, cyi1r, cyii,&
+                cy0r, cy0i, cy1r, cy1i, cu1r, cu1i, qi, cuii, cuir, cxxi, cyi1i, cyi1r, cyii, &
                 cyir
         real(dp) yr(nmax), yi(nmax), ur(nmax), ui(nmax)
         real(dp) cyr(npn1), cyi(npn1), czr(1200), czi(1200)
@@ -261,7 +261,7 @@ contains
         !  nmax - angular momentum cutoff
         !--------/---------/---------/---------/---------/---------/---------/--
         integer i, nmax, nmax1
-        real(dp) :: c,s, x, x1, x2, x3, y1
+        real(dp) :: c, s, x, x1, x2, x3, y1
         real(dp) y(:), v(:)
         !
         c = dcos(x)
@@ -284,56 +284,56 @@ contains
     end
     !=======================================================================
 
-!    function zartan(zs)
-!!        *--------/---------/---------/---------/---------/---------/---------/--
-!!        * For a complex argument using that
-!!        *              atan (z)= -ln((1+iz)/(1-iz))*i/2.d0
-!!        * Hower, a direct application of this formula often
-!!        * results in a nonzero imaginary part of  $\arctan z$ even
-!!        * for a  purely real $z=x$.
-!!        * Therefore, in order to avoid this, in a numerical
-!!        * implementation, the complex logarithm is written
-!!        * explicitly as
-!!        *
-!!        *  ln\left(\fr{1+iz}{1-iz}\right)= (ar1,ar2)= log(
-!!                        *  (1.d0 + abs(z)**2 -2.d0*imag(z))/1.d0+abs(z)**2 +2.d0*imag(z)))/2.d0
-!!        * +
-!!        * ci*atan(2.d0*dble(z)/(1-abs(z)**2).
-!!        *
-!!        * For a real z=x, |x|<1,  log here is purely imaginary and
-!!        * equals to i*atan(2x/(1-x**2))\equiv 2*i*atan x
-!!        *--------/---------/---------/---------/---------/---------/---------/--
-!        complex(dp) zartan
-!        complex(dp), intent(in) :: zs
-!        real(dp) xxs,xas,ar1,ar2
-!
-!        if (aimag(zs).eq.0.) then
-!            zartan=cmplx_dp(atan(dble(zs)),0.d0)
-!            return
-!        end if
-!        xas=abs(zs)**2
-!        ar1=log((1.d0+xas-2.d0*aimag(zs))/(1.d0+xas+2.d0*aimag(zs)))/2.d0
-!        xxs=dble(zs)
-!!       * special case:
-!        if(xas.eq.1.) then
-!            if(xxs.ge.0.) then
-!                ar2=pi/2.d0
-!            else if (xxs.lt.0.) then
-!                ar2=-pi/2.d0
-!            end if
-!            zartan =cmplx_dp(ar2,- ar1)/2.d0
-!        end if
-!!       * remaining cases:
-!        ar2=2.d0*xxs/(1.d0-xas)
-!        if(xas.lt.1.d0)  then     ! 1st and 4th quadrant
-!            zartan=cmplx_dp(atan(ar2),- ar1)/2.d0
-!        else if (xas.gt.1. .and. xxs.ge.0.) then       ! 2nd quadrant
-!            zartan=cmplx_dp(pi+atan(ar2),- ar1)/2.d0
-!        else if(xas.gt.1. .and. xxs.lt.0.) then        ! 3rd quadrant
-!            zartan=cmplx_dp(-pi+atan(ar2),- ar1)/2.d0
-!        end if
-!        return
-!    end function zartan
+    !    function zartan(zs)
+    !!        *--------/---------/---------/---------/---------/---------/---------/--
+    !!        * For a complex argument using that
+    !!        *              atan (z)= -ln((1+iz)/(1-iz))*i/2.d0
+    !!        * Hower, a direct application of this formula often
+    !!        * results in a nonzero imaginary part of  $\arctan z$ even
+    !!        * for a  purely real $z=x$.
+    !!        * Therefore, in order to avoid this, in a numerical
+    !!        * implementation, the complex logarithm is written
+    !!        * explicitly as
+    !!        *
+    !!        *  ln\left(\fr{1+iz}{1-iz}\right)= (ar1,ar2)= log(
+    !!                        *  (1.d0 + abs(z)**2 -2.d0*imag(z))/1.d0+abs(z)**2 +2.d0*imag(z)))/2.d0
+    !!        * +
+    !!        * ci*atan(2.d0*dble(z)/(1-abs(z)**2).
+    !!        *
+    !!        * For a real z=x, |x|<1,  log here is purely imaginary and
+    !!        * equals to i*atan(2x/(1-x**2))\equiv 2*i*atan x
+    !!        *--------/---------/---------/---------/---------/---------/---------/--
+    !        complex(dp) zartan
+    !        complex(dp), intent(in) :: zs
+    !        real(dp) xxs,xas,ar1,ar2
+    !
+    !        if (aimag(zs).eq.0.) then
+    !            zartan=cmplx_dp(atan(dble(zs)),0.d0)
+    !            return
+    !        end if
+    !        xas=abs(zs)**2
+    !        ar1=log((1.d0+xas-2.d0*aimag(zs))/(1.d0+xas+2.d0*aimag(zs)))/2.d0
+    !        xxs=dble(zs)
+    !!       * special case:
+    !        if(xas.eq.1.) then
+    !            if(xxs.ge.0.) then
+    !                ar2=pi/2.d0
+    !            else if (xxs.lt.0.) then
+    !                ar2=-pi/2.d0
+    !            end if
+    !            zartan =cmplx_dp(ar2,- ar1)/2.d0
+    !        end if
+    !!       * remaining cases:
+    !        ar2=2.d0*xxs/(1.d0-xas)
+    !        if(xas.lt.1.d0)  then     ! 1st and 4th quadrant
+    !            zartan=cmplx_dp(atan(ar2),- ar1)/2.d0
+    !        else if (xas.gt.1. .and. xxs.ge.0.) then       ! 2nd quadrant
+    !            zartan=cmplx_dp(pi+atan(ar2),- ar1)/2.d0
+    !        else if(xas.gt.1. .and. xxs.lt.0.) then        ! 3rd quadrant
+    !            zartan=cmplx_dp(-pi+atan(ar2),- ar1)/2.d0
+    !        end if
+    !        return
+    !    end function zartan
 
     !=======================================================================
 
@@ -433,62 +433,58 @@ contains
         !***********************************************************************
         !*                      nonzero dv1 initialization
         !*
-        if (m.ne.0) go to 20
-        !*
-        !* ddv1(n)=0.d0 [see (3.33) of {tks}]
-        !* d1,d2, and d3 below are the three consequent terms
-        !*       d_{0m}^{n-1}, d_{0m}^{n}, and d_{0m}^{n+1} beginning
-        !*       with n=m
-        !*=============
-        !* recurrence initialization following d^l_{00}=p_l
-        !*         [see eq. (b.27) of {mtl}]
-        !*
-        d1 = 1.d0                  !d^0_{00}=p_0=1   (see sec. 6.8 of {nr})
-        d2 = x                     !d^1_{00}=p_1=x
+        if (m==0) then
+            !*
+            !* ddv1(n)=0.d0 [see (3.33) of {tks}]
+            !* d1,d2, and d3 below are the three consequent terms
+            !*       d_{0m}^{n-1}, d_{0m}^{n}, and d_{0m}^{n+1} beginning
+            !*       with n=m
+            !*=============
+            !* recurrence initialization following d^l_{00}=p_l
+            !*         [see eq. (b.27) of {mtl}]
+            !*
+            d1 = 1.d0                  !d^0_{00}=p_0=1   (see sec. 6.8 of {nr})
+            d2 = x                     !d^1_{00}=p_1=x
 
-        do n = 1, lmax
-            qn = dble(n)
-            qn1 = dble(n + 1)
-            qn2 = dble(2 * n + 1)
-            !        * recurrence (31) of ref. {mis39} for d^{n+1}_{00}
-            d3 = (qn2 * x * d2 - qn * d1) / qn1
-            dv1(n) = d2                     !d^n_{00}
-            d1 = d2                         !becomes d^{n-1}_{00} in d3
-            d2 = d3                         !becomes d^{n}_{00} in d3
-        end do
-        !*
-        go to 100
-        !***********************************************************
-        !*                           m\neq 0 part
-        !*  d_{0m}^m \equiv a_m*(sin\theta)**m   initialization - (33) and recurrence (34) of ref. {mis39}
+            do n = 1, lmax
+                qn = dble(n)
+                qn1 = dble(n + 1)
+                qn2 = dble(2 * n + 1)
+                !        * recurrence (31) of ref. {mis39} for d^{n+1}_{00}
+                d3 = (qn2 * x * d2 - qn * d1) / qn1
+                dv1(n) = d2                     !d^n_{00}
+                d1 = d2                         !becomes d^{n-1}_{00} in d3
+                d2 = d3                         !becomes d^{n}_{00} in d3
+            end do
+        else
+            !***********************************************************
+            !*                           m\neq 0 part
+            !*  d_{0m}^m \equiv a_m*(sin\theta)**m   initialization - (33) and recurrence (34) of ref. {mis39}
+            do i = 1, m
+                i2 = i * 2
+                !          !recurrence (33,34) of ref. {mis39} f
+                a = a * dsqrt(dble(i2 - 1) / dble(i2)) * qs
+            end do
+            !* recurrence initialization following eqs. (32,33) of ref. {mis39}
 
-        20 continue
-        do i = 1, m
-            i2 = i * 2
-            !          !recurrence (33,34) of ref. {mis39} f
-            a = a * dsqrt(dble(i2 - 1) / dble(i2)) * qs
-        end do
-        !*
-        !* recurrence initialization following eqs. (32,33) of ref. {mis39}
+            d1 = 0.d0                 !=dv1(m-1); see eq. (32) of ref. {mis39}
+            d2 = a                    !=dv1(m);   see eq. (33) of ref. {mis39}
+            qmm = dble(m * m)
+            !*
+            do n = m, lmax
+                qn = dble(n)
+                qn1 = dble(n + 1)
+                qn2 = dble(2 * n + 1)
+                qnm = dsqrt(qn * qn - qmm)
+                qnm1 = dsqrt(qn1 * qn1 - qmm)
+                !          !recurrence (31) of ref. {mis39} for d^{n+1}_{0m}
+                d3 = (qn2 * x * d2 - qnm * d1) / qnm1
+                dv1(n) = d2                             !d^n_{0m}
+                d1 = d2                           !becomes d^{n-1}_{0m} in d3,der
+                d2 = d3                                 !becomes d^{n}_{0m} in d3
+            end do
+        end if
 
-        d1 = 0.d0                 !=dv1(m-1); see eq. (32) of ref. {mis39}
-        d2 = a                    !=dv1(m);   see eq. (33) of ref. {mis39}
-        qmm = dble(m * m)
-        !*
-        do n = m, lmax
-            qn = dble(n)
-            qn1 = dble(n + 1)
-            qn2 = dble(2 * n + 1)
-            qnm = dsqrt(qn * qn - qmm)
-            qnm1 = dsqrt(qn1 * qn1 - qmm)
-            !          !recurrence (31) of ref. {mis39} for d^{n+1}_{0m}
-            d3 = (qn2 * x * d2 - qnm * d1) / qnm1
-            dv1(n) = d2                             !d^n_{0m}
-            d1 = d2                           !becomes d^{n-1}_{0m} in d3,der
-            d2 = d3                                 !becomes d^{n}_{0m} in d3
-        end do
-
-        go to 100
         !*                        dv1 initialized
         !*             it remains to determine ddv1 and dv2
         !*********************************************************
@@ -534,14 +530,14 @@ contains
         !*
         !*                          m = 0
 
-        100  if (m.eq.0) then     !all ddv1(n)=x^l_0=0; see (3.33) of {tks}:
+        if (m==0) then     !all ddv1(n)=x^l_0=0; see (3.33) of {tks}:
             !* according to (3.37) of {tks}, dv2(0)=0.d0
 
             dv2(1) = -qs
 
-            if (lmax.ge.2) dv2(2) = 3 * x * dv2(1)
+            if (lmax>=2) dv2(2) = 3 * x * dv2(1)
 
-            if (lmax.lt.3) return
+            if (lmax<3) return
             !*
             do n = 3, lmax           !recurrence (3.36) of {tks},
                 dv2(n) = (2 * n - 1) * x * dv2(n - 1) / (n - 1) - n * dv2(n - 2) / (n - 1)
@@ -549,7 +545,7 @@ contains
             !***********************************************************************
             !*                           m > 0
 
-        else if (m.gt.0) then
+        else if (m>0) then
             !*
             !* >>> determine x^m_m according to eq. (3.29) of {tks}:
 
@@ -564,14 +560,14 @@ contains
             dv2(m) = x * a                        !see (3.34) of {tks}
             !* >>> determine x^{m+1}_m:
 
-            if (m.eq.lmax)  return
+            if (m==lmax)  return
             !     ! der=x^{m+1}_m; see (3.30) of {tks}
             der = x * dsqrt(2 * m + 1.d0) * a
             ddv1(m + 1) = der
             dv2(m + 1) = ((m + 1) * x * der - a * dsqrt(2 * m + 1.d0)) / dble(m)  !(3.35) of {tks}
             !* >>> determine remaining x^{l}_m's
 
-            if ((m + 2).eq.lmax) return
+            if ((m + 2)==lmax) return
 
             do n = m + 2, lmax
                 d3 = dsqrt(dble(n)**2 - dble(m)**2)
@@ -634,7 +630,6 @@ contains
         real(dp) a, x, qs, qs1, d1, d2, d3, der, qn, qn1, qn2, &
                 qnm, qnm1, qmm
 
-
         a = 1d0
         qs = dsqrt(1d0 - x * x)
         qs1 = 1d0 / qs
@@ -643,51 +638,49 @@ contains
             dv2(n) = 0d0
         enddo
 
-        if (m.ne.0) go to 20
+        if (m==0) then
+            d1 = 1d0
+            d2 = x
+            do n = 1, nmax
+                qn = dble(n)
+                qn1 = dble(n + 1)
+                qn2 = dble(2 * n + 1)
+                !        !recurrence (31) of ref. {mis39}
+                d3 = (qn2 * x * d2 - qn * d1) / qn1
+                !        !recurrence (35) of ref. {mis39}
+                der = qs1 * (qn1 * qn / qn2) * (-d1 + d3)
+                dv1(n) = d2
+                dv2(n) = der
+                d1 = d2
+                d2 = d3
+            enddo
+        else
+            qmm = dble(m * m)
+            !*a_m initialization - recurrence (34) of ref. {mis39}
+            do i = 1, m
+                i2 = i * 2
+                a = a * dsqrt(dble(i2 - 1) / dble(i2)) * qs
+            enddo
+            !*
+            d1 = 0d0
+            d2 = a
 
-        d1 = 1d0
-        d2 = x
-        do n = 1, nmax
-            qn = dble(n)
-            qn1 = dble(n + 1)
-            qn2 = dble(2 * n + 1)
-            !        !recurrence (31) of ref. {mis39}
-            d3 = (qn2 * x * d2 - qn * d1) / qn1
-            !        !recurrence (35) of ref. {mis39}
-            der = qs1 * (qn1 * qn / qn2) * (-d1 + d3)
-            dv1(n) = d2
-            dv2(n) = der
-            d1 = d2
-            d2 = d3
-        enddo
-        return
-
-        20 qmm = dble(m * m)
-        !*a_m initialization - recurrence (34) of ref. {mis39}
-        do i = 1, m
-            i2 = i * 2
-            a = a * dsqrt(dble(i2 - 1) / dble(i2)) * qs
-        enddo
-        !*
-        d1 = 0d0
-        d2 = a
-
-        do n = m, nmax
-            qn = dble(n)
-            qn2 = dble(2 * n + 1)
-            qn1 = dble(n + 1)
-            qnm = dsqrt(qn * qn - qmm)
-            qnm1 = dsqrt(qn1 * qn1 - qmm)
-            !        !recurrence (31) of ref. {mis39}
-            d3 = (qn2 * x * d2 - qnm * d1) / qnm1
-            !        !recurrence (35) of ref. {mis39}
-            der = qs1 * (-qn1 * qnm * d1 + qn * qnm1 * d3) / qn2
-            dv1(n) = d2
-            dv2(n) = der
-            d1 = d2
-            d2 = d3
-        enddo
-        !*
+            do n = m, nmax
+                qn = dble(n)
+                qn2 = dble(2 * n + 1)
+                qn1 = dble(n + 1)
+                qnm = dsqrt(qn * qn - qmm)
+                qnm1 = dsqrt(qn1 * qn1 - qmm)
+                !        !recurrence (31) of ref. {mis39}
+                d3 = (qn2 * x * d2 - qnm * d1) / qnm1
+                !        !recurrence (35) of ref. {mis39}
+                der = qs1 * (-qn1 * qnm * d1 + qn * qnm1 * d3) / qn2
+                dv1(n) = d2
+                dv2(n) = der
+                d1 = d2
+                d2 = d3
+            enddo
+        end if
         return
     end
 

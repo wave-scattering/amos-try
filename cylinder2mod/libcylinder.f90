@@ -3,10 +3,10 @@ module libcylinder
     use model_parameters
     use special_functions
     use cylinder_blas
-    !    use dense_solve
-    !    use multem_blas
-    !    use amos
-    !    use errfun, only : wpop
+    !use dense_solve
+    !use multem_blas
+    !use amos
+    !use errfun, only : wpop
 
     implicit none
     type, private :: cdrop_values
@@ -76,7 +76,7 @@ contains
         enddo
         rs = dsqrt(s * 0.5d0)
         rv = (v * 3d0 * 0.25d0)**(1d0 / 3d0)
-        if (dabs(rat - 1d0).gt.1d-8) rat = rv / rs
+        if (dabs(rat - 1d0)>1d-8) rat = rv / rs
         cdrop%r0v = 1d0 / rv
         write(nout, 1000) cdrop%r0v
         do n = 0, nc
@@ -205,24 +205,25 @@ contains
             z = cos(3.141592654d0 * (i - .25d0) / (n + .5d0))
             ! starting with the above approximation to the ith root, we enter
             ! the main loop of refinement by newton's method.
-            1        continue
-            p1 = 1.d0
-            p2 = 0.d0
+            do
+                p1 = 1.d0
+                p2 = 0.d0
 
-            do j = 1, n !loop up the recurrence relation to get legendre
-                p3 = p2     !polynomial evaluated at z.
-                p2 = p1
-                p1 = ((2.d0 * j - 1.d0) * z * p2 - (j - 1.d0) * p3) / j
+                do j = 1, n !loop up the recurrence relation to get legendre
+                    p3 = p2     !polynomial evaluated at z.
+                    p2 = p1
+                    p1 = ((2.d0 * j - 1.d0) * z * p2 - (j - 1.d0) * p3) / j
+                end do
+
+                ! p1 is now the desired  legendre polynomial. we next compute pp, its derivative,
+                ! by a standard relation involving also p2, the polynomial of one lower order:
+
+                pp = n * (z * p1 - p2) / (z * z - 1.d0)
+                z1 = z
+                z = z1 - p1 / pp                   !newton's method
+
+                if (abs(z - z1)<=eps) exit
             end do
-
-            ! p1 is now the desired  legendre polynomial. we next compute pp, its derivative,
-            ! by a standard relation involving also p2, the polynomial of one lower order:
-
-            pp = n * (z * p1 - p2) / (z * z - 1.d0)
-            z1 = z
-            z = z1 - p1 / pp                   !newton's method
-
-            if (abs(z - z1).gt.eps) goto 1
             ! scale the root to the desired interval, and put in its symmetric counterpart:
             x(i) = xm - xl * z
             x(n + 1 - i) = xm + xl * z
@@ -261,57 +262,67 @@ contains
         ind = mod(n, 2)
         k = n / 2 + ind
         f = dble(n)
-        do 100 i = 1, k
+        do i = 1, k
             m = n + 1 - i
-            if(i.eq.1) x = a - b / ((f + a) * f)
-            if(i.eq.2) x = (z(n) - a) * 4d0 + z(n)
-            if(i.eq.3) x = (z(n - 1) - z(n)) * 1.6d0 + z(n - 1)
-            if(i.gt.3) x = (z(m + 1) - z(m + 2)) * c + z(m + 3)
-            if(i.eq.k.and.ind.eq.1) x = 0d0
+            select case (i)
+            case(1)
+                x = a - b / ((f + a) * f)
+            case(2)
+                x = (z(n) - a) * 4d0 + z(n)
+            case(3)
+                x = (z(n - 1) - z(n)) * 1.6d0 + z(n - 1)
+            case default
+                x = (z(m + 1) - z(m + 2)) * c + z(m + 3)
+            end select
+
+            if(i==k.and.ind==1) x = 0d0
             niter = 0
             check = 1d-16
-            10     pb = 1d0
-            niter = niter + 1
-            if (niter.le.100) go to 15
-            check = check * 10d0
-            15     pc = x
-            dj = a
-            do j = 2, n
-                dj = dj + a
-                pa = pb
-                pb = pc
-                pc = x * pb + (x * pb - pa) * (dj - a) / dj
+            do
+                pb = 1d0
+                niter = niter + 1
+                if (niter>100) then
+                    check = check * 10d0
+                end if
+                pc = x
+                dj = a
+                do j = 2, n
+                    dj = dj + a
+                    pa = pb
+                    pb = pc
+                    pc = x * pb + (x * pb - pa) * (dj - a) / dj
+                end do
+                pa = a / ((pb - x * pc) * f)
+                pb = pa * pc * (a - x * x)
+                x = x - pb
+                if (dabs(pb)<=check * dabs(x)) exit
             end do
-            pa = a / ((pb - x * pc) * f)
-            pb = pa * pc * (a - x * x)
-            x = x - pb
-            if(dabs(pb).gt.check * dabs(x)) go to 10
             z(m) = x
             w(m) = pa * pa * (a - x * x)
-            if(ind1.eq.0) w(m) = b * w(m)
-            if(i.eq.k.and.ind.eq.1) go to 100
-            z(i) = -z(m)
-            w(i) = w(m)
-        100 continue
-        if(ind2.ne.1) go to 110
-        print 1100, n
-        1100 format(' ***  points and weights of gaussian quadrature formula', &
-                ' of ', i4, '-th order')
-        do i = 1, k
-            zz = -z(i)
-            print 1200, i, zz, i, w(i)
+            if(ind1==0) w(m) = b * w(m)
+            if(i/=k.or.ind/=1) then
+                z(i) = -z(m)
+                w(i) = w(m)
+            end if
         end do
-        1200 format(' ', 4x, 'x(', i4, ') = ', f17.14, 5x, 'w(', i4, ') = ', f17.14)
-        go to 115
-        110 continue
-        !     print 1300,n
-        ! 1300 format(' gaussian quadrature formula of ',i4,'-th order is used')
-        115 continue
-        if(ind1.eq.0) go to 140
-        do i = 1, n
-            z(i) = (a + z(i)) / b
-        end do
-        140 continue
+        if (ind2==1) then
+            print 1100, n
+            1100 format(' ***  points and weights of gaussian quadrature formula', &
+                    ' of ', i4, '-th order')
+            do i = 1, k
+                zz = -z(i)
+                print 1200, i, zz, i, w(i)
+            end do
+            1200 format(' ', 4x, 'x(', i4, ') = ', f17.14, 5x, 'w(', i4, ') = ', f17.14)
+            !     print 1300,n
+            ! 1300 format(' gaussian quadrature formula of ',i4,'-th order is used')
+        else
+            if(ind1/=0) then
+                do i = 1, n
+                    z(i) = (a + z(i)) / b
+                end do
+            end if
+        end if
 
         return
     end

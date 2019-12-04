@@ -2,12 +2,12 @@ module model_parameters
     use constants
     use flap, only : command_line_interface
     use penf, only : I4P
-    use finer, only :  file_ini
+    use finer, only : file_ini
 
-    !    use dense_solve
-!    use multem_blas
-!    use amos
-!    use errfun, only : wpop
+    !use dense_solve
+    !use multem_blas
+    !use amos
+    !use errfun, only : wpop
 
     implicit none
 
@@ -23,23 +23,23 @@ module model_parameters
     end type model_parameters_type
     type(model_parameters_type), public :: mpar
 
-    character(999), private        :: ini_config_file_name  !< Name of INI file.
-    type(file_ini), private        :: fini       !< INI file handler.
+    character(999), private :: ini_config_file_name  !< Name of INI file.
+    type(file_ini), private :: fini       !< INI file handler.
 
     type, private :: particle_type_values
         integer :: spheroid, cylinder, droplet, sphere_cut_top, sphere_cut_bottom, &
                 cone, cone_cut_top, cone_on_cylinder, nanorod
     end type particle_type_values
-    type(particle_type_values), public, parameter :: particle_type = particle_type_values( &
+    type(particle_type_values), public, parameter :: particle_type = particle_type_values(&
             -1, -2, -3, -4, -5, -6, -7, -8, -9)
 
     public cli_parse, ini_parse
 
-    contains
+contains
 
     !--------/---------/---------/---------/---------/---------/---------/--
     subroutine ini_parse()
-!        character(len = :), allocatable :: items(:, :) !< items pairs.
+        !        character(len = :), allocatable :: items(:, :) !< items pairs.
         integer :: error
         character(len = :), allocatable :: string         !< string option.
         real(dp) :: double, d_re, d_im
@@ -53,8 +53,8 @@ module model_parameters
         call fini%get(section_name = 'general', option_name = 'particle_type', &
                 val = string, error = error)
         mpar%np = 0
-        if ((trim(string) .eq. 'cylinder').or.(trim(string)=='-2')) mpar%np = -2
-        if ((trim(string) .eq. 'nanorod').or.(trim(string)=='-9')) mpar%np = -9
+        if ((trim(string)=='cylinder').or.(trim(string)=='-2')) mpar%np = -2
+        if ((trim(string)=='nanorod').or.(trim(string)=='-9')) mpar%np = -9
 
         call fini%get(section_name = 'nanorod', &
                 option_name = 'nanorod_cap_hr', val = double, error = error)
