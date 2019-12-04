@@ -30,7 +30,7 @@ target_link_libraries(libcylinder
         )
 
 ADD_EXECUTABLE(${PROJECTNAME}
-        tmtaxsp1.f
+        tmtaxsp1.f90
         axspartclnew4.f90
         gnzbess.f
         biga.f
