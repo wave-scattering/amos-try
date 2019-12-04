@@ -1132,7 +1132,6 @@ cc      IF (NP.EQ.-8) CALL RSP8(X,NG,RSNM,HT,R,DR)          ! cone on a cylinder
      &                                mpar%nanorod_cap_hr, R,DR) ! nanorod
 !
       WV=P*2D0/LAM                 !wave vector
-      cbess%wv = WV
       PPI=WV*WV
       PIR=PPI*MRR
       PII=PPI*MRI
@@ -1170,6 +1169,9 @@ cc      IF (NP.EQ.-8) CALL RSP8(X,NG,RSNM,HT,R,DR)          ! cone on a cylinder
 ! generate arrays of Bessel functions at NGAUSS GIF division
 ! points and store them in the common block /CBESS/
 !
+      cbess%wv = WV
+      cbess%mrr = mrr
+      cbess%mri = mri
       CALL BESS(Z,ZR,ZI,NG,NMAX,NNMAX1)
 !
       RETURN
@@ -1962,8 +1964,8 @@ c        OPEN(NOUT+3,FILE='surfint.dat')   !Gauss convergence check
                     call cbessjdj(r(i),N1, qj1, qdj1)
                     call cbessydy(r(i),N1, qy1, qdy1)
 ! Bessel functions of the interior argument:
-                    QJR2=cbess%JR(I,N2)
-                    QJI2=cbess%JI(I,N2)
+                    call cbesscjcdj(r(i),N2, nmax,
+     &                              qjr2, qji2, qdjr2, qdji2)
 ! Re and Im of j_{n2}(k_{in}r) j_{n1}(k_{out}r):
 
                     C1R=QJR2*QJ1

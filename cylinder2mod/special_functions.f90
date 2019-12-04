@@ -17,6 +17,7 @@ module special_functions
         real(dp), allocatable :: J(:,:), Y(:,:), JR(:,:), JI(:,:), &
                 DJ(:,:),DY(:,:),DJR(:,:),DJI(:,:)
         real(dp) :: wv ! wave vector = 2*pi/lambda
+        real(dp) :: mrr, mri ! real and imag parts of refractive index
     end type cbess_values
     type(cbess_values), public :: cbess
 
@@ -25,6 +26,23 @@ module special_functions
 
 contains
     !=======================================================================
+    !=======================================================================
+    subroutine cbesscjcdj(x, n, nmax, jr, ji, djr, dji)
+        real(dp) x, xx, xr, xi, jr, ji, djr, dji
+        integer nmax, n
+        !
+        call reallocate_abess(nmax)
+        xx = sqrt(x)*cbess%wv
+        xr = xx * cbess%mrr
+        xi = xx * cbess%mri
+        call cjb(xr, xi, abess%ajr, abess%aji, &
+                abess%adjr, abess%adji, nmax, 2)
+        jr = abess%ajr(n)
+        ji = abess%aji(n)
+        djr = abess%adjr(n)
+        dji = abess%adji(n)
+        return
+    end subroutine cbesscjcdj
     !=======================================================================
     subroutine cbessydy(x, nmax, y, dy)
         real(dp) x, xx, y, dy
