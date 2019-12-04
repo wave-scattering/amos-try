@@ -1945,7 +1945,7 @@ contains
             inm1 = max0(3, ixxx)
         else
             inm1 = 2                 !the bessel package routine ryb
-            !                            !requires nmax to be at least 2
+            !                        !requires nmax to be at least 2
         end if
         !
         if (inm1>=npn1) print 7333, npn1
@@ -2008,7 +2008,7 @@ contains
                     tr1nn1 = tr1(n1, n1)
                     ti1nn1 = ti1(n1, n1)
                     dn1 = dble(2 * n + 1)
-                    qsca = qsca + dn1 * (tr1nn * tr1nn + ti1nn * ti1nn&
+                    qsca = qsca + dn1 * (tr1nn * tr1nn + ti1nn * ti1nn &
                             + tr1nn1 * tr1nn1 + ti1nn1 * ti1nn1)
                     qext = qext + (tr1nn + tr1nn1) * dn1
                 end do

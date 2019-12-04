@@ -32,13 +32,13 @@ target_link_libraries(libcylinder
 ADD_EXECUTABLE(${PROJECTNAME}
         tmtaxsp1.f90
         axspartclnew4.f90
-        gnzbess.f
-        biga.f
-        chebev.f # TODO replace with non NR
-        gnricbessh.f
-        beschb.f # TODO replace with non NR
-        sordalc.f
-#        lpd.f
+        #gnzbess.f
+        #biga.f
+        #chebev.f90 # TODO replace with non NR
+        #gnricbessh.f
+        #beschb.f90 # TODO replace with non NR
+        #sordalc.f
+        #lpd.f
         )
 target_link_libraries(${PROJECTNAME}
         constants
