@@ -31,7 +31,7 @@ target_link_libraries(libcylinder
 
 ADD_EXECUTABLE(${PROJECTNAME}
         tmtaxsp1.f
-        "axspartclnew4.f"
+        axspartclnew4.f90
         gnzbess.f
         biga.f
         chebev.f # TODO replace with non NR
