@@ -29,7 +29,7 @@ contains
     !=======================================================================
     !=======================================================================
     !=======================================================================
-    subroutine rsp3 (x, r, dr)
+    subroutine rsp_cylinder (x, r, dr)
         !--------/---------/---------/---------/---------/---------/---------/--
         ! >>> x,ng,ngauss,rev,eps
         ! <<< r,dr
@@ -58,6 +58,7 @@ contains
         !
         !--------/---------/---------/---------/---------/---------/---------/--
         !TODO: convert to f90
+        implicit none
         real(dp) rev, eps, h, a, si, co, rthet, rad
         integer ng, ngauss, i
         real(dp) x(:), r(:), dr(:)
@@ -74,19 +75,19 @@ contains
             co = -x(i)
             si = dsqrt(1d0 - co * co)
 
-            if (si / co.gt.a / h) go to 20
-            ! along the plane cuts:
-            rad = h / co
-            rthet = h * si / (co * co)
-            go to 30
-            ! along the circular surface:
-            20      continue
-            rad = a / si
-            rthet = -a * co / (si * si)
-            !c         rad=1.d-10
-            !c         rthet=0.d0
+            if ((h * si)>(a * co)) then
+                ! along the circular surface:
+                rad = a / si
+                rthet = -a * co / (si * si)
+                !rad=1.d-10
+                !rthet=0.d0
+            else
+                ! along the plane cuts:
+                rad = h / co
+                rthet = h * si / (co * co)
+            end if
 
-            30      r(i) = rad * rad
+            r(i) = rad * rad
             r(ng - i + 1) = r(i)          !using mirror symmetry
 
             dr(i) = -rthet / rad
@@ -99,6 +100,7 @@ contains
     !=======================================================================
     subroutine drop (rat)
         !=================
+        implicit none
         integer nout, nc, ng, i, n
         real(dp) s, v, rat, cki, dri, rv, ri, si, risi, rs, wi, xi, xin
         ! number of the output unit
@@ -160,6 +162,7 @@ contains
         ! >>> eps
         ! <<< rat
         !=================
+        implicit none
         real(dp) :: rat, eps
         !
         rat = (1.5d0 / eps)**(1d0 / 3d0)

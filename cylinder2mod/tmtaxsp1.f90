@@ -826,17 +826,31 @@ subroutine vary (lam, mrr, mri, a, eps, &
     ht = 0d0
     ! decision tree to specify particle shape:
 
-    if (np>0)  call rsp2(x, ng, a, eps, np, r, dr)       ! chebyshev particle
-    if (np==-1) call  rsp1(x, ng, ngauss, a, eps, r, dr)   ! oblate/prolate spheroids
-    if (np==-2) call rsp3(x, r, dr)   ! oblate/prolate cylinder
-    if (np==-3) call rsp4(x, ng, a, r, dr)              ! a distorted chebyshev droplet
-    if (np==-4) call rsp5(x, ng, rsnm, eps, r, dr)       ! sphere cut by a plane on its top
-    if (np==-5) call rspi5(x, ng, rsnm, eps, r, dr)      ! sphere cut by a plane on its bottom
-    if (np==-6) call rsp6(x, ng, rsnm, ht, r, dr)        ! upwardly oriented cone
-    !c      if (np.eq.-7) call rsp7(x,ng,rsnm,ht,r,dr)          ! cone cut on its top
-    !c      if (np.eq.-8) call rsp8(x,ng,rsnm,ht,r,dr)          ! cone on a cylinder
-    if (np==-9) call rsp3nanorod (x, ng, ngauss, a, eps, &
-            mpar%nanorod_cap_hr, r, dr) ! nanorod
+    if (np>0)  then ! chebyshev particle
+        call rsp_chebyshev(x, ng, a, eps, np, r, dr)
+    else
+        select case (np)
+        case (-1) ! oblate/prolate spheroids
+            call rsp_spheroid(x, ng, ngauss, a, eps, r, dr)
+        case (-2) ! oblate/prolate cylinder
+            call rsp_cylinder(x, r, dr)
+        case (-3) ! a distorted chebyshev droplet
+            call rsp_droplet(x, ng, a, r, dr)
+        case (-4) ! sphere cut by a plane on its top
+            call rsp_sphere_cut_top(x, ng, rsnm, eps, r, dr)
+        case (-5) ! sphere cut by a plane on its bottom
+            call rsp_sphere_cut_bottom(x, ng, rsnm, eps, r, dr)
+        case (-6) ! upwardly oriented cone
+            call rsp_cone_up(x, ng, rsnm, ht, r, dr)
+        !case (-7) ! cone cut on its top
+        !    call rsp_cone_cut_top(x, ng, rsnm, ht, r, dr)
+        !case (-8) ! cone on a cylinder
+        !    call rsp_cone_on_cylinder(x, ng, rsnm, ht, r, dr)
+        case (-9) ! nanorod
+            call rsp_nanorod (x, ng, ngauss, a, eps, &
+                    mpar%nanorod_cap_hr, r, dr)
+        end select
+    end if
     !
     wv = p * 2d0 / lam                 !wave vector
     ppi = wv * wv
@@ -860,8 +874,10 @@ subroutine vary (lam, mrr, mri, a, eps, &
         zr(i) = v1            !=(2\pi/\lambda)*r*mrr
         zi(i) = v2            !=(2\pi/\lambda)*r*mri
     end do
-    if (nmax>npn1) print 90, nmax, npn1
-    if (nmax>npn1) stop
+    if (nmax>npn1) then
+        print 90, nmax, npn1
+        stop
+    end if
     90 format(' nmax = ', i2, ', i.e., greater than ', i3)
     !
     ! ta is the ``max. size parameter", max(2*pi*sqrt(ri)/lambda)
@@ -883,7 +899,7 @@ end
 
 !**********************************************************************
 
-subroutine rsp1 (x, ng, ngauss, rev, eps, r, dr)
+subroutine rsp_spheroid (x, ng, ngauss, rev, eps, r, dr)
     !--------/---------/---------/---------/---------/---------/---------/--
     ! >>> x,ng,ngauss,rev,eps
     ! <<< r,dr
@@ -909,7 +925,10 @@ subroutine rsp1 (x, ng, ngauss, rev, eps, r, dr)
     !   1.le.i.le.ngauss
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
-    implicit real(dp) (a-h, o-z)
+    implicit none
+    integer ng, ngauss, i
+    real(dp) rev, eps, ep, a, aa, c, cc, ee, ee1, rr
+    real(dp) s, ss
     real(dp) x(ng), r(ng), dr(ng)
 
     a = rev * eps**(1d0 / 3d0)
@@ -935,7 +954,7 @@ end
 
 !**********************************************************************
 
-subroutine rsp2 (x, ng, rev, eps, n, r, dr)
+subroutine rsp_chebyshev (x, ng, rev, eps, n, r, dr)
     !--------/---------/---------/---------/---------/---------/---------/--
     ! >>> x,ng,rev,eps,n
     ! <<< r,dr
@@ -965,7 +984,6 @@ subroutine rsp2 (x, ng, rev, eps, n, r, dr)
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
     implicit none
-    !implicit real(dp) (a-h, o-z)
     integer ng, i, n
     real(dp) rev, eps, ep, a, r0, ri, xi
     real(dp) dn, dnp, dn4
@@ -993,7 +1011,7 @@ end
 
 !**********************************************************************
 
-subroutine rsp3nanorod (x, ng, ngauss, rev, eps, epse, r, dr)
+subroutine rsp_nanorod (x, ng, ngauss, rev, eps, epse, r, dr)
     !--------/---------/---------/---------/---------/---------/---------/--
     ! >>> x,ng,ngauss,rev,eps
     ! <<< r,dr
@@ -1023,7 +1041,6 @@ subroutine rsp3nanorod (x, ng, ngauss, rev, eps, epse, r, dr)
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
     implicit none
-    !implicit real(dp) (a-h,o-z)
     integer ng, ngauss, i
     real(dp) rev, eps, h, a, co, si, rad, rthet
     real(dp) valdr, c2, s2, alpha, beta, he, hc, epse, epsc
@@ -1080,7 +1097,7 @@ subroutine rsp3nanorod (x, ng, ngauss, rev, eps, epse, r, dr)
 end
 
 
-subroutine rsp4 (x, ng, rev, r, dr)
+subroutine rsp_droplet (x, ng, rev, r, dr)
     !--------/---------/---------/---------/---------/---------/---------/--
     ! >>> x,ng
     ! <<< r,dr
@@ -1120,7 +1137,7 @@ subroutine rsp4 (x, ng, rev, r, dr)
         dri = dri * r0
         r(i) = ri * ri
         dr(i) = dri / ri
-        !        write(nout,*) i,r(i),dr(i)
+        !write(nout,*) i,r(i),dr(i)
     enddo
 
     return
@@ -1129,15 +1146,15 @@ end
 
 !**********************************************************************
 
-subroutine rsp5 (x, ng, rev, eps, r, dr)
+subroutine rsp_sphere_cut_top (x, ng, rev, eps, r, dr)
     !--------/---------/---------/---------/---------/---------/---------/--
     ! >>> x,ng,rev,eps
     ! <<< r,dr
     !=========================
     !   activated for np=-4
     !
-    !   similar to rspi5, except for that the plane cut is on the sphere "top"
-    !   ===> cosine of the separation angle has the same magnitude as in rspi5,
+    !   similar to rsp_sphere_cut_bottom, except for that the plane cut is on the sphere "top"
+    !   ===> cosine of the separation angle has the same magnitude as in rsp_sphere_cut_bottom,
     !        but is always positive in the present case !!!
     !
     !   calculation of the functions
@@ -1210,15 +1227,15 @@ end
 
 !**********************************************************************
 
-subroutine rspi5 (x, ng, rev, eps, r, dr)
+subroutine rsp_sphere_cut_bottom (x, ng, rev, eps, r, dr)
     !--------/---------/---------/---------/---------/---------/---------/--
     ! >>> x,ng,rev,eps
     ! <<< r,dr
     !=========================
     !   activated for np=-5
     !
-    !   similar to rsp5, except for that the plane cut is on the sphere "bottom"
-    !   ===> cosine of the separation angle has the same magnitude as in rsp5,
+    !   similar to rsp_sphere_cut_top, except for that the plane cut is on the sphere "bottom"
+    !   ===> cosine of the separation angle has the same magnitude as in rsp_sphere_cut_top,
     !        but is always negative in the present case !!!
     !
     !   calculation of the functions
@@ -1291,7 +1308,7 @@ end
 
 !**********************************************************************
 
-subroutine rsp6(x, ng, rev, ht, r, dr)
+subroutine rsp_cone_up(x, ng, rev, ht, r, dr)
     !--------/---------/---------/---------/---------/---------/---------/--
     ! >>> x,ng,rev,ht
     ! <<< r,dr
@@ -1832,7 +1849,7 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
     ! calculate the product q^{-1} rg q
     !
     call tt(nmax)
-    !
+
     return
 end
 
@@ -2263,6 +2280,9 @@ subroutine tt(nmax)
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
 
+    implicit none
+    integer nmax, nm, i, info, j, k
+    real(dp) ai, ar, ari, arr, ti, tr
     real(dp)  qr(npn2, npn2), qi(npn2, npn2), emach, &
             rgqr(npn2, npn2), rgqi(npn2, npn2)
     real(dp) tr1(npn2, npn2), ti1(npn2, npn2)
