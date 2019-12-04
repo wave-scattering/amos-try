@@ -426,8 +426,7 @@ subroutine vigampl (x, nmax, m, ddv1, dv2)
         end do
 
     end if
-    !
-    go to 100
+
     !********************************************************
     !  (1-cos\theta) is very small:
     !
@@ -470,7 +469,7 @@ subroutine vigampl (x, nmax, m, ddv1, dv2)
     !                   nonzero ddv1/dv2 initialization
     !                          m = 0
 
-    100  if (m==0) then     !all ddv1(n)=x^l_0=0; see (3.33) of {tks}:
+    if (m==0) then     !all ddv1(n)=x^l_0=0; see (3.33) of {tks}:
         ! according to (3.37) of {tks}, dv2(0)=0.d0
 
         dv2(1) = qs
@@ -500,26 +499,26 @@ subroutine vigampl (x, nmax, m, ddv1, dv2)
         dv2(m) = x * a                        !see (3.34) of {tks}
         ! >>> determine x^{m+1}_m:
 
-        if (m==nmax)  go to 120
+        if (m/=nmax)  then
+            der = x * dsqrt(2 * m + 1.d0) * a          ! der=x^{m+1}_m; see (3.30) of {tks}
+            ddv1(m + 1) = der
+            dv2(m + 1) = ((m + 1) * x * der - a * dsqrt(2 * m + 1.d0)) / dble(m)  !(3.35) of {tks}
+            ! >>> determine remaining x^{l}_m's
+        end if
 
-        der = x * dsqrt(2 * m + 1.d0) * a          ! der=x^{m+1}_m; see (3.30) of {tks}
-        ddv1(m + 1) = der
-        dv2(m + 1) = ((m + 1) * x * der - a * dsqrt(2 * m + 1.d0)) / dble(m)  !(3.35) of {tks}
-        ! >>> determine remaining x^{l}_m's
-
-        if ((m + 2)==nmax)  go to 120
-
-        do n = m + 2, nmax
-            d3 = dsqrt(dble(n)**2 - dble(m)**2)
-            ddv1(n) = ((2 * n - 1) * x * ddv1(n - 1) - &
-                    dsqrt(dble(n - 1)**2 - dble(m)**2) * ddv1(n - 2)) / d3
-            !                                                     !see (3.31) of {tks}
-            dv2(n) = (n * x * ddv1(n) - ddv1(n - 1) * d3) / dble(m)      !see (3.35) of {tks}
-        enddo
+        if ((m + 2)/=nmax)  then
+            do n = m + 2, nmax
+                d3 = dsqrt(dble(n)**2 - dble(m)**2)
+                ddv1(n) = ((2 * n - 1) * x * ddv1(n - 1) - &
+                        dsqrt(dble(n - 1)**2 - dble(m)**2) * ddv1(n - 2)) / d3
+                !                                                     !see (3.31) of {tks}
+                dv2(n) = (n * x * ddv1(n) - ddv1(n - 1) * d3) / dble(m)      !see (3.35) of {tks}
+            enddo
+        end if
 
     end if
 
-    120 return
+    return
 end
 !**********************************************************************
 

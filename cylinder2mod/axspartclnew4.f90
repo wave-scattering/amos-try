@@ -929,7 +929,7 @@ program axspartcl1
     !      if (1.eq.1) nstep=0             ! temporarily
     !      delo=0.d0
     !      omega0=omega
-    !      go to 11
+    !      goto 11
     !
     ! option for omega input:
     !      write(6,*)'read omega ='
@@ -1308,11 +1308,11 @@ program axspartcl1
     ! omf is reepsz/omega and ceps1 contains the sphere eps
     !                       material constant reading:
     !
-    if (nmat<=1) then
-
-        go to 2         !no reading of material data
-
-    else if (nmat==2) then            ! silver data
+    select case (nmat)
+    case (1) !no reading of material data
+        continue
+        !        goto 2
+    case (2) ! silver data
 
         open(unit = 30, file = 'agc.dat')
         rewind(30)
@@ -1321,7 +1321,7 @@ program axspartcl1
         enddo
         close(30)
 
-    else if (nmat==3) then        ! gold data
+    case (3) ! gold data
 
         !      open(unit=30,file='au293knew.dat')       !gold data for different t
         open(unit = 30, file = 'audat.dat')          !gold data in nm
@@ -1336,7 +1336,7 @@ program axspartcl1
 
         !c      else if (nmat.eq.4) then
 
-    else if (nmat==5) then        ! copper data
+    case (5) ! copper data
 
         open(unit = 30, file = 'cudat.dat')          !copper data in nm
         write(6, *)'copper particles'
@@ -1347,7 +1347,7 @@ program axspartcl1
         enddo
         close(30)
 
-    else if (nmat==6) then        ! aluminium data
+    case (6) ! aluminium data
 
         open(unit = 30, file = 'aldat.dat')          !aluminium data in nm
         write(6, *)'aluminum particles'
@@ -1358,7 +1358,7 @@ program axspartcl1
         enddo
         close(30)
 
-    else if (nmat==7) then        ! platinum data
+    case (7) ! platinum data
 
         open(unit = 30, file = 'ptdat.dat')          !platinum data in nm
         write(6, *)'platinum particles'
@@ -1369,7 +1369,7 @@ program axspartcl1
         enddo
         close(30)
 
-    else if (nmat==8) then        ! silicon data
+    case (8) ! silicon data
 
         !     open(unit=30,file='sieps.dat')  !silicon data in nm
         open(unit = 30, file = 'sidat.dat')   !silicon data in nm for larger interval
@@ -1385,7 +1385,7 @@ program axspartcl1
         enddo
         close(30)
 
-    else if (nmat==9) then        ! water data
+    case (9) ! water data
 
         open(unit = 30, file = 'measured_water_dispersion_t=24.txt')   !water in ghz
         write(6, *)'water particles'
@@ -1397,7 +1397,7 @@ program axspartcl1
         enddo
         close(30)
 
-    end if                      ! material constant reading
+    end select ! material constant reading
     !********************
     !                     --------------------------------
     ! begin main scanning loop:
@@ -1416,178 +1416,167 @@ program axspartcl1
             omega = omega0 + dble(istep - 1) * delo
 
             write(6, *) itter, istep, defp, hlength
-            !     omega_max = omega0 + dble(nstep)*delo
-            !     lambda_min=2.d0*pi*rev/(omega_max*rmuf)
-            !      lambda_max=2.d0*pi*rev/(omega0*rmuf)
-            !      lambda = lambda_min + (lambda_max - lambda_min)*dble(istep)
-            !     & /dble(nstep)
+            !omega_max = omega0 + dble(nstep)*delo
+            !lambda_min=2.d0*pi*rev/(omega_max*rmuf)
+            !lambda_max=2.d0*pi*rev/(omega0*rmuf)
+            !lambda = lambda_min + (lambda_max - lambda_min)*dble(istep) &
+            !         /dble(nstep)
             lambda = 2.d0 * pi * rev_beg / (omega * rmuf)
 
-            !c      xs=rmuf*omega*dble(sqrt(zeps0))  !equiv. size parameter
+            !xs=rmuf*omega*dble(sqrt(zeps0))  !equiv. size parameter
 
-            if ((nmat==0).or.(ynperfcon)) go to 8      !dispersionless dielectric
-            !                                                      !or ideal metal
-            ! in case of a dispersion, epssph is modified.
-            ! for ideal drude metal
-            !     plasma=2.d0*pi*sphere radius in nm/(lambda_z in nm*rmuf)
-            ! where lambda_z is the wavelength for which re eps_s=0.
+            ! it is neither dispersionless dielectric nor ideal metal
+            if ((nmat/=0).and.(.not.ynperfcon)) then
+                ! in case of a dispersion, epssph is modified.
+                ! for ideal drude metal
+                !     plasma=2.d0*pi*sphere radius in nm/(lambda_z in nm*rmuf)
+                ! where lambda_z is the wavelength for which re eps_s=0.
 
-            reepsz = 2.d0 * pi * rev / (323.83d0 * rmuf)
+                reepsz = 2.d0 * pi * rev / (323.83d0 * rmuf)
 
-            if (nmat==1) then              !material decision if - drude metal
+                select case (nmat)
+                case (1) !material decision if - drude metal
 
-                plasma = reepsz
-                omxp = plasma / omega
-                zeps1 = 1.d0 - omxp**2 / (1.d0 + ci * plasma / (144.d0 * omega))
-                go to 5
-                !
-            else if (nmat==4) then             !material decision if - zns
-                !
-                filfrac = 0.62d0         ! filfrac of zns in zns core
-                call  znsrefind(lambda, filfrac, zeps1)
-                go to 5
-                !
-            else if (nmat==2) then         !material decision if - ag
-
-                ! >>> real material data:           !silver
-                !                         lambda_z=323.83d0
-                !                         lambda_p=164.d0
-                ! when real material data are used,
-                ! reepsz differs from plasma!!! the plasma wavelength is
-                ! calculated below:
-
-                plasma = reepsz * 7.2d0 / 3.8291d0
-                ! security trap - remainder (not optimized!)
-                omxf = omega / reepsz
-                if (omxf>omf(1)) then
-                    write(6, *)'calculation of has to stop with'
-                    write(6, *)' omf(1)'
-                    write(6, *)' omxf=', omxf
-                    stop
-                end if
-
-                if (omxf<omf(nfin)) then
+                    plasma = reepsz
                     omxp = plasma / omega
                     zeps1 = 1.d0 - omxp**2 / (1.d0 + ci * plasma / (144.d0 * omega))
-                    ! damping coefficient for silver is plasma/144 where plasma is different from
-                    ! the re eps zero crossing at 3.8291 ev according to palik!!!
-                    go to 5
-                else if (omxf==omf(1)) then
-                    zeps1 = ceps1(1)
-                    go to 5
-                else
-                    do ieps = 2, nfin
-                        ! data file ordered with the increased wavelength
-                        ! omxf increases in the loop and is oriented opposite to the data file
-                        if (omxf>omf(ieps)) then     ! linear interpolation
-                            zeps1 = ceps1(ieps) + (omxf - omf(ieps)) * (ceps1(ieps - 1) - ceps1(ieps)&
-                                    )&
-                                    / (omf(ieps - 1) - omf(ieps))
-                            go to 5
-                        end if
-                    enddo
-                end if   !end ag
 
-            else if ((nmat>=3).or.((nmat>=5).and.(nmat<=7))) then
-                !material decision if&
-                !au,cu,al,pt
-                ! >>>
-                ! data file ordered with the decreased wavelength
-                ! omega increases in the loop and is oriented along the data file
-                !
-                if ((omega<omf(1)).or.(omega>omf(nfin))) then
-                    !c       write(6,*)'material data not available for this wavelength'
-                    !c       stop
+                case (4) !material decision if - zns
                     !
-                    call sordalc(nmat, lambda, zeps1)
-                    go to 5
+                    filfrac = 0.62d0         ! filfrac of zns in zns core
+                    call  znsrefind(lambda, filfrac, zeps1)
+
+                case (2) !material decision if - ag
+
+                    ! >>> real material data:           !silver
+                    !                         lambda_z=323.83d0
+                    !                         lambda_p=164.d0
+                    ! when real material data are used,
+                    ! reepsz differs from plasma!!! the plasma wavelength is
+                    ! calculated below:
+
+                    plasma = reepsz * 7.2d0 / 3.8291d0
+                    ! security trap - remainder (not optimized!)
+                    omxf = omega / reepsz
+                    if (omxf>omf(1)) then
+                        write(6, *)'calculation of has to stop with'
+                        write(6, *)' omf(1)'
+                        write(6, *)' omxf=', omxf
+                        stop
+                    end if
+
+                    if (omxf<omf(nfin)) then
+                        omxp = plasma / omega
+                        zeps1 = 1.d0 - omxp**2 / (1.d0 + ci * plasma / (144.d0 * omega))
+                        ! damping coefficient for silver is plasma/144 where plasma is different from
+                        ! the re eps zero crossing at 3.8291 ev according to palik!!!
+                    else if (omxf==omf(1)) then
+                        zeps1 = ceps1(1)
+                    else
+                        do ieps = 2, nfin
+                            ! data file ordered with the increased wavelength
+                            ! omxf increases in the loop and is oriented opposite to the data file
+                            if (omxf>omf(ieps)) then     ! linear interpolation
+                                zeps1 = ceps1(ieps) + (omxf - omf(ieps)) * (ceps1(ieps - 1) - ceps1(ieps))&
+                                        / (omf(ieps - 1) - omf(ieps))
+                                exit
+                            end if
+                        enddo
+                    end if   !end ag
+
+                case (3, 5, 7)
+                    !material decision if&
+                    !au,cu,al,pt
+                    ! >>>
+                    ! data file ordered with the decreased wavelength
+                    ! omega increases in the loop and is oriented along the data file
                     !
-                end if
-                !
-                if (omega==omf(nfin)) then
-                    zeps1 = ceps1(nfin)
-                    go to 5
-                else
-                    do ieps = 1, nfin - 1
-                        if (omega<omf(ieps + 1)) then     ! linear interpolation
-                            zeps1 = ceps1(ieps) + (omega - omf(ieps)) * (ceps1(ieps + 1) - ceps1(ieps&
-                                    ))&
-                                    / (omf(ieps + 1) - omf(ieps))
-                            go to 5
-                        end if
-                    enddo
-                end if
+                    if ((omega<omf(1)).or.(omega>omf(nfin))) then
+                        !c       write(6,*)'material data not available for this wavelength'
+                        !c       stop
 
-            else if (nmat==8) then           !material decision if - silicon
-                ! >>>
-                ! data file ordered with the decreased wavelength
-                ! omega increases in the loop and is oriented along the data file
-                !
-                if ((omega<omf(1)).or.(omega>omf(nfin))) then
-                    write(6, *)'material data not available for this wavelength'
-                    stop
+                        call sordalc(nmat, lambda, zeps1)
+
+                    end if
                     !
-                end if
-                !
-                if (omega==omf(nfin)) then
-                    zeps1 = ceps1(nfin)
-                    go to 5
-                else
-                    do ieps = 1, nfin - 1
-                        if (omega<omf(ieps + 1)) then     ! linear interpolation
-                            zeps1 = ceps1(ieps) + (omega - omf(ieps)) * (ceps1(ieps + 1) - ceps1(ieps&
-                                    ))&
-                                    / (omf(ieps + 1) - omf(ieps))
-                            go to 5
-                        end if
-                    enddo
-                end if
+                    if (omega==omf(nfin)) then
+                        zeps1 = ceps1(nfin)
+                    else
+                        do ieps = 1, nfin - 1
+                            if (omega<omf(ieps + 1)) then     ! linear interpolation
+                                zeps1 = ceps1(ieps) + (omega - omf(ieps)) * (ceps1(ieps + 1) - ceps1(ieps))&
+                                        / (omf(ieps + 1) - omf(ieps))
+                                exit
+                            end if
+                        enddo
+                    end if
 
-            else if (nmat==9) then           !material decision if - water
-                ! >>>
-                ! data file ordered with the decreased wavelength
-                ! omega increases in the loop and is oriented along the data file
-                !
-                if ((omega<omf(1)).or.(omega>omf(nfin))) then
-                    write(6, *)'material data not available for this wavelength'
-                    stop
+                case (8) !material decision if - silicon
+                    ! >>>
+                    ! data file ordered with the decreased wavelength
+                    ! omega increases in the loop and is oriented along the data file
                     !
-                end if
-                !
-                if (omega==omf(nfin)) then
-                    zeps1 = ceps1(nfin)
-                    go to 5
-                else
-                    do ieps = 1, nfin - 1
-                        if (omega<omf(ieps + 1)) then     ! linear interpolation
-                            zeps1 = ceps1(ieps) + (omega - omf(ieps)) * (ceps1(ieps + 1) - ceps1(ieps))&
-                                    / (omf(ieps + 1) - omf(ieps))
-                            go to 5
-                        end if
-                    enddo
+                    if ((omega<omf(1)).or.(omega>omf(nfin))) then
+                        write(6, *)'material data not available for this wavelength'
+                        stop
+                        !
+                    end if
+                    !
+                    if (omega==omf(nfin)) then
+                        zeps1 = ceps1(nfin)
+                    else
+                        do ieps = 1, nfin - 1
+                            if (omega<omf(ieps + 1)) then     ! linear interpolation
+                                zeps1 = ceps1(ieps) + (omega - omf(ieps)) * (ceps1(ieps + 1) - ceps1(ieps))&
+                                        / (omf(ieps + 1) - omf(ieps))
+                                exit
+                            end if
+                        enddo
+                    end if
+
+                case (9) !material decision if - water
+                    ! >>>
+                    ! data file ordered with the decreased wavelength
+                    ! omega increases in the loop and is oriented along the data file
+                    !
+                    if ((omega<omf(1)).or.(omega>omf(nfin))) then
+                        write(6, *)'material data not available for this wavelength'
+                        stop
+                        !
+                    end if
+                    !
+                    if (omega==omf(nfin)) then
+                        zeps1 = ceps1(nfin)
+                    else
+                        do ieps = 1, nfin - 1
+                            if (omega<omf(ieps + 1)) then     ! linear interpolation
+                                zeps1 = ceps1(ieps) + (omega - omf(ieps)) * (ceps1(ieps + 1) - ceps1(ieps))&
+                                        / (omf(ieps + 1) - omf(ieps))
+                                exit
+                            end if
+                        enddo
+                    end if
+
+                end select ! end of material decision if
+                ! the end of reading real data according to palik's  book
+                !_____________________________________
+                ! activate bruggeman:
+
+                if (ynbrug) then
+                    ff = 0.8d0
+                    z1 = (3.d0 * ff - 1.d0) * zeps1 + (2.d0 - 3.d0 * ff) * zeps0
+                    z2 = sqrt(z1 * z1 + 8.d0 * zeps1 * zeps0)
+                    !
+                    if (aimag(z2)>=0.0) then
+                        zeps1 = (z1 + z2) / 4.d0
+                    else
+                        zeps1 = (z1 - z2) / 4.d0
+                    end if
                 end if
 
-            end if                  ! end of material decision if
-            ! the end of reading real data according to palik's  book
-            !_____________________________________
-            ! activate bruggeman:
-
-            5       if (ynbrug) then
-                ff = 0.8d0
-                z1 = (3.d0 * ff - 1.d0) * zeps1 + (2.d0 - 3.d0 * ff) * zeps0
-                z2 = sqrt(z1 * z1 + 8.d0 * zeps1 * zeps0)
-                !
-                if (aimag(z2)>=0.0) then
-                    zeps1 = (z1 + z2) / 4.d0
-                else
-                    zeps1 = (z1 - z2) / 4.d0
-                end if
+                zeps(ilcs) = zeps1
+                !______________________________________
             end if
-
-            zeps(ilcs) = zeps1
-            !______________________________________
-
-            8   continue
 
             !c      write(6,*)'lambda in axspartcl=', lambda
 
@@ -1628,7 +1617,7 @@ program axspartcl1
             end if
             !
             !--------/---------/---------/---------/---------/---------/---------/--
-            !c      if(nstep.gt.10) go to 200
+            !c      if(nstep.gt.10) goto 200
             !      write(6,*) 'istep=', istep
             !c      write(6,*) 'lambda=',lambda
             !c      write(6,*)
@@ -1680,7 +1669,7 @@ program axspartcl1
     write(6, *)'oa quadrupole extinction in axs-quadrext.dat'
     !--------/---------/---------/---------/---------/---------/---------/--
 
-    if (.not.ynintens) go to 1000
+    if (.not.ynintens) goto 1000
 
     !--------/---------/---------/---------/---------/---------/---------/--
     !
@@ -2049,7 +2038,7 @@ contains
 
                 !        print 7334, nmax,dsca,dext
 
-                if(dsca<=ddelta.and.dext<=ddelta) go to 55
+                if(dsca<=ddelta.and.dext<=ddelta) exit
                 if (nma==npn1) print 7333, npn1
                 if (nma==npn1) stop
 
@@ -2057,7 +2046,7 @@ contains
             end do
             ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-            55 continue                   !begin ngauss-convergence test
+            !begin ngauss-convergence test
 
             write(6, *)
             write(6, *)'ngauss-convergence test'
@@ -2068,16 +2057,70 @@ contains
             if (ngauss==npng1) print 7336
             7336    format('warning: ngauss=npng1')
 
-            if (ngauss==npng1) go to 160
+            if (ngauss/=npng1) then
+                do ngaus = nnnggg, npng1
+                    !
+                    if (ngaus>300.and.ngaus<2595) cycle
+                    if (ngaus==npng1) print 7336
+                    !
+                    ngauss = ngaus
+                    !c         nggg=2*ngauss
+                    !
+                    ! gif division points and weights + other numerical constants
+                    !
+                    call const(ngauss, nmax, x, w, an, ann, s, ss, np, eps, rsnm, ht)     !in ampldr
+                    !
+                    ! specify particle shape:
+                    !
+                    call vary(lam, mrr, mri, a, eps, &
+                            rsnm, ht, np, ngauss, x, p, &
+                            ppi, pir, pii, r, dr, ddr, drr, dri, nmax)
+                    !
+                    ! determine m=m'=0 elements of the t matrix
+                    !
+                    call tmatr0 (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
+                            ddr, drr, dri, nmax, ncheck, naxsm)
+                    !
+                    qext = 0d0
+                    qsca = 0d0
 
-            do ngaus = nnnggg, npng1
-                !
-                if (ngaus>300.and.ngaus<2595) cycle
-                if (ngaus==npng1) print 7336
-                !
-                ngauss = ngaus
-                !c         nggg=2*ngauss
-                !
+                    do n = 1, nmax
+                        n1 = n + nmax
+                        tr1nn = tr1(n, n)
+                        ti1nn = ti1(n, n)
+                        tr1nn1 = tr1(n1, n1)
+                        ti1nn1 = ti1(n1, n1)
+
+                        dn1 = dble(2 * n + 1)
+
+                        qsca = qsca + dn1 * (tr1nn * tr1nn + ti1nn * ti1nn&
+                                + tr1nn1 * tr1nn1 + ti1nn1 * ti1nn1)
+                        qext = qext + (tr1nn + tr1nn1) * dn1
+
+                    end do
+
+                    dsca = dabs((qsca1 - qsca) / qsca)
+                    dext = dabs((qext1 - qext) / qext)
+
+                    !        print 7337, nggg,dsca,dext
+                    ! 7337    format(' ng=',i3,'  dc2=',d8.2,'   dc1=',d8.2)
+                    !<<<
+                    write(6, *)'ngauss=', ngauss
+                    write(6, *)'qsca1=', qsca1
+                    write(6, *)'qsca=', qsca
+                    write(6, *)'qext1=', qext1
+                    write(6, *)'qext=', qext
+
+                    if(dsca<=ddelta.and.dext<=ddelta) exit
+                    !<<<
+                    qext1 = qext
+                    qsca1 = qsca
+                    !
+                    150 continue
+                end do
+                ! %%%%%%%%%%%%%%%%%% successful ngauss-convergence test %%%%%%%%%%%%%%%
+
+            else if (.not.yncheck) then
                 ! gif division points and weights + other numerical constants
                 !
                 call const(ngauss, nmax, x, w, an, ann, s, ss, np, eps, rsnm, ht)     !in ampldr
@@ -2093,64 +2136,10 @@ contains
                 call tmatr0 (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
                         ddr, drr, dri, nmax, ncheck, naxsm)
                 !
-                qext = 0d0
-                qsca = 0d0
-
-                do n = 1, nmax
-                    n1 = n + nmax
-                    tr1nn = tr1(n, n)
-                    ti1nn = ti1(n, n)
-                    tr1nn1 = tr1(n1, n1)
-                    ti1nn1 = ti1(n1, n1)
-
-                    dn1 = dble(2 * n + 1)
-
-                    qsca = qsca + dn1 * (tr1nn * tr1nn + ti1nn * ti1nn&
-                            + tr1nn1 * tr1nn1 + ti1nn1 * ti1nn1)
-                    qext = qext + (tr1nn + tr1nn1) * dn1
-
-                end do
-
-                dsca = dabs((qsca1 - qsca) / qsca)
-                dext = dabs((qext1 - qext) / qext)
-
-                !        print 7337, nggg,dsca,dext
-                ! 7337    format(' ng=',i3,'  dc2=',d8.2,'   dc1=',d8.2)
                 !<<<
-                write(6, *)'ngauss=', ngauss
-                write(6, *)'qsca1=', qsca1
-                write(6, *)'qsca=', qsca
-                write(6, *)'qext1=', qext1
-                write(6, *)'qext=', qext
-
-                if(dsca<=ddelta.and.dext<=ddelta) go to 160
-                !<<<
-                qext1 = qext
-                qsca1 = qsca
                 !
-                150 continue
-            end do
-            ! %%%%%%%%%%%%%%%%%% successful ngauss-convergence test %%%%%%%%%%%%%%%
-
-        else if (.not.yncheck) then
-            ! gif division points and weights + other numerical constants
-            !
-            call const(ngauss, nmax, x, w, an, ann, s, ss, np, eps, rsnm, ht)     !in ampldr
-            !
-            ! specify particle shape:
-            !
-            call vary(lam, mrr, mri, a, eps, &
-                    rsnm, ht, np, ngauss, x, p, &
-                    ppi, pir, pii, r, dr, ddr, drr, dri, nmax)
-            !
-            ! determine m=m'=0 elements of the t matrix
-            !
-            call tmatr0 (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
-                    ddr, drr, dri, nmax, ncheck, naxsm)
-            !
-            !<<<
-            !
-        end if                     !yncheck
+            end if !yncheck
+        end if
 
         160  continue
         !<<<
@@ -3164,7 +3153,7 @@ contains
                     uri = dr(i)
                     rri = rr(i)
 
-                    if (ncheck==1.and.si>0d0) go to 150
+                    if (ncheck==1.and.si>0d0) goto 150
                     ! w(i)*r^2(i)*(pi(n1)*tau(n2)+tau(n1)*pi(n2):
 
                     e1 = rr(i) * aa1             ! <-- aa1
@@ -3174,7 +3163,7 @@ contains
                     gr11 = gr11 + e1 * c1r
                     gi11 = gi11 + e1 * c1i
 
-                    if (ncheck==1) go to 160
+                    if (ncheck==1) goto 160
 
                     150               continue
                     ! w(i)*r^2(\theta)*[pi(n1)*pi(n2)+tau(n1)*tau(n2)]
