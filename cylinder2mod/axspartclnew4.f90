@@ -1310,8 +1310,6 @@ program axspartcl1
     !
     select case (nmat)
     case (1) !no reading of material data
-        continue
-        !        goto 2
     case (2) ! silver data
 
         open(unit = 30, file = 'agc.dat')
@@ -1402,7 +1400,7 @@ program axspartcl1
     !                     --------------------------------
     ! begin main scanning loop:
     write(6, *) 'begining of main loop'
-    2   rev_beg = rev
+    rev_beg = rev
 
     do itter = 1, ndefp
 
@@ -2115,8 +2113,7 @@ contains
                     !<<<
                     qext1 = qext
                     qsca1 = qsca
-                    !
-                    150 continue
+
                 end do
                 ! %%%%%%%%%%%%%%%%%% successful ngauss-convergence test %%%%%%%%%%%%%%%
 
@@ -2141,8 +2138,6 @@ contains
             end if !yncheck
         end if
 
-        160  continue
-        !<<<
         write(6, *)
         write(6, *)'nmax=', nmax
         write(6, *)'ngauss=', ngauss
@@ -2284,10 +2279,10 @@ contains
             qxt = 0d0
 
             do n = 1, nnm
-
-                qxt = qxt + tr1(n, n) * 2d0       !multiplication by 2d0 accounts
-                !                                          !for +/-m symmetry of resulting
-                !                                          !expressions
+                !multiplication by 2d0 accounts
+                !for +/-m symmetry of resulting
+                !expressions
+                qxt = qxt + tr1(n, n) * 2d0
             end do
             !<<<
             ! summation over magnetic quantum number:
@@ -2313,22 +2308,20 @@ contains
                 !      stop
             end if
 
-            !c         write(nout,*)'m=',m
-            !c         write(nout,*)'qsca=',qsca
-            !c         write(nout,*)'qsc=',qsc
-            !c         write(nout,*)'qext=',qext
-            !c         write(nout,*)'qxt=',qxt
+            !write(nout,*)'m=',m
+            !write(nout,*)'qsca=',qsca
+            !write(nout,*)'qsc=',qsc
+            !write(nout,*)'qext=',qext
+            !write(nout,*)'qxt=',qxt
             !
-            !        print 7800,m,dabs(qxt),qsc,nmax
-            ! 7800    format(' m=',i3,'  qxt=',d12.6,'  qsc=',d12.6,
-            !     &          '  nmax=',i3)
+            !print 7800,m,dabs(qxt),qsc,nmax
+            !7800 format(' m=',i3,'  qxt=',d12.6,'  qsc=',d12.6, '  nmax=',i3)
 
-            !end of loop over m's
-        end do
+        end do !end of loop over m's
         !<<<
         write(6, *)'qsca=', qsca
         write(6, *)'qext=', qext
-        !
+
         ! 'qsca' and '-qext' are now 'efficiency factors' for scattering
         ! and extinction (=\sum_{al} \sin^2\eta_{al}).
 
@@ -2360,9 +2353,9 @@ contains
         write(nout + 10, *)
         write(nout + 10, *) lambda
         write(nout + 12, *)
-        !c         write(nout+12,*) lambda
-        !c         write(nout+13,*) lambda
-        !c         write(nout+16,*) -qext
+        !write(nout+12,*) lambda
+        !write(nout+13,*) lambda
+        !write(nout+16,*) -qext
         !<<<
         !_________________________________________________________
         !  computation of the amplitude and phase matrices
@@ -2400,10 +2393,10 @@ contains
 
         5001 format (4f10.4)
 
-        !      itime=mclock()
-        !      time=dble(itime)/6000d0
-        !      print 1001,time
-        ! 1001 format (' time =',f8.2,' min')
+        !itime=mclock()
+        !time=dble(itime)/6000d0
+        !print 1001,time
+        !1001 format (' time =',f8.2,' min')
 
         return
     end
@@ -2466,10 +2459,9 @@ contains
         common /dielf/ zeps0
         common /revf/ rev
         common /cylpar/ rsnm, hlength
-        !
+
         ! transfers zeps0,rev here from the main
-        !____
-        !
+
         ! checking the initial set of angles tl,tl1,pl,pl1,alpha,beta
         ! for allowability
 
@@ -2489,8 +2481,8 @@ contains
         ! specifying numerical constants:
 
         pin = dacos(-1d0)         !=pi
-        pin2 = pin * 0.5d0          !=pi/2
-        pigrad = pin / 180d0            !=pi/180
+        pin2 = pin * 0.5d0        !=pi/2
+        pigrad = pin / 180d0      !=pi/180
         ! conversion from degrees to radians:
         alph = alpha * pigrad
         bet = beta * pigrad
@@ -2527,9 +2519,9 @@ contains
         cp = dcos(phil - alph)
         sp = dsin(phil - alph)
 
-        ctp = ct * cb + st * sb * cp             !eq. (9)
+        ctp = ct * cb + st * sb * cp       !eq. (9)
         thetp = dacos(ctp)
-        cpp = cb * st * cp - sb * ct             !eq. (20)
+        cpp = cb * st * cp - sb * ct       !eq. (20)
         spp = st * sp                      !eq. (21)
         phip = datan(spp / cpp)
 
@@ -2544,9 +2536,9 @@ contains
         cp1 = dcos(phil1 - alph)
         sp1 = dsin(phil1 - alph)
 
-        ctp1 = ct1 * cb + st1 * sb * cp1          !eq. (9)
+        ctp1 = ct1 * cb + st1 * sb * cp1    !eq. (9)
         thetp1 = dacos(ctp1)
-        cpp1 = cb * st1 * cp1 - sb * ct1          !eq. (20)
+        cpp1 = cb * st1 * cp1 - sb * ct1    !eq. (20)
         spp1 = st1 * sp1                    !eq. (21)
         phip1 = datan(spp1 / cpp1)
 
@@ -2692,7 +2684,7 @@ contains
 
         dcth0 = ctp             !\cos\vartheta_{inc}^p
         dcth = ctp1             !\cos\vartheta_{sca}^p
-        ph = phip1 - phip         !(\varphi_{sca}^p-\varphi_{inc}^p)
+        ph = phip1 - phip       !(\varphi_{sca}^p-\varphi_{inc}^p)
         ! amplitude scattering matrix elements s11,s12,s21,s22 initialization
 
         vv = (0d0, 0d0)
@@ -2910,13 +2902,13 @@ contains
                 rgqr(npn2, npn2), rgqi(npn2, npn2), &
                 tqr(npn2, npn2), tqi(npn2, npn2), &
                 trgqr(npn2, npn2), trgqi(npn2, npn2)
-        !c      real(dp) tr1(npn2,npn2),ti1(npn2,npn2)
+        !real(dp) tr1(npn2,npn2),ti1(npn2,npn2)
         !________
         common /tmat99/&
                 r11, r12, r21, r22, i11, i12, i21, i22, rg11, rg12, rg21, rg22, &
                 ig11, ig12, ig21, ig22          !only between tmatr routines
-        !c      common /ct/ tr1,ti1                      !output from tt routine
-        common /ctt/ qr, qi, rgqr, rgqi             !input for tt routine
+        !common /ct/ tr1,ti1                    !output from tt routine
+        common /ctt/ qr, qi, rgqr, rgqi         !input for tt routine
         !________
         mm1 = m
         qm = dble(m)
@@ -3165,7 +3157,7 @@ contains
 
                     if (ncheck==1) goto 160
 
-                    150               continue
+                    150 continue
                     ! w(i)*r^2(\theta)*[pi(n1)*pi(n2)+tau(n1)*tau(n2)]
                     ! (prefactor containing r^2(\theta)<->hat{r} part)
 
@@ -3304,7 +3296,6 @@ contains
         return
     end
 
-
-    ! (c) copr. 09/1998  alexander moroz
-    ! (c) copr. 10/2005  alexander moroz
 end program
+! (c) copr. 09/1998  Alexander Moroz
+! (c) copr. 10/2005  Alexander Moroz
