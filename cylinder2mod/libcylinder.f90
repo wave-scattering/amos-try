@@ -3,10 +3,10 @@ module libcylinder
     use model_parameters
     use special_functions
     use cylinder_blas
-!    use dense_solve
-!    use multem_blas
-!    use amos
-!    use errfun, only : wpop
+    !    use dense_solve
+    !    use multem_blas
+    !    use amos
+    !    use errfun, only : wpop
 
     implicit none
     type, private :: cdrop_values
@@ -21,7 +21,7 @@ contains
     !=======================================================================
     complex(dp) function cmplx_dp(re, im)
         real(dp), intent(in) :: re, im
-        cmplx_dp = cmplx(re,im, kind=dp)
+        cmplx_dp = cmplx(re, im, kind = dp)
     end function cmplx_dp
     !=======================================================================
     !=======================================================================
@@ -131,7 +131,7 @@ contains
         else
             e = dsqrt(1d0 - 1d0 / (d * d))
             r = 0.25d0 * (2d0 * d**(2d0 / 3d0) &
-                         + d**(-4d0 / 3d0) * dlog((1d0 + e) / (1d0 - e)) / e)
+                    + d**(-4d0 / 3d0) * dlog((1d0 + e) / (1d0 - e)) / e)
             r = dsqrt(r)
             rat = 1d0 / r
             !
@@ -145,7 +145,7 @@ contains
         ! <<< rat
         !=================
         !--------/---------/---------/---------/---------/---------/---------/--
-!        implicit real(dp) (a-h, o-z)
+        !        implicit real(dp) (a-h, o-z)
         integer n, ng, i
         real(dp) e, rat, dn, s, v, xi, dx, dxn, ds, dsn, dcn, a, a2, en, ens, rs, rv
         real(dp) x(60), w(60)
@@ -249,15 +249,15 @@ contains
         !    z - division points
         !    w - weights
         !--------/---------/---------/---------/---------/---------/---------/--
-!        implicit real(dp) (a-h, p-z)
+        !        implicit real(dp) (a-h, p-z)
         integer, intent(in) :: n, ind1, ind2
-        integer i,k, ind,j,m,niter
-        real(dp) x, a,b,c, check, dj,f, pa,pb,pc,zz
+        integer i, k, ind, j, m, niter
+        real(dp) x, a, b, c, check, dj, f, pa, pb, pc, zz
         real(dp), intent(out) :: z(:), w(:)
         a = 1d0
         b = 2d0
         c = 3d0
-!        data a, b, c /1d0, 2d0, 3d0/
+        !        data a, b, c /1d0, 2d0, 3d0/
         ind = mod(n, 2)
         k = n / 2 + ind
         f = dble(n)

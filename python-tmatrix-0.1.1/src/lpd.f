@@ -134,6 +134,7 @@
 *     End of ZGETF2
 *
       END
+
       SUBROUTINE ZGETRF( M, N, A, LDA, IPIV, INFO )
 *
 *  -- LAPACK routine (version 3.0) --
@@ -294,6 +295,7 @@
 *     End of ZGETRF
 *
       END
+
       SUBROUTINE ZLASWP( N, A, LDA, K1, K2, IPIV, INCX )
 *
 *  -- LAPACK auxiliary routine (version 3.0) --
@@ -414,6 +416,7 @@
 *     End of ZLASWP
 *
       END
+
       INTEGER          FUNCTION IEEECK( ISPEC, ZERO, ONE )
 *
 *  -- LAPACK auxiliary routine (version 3.0) --
@@ -562,6 +565,7 @@
 *
       RETURN
       END
+
       INTEGER          FUNCTION ILAENV( ISPEC, NAME, OPTS, N1, N2, N3,
      $                 N4 )
 *
@@ -1109,6 +1113,7 @@ C     ILAENV = 0
 *     End of ILAENV
 *
       END
+
       SUBROUTINE XERBLA( SRNAME, INFO )
 *
 *  -- LAPACK auxiliary routine (version 3.0) --
@@ -1350,6 +1355,7 @@ C     ILAENV = 0
 *     End of ZGETRI
 *
       END
+
       SUBROUTINE ZTRTI2( UPLO, DIAG, N, A, LDA, INFO )
 *
 *  -- LAPACK routine (version 3.0) --
@@ -1497,6 +1503,7 @@ C     ILAENV = 0
 *     End of ZTRTI2
 *
       END
+
       SUBROUTINE ZTRTRI( UPLO, DIAG, N, A, LDA, INFO )
 *
 *  -- LAPACK routine (version 3.0) --
