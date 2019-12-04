@@ -25,17 +25,17 @@ C   We thank Cory Davis (University of Edinburgh) for pointing
 C   out the possibility of replacing the proprietary NAG matrix
 C   inversion routine by the public-domain LAPACK equivalent.
 
-C   CALCULATION OF THE AMPLITUDE AND PHASE MATRICES FOR                 
-C   A PARTICLE WITH AN AXIALLY SYMMETRIC SHAPE                   
-                                                                       
-C   This version of the code uses DOUBLE PRECISION variables,          
-C   is applicable to spheroids, finite circular cylinders,            
+C   CALCULATION OF THE AMPLITUDE AND PHASE MATRICES FOR
+C   A PARTICLE WITH AN AXIALLY SYMMETRIC SHAPE
+
+C   This version of the code uses DOUBLE PRECISION variables,
+C   is applicable to spheroids, finite circular cylinders,
 C   Chebyshev particles, and generalized Chebyshev particles
-C   (distorted water drops), and must be used along with the 
-C   accompanying files lpd.f and ampld.par.f.                
-                                                                       
-C   Last update 08/06/2005                                               
-                                                                       
+C   (distorted water drops), and must be used along with the
+C   accompanying files lpd.f and ampld.par.f.
+
+C   Last update 08/06/2005 
+
 C   The code has been developed by Michael Mishchenko at the NASA
 C   Goddard Institute for Space Studies, New York.  The development
 C   of the code was supported by the NASA Radiation Sciences Program.
@@ -110,10 +110,10 @@ C   The use of extended precision variables (Ref. 1) can significantly
 C   increase the maximum convergent equivalent-sphere size parameter 
 C   and make it well larger than 100 (depending on refractive index    
 C   and aspect ratio).  The extended-precision code is also available. 
-C   However, the use of extended precision varibales results in a      
+C   However, the use of extended precision variables results in a      
 C   greater consumption of CPU time.                                   
-C   On IBM RISC workstations, that code is approximately               
-C   five times slower than this double-precision code.  The            
+C   On IBM RISC workstations, this code is approximately
+C   5-8 times slower than the double-precision code.  However, the
 C   CPU time difference between the double-precision and extended-     
 C   precision codes can be larger on supercomputers.                   
                                                                        
@@ -130,8 +130,8 @@ C   scheme. LAPACK stands for Linear Algebra PACKage. The latter is
 C   publicly available at the following internet site:
 C
 C   http://www.netlib.org/lapack/
- 
-                                                                       
+
+
 C   INPUT PARAMETERS:                                                  
 C                                                                      
 C      AXI - equivalent-sphere radius                                  
@@ -151,14 +151,14 @@ C             For cylinders NP=-2 and EPS is the ratio of the
 C                 diameter to the length.                              
 C             For Chebyshev particles NP must be positive and 
 C                 is the degree of the Chebyshev polynomial, while     
-C                 EPS is the deformation parameter (Ref. 5).                    
+C                 EPS is the deformation parameter (Ref. 5).          
 C             For generalized Chebyshev particles (describing the shape
 C                 of distorted water drops) NP=-3.  The coefficients
 C                 of the Chebyshev polynomial expansion of the particle
 C                 shape (Ref. 7) are specified in subroutine DROP.
 C      DDELT - accuracy of the computations                            
 C      NDGS - parameter controlling the number of division points      
-C             in computing integrals over the particle surface (Ref. 5).        
+C             in computing integrals over the particle surface (Ref. 5).   
 C             For compact particles, the recommended value is 2.       
 C             For highly aspherical particles larger values (3, 4,...) 
 C             may be necessary to obtain convergence.                  
@@ -194,7 +194,7 @@ C      Elements of the 2x2 amplitude matrix
 C      Elements of the 4x4 phase matrix
                                                                        
 C   Note that LAM and AXI must be given in the same units of length        
-C   (e.g., microns).                                                          
+C   (e.g., microns).                       
                                                                        
 C   The convergence of the T-matrix method for particles with          
 C   different sizes, refractive indices, and aspect ratios can be      
@@ -224,12 +224,12 @@ C   possible value 1.  If W is greater than 1 by more than
 C   DDELT, this message can be an indication of numerical              
 C   instability caused by extreme values of particle parameters.       
                                                                        
-C   The message "WARNING: NGAUSS=NPNG1" means that convergence over    
-C   the parameter NG (see Ref. 2) cannot be obtained for the NPNG1     
+C   The message "WARNING: NGAUSS=NPNG1" means that convergence over
+C   the parameter NG (see Ref. 2) cannot be obtained for the NPNG1
 C   value specified in the PARAMETER statement in the file ampld.par.f.
 C   Often this is not a serious problem, especially for compact
 C   particles.
-                                                                       
+
 C   Larger and/or more aspherical particles may require larger
 C   values of the parameters NPN1, NPN4, and NPNG1 in the file
 C   ampld.par.f.  It is recommended to keep NPN1=NPN4+25 and
@@ -406,7 +406,7 @@ C 7334    FORMAT(' NMAX =', I3,'  DC2=',D8.2,'   DC1=',D8.2)
          DEXT=DABS((QEXT1-QEXT)/QEXT)
          QEXT1=QEXT
          QSCA1=QSCA
-c        PRINT 7334, NMAX,DSCA,DEXT
+C        PRINT 7334, NMAX,DSCA,DEXT
          IF(DSCA.LE.DDELT.AND.DEXT.LE.DDELT) GO TO 55
 C         IF (NMA.EQ.NPN1) PRINT 7333, NPN1
 C         IF (NMA.EQ.NPN1) STOP      
@@ -447,7 +447,7 @@ c        PRINT 7337, NGGG,DSCA,DEXT
          QEXT1=QEXT
          QSCA1=QSCA
          IF(DSCA.LE.DDELT.AND.DEXT.LE.DDELT) GO TO 155
-c         IF (NGAUS.EQ.NPNG1) PRINT 7336
+C         IF (NGAUS.EQ.NPNG1) PRINT 7336
   150 CONTINUE
   155 CONTINUE
       QSCA=0D0
@@ -538,11 +538,7 @@ C      PHI0=114D0
 C      PHI=128D0
 C  AMPLITUDE MATRIX [Eqs. (2)-(4) of Ref. 6]
       CALL AMPL (NMAX,LAM,THET0,THET,PHI0,PHI,ALPHA,BETA,
-     &           S11,S12,S21,S22,ERRCODE) 
-C      IF (ERRCODE.GT.0) RETURN
-C      Q11=LAM*DIMAG(S11+S22)  ! aqui LAM =  2*PI/k1 (pagina 55)
-C      Q12=LAM*DIMAG(S11-S22)
-C      Q13=-LAM*DIMAG(S12+S21)
+     &           S11,S12,S21,S22,ERRCODE)
 C  PHASE MATRIX [Eqs. (13)-(29) of Ref. 6]
 C      Z11=0.5D0*(S11*DCONJG(S11)+S12*DCONJG(S12)
 C     &          +S21*DCONJG(S21)+S22*DCONJG(S22))
@@ -627,7 +623,7 @@ C     &        ' ALLOWABLE RANGE')
       THETL1=TL1*PI
       PHIL1=PL1*PI
 
-      EPS=1D-7
+      EPS=1D-8
       IF (THETL.LT.PIN2) THETL=THETL+EPS
       IF (THETL.GT.PIN2) THETL=THETL-EPS
       IF (THETL1.LT.PIN2) THETL1=THETL1+EPS
@@ -938,7 +934,25 @@ C     0.LE.X.LE.1
       END 
 
 C**********************************************************************
-
+C                                                                     *
+C   INPUT PARAMETERS:                                                 *
+C                                                                     *
+C   NG = 2*NGAUSS - number of quadrature points on the                *
+C                   interval  (-1,1). NGAUSS.LE.NPNG1                 *
+C   NMAX,MMAX - maximum dimensions of the arrays.  NMAX.LE.NPN1       *
+C               MMAX.LE.NPN1                                          *
+C   P - pi                                                            *
+C                                                                     *
+C   OUTPUT PARAMETERS:                                                *
+C                                                                     *
+C   X,W - points and weights of the quadrature formula                *
+C   AN(N) = n*(n+1)                                                   *
+C   ANN(N1,N2) = (1/2)*sqrt((2*n1+1)*(2*n2+1)/(n1*(n1+1)*n2*(n2+1)))  *
+C   S(I)=1/sin(arccos(x(i)))                                          *
+C   SS(I)=S(I)**2                                                     *
+C                                                                     *
+C**********************************************************************
+ 
       SUBROUTINE CONSTANT (NGAUSS,NMAX,MMAX,P,X,W,AN,ANN,S,SS,NP,EPS)
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'ampld.par.f'
@@ -989,7 +1003,32 @@ C**********************************************************************
    20 CONTINUE
       RETURN
       END
- 
+
+C**********************************************************************
+C                                                                     *
+C   INPUT PARAMETERS:                                                 *
+C                                                                     *
+C   LAM - wavelength of light                                         *
+C   MRR and MRI - real and imaginary parts of the refractive index    *
+C   A,EPS,NP - specify shape of the particle                          *
+C              (see subroutines RSP1, RSP2, and RSP3)                 *
+C   NG = NGAUSS*2 - number of gaussian quadrature points on the       *
+C                   interval  (-1,1)                                  *
+C   X - gaussian division points                                      *
+C   P - pi                                                            *
+C                                                                     *
+C   OUTPUT INFORMATION:                                               *
+C                                                                     *
+C   PPI = PI**2 , where PI = (2*P)/LAM (wavenumber)                   *
+C   PIR = PPI*MRR                                                     *
+C   PII = PPI*MRI                                                     *
+C   R and DR - see subroutines RSP1, RSP2, and RSP3                   *
+C   DDR=1/(PI*SQRT(R))                                                *
+C   DRR+I*DRI=DDR/(MRR+I*MRI)                                         *
+C   NMAX - dimension of T(m)-matrices                                 *
+C   arrays  J,Y,JR,JI,DJ,DY,DJR,DJI are transferred through           *
+C         COMMON /CBESS/ - see subroutine BESS                        *
+C                                                                     *
 C**********************************************************************
  
       SUBROUTINE VARY (LAM,MRR,MRI,A,EPS,NP,NGAUSS,X,P,PPI,PIR,PII,
@@ -1007,7 +1046,7 @@ C**********************************************************************
 
       COMMON /CBESS/ J,Y,JR,JI,DJ,DY,DJR,DJI
       NG=NGAUSS*2
-      IF (NP.GT.0) CALL RSP2(X,NG,A,EPS,NP,R,DR)
+      IF (NP.GE.0) CALL RSP2(X,NG,A,EPS,NP,R,DR)
       IF (NP.EQ.-1) CALL RSP1(X,NG,NGAUSS,A,EPS,NP,R,DR)
       IF (NP.EQ.-2) CALL RSP3(X,NG,NGAUSS,A,EPS,R,DR)
       IF (NP.EQ.-9) CALL RSP3nanorod(X,NG,NGAUSS,A,EPS,EPSe, R,DR)
@@ -1049,6 +1088,16 @@ C 9000 FORMAT(' NMAX = ',I2,', i.e., greater than ',I3)
       END
  
 C**********************************************************************
+C                                                                     *
+C   Calculation of the functions R(I)=r(y)**2 and                     *
+C   DR(I)=[(d/dy)r(y)]/r(y) and horizontal semi-axis A                *
+C   for a spheroid specified by the parameters REV (equal-volume-     *
+C   sphere radius) and EPS=A/B (ratio of the semi-axes).              *
+C   y(I)=arccos(X(I))                                                 *
+C   1.LE.I.LE.NG                                                      *
+C   X - arguments                                                     *
+C                                                                     *
+C**********************************************************************
  
       SUBROUTINE RSP1 (X,NG,NGAUSS,REV,EPS,NP,R,DR)
       IMPLICIT REAL*8 (A-H,O-Z)
@@ -1071,6 +1120,16 @@ C**********************************************************************
       RETURN
       END
  
+C**********************************************************************
+C                                                                     *
+C   Calculation of the functions R(I)=r(y)**2 and                     *
+C   DR(I)=[(d/dy)r(y)]/r(y) and parameter R0 for a Chebyshev          *
+C   particle specified by the parameters REV (equal-volume-sphere     *
+C   radius), EPS, and N.                                              *
+C   y(I)=arccos(X(I))                                                 *
+C   1.LE.I.LE.NG                                                      *
+C   X - arguments                                                     *
+C                                                                     *
 C**********************************************************************
  
       SUBROUTINE RSP2 (X,NG,REV,EPS,N,R,DR)
@@ -1096,6 +1155,16 @@ c        WRITE (6,*) I,R(I),DR(I)
       RETURN
       END
  
+C**********************************************************************
+C                                                                     *
+C   Calculation of the functions R(I)=r(y)**2 and                     *
+C   DR(I)=[(d/dy)r(y)]/r(y)                                           *
+C   for a cylinder specified by the parameters REV (equal-volume-     *
+C   sphere radius) and EPS=A/H (ratio of radius to semi-length)       *
+C   y(I)=arccos(X(I))                                                 *
+C   1.LE.I.LE.NG                                                      *
+C   X - arguments                                                     *
+C                                                                     *
 C**********************************************************************
  
       SUBROUTINE RSP3 (X,NG,NGAUSS,REV,EPS,R,DR)
@@ -1210,7 +1279,7 @@ C--------/---------/---------/---------/---------/---------/---------/--
 C**********************************************************************
 C                                                                     *
 C   Calculation of the functions R(I)=r(y)**2 and                     *
-C   DR(I)=((d/dy)r(y))/r(y) for a distorted                           *
+C   DR(I)=[(d/dy)r(y)]/r(y) for a distorted                           *
 C   droplet specified by the parameters r_ev (equal-volume-sphere     *
 C   radius) and c_n (Chebyshev expansion coefficients)                *
 C   Y(I)=arccos(X(I))                                                 *
@@ -1238,12 +1307,33 @@ C**********************************************************************
          DRI=DRI*R0
          R(I)=RI*RI
          DR(I)=DRI/RI
-c        WRITE (6,*) I,R(I),DR(I)
+C        WRITE (6,*) I,R(I),DR(I)
       ENDDO
       RETURN
       END
 
-C*********************************************************************
+C**********************************************************************
+C                                                                     *
+C   Calculation of spherical Bessel functions of the first kind       *
+C   J(I,N) = j_n(x) and second kind Y(I,N) = y_n(x)                   *
+C   of real-valued argument X(I) and first kind JR(I,N)+I*JI(I,N) =   *
+C   = j_n(z) of complex argument Z(I)=XR(I)+I*XI(I), as well as       *
+C   the functions                                                     *
+C                                                                     *
+C   DJ(I,N) = (1/x)(d/dx)(x*j_n(x)) ,                                 *
+C   DY(I,N) = (1/x)(d/dx)(x*y_n(x)) ,                                 *
+C   DJR(I,N) = Re ((1/z)(d/dz)(z*j_n(x)) ,                            *
+C   DJI(I,N) = Im ((1/z)(d/dz)(z*j_n(x)) .                            *
+C                                                                     *
+C   1.LE.N.LE.NMAX                                                    *
+C   NMAX.LE.NPN1                                                      *
+C   X,XR,XI - arguments                                               *
+C   1.LE.I.LE.NG                                                      *
+C   Arrays  J,Y,JR,JI,DJ,DY,DJR,DJI are in                            *
+C         COMMON /CBESS/                                              *
+C   Parameters NNMAX1 and NMAX2 determine computational accuracy      *
+C                                                                     *
+C**********************************************************************
  
       SUBROUTINE BESS (X,XR,XI,NG,NMAX,NNMAX1,NNMAX2)
       INCLUDE 'ampld.par.f'
@@ -1278,6 +1368,13 @@ C*********************************************************************
       END
  
 C**********************************************************************
+C                                                                     *
+C   Calculation of spherical Bessel functions of the first kind j     *
+C   of real-valued argument x of orders from 1 to NMAX by using       *
+C   backward recursion. Parametr NNMAX determines numerical accuracy. *
+C   U - function (1/x)(d/dx)(x*j(x))                                  *
+C                                                                     *
+C**********************************************************************
  
       SUBROUTINE RJB(X,Y,U,NMAX,NNMAX)
       IMPLICIT REAL*8 (A-H,O-Z)
@@ -1305,6 +1402,12 @@ C**********************************************************************
       END
  
 C**********************************************************************
+C                                                                     *
+C   Calculation of spherical Bessel functions of the second kind y    *
+C   of real-valued argument x of orders from 1 to NMAX by using upward*
+C   recursion. V - function (1/x)(d/dx)(x*y(x))                       *
+C                                                                     *
+C**********************************************************************
  
       SUBROUTINE RYB(X,Y,V,NMAX)
       IMPLICIT REAL*8 (A-H,O-Z)
@@ -1328,10 +1431,10 @@ C**********************************************************************
  
 C**********************************************************************
 C                                                                     *
-C   CALCULATION OF SPHERICAL BESSEL FUNCTIONS OF THE FIRST KIND       *
-C   J=JR+I*JI OF COMPLEX ARGUMENT X=XR+I*XI OF ORDERS FROM 1 TO NMAX  *
-C   BY USING BACKWARD RECURSION. PARAMETR NNMAX DETERMINES NUMERICAL  *
-C   ACCURACY. U=UR+I*UI - FUNCTION (1/X)(D/DX)(X*J(X))                *
+C   Calculation of spherical Bessel functions of the first kind       *
+C   j=JR+I*JI of complex argument x=XR+I*XI of orders from 1 to NMAX  *
+C   by using backward recursion. Parametr NNMAX determines numerical  *
+C   accuracy. U=UR+I*UI - function (1/x)(d/dx)(x*j(x))                *
 C                                                                     *
 C**********************************************************************
  
@@ -1405,6 +1508,15 @@ C**********************************************************************
       RETURN
       END
  
+C**********************************************************************
+C                                                                     *
+C   calculation of the T(0) matrix for an axially symmetric particle  *
+C                                                                     *
+C   Output information:                                               *
+C                                                                     *
+C   Arrays  TR1 and TI1 (real and imaginary parts of the              *
+C   T(0) matrix) are in COMMON /CT/                                   *
+C                                                                     *
 C**********************************************************************
  
       SUBROUTINE TMATR0 (NGAUSS,X,W,AN,ANN,S,SS,PPI,PIR,PII,R,DR,DDR,
@@ -1619,6 +1731,33 @@ C**********************************************************************
       END
  
 C**********************************************************************
+C                                                                     *
+C   Calculation of the T(M) matrix, M.GE.1, for an axially symmetric  *
+C   particle                                                          *
+C                                                                     *
+C   Input parameters:                                                 *
+C                                                                     *
+C   M.GE.1                                                            *
+C   NG = NGAUSS*2 - number of gaussian division points on the         *
+C        interval  (-1,1)                                             *
+C   W - quadrature weights                                            *
+C   AN,ANN - see subroutine   CONST                                   *
+C   S,SS - see subroutine   CONST                                     *
+C   ARRAYS  DV1,DV2,DV3,DV4 are in COMMON /DV/ -                      *
+C         see subroutine   DVIG                                       *
+C   PPI,PIR,PII - see subroutine   VARY                               *
+C   R J DR - see subroutines RSP1 and RSP2                            *
+C   DDR,DRR,DRI - see subroutine   VARY                               *
+C   NMAX - dimension of the T(M) matrix                               *
+C   Arrays  J,Y,JR,JI,DJ,DY,DJR,DJI are in                            *
+C        COMMON /CBESS/ - see subroutine   BESS                       *
+C                                                                     *
+C   Output parameters:                                                *
+C                                                                     *
+C   Arrays  TR1,TI1 (real and imaginary parts of the T(M) matrix)     *
+C   are in COMMON /CT/                                                *
+C                                                                     *
+C**********************************************************************
  
       SUBROUTINE TMATR (M,NGAUSS,X,W,AN,ANN,S,SS,PPI,PIR,PII,R,DR,DDR,
      *                  DRR,DRI,NMAX,NCHECK)
@@ -1633,7 +1772,7 @@ C**********************************************************************
      *        D1(NPNG2,NPN1),D2(NPNG2,NPN1),
      *        DRI(NPNG2),DS(NPNG2),DSS(NPNG2),RR(NPNG2),
      *        DV1(NPN1),DV2(NPN1)
- 
+
       REAL*8  R11(NPN1,NPN1),R12(NPN1,NPN1),
      *        R21(NPN1,NPN1),R22(NPN1,NPN1),
      *        I11(NPN1,NPN1),I12(NPN1,NPN1),
@@ -1899,12 +2038,19 @@ C**********************************************************************
       END
  
 C*****************************************************************
+c
+c     Calculation of the functions
+c     DV1(n)=dvig(0,m,n,arccos x)
+c     and
+c     DV2(n)=[d/d(arccos x)] dvig(0,m,n,arccos x)
+c     1.LE.N.LE.NMAX
+c     0.LE.x.LE.1
  
-      SUBROUTINE VIG (X, NMAX, M, DV1, DV2)
+      SUBROUTINE VIG (X,NMAX,M,DV1,DV2)
       INCLUDE 'ampld.par.f'
       IMPLICIT REAL*8 (A-H,O-Z)
       REAL*8 DV1(NPN1),DV2(NPN1)
- 
+
       A=1D0
       QS=DSQRT(1D0-X*X)
       QS1=1D0/QS
@@ -1952,10 +2098,10 @@ C*****************************************************************
  
 C**********************************************************************
 C                                                                     *
-C   CALCULATION OF THE MATRIX    T = - RG(Q) * (Q**(-1))              *
+C   Calculation of the matrix    T = - RG(Q) * (Q**(-1))              *
 C                                                                     *
-C   INPUT INFORTMATION IS IN COMMON /CTT/                             *
-C   OUTPUT INFORMATION IS IN COMMON /CT/                              *
+C   Input infortmation is in COMMON /CTT/                             *
+C   Output information is in COMMON /CT/                              *
 C                                                                     *
 C**********************************************************************
  
@@ -2022,7 +2168,7 @@ C*****************************************************************
      &   /E)
       R=DSQRT(R)
       RAT=1D0/R
-      return
+      RETURN
       END
  
 c****************************************************************
@@ -2065,7 +2211,7 @@ C********************************************************************
       RETURN
       END
 
-C**********************************************************************
+C********************************************************************
 
       SUBROUTINE DROP (RAT)
       PARAMETER (NC=10, NG=60)
