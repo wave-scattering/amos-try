@@ -16,7 +16,7 @@ add_library(model_parameters model_parameters.f90)
 target_link_libraries(model_parameters constants FiNeR::FiNeR)
 
 add_library(special_functions special_functions.f90)
-target_link_libraries(special_functions constants)
+target_link_libraries(special_functions constants amos)
 
 add_library(cylinder_blas cylinder_blas.f90)
 target_link_libraries(cylinder_blas constants model_parameters)
@@ -27,6 +27,7 @@ target_link_libraries(libcylinder
         special_functions
         model_parameters
         cylinder_blas
+        quadpack::quadpack
         )
 
 ADD_EXECUTABLE(${PROJECTNAME}
