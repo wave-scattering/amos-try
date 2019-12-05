@@ -1993,8 +1993,13 @@ contains
                 !
                 ! determine m=m'=0 elements of the t matrix
                 !
-                call tmatr0 (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
-                        ddr, drr, dri, nmax, ncheck, naxsm)
+                if (mpar%yn_adaptive == 0) then
+                    call tmatr0 (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
+                            ddr, drr, dri, nmax, ncheck, naxsm)
+                else
+                    call tmatr0_adapt (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
+                            ddr, drr, dri, nmax, ncheck, naxsm)
+                endif
                 !
                 qext = 0d0
                 qsca = 0d0
@@ -2076,8 +2081,13 @@ contains
                     !
                     ! determine m=m'=0 elements of the t matrix
                     !
-                    call tmatr0 (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
-                            ddr, drr, dri, nmax, ncheck, naxsm)
+                    if (mpar%yn_adaptive == 0) then
+                        call tmatr0 (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
+                                ddr, drr, dri, nmax, ncheck, naxsm)
+                    else
+                        call tmatr0_adapt (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
+                                ddr, drr, dri, nmax, ncheck, naxsm)
+                    endif
                     !
                     qext = 0d0
                     qsca = 0d0
@@ -2130,8 +2140,13 @@ contains
                 !
                 ! determine m=m'=0 elements of the t matrix
                 !
-                call tmatr0 (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
-                        ddr, drr, dri, nmax, ncheck, naxsm)
+                if (mpar%yn_adaptive == 0) then
+                    call tmatr0 (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
+                            ddr, drr, dri, nmax, ncheck, naxsm)
+                else
+                    call tmatr0_adapt (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
+                            ddr, drr, dri, nmax, ncheck, naxsm)
+                endif
                 !
                 !<<<
                 !

@@ -22,6 +22,9 @@ module model_parameters
         !Select the solver between Lapack or custom routines (ichoice = 1 or 2)
         integer, public :: ichoice
 
+        ! choice of integration: 0 - fixed Gaussian-Legendre, 1 - adaptive from quadpack
+        integer, public :: yn_adaptive
+
     end type model_parameters_type
     type(model_parameters_type), public :: mpar
 
@@ -52,11 +55,17 @@ contains
         allocate(character(999) :: string)
         string = repeat(' ', 999)
 
+
         call fini%get(section_name = 'general', option_name = 'particle_type', &
                 val = string, error = error)
         mpar%np = 0
         if ((trim(string)=='cylinder').or.(trim(string)=='-2')) mpar%np = -2
         if ((trim(string)=='nanorod').or.(trim(string)=='-9')) mpar%np = -9
+
+        call fini%get(section_name = 'general', option_name = 'adaptive_integration', &
+                val = num, error = error)
+        mpar%yn_adaptive = 0
+        if (error==0) mpar%yn_adaptive = num
 
         call fini%get(section_name = 'nanorod', &
                 option_name = 'nanorod_cap_hr', val = double, error = error)
