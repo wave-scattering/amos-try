@@ -321,6 +321,7 @@ contains
         !    w - weights
         !--------/---------/---------/---------/---------/---------/---------/--
         !        implicit real(dp) (a-h, p-z)
+        implicit none
         integer, intent(in) :: n, ind1, ind2
         integer i, k, ind, j, m, niter
         real(dp) x, a, b, c, check, dj, f, pa, pb, pc, zz

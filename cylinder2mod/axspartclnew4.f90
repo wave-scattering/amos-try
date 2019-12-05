@@ -1850,22 +1850,32 @@ contains
         !  phi0 - azimuth angle of the incident beam in degrees
         !  phi - azimuth angle of the scattered beam in degrees
         !--------/---------/---------/---------/---------/---------/---------/--
-        implicit real(dp) (a-h, o-z)
+        implicit none
         integer nout, naxsm
         logical yncheck
         integer nmax, np, inm1, ixxx, m, m1, n, n1, n11, n2, n22, ncheck, &
                 ndgs, ngaus, ngauss, nm, nma, nn1, nn2, nnm, nnnggg
         ! number of the output unit
         parameter (nout = 35)
-        !
+
+        real(dp) eps, a, alpha, beta, dext, dsca, dn1, &
+                fac, p, phi, phi0, pir, pii, ppi, &
+                qabs, qext, qext1, qsc, qsca, qsca1, &
+                qxt, rat, rev, thet, thet0, &
+                tr1nn, tr1nn1, ti1nn, ti1nn1, &
+                walb, xev, z11, z12, z13, z14, &
+                z21, z22, z23, z24, &
+                z31, z32, z33, z34, &
+                z41, z42, z43, z44, &
+                zz1, zz2, zz3, zz4, &
+                zz5, zz6, zz7, zz8
         real(dp)  lam, lambda, mrr, mri, rsnm, ht, ddelt, ddelta, &
                 x(npng2), w(npng2), &
                 s(npng2), ss(npng2), an(npn1), r(npng2), dr(npng2), &
                 ddr(npng2), drr(npng2), dri(npng2), ann(npn1, npn1)
         real(dp) tr1(npn2, npn2), ti1(npn2, npn2)
         !      real(dp) xalpha(300),xbeta(300),walpha(300),wbeta(300)
-        real(dp)&
-                rt11(npn6, npn4, npn4), rt12(npn6, npn4, npn4), &
+        real(dp) rt11(npn6, npn4, npn4), rt12(npn6, npn4, npn4), &
                 rt21(npn6, npn4, npn4), rt22(npn6, npn4, npn4), &
                 it11(npn6, npn4, npn4), it12(npn6, npn4, npn4), &
                 it21(npn6, npn4, npn4), it22(npn6, npn4, npn4)
@@ -2435,23 +2445,35 @@ contains
         !         laboratory reference frame (refs. 6 and 7).
         !   vv,vh,hv,hh ... amplitude scattering matrix elements s11,s12,s21,s22
         !--------/---------/---------/---------/---------/---------/---------/--
-        implicit real(dp) (a-b, d-h, o-z)
-        implicit complex(dp) (c)
+        !implicit real(dp) (a-b, d-h, o-z)
+        !implicit complex(dp) (c)
+        implicit none
         integer nout
         integer nmax, i, j, k, m, m1, n, nmin, nn
         ! number of the output unit
         parameter (nout = 35)
-        include 'ampld.par.f'
+        !include 'ampld.par.f'
+        real(dp) rev, eps, hlength, x, y
+        real(dp) tl, tl1, pl, pl1, alpha, beta, &
+                alph, bet, d, d11, d12, d21, d22, &
+                dcth, dcth0, dk, dnn, dv1n, dv1nn, &
+                dv2n, dv2nn, fac, fc, fs, ph, phil, &
+                phil1, phip, phip1, pigrad, pin, pin2, &
+                rn, rsnm, sa, sb, sp, sp1, spp, spp1, &
+                st, st1, thetl, thetl1, thetp, thetp1
         real(dp) dlam, lambda, cext, cext1, cext2
         real(dp) al(3, 2), al1(3, 2), ap(2, 3), ap1(2, 3), b(3, 3), &
                 r(2, 2), r1(2, 2), c(3, 2), ca, cb, ct, cp, ctp, cpp, ct1, cp1, &
                 ctp1, cpp1
         real(dp) dv1(npn6), dv2(npn6), dv01(npn6), dv02(npn6)
-        real(dp)&
-                tr11(npn6, npn4, npn4), tr12(npn6, npn4, npn4), &
+        real(dp) tr11(npn6, npn4, npn4), tr12(npn6, npn4, npn4), &
                 tr21(npn6, npn4, npn4), tr22(npn6, npn4, npn4), &
                 ti11(npn6, npn4, npn4), ti12(npn6, npn4, npn4), &
                 ti21(npn6, npn4, npn4), ti22(npn6, npn4, npn4)
+
+        complex(dp) chh, chv, cn, cn1, cn2, &
+                ct11, ct12, ct21, ct22, &
+                cvh, cvv
         complex(dp) cal(npn4, npn4), vv, vh, hv, hh, zeps0
         !_____
         common /tmat/ tr11, tr12, tr21, tr22, ti11, ti12, ti21, ti22
@@ -2877,10 +2899,33 @@ contains
         !  separately for the real and imaginary parts of the integrand.
         !
         !--------/---------/---------/---------/---------/---------/---------/--
-        include 'ampld.par.f'
-        implicit real(dp) (a-h, o-z)
+        !include 'ampld.par.f'
+        implicit none
         integer m, ngauss, nmax, ncheck, naxsm, i, i1, i2, k1, k2, kk1, &
                 kk2, mm1, n, n1, n2, ng, ngss, nm, nnmax
+        real(dp) ppi, pir, pii, a11, a12, a21, a22, &
+                aa1, aa2, ar11, ar12, ar21, ar22, &
+                ai11, ai12, ai21, ai22, an1, an2, &
+                an12, b1r, b1i, b2r, b2i, b3r, b3i, &
+                b4r, b4i, b5r, b5i, b6r, b6i, &
+                b7r, b7i, b8r, b8i, &
+                c1r, c1i, c2r, c2i, &
+                c3r, c3i, c4r, c4i, &
+                c5r, c5i, c6r, c6i, &
+                c7r, c7i, c8r, c8i, &
+                d1n1, d1n2, d2n1, d2n2, &
+                d3n1, d3n2, ddri, drii, &
+                drri, e1, e2, e3, f1, f2, &
+                factor, gr11, gr12, gr21, gr22, &
+                gi11, gi12, gi21, gi22, &
+                qdj1, qdjr2, qdji2, &
+                qdy1, qj1, qjr2, qji2, qm, qmm, &
+                qy1, rri, si, &
+                tar11, tar12, tar21, tar22, &
+                tai11, tai12, tai21, tai22, &
+                tgr11, tgr12, tgr21, tgr22, &
+                tgi11, tgi12, tgi21, tgi22, &
+                tpir, tpii, tppi, uri, wr
         real(dp)  x(npng2), w(npng2), an(npn1), &
                 r(npng2), dr(npng2), sig(npn2), &
                 ddr(npng2), drr(npng2), &
@@ -2964,7 +3009,7 @@ contains
             !     dv2(n)=[d/d(arccos x)] dvig(0,m,n,arccos x)
             !                              = d d_{0m}^{(l)}/d\theta
             !--------/---------/---------/---------/---------/---------/---------/--
-            !
+
             do n = 1, nmax
 
                 dd1 = ddv1(n)
@@ -2975,7 +3020,7 @@ contains
                 d3(i1, n) = dd3
 
                 if (naxsm==1) then         !gauss abscissas chosen +/- symmetric
-                    !
+
                     ! using (4.2.4) and (4.2.6) of {ed},
                     !           d_{0m}^{(l)}(\pi-\theta) = (-1)^{l+m} d_{0m}^{(l)}(\theta)
 
@@ -2989,9 +3034,9 @@ contains
             enddo
 
             if (naxsm==0) then        !gauss abscissas not chosen +/- symmetric
-                !
+
                 call vigf(x(i2), nmax, m, dv1, dv2, ddv1)
-                !
+
                 do n = 1, nmax
                     dd1 = ddv1(n)
                     dd2 = dv2(n)
@@ -3003,7 +3048,7 @@ contains
 
             end if
         end do
-        !
+
         !  assigning r^2(\theta)*weight product:
 
         do i = 1, ngss
@@ -3013,7 +3058,7 @@ contains
 
             rr(i) = wr            !w(i)*r^2(\theta)
         end do
-        !
+
         do n1 = mm1, nmax         !mm1=m below
             an1 = an(n1)
 
