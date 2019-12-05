@@ -86,12 +86,16 @@ subroutine tmtaxsp(nmax, rap, zeps1, tmt)
     !
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
-    implicit real(dp) (a-h, o-z)
-    integer lmaxd, lmax1d, lmtd
-    integer naxsm
+    implicit none
 
+    integer lmaxd, lmax1d, lmtd, naxsm
     parameter (lmaxd = 8, lmax1d = lmaxd + 1, lmtd = lmax1d * lmax1d - 1)
 
+    integer ndgs, ngauss, n, nm, np, n1, n2, m, l1, l2, lmtot, k1, k2, kk1, kk2
+    integer nmax, ncheck, inm1, ixxx, ja, jam, jb, jbm
+    real(dp) rev, eps, ht, a, alpha, beta, ddelt, dn1
+    real(dp) p, pir, pii, ppr, ppi, qext, qsca, rat, rap, rsnm
+    real(dp) tr1nn, ti1nn, tr1nn1, ti1nn1, xev
     real(dp)  lam, mrr, mri, x(npng2), w(npng2), s(npng2), ss(npng2), &
             an(npn1), r(npng2), dr(npng2), &
             ddr(npng2), drr(npng2), dri(npng2), ann(npn1, npn1)
@@ -393,8 +397,8 @@ subroutine vigampl (x, nmax, m, ddv1, dv2)
     !     called only by the ampl routine!!!
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
-    include 'ampld.par.f'
-    implicit real(dp) (a-h, o-z)
+    !include 'ampld.par.f'
+    implicit none
     real(dp) ddv1(npn1), dv2(npn1)
 
     !      implicit none
@@ -500,19 +504,23 @@ subroutine vigampl (x, nmax, m, ddv1, dv2)
         ! >>> determine x^{m+1}_m:
 
         if (m/=nmax)  then
-            der = x * dsqrt(2 * m + 1.d0) * a          ! der=x^{m+1}_m; see (3.30) of {tks}
+            !see (3.30) of {tks}
+            der = x * dsqrt(2 * m + 1.d0) * a          ! der=x^{m+1}_m;
             ddv1(m + 1) = der
-            dv2(m + 1) = ((m + 1) * x * der - a * dsqrt(2 * m + 1.d0)) / dble(m)  !(3.35) of {tks}
+            !(3.35) of {tks}
+            dv2(m + 1) = ((m + 1) * x * der - a * dsqrt(2 * m + 1.d0)) / dble(m)
             ! >>> determine remaining x^{l}_m's
         end if
 
         if ((m + 2)/=nmax)  then
             do n = m + 2, nmax
+                !see (3.31) of {tks}
                 d3 = dsqrt(dble(n)**2 - dble(m)**2)
                 ddv1(n) = ((2 * n - 1) * x * ddv1(n - 1) - &
                         dsqrt(dble(n - 1)**2 - dble(m)**2) * ddv1(n - 2)) / d3
-                !                                                     !see (3.31) of {tks}
-                dv2(n) = (n * x * ddv1(n) - ddv1(n - 1) * d3) / dble(m)      !see (3.35) of {tks}
+
+                !see (3.35) of {tks}
+                dv2(n) = (n * x * ddv1(n) - ddv1(n - 1) * d3) / dble(m)
             enddo
         end if
 
@@ -543,20 +551,22 @@ subroutine const (ngauss, nmax, x, w, an, ann, s, ss, np, eps)
     !  ss ... 1/(\sin^2\theta)
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
-    implicit real(dp) (a-h, o-z)
-    include 'ampld.par.f'
-    integer neps, jg, i, j
+    implicit none
+    !include 'ampld.par.f'
+    integer ngauss, nmax, np, ng, ng1, ng2, nn
+    integer neps, jg, i, j, n, n1
+    real(dp) eps, d, ddd, xx, y
     real(dp) ee, ee1, cc, si, xi1, xi2, xav
     real(dp) xtheta, theta0, rx
     real(dp) x(npng2), w(npng2), x1(npng2), w1(npng2), &
             x2(npng2), w2(npng2), &
             s(npng2), ss(npng2), &
             an(npn1), ann(npn1, npn1), dd(npn1)
-    !
+
     common/revval/ rx
-    !
-    !     data pi/3.141592653589793d0/
-    !
+
+    !data pi/3.141592653589793d0/
+
     do n = 1, nmax
         nn = n * (n + 1)
         an(n) = dble(nn)
@@ -570,13 +580,14 @@ subroutine const (ngauss, nmax, x, w, an, ann, s, ss, np, eps)
     end do
 
     ng = 2 * ngauss
-    !
-    ! gif division points and weights
-    !
-    neps = max(eps, 1.d0 / eps)      !number of gauss integration
-    !                                 !intervals from eps
 
-    if (np==-1) then         ! spheroid
+    ! gif division points and weights
+
+    !number of gauss integration
+    !intervals from eps
+    neps = max(eps, 1.d0 / eps)
+
+    if (np==-1) then ! spheroid
 
         if(neps==1) then
 
@@ -648,12 +659,12 @@ subroutine const (ngauss, nmax, x, w, an, ann, s, ss, np, eps)
                 do  j = 1, ng1
                     w(jg + j) = w1(j)
                     x(jg + j) = x1(j)
-                enddo         !j
+                enddo !j
 
-            enddo         !i
-            !
+            enddo !i
+
             ! assuming mirror symmetry in the $\theta=\pi/2$ plane
-            !
+
             do  i = 1, ngauss
                 w(i) = w(ng - i + 1)
                 x(i) = -x(ng - i + 1)
@@ -666,21 +677,21 @@ subroutine const (ngauss, nmax, x, w, an, ann, s, ss, np, eps)
 
         ng1 = dble(ngauss) / 2d0
         ng2 = ngauss - ng1
-        xx = -dcos(datan(eps))        !-cos of separation angle between
-        !                                 !horizontal and vertical cylinder
-        !                                 !faces
-        !
+        !-cos of separation angle between
+        !horizontal and vertical cylinder
+        !faces
+        xx = -dcos(datan(eps))
+
         ! gif division points and weights
-        !
+
         call gauss(ng1, 0, 0, x1, w1)         !for (0,ng1)
         call gauss(ng2, 0, 0, x2, w2)         !for (ng1+1,ngauss=ng1+ng2)
-        !
+
         ! in gauss (n,ind1,ind2,z,w):
         ! ind1 = 0 - interval (-1,1),
         ! ind1 = 1 - (0,1)
         ! ind2 = 1 results are printed.
-        !
-        !
+
         do i = 1, ng1
             w(i) = 0.5d0 * (xx + 1d0) * w1(i)
             x(i) = 0.5d0 * (xx + 1d0) * x1(i) + 0.5d0 * (xx - 1d0)
@@ -689,9 +700,9 @@ subroutine const (ngauss, nmax, x, w, an, ann, s, ss, np, eps)
             w(i + ng1) = -0.5d0 * xx * w2(i)
             x(i + ng1) = -0.5d0 * xx * x2(i) + 0.5d0 * xx
         end do
-        !
+
         ! assuming mirror symmetry in the $\theta=\pi/2$ plane
-        !
+
         do i = 1, ngauss
             w(ng - i + 1) = w(i)
             x(ng - i + 1) = -x(i)
@@ -705,10 +716,10 @@ subroutine const (ngauss, nmax, x, w, an, ann, s, ss, np, eps)
         ng1 = ng - ng2
         theta0 = 1.d0 / sqrt(8.d0 * rx / eps - 3.d0)  !cosine of the separation angle
         xx = theta0
-        !
+
         call gauleg(-1.d0, theta0, x1, w1, ng1)       !for (0,ng1)
         call gauleg(theta0, 1.d0, x2, w2, ng2)        !for (ng2+1,ng=ng1+ng2)
-        !
+
         do  i = 1, ng1
             w(i) = w1(i)
             x(i) = x1(i)
@@ -720,19 +731,19 @@ subroutine const (ngauss, nmax, x, w, an, ann, s, ss, np, eps)
             x(i + ng1) = x2(i)
 
         enddo
-        !
+
         !*****************************************************************
-    else if (np==-5) then            ! cut sphere on its bottom
+    else if (np==-5) then ! cut sphere on its bottom
 
         xtheta = dacos((eps - rx) / rx)
         xx = dsin(xtheta) / (pi - xtheta)
         ng1 = xx * dble(ng)
         ng2 = ng - ng1
         theta0 = -1.d0 / sqrt(8.d0 * rx / eps - 3.d0)  !cosine of the separation angle
-        !
+
         call gauleg(-1.d0, theta0, x1, w1, ng1)       !for (0,ng1)
         call gauleg(theta0, 1.d0, x2, w2, ng2)        !for (ng2+1,ng=ng1+ng2)
-        !
+
         do  i = 1, ng1
             w(i) = w1(i)
             x(i) = x1(i)
@@ -745,15 +756,15 @@ subroutine const (ngauss, nmax, x, w, an, ann, s, ss, np, eps)
 
         enddo
         !*****************************************************************
-        !
+
     else
-        !
+
         call gauss(ng, 0, 0, x, w)
-        !      call gauleg(-1.d0,1.d0,x,w,ng)
-        !
+        !call gauleg(-1.d0,1.d0,x,w,ng)
+
     end if
-    !
-    if (np>-4) then           !mirror symmetry present
+
+    if (np>-4) then !mirror symmetry present
 
         do i = 1, ngauss
             y = x(i)
@@ -765,7 +776,7 @@ subroutine const (ngauss, nmax, x, w, an, ann, s, ss, np, eps)
             s(ng - i + 1) = y
         end do
 
-    else                         !mirror symmetry absent
+    else !mirror symmetry absent
 
         do i = 1, ng
             y = x(i)
@@ -776,7 +787,7 @@ subroutine const (ngauss, nmax, x, w, an, ann, s, ss, np, eps)
         end do
 
     end if
-    !
+
     return
 end
 
@@ -815,17 +826,20 @@ subroutine vary (lam, mrr, mri, a, eps, &
     !  dri=-(mri/(mrr**2+mri**2))*(\lambda/[2*\pi*r(\theta)])
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
-    include 'ampld.par.f'
-    implicit real(dp) (a-h, o-z)
-    real(dp) rsnm, ht
+    !include 'ampld.par.f'
+    implicit none
+    integer np, ng, ngauss, nmax, nnmax1, nnmax2, i
+    real(dp) a, eps
+    real(dp) p, ppi, pir, pii, pri, prr, ta, tb
+    real(dp) rsnm, ht, wv, v, v1, v2, vv
     real(dp)  x(npng2), r(npng2), dr(npng2), mrr, mri, lam, &
             z(npng2), zr(npng2), zi(npng2), &
             ddr(npng2), drr(npng2), dri(npng2)
 
     ng = ngauss * 2
     ht = 0d0
-    ! decision tree to specify particle shape:
 
+    ! decision tree to specify particle shape:
     if (np>0)  then ! chebyshev particle
         call rsp_chebyshev(x, ng, a, eps, np, r, dr)
     else
@@ -851,7 +865,7 @@ subroutine vary (lam, mrr, mri, a, eps, &
                     mpar%nanorod_cap_hr, r, dr)
         end select
     end if
-    !
+
     wv = p * 2d0 / lam                 !wave vector
     ppi = wv * wv
     pir = ppi * mrr
@@ -879,7 +893,7 @@ subroutine vary (lam, mrr, mri, a, eps, &
         stop
     end if
     90 format(' nmax = ', i2, ', i.e., greater than ', i3)
-    !
+
     ! ta is the ``max. size parameter", max(2*pi*sqrt(ri)/lambda)
 
     tb = ta * dsqrt(mrr * mrr + mri * mri)     !=ta*epsin
@@ -888,12 +902,12 @@ subroutine vary (lam, mrr, mri, a, eps, &
     nnmax1 = 1.2d0 * dsqrt(dmax1(ta, dble(nmax))) + 3d0
     nnmax2 = (tb + 4d0 * (tb**0.33333d0) + 1.2d0 * dsqrt(tb))  !wiscombe bound
     nnmax2 = nnmax2 - nmax + 5
-    !
+
     ! generate arrays of bessel functions at ngauss gif division
     ! points and store them in the common block /cbess/
-    !
+
     call bess(z, zr, zi, ng, nmax, nnmax1)
-    !
+
     return
 end
 
@@ -1120,8 +1134,10 @@ subroutine rsp_droplet (x, ng, rev, r, dr)
     !
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
+    implicit none
+    integer ng, n, nc, i
     parameter (nc = 10)
-    implicit real(dp) (a-h, o-z)
+    real(dp) rev, dri, r0, ri, xi, xin
     real(dp) x(ng), r(ng), dr(ng)
     r0 = rev * cdrop%r0v
     do i = 1, ng
@@ -1183,7 +1199,9 @@ subroutine rsp_sphere_cut_top (x, ng, rev, eps, r, dr)
     !   1.le.i.le.ngauss
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
-    implicit real(dp) (a-h, o-z)
+    implicit none
+    integer ng, i
+    real(dp) rev, eps, a, rad, co, cc, rthet, si, ss, theta0
     real(dp) x(ng), r(ng), dr(ng)
 
     if (eps>=2.d0 * rev) then
@@ -1264,7 +1282,10 @@ subroutine rsp_sphere_cut_bottom (x, ng, rev, eps, r, dr)
     !   1.le.i.le.ngauss
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
-    implicit real(dp) (a-h, o-z)
+    implicit none
+    integer ng, i
+    real(dp) rev, eps, rad, rthet, a, &
+            co, cc, si, ss, theta0
     real(dp) x(ng), r(ng), dr(ng)
 
     if (eps>=2.d0 * rev) then
@@ -1898,8 +1919,38 @@ subroutine tmatr (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
     !
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
-    include 'ampld.par.f'
-    implicit real(dp) (a-h, o-z)
+    !include 'ampld.par.f'
+    implicit none
+    integer m, ngauss, nmax, ncheck, naxsm
+    integer n, ng, ngss, nm, nnmax, &
+            n1, n2, i, i1, i2, &
+            k1, k2, kk1, kk2, mm1
+    real(dp) ppi, pir, pii
+    real(dp) a11, a12, a21, a22, aa1, aa2, &
+            ar11, ar12, ar21, ar22, &
+            ai11, ai12, ai21, ai22, &
+            an1, an2, an12, &
+            b1r, b1i, b2r, b2i, b3r, b3i, &
+            b4r, b4i, b5r, b5i, b6r, b6i, &
+            b7r, b7i, b8r, b8i, &
+            c1r, c1i, c2r, c2i, c3r, c3i, &
+            c4r, c4i, c5r, c5i, c6r, c6i, &
+            c7r, c7i, c8r, c8i, &
+            d1n1, d1n2, d2n1, d2n2, &
+            dd1, dd2, ddri, drii, drri, &
+            dsi, e1, e2, e3, f1, f2, &
+            factor, &
+            gr11, gr12, gr21, gr22, &
+            gi11, gi12, gi21, gi22, &
+            qdj1, qdjr2, qdji2, qdy1, &
+            qj1, qjr2, qji2, qm, qmm, &
+            qy1, rri, si, &
+            tar11, tar12, tar21, tar22, &
+            tai11, tai12, tai21, tai22, &
+            tgr11, tgr12, tgr21, tgr22, &
+            tgi11, tgi12, tgi21, tgi22, &
+            tpir, tpii, tppi, uri, wr
+
     real(dp)  x(npng2), w(npng2), an(npn1), s(npng2), ss(npng2), &
             r(npng2), dr(npng2), sig(npn2), &
             ddr(npng2), drr(npng2), &
