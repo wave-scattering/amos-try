@@ -65,7 +65,7 @@ contains
         !    of the integrand at user specified points,
         implicit none
 
-        integer ( kind = 4 ), parameter :: limit = 500
+        integer ( kind = 4 ), parameter :: limit = 1500
         integer ( kind = 4 ), parameter :: npts = 1
         integer ( kind = 4 ), parameter :: npts2 = 2 * npts
 
@@ -75,7 +75,7 @@ contains
         real ( kind = 8 ) :: a, b
         real ( kind = 8 ) abserr
         real ( kind = 8 ), parameter :: epsabs = 0.0D+00
-        real ( kind = 8 ), parameter :: epsrel = 1.0D-13
+        real ( kind = 8 ), parameter :: epsrel = 1.0D-5
         real ( kind = 8 ), external :: fun
         integer ( kind = 4 ) ier
         integer ( kind = 4 ) iwork(leniw)
@@ -87,17 +87,18 @@ contains
         !
         !  Singularity points:
         !
-        points(1) = mpar%eps/dsqrt(mpar%eps**2 +1)
+        points(1) = 1.0_dp/dsqrt(mpar%eps**2 +1.0_dp)
+        write(*,*) 'Points = ', points
 
         call dqagp ( fun, a, b, npts2, points, epsabs, epsrel, result, abserr, &
                 neval, ier, leniw, lenw, last, iwork, work )
 
-        write ( *, '(a,g14.6)' ) '  Integral left endpoint A =    ', a
-        write ( *, '(a,g14.6)' ) '  Integral right endpoint B =   ', b
+!        write ( *, '(a,g14.6)' ) '  Integral left endpoint A =    ', a
+!        write ( *, '(a,g14.6)' ) '  Integral right endpoint B =   ', b
         write ( *, '(a,g14.6)' ) '  Estimated integral is         ', result
         write ( *, '(a,g14.6)' ) '  Estimated integral error =    ', abserr
         write ( *, '(a,i8)' ) '  Number of function evaluations, NEVAL = ', neval
-        write ( *, '(a,i8)' ) '  Error return code IER = ', ier
+!        write ( *, '(a,i8)' ) '  Error return code IER = ', ier
 
         return
     end
@@ -112,7 +113,7 @@ contains
         real ( kind = 8 ) :: a,b
         real ( kind = 8 ) abserr
         real ( kind = 8 ), parameter :: epsabs = 0.0D+00
-        real ( kind = 8 ), parameter :: epsrel = 0.001D+00
+        real ( kind = 8 ), parameter :: epsrel = 1.0D-4
         real ( kind = 8 ), external :: fun
         integer ( kind = 4 ) ier
         integer ( kind = 4 ) iwork(limit)
@@ -124,15 +125,15 @@ contains
         call dqags ( fun, a, b, epsabs, epsrel, result, abserr, neval, ier, &
                 limit, lenw, last, iwork, work )
 
-            write ( *, '(a,g14.6)' ) '  Integral left endpoint A =    ', a
-            write ( *, '(a,g14.6)' ) '  Integral right endpoint B =   ', b
+!            write ( *, '(a,g14.6)' ) '  Integral left endpoint A =    ', a
+!            write ( *, '(a,g14.6)' ) '  Integral right endpoint B =   ', b
             write ( *, '(a,g14.6)' ) '  Estimated integral is         ', result
             write ( *, '(a,g14.6)' ) '  Estimated integral error =    ', abserr
             write ( *, '(a,i8)' ) '  Number of function evaluations, NEVAL = ', neval
-            write ( *, '(a,i8)' ) '  Error return code IER = ', ier
-        if (ier /= 0) then
-            stop 'dqags integration error'
-        end if
+!            write ( *, '(a,i8)' ) '  Error return code IER = ', ier
+!        if (ier /= 0 .and. ier/=3) then
+!            stop 'dqags integration error'
+!        end if
 
         return
     end
@@ -204,7 +205,7 @@ contains
         !   a=h*eps  ... cylinder radius   ====>
         !
         !   4*pi*rev**3/3=2*h*pi*a**2=2*pi*h**3*eps**2 <====>
-        !                h=rev*( (2d0/(3d0*eps*eps))**(1d0/3d0) )
+        !                h=rev*( (2_dp/(3_dp*eps*eps))**(1_dp/3_dp) )
         !
         !
         !   ngauss ... the number of gif division points
@@ -213,7 +214,6 @@ contains
         !   1.le.i.le.ngauss
         !
         !--------/---------/---------/---------/---------/---------/---------/--
-        !TODO: convert to f90
         implicit none
         real(dp) rev, eps, h, a, si, co, rthet, rad
         integer ng, ngauss, i
@@ -221,7 +221,7 @@ contains
         rev = mpar%rev
         eps = mpar%eps
         ! determine half-length of the cylinder
-        h = rev * ((2d0 / (3d0 * eps * eps))**(1d0 / 3d0))
+        h = rev * ((2.0_dp / (3.0_dp * eps * eps))**(1.0_dp / 3.0_dp))
         ! determine cylinder radius:
         a = h * eps
         ng = size(x)
@@ -229,14 +229,15 @@ contains
         if (ng == 1) ngauss = 1
         do i = 1, ngauss
             co = -x(i)
-            si = dsqrt(1d0 - co * co)
+            si = dsqrt(1.0_dp - co * co)
 
             if ((h * si)>(a * co)) then
                 ! along the circular surface:
                 rad = a / si
                 rthet = -a * co / (si * si)
                 !rad=1.d-10
-                !rthet=0.d0
+                !rthet=0.0_dp
+!                write(*,*) 'cyl'
             else
                 ! along the plane cuts:
                 rad = h / co

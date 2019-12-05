@@ -1639,16 +1639,18 @@ subroutine tmatr0_adapt(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
                 integrand%nmax = nmax ! used only for bessel evaluation
                 do i = 1, ngss    !=ngauss   if ncheck.eq.1
                     ar12=ar12+w(i)*ar12_m0_integrand(x(i))        !~re j^{12}
-                    !                   if (nmax > 20) then
-                    !                   write(*,*) x(i), ar12_m0_integrand(X(I))
-                    !                   endif
+                    if (n1 == 5 .and. n2 == 1) then
+                        write(*,*) x(i), ar12_m0_integrand(X(I))
+                    endif
                 end do               !end of gauss integration
-!                if (nmax > 20) then
+                if (n1 == 5 .and. n2 == 1) then
 !                    call integrate(f03, -0.0_dp, 1.0_dp, AR12)
-!                    write(*,*)"From Gauss: ", AR12
-!                call integrate_p(ar12_m0_integrand, 0.0_dp, 1.0_dp, ar12)
-!                    call integrate(ar12_m0_integrand, 0.0_dp, 1.0_dp, AR12)
-!                end if
+                    write ( *, '(a,g14.6)' ) '  From Gauss: ----------->     ', ar12
+                    write(*,*)"From quadpack p: "
+                    call integrate_p(ar12_m0_integrand, 0.0_dp, 1.0_dp, ar12)
+                    write(*,*)"From quadpack: "
+                    call integrate(ar12_m0_integrand, 0.0_dp, 1.0_dp, ar12)
+                end if
 
                 !
                 ! gauss integration loop (other vars):
