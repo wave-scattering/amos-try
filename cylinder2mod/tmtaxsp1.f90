@@ -897,6 +897,9 @@ subroutine vary (lam, mrr, mri, a, eps, &
     ! generate arrays of bessel functions at ngauss gif division
     ! points and store them in the common block /cbess/
     !
+    cbess%wv = WV
+    cbess%mrr = mrr
+    cbess%mri = mri
     call bess(z, zr, zi, ng, nmax, nnmax1)
     !
     return

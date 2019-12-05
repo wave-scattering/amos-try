@@ -61,7 +61,7 @@ contains
         integer nmax
         !
         call reallocate_abess(nmax)
-        xx = sqrt(x)*cbess%wv
+        xx = dsqrt(x)*cbess%wv
         call rjb(xx, abess%aj, abess%adj, nmax, abess%nnmax1)
         j = abess%aj(nmax)
         dj = abess%adj(nmax)
