@@ -49,7 +49,7 @@ contains
         integer nmax
         !
         call reallocate_abess(nmax)
-        xx = sqrt(x)*cbess%wv
+        xx = dsqrt(x)*cbess%wv
         call ryb(xx, abess%ay, abess%ady, nmax)
         y = abess%ay(nmax)
         dy = abess%ady(nmax)

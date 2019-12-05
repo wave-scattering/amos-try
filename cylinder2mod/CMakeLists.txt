@@ -27,6 +27,7 @@ target_link_libraries(libcylinder
         special_functions
         model_parameters
         cylinder_blas
+        quadpack::quadpack
         )
 
 ADD_EXECUTABLE(${PROJECTNAME}

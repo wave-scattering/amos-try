@@ -201,8 +201,14 @@ C
 !
 ! determine m=m'=0 elements of the T matrix
 !
+         if (mpar%yn_adaptive == 0) then
          CALL TMATR0 (NGAUSS,X,W,AN,ANN,PPI,PIR,PII,R,DR,
      &                 DDR,DRR,DRI,NMAX,NCHECK,NAXSM)
+         else
+         CALL TMATR0_adapt(NGAUSS,X,W,AN,ANN,PPI,PIR,PII,R,DR,
+     &                 DDR,DRR,DRI,NMAX,NCHECK,NAXSM)
+
+         endif
 !
          QEXT=0D0
          QSCA=0D0
@@ -1712,7 +1718,7 @@ C**********************************************************************
 
 C**********************************************************************
  
-      SUBROUTINE TMATR0(NGAUSS,X,W,AN,ANN,PPI,PIR,PII,R,DR,DDR,
+      SUBROUTINE TMATR0_adapt(NGAUSS,X,W,AN,ANN,PPI,PIR,PII,R,DR,DDR,
      &                  DRR,DRI,NMAX,NCHECK,NAXSM)
 C--------/---------/---------/---------/---------/---------/---------/--
 C >>> NGAUSS,X,W,AN,ANN,PPI,PIR,PII,R,DR,DDR,DRR,DRI,NMAX,NCHECK
@@ -1765,7 +1771,8 @@ C--------/---------/---------/---------/---------/---------/---------/--
      & qdj1,  qdji2, qdjr2, qdy1, qj1,
      & qji2, qjr2, qy1,  rri, si, tai12, tai21,
      & tar12, tar21, tgi12, tgi21,
-     & tgr12, tgr21, tppi, tpii, tpir, uri
+     & tgr12, tgr21, tppi, tpii, tpir, uri,
+     & x_to_rsp(1), r_from_x(1), dr_from_x(1)
 
       real(dp)  X(NPNG2),W(NPNG2),AN(NPN1),
      &   R(NPNG2),DR(NPNG2),SIG(NPN2),
@@ -1891,40 +1898,25 @@ c        OPEN(NOUT+3,FILE='surfint.dat')   !Gauss convergence check
 !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ! Gauss integration loop for AR12 only:
 !+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                integrand%n1 = N1
+                integrand%n2 = N2
+                integrand%nmax = nmax ! used only for bessel evaluation
                 DO I=1,NGSS    !=NGAUSS   if NCHECK.EQ.1
                                    !=2*NGAUSS if NCHECK.EQ.0
-
-                    CALL VIG_1v ( X(I), N1, 0, D1N1, D2N1)
-                    CALL VIG_1v ( X(I), N2, 0, D1N2, D2N2)
-                    A12=D1N1*D2N2
-                    A22=D2N1*D2N2
-                    call cbessjdj(r(i),N1, qj1, qdj1)
-                    call cbessydy(r(i),N1, qy1, qdy1)
-! Bessel functions of the interior argument:
-                    call cbesscjcdj(r(i),N2, nmax,
-     &                              qjr2, qji2, qdjr2, qdji2)
-! Re and Im of j_{n2}(k_{in}r) j_{n1}(k_{out}r):
-
-                    C1R=QJR2*QJ1
-! Re and Im of j_{n2}(k_{in}r) h_{n1}(k_{out}r):
-                    B1R=C1R-QJI2*QY1
-! Re and Im of j_{n2}(k_{in}r) [k_{out}r j_{n1}(k_{out}r)]'/(k_{out}r):
-                    C2R=QJR2*QDJ1
-! Re and Im of j_{n2}(k_{in}r) [k_{out}r h_{n1}(k_{out}r)]'/(k_{out}r):
-                    B2R=C2R-QJI2*QDY1
-                    DDRI=DDR(I)               !1/(k_{out}r)
-! Re and Im of [1/(k_{out}r)]*j_{n2}(k_{in}r) h_{n1}(k_{out}r):
-                    B3R=DDRI*B1R
-!%%%%%%%  Forming integrands of J-matrices (J^{11}=J^{22}=0 for m=0): %%%%%%%%
-                    URI=DR(I)        !dr/(d\theta)
-                    RRI=RR(I)        !w(i)*r^2(\theta)
-! w(i)*r^2(\theta)*D2N1*D2N2:
-                    F1=RRI*A22      !prefactor containing r^2(\theta)<->hat{r} part
-! N1*(N1+1)*w(i)*r(\theta)*[dr/(d\theta)]*D1N1*D2N2:
-                    F2=RRI*URI*AN1*A12     !prefactor containing r(\theta)*[dr/(d\theta)]
-                                           !hat{theta} part
-                    AR12=AR12+F1*B2R+F2*B3R        !~Re J^{12}
+                    AR12=AR12+W(I)*ar12_m0_integrand(X(I))        !~Re J^{12}
+!                   if (nmax > 20) then
+!                   write(*,*) x(i), ar12_m0_integrand(X(I))
+!                   endif
                 end do               !end of Gauss integration
+!               if (nmax > 20) then
+!               call integrate(f03,
+!    &                         -0.0_dp, 1.0_dp, AR12)
+                write(*,*)"From Gauss: ", AR12
+                call integrate_p(ar12_m0_integrand,
+     &                         0.0_dp, 1.0_dp, AR12)
+!               call integrate(ar12_m0_integrand,
+!    &                         0.0_dp, 1.0_dp, AR12)
+!               end if
 
 
 !
@@ -2126,6 +2118,382 @@ c      close(nout+3)
       RETURN
       END
  
+C**********************************************************************
+
+      SUBROUTINE TMATR0(NGAUSS,X,W,AN,ANN,PPI,PIR,PII,R,DR,DDR,
+     &                  DRR,DRI,NMAX,NCHECK,NAXSM)
+C--------/---------/---------/---------/---------/---------/---------/--
+C >>> NGAUSS,X,W,AN,ANN,PPI,PIR,PII,R,DR,DDR,DRR,DRI,NMAX,NCHECK
+C <<< common blocks /TMAT99/, /CT/ (for main),  and /CTT/ (for TT)
+C=====================
+C
+C  Determines the T-matrix of an axially symmetric scatterer
+C                           for M=0
+C
+C  NGAUSS - the number of GIF division points
+C  X=\cos\theta  - GIF division points
+C  W - GIF weights
+C  AN(N)=N*(N+1)
+C  ANN(l_1,l_2)=\sqrt{\fr{(2 l_1+1)}{l_1(l_1+1)} }
+C                       \sqrt{\fr{(2 l_2+1)}{l_2(l_2+1)} }/2
+C  NMAX - angular momentum cutoff
+C  NCHECK  -  .EQ.0  THEN  NGSS=2*NGAUSS, FACTOR=1D0
+C             .EQ.1  THEN  NGSS = NGAUSS, FACTOR=2D0
+C  NAXSM   -  .EQ.0 : Gauss abscissas do not have +/- theta symmetry
+C             .EQ.1 : Gauss abscissas have +/- theta symmetry
+C  P=DACOS(-1D0)
+C  PI=P*2D0/LAM - wave vector
+C  PPI=PI*PI
+C  PIR=PPI*MRR
+C  PII=PPI*MRI
+C  R=r^2(\theta)                        for axially symmetric particles
+C  DR=[dr(\theta)/(d\theta)]/r(\theta)  for axially symmetric particles
+C  DDR=\lambda/[2*\pi*r(\theta)]=1/(k_out*r)
+C  DRR=(MRR/(MRR**2+MRI**2))*(\lambda/[2*\pi*r(\theta)])
+C                  = Re 1/(k_in*r)
+C  DRI=-(MRI/(MRR**2+MRI**2))*(\lambda/[2*\pi*r(\theta)])
+C                  = Im 1/(k_in*r)
+C  Refractive index outside is assumed to real, whereas inside
+C  a scatterer, refractive index is allowed to be complex in general.
+C  Consequently, the Bessel function j_l(k_in*r) will in general
+C  be complex. The routine below performs Waterman surface integral
+C  separately for the real and imaginary parts of the integrand.
+C
+C--------/---------/---------/---------/---------/---------/---------/--
+      use libcylinder
+      IMPLICIT none
+      integer ngauss, nmax, ncheck, naxsm, i, i1, i2, k1, k2, kk1, kk2,
+     & mm1, n, n1, n2, ng, ngss, nm, nnmax
+      real(dp) :: PPI, PIR, PII, D1N1, A12, A21, A22, AI12, AI21, AN1,
+     & AN12, AN2, AR12, AR21, B1I, B1R, B2I, B2R, B3I, B3R, B4I, B4R,
+     & B5r, b5i, c1r, c1i, c2r, c2i, c3r, c3i, c4r, c4i, c5r, c5i,
+     & d1n2, d2n1, d2n2, dd1, dd2, ddri, drii, drri, f1, f2,
+     & factor, gi12, gi21, gr12, gr21,
+     & qdj1,  qdji2, qdjr2, qdy1, qj1,
+     & qji2, qjr2, qy1,  rri, si, tai12, tai21,
+     & tar12, tar21, tgi12, tgi21,
+     & tgr12, tgr21, tppi, tpii, tpir, uri
+
+      real(dp)  X(NPNG2),W(NPNG2),AN(NPN1),
+     &   R(NPNG2),DR(NPNG2),SIG(NPN2),
+     &   DDR(NPNG2),DRR(NPNG2),
+     &   D1(NPNG2,NPN1),D2(NPNG2,NPN1),
+     &   DRI(NPNG2),RR(NPNG2),
+     &   DV1(NPN1),DV2(NPN1)
+
+      real(dp)  R11(NPN1,NPN1),R12(NPN1,NPN1),
+     &   R21(NPN1,NPN1),R22(NPN1,NPN1),
+     &   I11(NPN1,NPN1),I12(NPN1,NPN1),
+     &   I21(NPN1,NPN1),I22(NPN1,NPN1),
+     &   RG11(NPN1,NPN1),RG12(NPN1,NPN1),
+     &   RG21(NPN1,NPN1),RG22(NPN1,NPN1),
+     &   IG11(NPN1,NPN1),IG12(NPN1,NPN1),
+     &   IG21(NPN1,NPN1),IG22(NPN1,NPN1),
+     &   ANN(NPN1,NPN1),
+     &   QR(NPN2,NPN2),QI(NPN2,NPN2),
+     &   RGQR(NPN2,NPN2),RGQI(NPN2,NPN2),
+     &   TQR(NPN2,NPN2),TQI(NPN2,NPN2),
+     &   TRGQR(NPN2,NPN2),TRGQI(NPN2,NPN2)
+cc      real(dp) TR1(NPN2,NPN2),TI1(NPN2,NPN2)
+!
+      COMMON /TMAT99/
+     &            R11,R12,R21,R22,I11,I12,I21,I22,RG11,RG12,RG21,RG22,
+     &            IG11,IG12,IG21,IG22           !only between TMATR routines
+cc      COMMON /CT/ TR1,TI1                       !output from TT routine
+      COMMON /CTT/ QR,QI,RGQR,RGQI              !input for TT routine
+!
+      MM1=1
+      NNMAX=NMAX+NMAX
+      NG=2*NGAUSS
+      NGSS=NG
+      FACTOR=1D0
+!
+      IF (NCHECK.EQ.1) THEN         !Theta=pi/2 is scatterer mirror symmetry plane
+            NGSS=NGAUSS
+            FACTOR=2D0
+         ELSE                       !Theta=pi/2 is not a scatterer mirror symmetry plane
+            CONTINUE
+      ENDIF
+!
+      SI=1D0
+      DO N=1,NNMAX
+           SI=-SI
+           SIG(N)=SI              !=(-1)**N
+      end do
+!
+! Assigning Wigner d-matrices - assuming mirror symmetry
+! in the \theta=\pi/2 plane:
+
+      DO I=1,NGAUSS
+
+         I1=NGAUSS-I+1
+cc         I2=NGAUSS+I
+         IF (NCHECK.EQ.0) I2=NGAUSS+I
+!
+         CALL VIG ( X(I1), NMAX, 0, DV1, DV2)
+!
+         DO N=1,NMAX
+
+            DD1=DV1(N)
+            DD2=DV2(N)
+            D1(I1,N)=DD1
+            D2(I1,N)=DD2
+! If theta=pi/2 is not a scatterer mirror symmetry plane but
+! Gauss abscissas are still chosen symmetrically:
+
+         IF ((NCHECK.EQ.0).AND.(NAXSM.EQ.1)) THEN
+! using (4.2.4) and (4.2.6) of {Ed},
+!           d_{0m}^{(l)}(\pi-\theta) = (-1)^{l+m} d_{0m}^{(l)}(\theta)
+! (4.2.5) of {Ed}:                   = (-1)^{l} d_{0 -m}^{(l)}(\theta)
+
+            SI=SIG(N)                  !=(-1)**N
+            D1(I2,N)=DD1*SI
+            D2(I2,N)=-DD2*SI
+
+         END IF
+
+         ENDDO
+! If neither scatterer nor Gauss abscissas have theta=pi/2
+! as a mirror symmetry plane:
+
+         IF ((NCHECK.EQ.0).AND.(NAXSM.EQ.0)) THEN
+!
+         CALL VIG ( X(I2), NMAX, 0, DV1, DV2)
+!
+          DO N=1,NMAX
+            DD1=DV1(N)
+            DD2=DV2(N)
+            D1(I2,N)=DD1
+            D2(I2,N)=DD2
+          ENDDO
+
+         END IF
+      end do
+!
+!  Assigning r^2(\theta)*weight product:
+
+      DO I=1,NGSS
+           RR(I)=W(I)*R(I)
+
+cc           if (dr(i).eq.0.d0) RR(I)=0.d0   !temporarily only
+      end do
+!
+      DO N1=MM1,NMAX
+           AN1=AN(N1)
+           DO N2=MM1,NMAX
+                AN2=AN(N2)
+
+                AR12=0D0
+                AR21=0D0
+                AI12=0D0
+                AI21=0D0
+                GR12=0D0
+                GR21=0D0
+                GI12=0D0
+                GI21=0D0
+
+c        OPEN(NOUT+3,FILE='surfint.dat')   !Gauss convergence check
+
+                IF (NCHECK.EQ.1.AND.SIG(N1+N2).LT.0D0) GO TO 205
+!
+! Gauss integration loop:
+!
+                DO I=1,NGSS    !=NGAUSS   if NCHECK.EQ.1
+                                   !=2*NGAUSS if NCHECK.EQ.0
+
+                    D1N1=D1(I,N1)
+                    D2N1=D2(I,N1)
+                    D1N2=D1(I,N2)
+                    D2N2=D2(I,N2)
+                    A12=D1N1*D2N2
+                    A21=D2N1*D1N2
+                    A22=D2N1*D2N2
+c                    AA1=A12+A21
+! Vector spherical harmonics:
+C  Since refractive index is allowed to be complex in general,
+C  the Bessel function j_l(k_in*r) is complex. The code below
+C  performs a separation of the complex integrand in Waterman's
+C  surface integral into its respective real and imaginary
+C  parts:
+! Bessel functions of the exterior argument:
+                    QJ1=cbess%J(I,N1)
+                    QY1=cbess%Y(I,N1)
+                    QDJ1=cbess%DJ(I,N1)
+                    QDY1=cbess%DY(I,N1)
+! Bessel functions of the interior argument:
+
+                    QJR2=cbess%JR(I,N2)
+                    QJI2=cbess%JI(I,N2)
+                    QDJR2=cbess%DJR(I,N2)
+                    QDJI2=cbess%DJI(I,N2)
+!_____________________
+! Re and Im of j_{n2}(k_{in}r) j_{n1}(k_{out}r):
+                    C1R=QJR2*QJ1
+                    C1I=QJI2*QJ1
+! Re and Im of j_{n2}(k_{in}r) h_{n1}(k_{out}r):
+
+                    B1R=C1R-QJI2*QY1
+                    B1I=C1I+QJR2*QY1
+! Re and Im of j_{n2}(k_{in}r) [k_{out}r j_{n1}(k_{out}r)]'/(k_{out}r):
+
+                    C2R=QJR2*QDJ1
+                    C2I=QJI2*QDJ1
+! Re and Im of j_{n2}(k_{in}r) [k_{out}r h_{n1}(k_{out}r)]'/(k_{out}r):
+
+                    B2R=C2R-QJI2*QDY1
+                    B2I=C2I+QJR2*QDY1
+
+                    DDRI=DDR(I)               !1/(k_{out}r)
+! Re and Im of [1/(k_{out}r)]*j_{n2}(k_{in}r) j_{n1}(k_{out}r)
+
+                    C3R=DDRI*C1R
+                    C3I=DDRI*C1I
+! Re and Im of [1/(k_{out}r)]*j_{n2}(k_{in}r) h_{n1}(k_{out}r):
+
+                    B3R=DDRI*B1R
+                    B3I=DDRI*B1I
+! Re and Im of  [k_{in}r j_{n2}(k_{in}r)]'/(k_{in}r)
+!                          * j_{n1}(k_{out}r):
+
+                    C4R=QDJR2*QJ1
+                    C4I=QDJI2*QJ1
+! Re and Im of [k_{in}r j_{n2}(k_{in}r)]'/(k_{in}r)
+!                          *  h_{n1}(k_{out}r):
+
+                    B4R=C4R-QDJI2*QY1
+                    B4I=C4I+QDJR2*QY1
+
+                    DRRI=DRR(I)               !Re[1/(k_{in}r)]
+                    DRII=DRI(I)               !Im[1/(k_{in}r)]
+! Re and Im of [1/(k_{in}r)] j_{n2}(k_{in}r) j_{n1}(k_{out}r):
+
+                    C5R=C1R*DRRI-C1I*DRII
+                    C5I=C1I*DRRI+C1R*DRII
+! Re and Im of [1/(k_{in}r)] j_{n2}(k_{in}r) h_{n1}(k_{out}r):
+
+                    B5R=B1R*DRRI-B1I*DRII
+                    B5I=B1I*DRRI+B1R*DRII
+!%%%%%%%  Forming integrands of J-matrices (J^{11}=J^{22}=0 for m=0): %%%%%%%%
+
+                    URI=DR(I)        !dr/(d\theta)
+                    RRI=RR(I)        !w(i)*r^2(\theta)
+! w(i)*r^2(\theta)*D2N1*D2N2:
+                    F1=RRI*A22      !prefactor containing r^2(\theta)<->hat{r} part
+! N1*(N1+1)*w(i)*r(\theta)*[dr/(d\theta)]*D1N1*D2N2:
+                    F2=RRI*URI*AN1*A12     !prefactor containing r(\theta)*[dr/(d\theta)]
+                                           !hat{theta} part
+
+
+                    AR12=AR12+F1*B2R+F2*B3R        !~Re J^{12}
+                    AI12=AI12+F1*B2I+F2*B3I        !~Im J^{12}
+
+                    GR12=GR12+F1*C2R+F2*C3R        !~Re Rg J^{12}
+                    GI12=GI12+F1*C2I+F2*C3I        !~Im Rg J^{12}
+
+!*  N2*(N2+1)*w(i)*r(\theta)*[dr/(d\theta)]*D2N1*D1N2:
+                    F2=RRI*URI*AN2*A21     !prefactor containing r(\theta)*[dr/(d\theta)]
+                                           !hat{theta} part
+
+                    AR21=AR21+F1*B4R+F2*B5R        !~Re J^{21}
+                    AI21=AI21+F1*B4I+F2*B5I        !~Im J^{21}
+
+                    GR21=GR21+F1*C4R+F2*C5R        !~Re Rg J^{21}
+                    GI21=GI21+F1*C4I+F2*C5I        !~Im Rg J^{21}
+                end do               !end of Gauss integration
+
+c                write(nout+3,*)'N1=',N1,'   N2=',N2
+c                write(nout+3,*)'AR12=', AR12
+c                write(nout+3,*)'AI12=', AI12
+c                write(nout+3,*)'AR21=', AR21
+c                write(nout+3,*)'AI21=', AI21
+c                write(nout+3,*)'GR12=', GR12
+c                write(nout+3,*)'GI12=', GI12
+c                write(nout+3,*)'GR21=', GR21
+c                write(nout+3,*)'GI21=', GI21
+!%%%%%%%%%%%%%  Forming J-matrices (J^{11}=J^{22}=0 for m=0):
+
+  205           AN12=ANN(N1,N2)*FACTOR
+
+                R12(N1,N2)=AR12*AN12
+                R21(N1,N2)=AR21*AN12
+                I12(N1,N2)=AI12*AN12
+                I21(N1,N2)=AI21*AN12
+
+                RG12(N1,N2)=GR12*AN12
+                RG21(N1,N2)=GR21*AN12
+                IG12(N1,N2)=GI12*AN12
+                IG21(N1,N2)=GI21*AN12
+          end do
+      end do            !end of the loop over angular momenta
+
+c      close(nout+3)
+!%%%%%%%%%%%%%%%%%%%%%%%  Forming Q and RgQ -matrices
+
+      TPIR=PIR                 !Re [1/k_{in}^2]
+      TPII=PII                 !Im [1/k_{in}^2]
+      TPPI=PPI                 !1/k_{out}^2
+
+      NM=NMAX
+
+      DO N1=MM1,NMAX
+           K1=N1-MM1+1
+           KK1=K1+NM
+           DO N2=MM1,NMAX
+                K2=N2-MM1+1
+                KK2=K2+NM
+
+                TAR12= I12(N1,N2)
+                TAI12=-R12(N1,N2)
+                TGR12= IG12(N1,N2)
+                TGI12=-RG12(N1,N2)
+
+                TAR21=-I21(N1,N2)
+                TAI21= R21(N1,N2)
+                TGR21=-IG21(N1,N2)
+                TGI21= RG21(N1,N2)
+
+                TQR(K1,K2)=TPIR*TAR21-TPII*TAI21+TPPI*TAR12
+                TQI(K1,K2)=TPIR*TAI21+TPII*TAR21+TPPI*TAI12
+                TRGQR(K1,K2)=TPIR*TGR21-TPII*TGI21+TPPI*TGR12
+                TRGQI(K1,K2)=TPIR*TGI21+TPII*TGR21+TPPI*TGI12
+
+                TQR(K1,KK2)=0D0
+                TQI(K1,KK2)=0D0
+                TRGQR(K1,KK2)=0D0
+                TRGQI(K1,KK2)=0D0
+
+                TQR(KK1,K2)=0D0
+                TQI(KK1,K2)=0D0
+                TRGQR(KK1,K2)=0D0
+                TRGQI(KK1,K2)=0D0
+
+                TQR(KK1,KK2)=TPIR*TAR12-TPII*TAI12+TPPI*TAR21
+                TQI(KK1,KK2)=TPIR*TAI12+TPII*TAR12+TPPI*TAI21
+                TRGQR(KK1,KK2)=TPIR*TGR12-TPII*TGI12+TPPI*TGR21
+                TRGQI(KK1,KK2)=TPIR*TGI12+TPII*TGR12+TPPI*TGI21
+           end do
+      end do
+
+      NNMAX=2*NM
+      DO N1=1,NNMAX
+           DO N2=1,NNMAX
+                QR(N1,N2)=TQR(N1,N2)
+                QI(N1,N2)=TQI(N1,N2)
+                RGQR(N1,N2)=TRGQR(N1,N2)
+                RGQI(N1,N2)=TRGQI(N1,N2)
+           end do
+      end do
+!%%%%%%%%%%%%%%%%%%%%%%%  Forming resulting T-matrix
+!
+! Calculate the product Q^{-1} Rg Q
+!
+      CALL TT(NMAX)
+!
+      RETURN
+      END
+
+C**********************************************************************
+
 C**********************************************************************
  
       SUBROUTINE TMATR (M,NGAUSS,X,W,AN,ANN,S,SS,PPI,PIR,PII,R,DR,DDR,

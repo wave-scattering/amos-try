@@ -2058,8 +2058,14 @@ c 7334    FORMAT(' NMAX =', I3,'  DC2=',D8.2,'   DC1=',D8.2)
 !
 ! determine m=m'=0 elements of the T matrix
 !
+        if (mpar%yn_adaptive == 0) then
          CALL TMATR0 (NGAUSS,X,W,AN,ANN,PPI,PIR,PII,R,DR,
      &                 DDR,DRR,DRI,NMAX,NCHECK,NAXSM)
+         else
+         CALL TMATR0_adapt(NGAUSS,X,W,AN,ANN,PPI,PIR,PII,R,DR,
+     &                 DDR,DRR,DRI,NMAX,NCHECK,NAXSM)
+
+         endif
 !
          QEXT=0D0
          QSCA=0D0
@@ -2141,8 +2147,13 @@ cc         NGGG=2*NGAUSS
 !
 ! determine m=m'=0 elements of the T matrix
 !
+         if (mpar%yn_adaptive == 0) then
          CALL TMATR0 (NGAUSS,X,W,AN,ANN,PPI,PIR,PII,R,DR,
      &                 DDR,DRR,DRI,NMAX,NCHECK,NAXSM)
+         else
+         CALL TMATR0_adapt(NGAUSS,X,W,AN,ANN,PPI,PIR,PII,R,DR,
+     &                 DDR,DRR,DRI,NMAX,NCHECK,NAXSM)
+         endif
 !
          QEXT=0D0
          QSCA=0D0
@@ -2196,9 +2207,14 @@ c 7337    FORMAT(' NG=',I3,'  DC2=',D8.2,'   DC1=',D8.2)
 !
 ! determine m=m'=0 elements of the T matrix
 !
+
+        if (mpar%yn_adaptive == 0) then
          CALL TMATR0 (NGAUSS,X,W,AN,ANN,PPI,PIR,PII,R,DR,
      &                 DDR,DRR,DRI,NMAX,NCHECK,NAXSM)
-!
+         else
+         CALL TMATR0_adapt(NGAUSS,X,W,AN,ANN,PPI,PIR,PII,R,DR,
+     &                 DDR,DRR,DRI,NMAX,NCHECK,NAXSM)
+         endif
 !<<<
 !
       END IF                     !YNCHECK
