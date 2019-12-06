@@ -1638,121 +1638,16 @@ subroutine tmatr0_adapt(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
                 integrand%n1 = n1
                 integrand%n2 = n2
                 integrand%nmax = nmax ! used only for bessel evaluation
-!                call integrate(ar12_m0_integrand, 0.0_dp, 1.0_dp, ar12)
-!                do i = 1, ngss    !=ngauss   if ncheck.eq.1
-!                    val = ar12_m0_integrand(x(i))
-!                    ar12=ar12+w(i)*(val(1))        !~re j^{12}
-!                end do               !end of gauss integration
-!                if (n1 == 5 .and. n2 == 1) then
-!                    call integrate(f03, -0.0_dp, 1.0_dp, AR12)
-!                    write ( *, '(a,g14.6)' ) '  From Gauss: ----------->     ', ar12
-!                    write(*,*)"From quadpack p: "
-!                    call integrate_p(ar12_m0_integrand, 0.0_dp, 1.0_dp, ar12)
-!                write(*,*)"From quadpack: "
-!                call integrate(ar12_m0_integrand, 0.0_dp, 1.0_dp, ar12)
-!                end if
 
-                !
                 ! gauss integration loop (other vars):
                 !
                 do i = 1, ngss    !=ngauss   if ncheck.eq.1
-                    !                                  !=2*ngauss if ncheck.eq.0
-!                    n1 = integrand%n1
-!                    n2 = integrand%n2
-                    an1 = dble(n1*(n1+1))
-                    an2 = dble(n2*(n2+1))
-                    if (mpar%np.ne.-2) stop 'adaptive integration is only implemented for cylinder'
-                    xi=x(i)
-                    x_to_rsp(1) = xi
-                    call rsp_cylinder(x_to_rsp, r_from_x, dr_from_x)
-                    call vig_1v ( xi, n1, 0, d1n1, d2n1)
-                    call vig_1v ( xi, n2, 0, d1n2, d2n2)
-
-                    a12 = d1n1 * d2n2
-                    a21 = d2n1 * d1n2
-                    a22 = d2n1 * d2n2
-                    !                    aa1=a12+a21
-                    ! vector spherical harmonics:
-                    !  since refractive index is allowed to be complex in general,
-                    !  the bessel function j_l(k_in*r) is complex. the code below
-                    !  performs a separation of the complex integrand in waterman's
-                    !  surface integral into its respective real and imaginary
-                    !  parts:
-                    ! bessel functions of the exterior argument:
-                    call cbessjdj(r_from_x(1),n1, qj1, qdj1)
-                    call cbessydy(r_from_x(1),n1, qy1, qdy1)
-                    ! bessel functions of the interior argument:
-                    call cbesscjcdj(r_from_x(1),n2, integrand%nmax, qjr2, qji2, qdjr2, qdji2)
-                    ! re and im of j_{n2}(k_{in}r) j_{n1}(k_{out}r):
-                    !_____________________
-                    ! re and im of j_{n2}(k_{in}r) j_{n1}(k_{out}r):
-
-                    c1r = qjr2 * qj1
-                    c1i = qji2 * qj1
-                    ! re and im of j_{n2}(k_{in}r) h_{n1}(k_{out}r):
-
-                    b1r = c1r - qji2 * qy1
-                    b1i = c1i + qjr2 * qy1
-                    ! re and im of j_{n2}(k_{in}r) [k_{out}r j_{n1}(k_{out}r)]'/(k_{out}r):
-
-                    c2r = qjr2 * qdj1
-                    c2i = qji2 * qdj1
-                    ! re and im of j_{n2}(k_{in}r) [k_{out}r h_{n1}(k_{out}r)]'/(k_{out}r):
-
-                    b2r = c2r - qji2 * qdy1
-                    b2i = c2i + qjr2 * qdy1
-
-                    ddri=1.0_dp/(dsqrt(r_from_x(1))*cbess%wv) !1/(k_{out}r)
-                    ! re and im of [1/(k_{out}r)]*j_{n2}(k_{in}r) j_{n1}(k_{out}r)
-
-                    c3r = ddri * c1r
-                    c3i = ddri * c1i
-                    ! re and im of [1/(k_{out}r)]*j_{n2}(k_{in}r) h_{n1}(k_{out}r):
-
-                    b3r = ddri * b1r
-                    b3i = ddri * b1i
-                    ! re and im of  [k_{in}r j_{n2}(k_{in}r)]'/(k_{in}r)
-                    !                          * j_{n1}(k_{out}r):
-
-                    c4r = qdjr2 * qj1
-                    c4i = qdji2 * qj1
-                    ! re and im of [k_{in}r j_{n2}(k_{in}r)]'/(k_{in}r)
-                    !                          *  h_{n1}(k_{out}r):
-
-                    b4r = c4r - qdji2 * qy1
-                    b4i = c4i + qdjr2 * qy1
-
-                    v = 1.0_dp / (cbess%mrr**2 + cbess%mri**2)
-                    drri = cbess%mrr * v * ddri               !re[1/(k_{in}r)]
-                    drii = -cbess%mri * v * ddri               !im[1/(k_{in}r)]
-                    ! re and im of [1/(k_{in}r)] j_{n2}(k_{in}r) j_{n1}(k_{out}r):
-
-                    c5r = c1r * drri - c1i * drii
-                    c5i = c1i * drri + c1r * drii
-                    ! re and im of [1/(k_{in}r)] j_{n2}(k_{in}r) h_{n1}(k_{out}r):
-
-                    b5r = b1r * drri - b1i * drii
-                    b5i = b1i * drri + b1r * drii
-                    !%%%%%%%  forming integrands of j-matrices (j^{11}=j^{22}=0 for m=0): %%%%%%%%
-
-                    uri = -dr_from_x(1)        !dr/(d\theta)
-!                    rri = rr(i)        !w(i)*r^2(\theta)
-                    ! w(i)*r^2(\theta)*d2n1*d2n2:
-                    f1 = w(i) * r_from_x(1)* a22      !prefactor containing r^2(\theta)<->hat{r} part
-                    ! n1*(n1+1)*w(i)*r(\theta)*[dr/(d\theta)]*d1n1*d2n2:
-                    f2 = w(i) * r_from_x(1) * uri * an1 * a12     !prefactor containing r(\theta)*[dr/(d\theta)]
-                    !                                          !hat{theta} part
-
-
+                    !             !=2*ngauss if ncheck.eq.0
                     ar12 = ar12 + w(i)*m0_ar12(x(i))         !~re j^{12}
                     ai12 = ai12 + w(i)*m0_ai12(x(i))        !~im j^{12}
 
                     gr12 = gr12 + w(i)*m0_gr12(x(i))        !~re rg j^{12}
                     gi12 = gi12 + w(i)*m0_gi12(x(i))        !~im rg j^{12}
-
-                    !*  n2*(n2+1)*w(i)*r(\theta)*[dr/(d\theta)]*d2n1*d1n2:
-                    f2 = w(i) * r_from_x(1) * uri * an2 * a21     !prefactor containing r(\theta)*[dr/(d\theta)]
-                    !                                          !hat{theta} part
 
                     ar21 = ar21 + w(i)*m0_ar21(x(i))        !~re j^{21}
                     ai21 = ai21 + w(i)*m0_ai21(x(i))        !~im j^{21}
@@ -1760,6 +1655,14 @@ subroutine tmatr0_adapt(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
                     gr21 = gr21 + w(i)*m0_gr21(x(i))       !~re rg j^{21}
                     gi21 = gi21 + w(i)*m0_gi21(x(i))        !~im rg j^{21}
                 end do               !end of gauss integration
+!                call integrate(m0_ar12, 0.0_dp, 1.0_dp, ar12)
+!                call integrate(m0_ai12, 0.0_dp, 1.0_dp, ai12)
+!                call integrate(m0_gr12, 0.0_dp, 1.0_dp, gr12)
+!                call integrate(m0_gi12, 0.0_dp, 1.0_dp, gi12)
+!                call integrate(m0_ar21, 0.0_dp, 1.0_dp, ar21)
+!                call integrate(m0_ai21, 0.0_dp, 1.0_dp, ai21)
+!                call integrate(m0_gr21, 0.0_dp, 1.0_dp, gr21)
+!                call integrate(m0_gi21, 0.0_dp, 1.0_dp, gi21)
 
                 !                write(nout+3,*)'n1=',n1,'   n2=',n2
                 !                write(nout+3,*)'ar12=', ar12

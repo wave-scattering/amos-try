@@ -113,7 +113,7 @@ contains
         real ( kind = 8 ) :: a,b
         real ( kind = 8 ) abserr
         real ( kind = 8 ), parameter :: epsabs = 0.0D+00
-        real ( kind = 8 ), parameter :: epsrel = 1.0D-1
+        real ( kind = 8 ), parameter :: epsrel = 1.0D-2
         real ( kind = 8 ), external :: fun
         integer ( kind = 4 ) ier
         integer ( kind = 4 ) iwork(limit)
