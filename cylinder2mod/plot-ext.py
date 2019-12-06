@@ -27,8 +27,11 @@ x_max = float(config['beam']['x_max'])
 rl_min = float(config['cylinder']['rl_min'])
 rl_max = float(config['cylinder']['rl_max'])
 plt.figure()
-spectra = data[7,:]
+spectra = data[0,:]
+# spectra = data[7,:]
 spectra_x = np.linspace(x_min, x_max, len(spectra))
+plt.plot(spectra_x, spectra)
+spectra = data[-1,:]
 plt.plot(spectra_x, spectra)
 # plt.title(f'$r/L = ${rl_max}')
 plt.tight_layout()

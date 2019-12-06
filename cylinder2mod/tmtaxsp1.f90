@@ -94,7 +94,7 @@ subroutine tmtaxsp(nmax, rap, zeps1, tmt)
     integer ndgs, ngauss, n, nm, np, n1, n2, m, l1, l2, lmtot, k1, k2, kk1, kk2
     integer nmax, ncheck, inm1, ixxx, ja, jam, jb, jbm
     real(dp) rev, eps, ht, a, alpha, beta, ddelt, dn1
-    real(dp) p, pir, pii, ppr, ppi, qext, qsca, rat, rap, rsnm
+    real(dp) p, pir, pii, ppi, qext, qsca, rat, rap, rsnm
     real(dp) tr1nn, ti1nn, tr1nn1, ti1nn1, xev
     real(dp)  lam, mrr, mri, x(npng2), w(npng2), s(npng2), ss(npng2), &
             an(npn1), r(npng2), dr(npng2), &
@@ -949,7 +949,7 @@ subroutine rsp_spheroid (x, ng, ngauss, rev, eps, r, dr)
     use libcylinder
     implicit none
     integer ng, ngauss, i
-    real(dp) rev, eps, ep, a, aa, c, cc, ee, ee1, rr
+    real(dp) rev, eps, a, aa, c, cc, ee, ee1, rr
     real(dp) s, ss
     real(dp) x(ng), r(ng), dr(ng)
 
@@ -1506,10 +1506,11 @@ subroutine tmatr0_adapt(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
             d1n2, d2n1, d2n2, dd1, dd2, ddri, drii, drri, f1, f2, &
             factor, gi12, gi21, gr12, gr21, &
             qdj1, qdji2, qdjr2, qdy1, qj1, &
-            qji2, qjr2, qy1, rri, si, tai12, tai21, &
+            qji2, qjr2, qy1, si, tai12, tai21, &
             tar12, tar21, tgi12, tgi21, &
             tgr12, tgr21, tppi, tpii, tpir, uri, &
-            x_to_rsp(1), r_from_x(1), dr_from_x(1)
+            x_to_rsp(1), r_from_x(1), dr_from_x(1), xi, &
+            v
     real(dp)  x(npng2), w(npng2), an(npn1), &
             r(npng2), dr(npng2), sig(npn2), &
             ddr(npng2), drr(npng2), &
@@ -1637,31 +1638,36 @@ subroutine tmatr0_adapt(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
                 integrand%n1 = n1
                 integrand%n2 = n2
                 integrand%nmax = nmax ! used only for bessel evaluation
-                do i = 1, ngss    !=ngauss   if ncheck.eq.1
-                    ar12=ar12+w(i)*ar12_m0_integrand(x(i))        !~re j^{12}
-                    if (n1 == 5 .and. n2 == 1) then
-                        write(*,*) x(i), ar12_m0_integrand(X(I))
-                    endif
-                end do               !end of gauss integration
-                if (n1 == 5 .and. n2 == 1) then
+!                call integrate(ar12_m0_integrand, 0.0_dp, 1.0_dp, ar12)
+!                do i = 1, ngss    !=ngauss   if ncheck.eq.1
+!                    val = ar12_m0_integrand(x(i))
+!                    ar12=ar12+w(i)*(val(1))        !~re j^{12}
+!                end do               !end of gauss integration
+!                if (n1 == 5 .and. n2 == 1) then
 !                    call integrate(f03, -0.0_dp, 1.0_dp, AR12)
-                    write ( *, '(a,g14.6)' ) '  From Gauss: ----------->     ', ar12
-                    write(*,*)"From quadpack p: "
-                    call integrate_p(ar12_m0_integrand, 0.0_dp, 1.0_dp, ar12)
-                    write(*,*)"From quadpack: "
-                    call integrate(ar12_m0_integrand, 0.0_dp, 1.0_dp, ar12)
-                end if
+!                    write ( *, '(a,g14.6)' ) '  From Gauss: ----------->     ', ar12
+!                    write(*,*)"From quadpack p: "
+!                    call integrate_p(ar12_m0_integrand, 0.0_dp, 1.0_dp, ar12)
+!                write(*,*)"From quadpack: "
+!                call integrate(ar12_m0_integrand, 0.0_dp, 1.0_dp, ar12)
+!                end if
 
                 !
                 ! gauss integration loop (other vars):
                 !
                 do i = 1, ngss    !=ngauss   if ncheck.eq.1
                     !                                  !=2*ngauss if ncheck.eq.0
+!                    n1 = integrand%n1
+!                    n2 = integrand%n2
+                    an1 = dble(n1*(n1+1))
+                    an2 = dble(n2*(n2+1))
+                    if (mpar%np.ne.-2) stop 'adaptive integration is only implemented for cylinder'
+                    xi=x(i)
+                    x_to_rsp(1) = xi
+                    call rsp_cylinder(x_to_rsp, r_from_x, dr_from_x)
+                    call vig_1v ( xi, n1, 0, d1n1, d2n1)
+                    call vig_1v ( xi, n2, 0, d1n2, d2n2)
 
-                    d1n1 = d1(i, n1)
-                    d2n1 = d2(i, n1)
-                    d1n2 = d1(i, n2)
-                    d2n2 = d2(i, n2)
                     a12 = d1n1 * d2n2
                     a21 = d2n1 * d1n2
                     a22 = d2n1 * d2n2
@@ -1673,17 +1679,11 @@ subroutine tmatr0_adapt(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
                     !  surface integral into its respective real and imaginary
                     !  parts:
                     ! bessel functions of the exterior argument:
-
-                    qj1 = cbess%j(i, n1)
-                    qy1 = cbess%y(i, n1)
-                    qdj1 = cbess%dj(i, n1)
-                    qdy1 = cbess%dy(i, n1)
+                    call cbessjdj(r_from_x(1),n1, qj1, qdj1)
+                    call cbessydy(r_from_x(1),n1, qy1, qdy1)
                     ! bessel functions of the interior argument:
-
-                    qjr2 = cbess%jr(i, n2)
-                    qji2 = cbess%ji(i, n2)
-                    qdjr2 = cbess%djr(i, n2)
-                    qdji2 = cbess%dji(i, n2)
+                    call cbesscjcdj(r_from_x(1),n2, integrand%nmax, qjr2, qji2, qdjr2, qdji2)
+                    ! re and im of j_{n2}(k_{in}r) j_{n1}(k_{out}r):
                     !_____________________
                     ! re and im of j_{n2}(k_{in}r) j_{n1}(k_{out}r):
 
@@ -1702,7 +1702,7 @@ subroutine tmatr0_adapt(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
                     b2r = c2r - qji2 * qdy1
                     b2i = c2i + qjr2 * qdy1
 
-                    ddri = ddr(i)               !1/(k_{out}r)
+                    ddri=1.0_dp/(dsqrt(r_from_x(1))*cbess%wv) !1/(k_{out}r)
                     ! re and im of [1/(k_{out}r)]*j_{n2}(k_{in}r) j_{n1}(k_{out}r)
 
                     c3r = ddri * c1r
@@ -1722,8 +1722,9 @@ subroutine tmatr0_adapt(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
                     b4r = c4r - qdji2 * qy1
                     b4i = c4i + qdjr2 * qy1
 
-                    drri = drr(i)               !re[1/(k_{in}r)]
-                    drii = dri(i)               !im[1/(k_{in}r)]
+                    v = 1.0_dp / (cbess%mrr**2 + cbess%mri**2)
+                    drri = cbess%mrr * v * ddri               !re[1/(k_{in}r)]
+                    drii = -cbess%mri * v * ddri               !im[1/(k_{in}r)]
                     ! re and im of [1/(k_{in}r)] j_{n2}(k_{in}r) j_{n1}(k_{out}r):
 
                     c5r = c1r * drri - c1i * drii
@@ -1734,30 +1735,30 @@ subroutine tmatr0_adapt(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
                     b5i = b1i * drri + b1r * drii
                     !%%%%%%%  forming integrands of j-matrices (j^{11}=j^{22}=0 for m=0): %%%%%%%%
 
-                    uri = dr(i)        !dr/(d\theta)
-                    rri = rr(i)        !w(i)*r^2(\theta)
+                    uri = -dr_from_x(1)        !dr/(d\theta)
+!                    rri = rr(i)        !w(i)*r^2(\theta)
                     ! w(i)*r^2(\theta)*d2n1*d2n2:
-                    f1 = rri * a22      !prefactor containing r^2(\theta)<->hat{r} part
+                    f1 = w(i) * r_from_x(1)* a22      !prefactor containing r^2(\theta)<->hat{r} part
                     ! n1*(n1+1)*w(i)*r(\theta)*[dr/(d\theta)]*d1n1*d2n2:
-                    f2 = rri * uri * an1 * a12     !prefactor containing r(\theta)*[dr/(d\theta)]
+                    f2 = w(i) * r_from_x(1) * uri * an1 * a12     !prefactor containing r(\theta)*[dr/(d\theta)]
                     !                                          !hat{theta} part
 
 
-                    !                   ar12=ar12+f1*b2r+f2*b3r        !~re j^{12}
-                    ai12 = ai12 + f1 * b2i + f2 * b3i        !~im j^{12}
+                    ar12 = ar12 + w(i)*m0_ar12(x(i))         !~re j^{12}
+                    ai12 = ai12 + w(i)*m0_ai12(x(i))        !~im j^{12}
 
-                    gr12 = gr12 + f1 * c2r + f2 * c3r        !~re rg j^{12}
-                    gi12 = gi12 + f1 * c2i + f2 * c3i        !~im rg j^{12}
+                    gr12 = gr12 + w(i)*m0_gr12(x(i))        !~re rg j^{12}
+                    gi12 = gi12 + w(i)*m0_gi12(x(i))        !~im rg j^{12}
 
                     !*  n2*(n2+1)*w(i)*r(\theta)*[dr/(d\theta)]*d2n1*d1n2:
-                    f2 = rri * uri * an2 * a21     !prefactor containing r(\theta)*[dr/(d\theta)]
+                    f2 = w(i) * r_from_x(1) * uri * an2 * a21     !prefactor containing r(\theta)*[dr/(d\theta)]
                     !                                          !hat{theta} part
 
-                    ar21 = ar21 + f1 * b4r + f2 * b5r        !~re j^{21}
-                    ai21 = ai21 + f1 * b4i + f2 * b5i        !~im j^{21}
+                    ar21 = ar21 + w(i)*m0_ar21(x(i))        !~re j^{21}
+                    ai21 = ai21 + w(i)*m0_ai21(x(i))        !~im j^{21}
 
-                    gr21 = gr21 + f1 * c4r + f2 * c5r        !~re rg j^{21}
-                    gi21 = gi21 + f1 * c4i + f2 * c5i        !~im rg j^{21}
+                    gr21 = gr21 + w(i)*m0_gr21(x(i))       !~re rg j^{21}
+                    gi21 = gi21 + w(i)*m0_gi21(x(i))        !~im rg j^{21}
                 end do               !end of gauss integration
 
                 !                write(nout+3,*)'n1=',n1,'   n2=',n2
