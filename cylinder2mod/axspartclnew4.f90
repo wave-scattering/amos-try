@@ -2248,9 +2248,16 @@ contains
             !
             !         call tmatr(m,ngauss,x,w,an,ann,s,ss,ppi,pir,pii,r,dr,
             !     &               ddr,drr,dri,nmax,ncheck,naxsm)
+            if (mpar%yn_adaptive == 0) then
+                call tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, &
+                        ddr, drr, dri, nmax, ncheck, naxsm)
+            else
+                call tmatr_adapt(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, &
+                        ddr, drr, dri, nmax, ncheck, naxsm)
+            endif
 
-            call tmtr(m, ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, drr, &
-                    dri, nmax, ncheck, naxsm)
+!            call tmtr(m, ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, drr, &
+!                    dri, nmax, ncheck, naxsm)
             !
             ! <<< returns  m=m'>0 elements of the t matrix
             !

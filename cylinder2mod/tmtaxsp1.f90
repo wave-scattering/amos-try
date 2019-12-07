@@ -288,8 +288,13 @@ subroutine tmtaxsp(nmax, rap, zeps1, tmt)
 
     do m = 1, nmax
         !
-        call tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, &
-                ddr, drr, dri, nmax, ncheck, naxsm)
+        if (mpar%yn_adaptive == 0) then
+            call tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, &
+                    ddr, drr, dri, nmax, ncheck, naxsm)
+        else
+            call tmatr_adapt(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, &
+                    ddr, drr, dri, nmax, ncheck, naxsm)
+        endif
         !
         ! <<< returns  m=m'>0 elements of the t matrix
         !
@@ -2133,6 +2138,466 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
     return
 end
 
+!**********************************************************************
+
+subroutine tmatr_adapt (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
+        drr, dri, nmax, ncheck, naxsm)
+    !--------/---------/---------/---------/---------/---------/---------/--
+    ! >>> ngauss,x,w,an,ann,s,ss,ppi,pir,pii,r,dr,ddr,drr,dri,nmax,ncheck
+    ! <<< common blocks /tmat99/, /ct/ (for main),  and /ctt/ (for tt)
+    !=====================
+    !
+    !  determines the t-matrix of an axially symmetric scatterer
+    !                           for m.gt.0
+    !
+    !  m      - azimuthal number
+    !  ngauss - the number of gif division points
+    !  x=\cos\theta  - gif division points
+    !  w - gif weights
+    !  an(n)=n*(n+1)
+    !  ann(l_1,l_2)=\sqrt{\fr{(2 l_1+1)}{l_1(l_1+1)} }
+    !                       \sqrt{\fr{(2 l_2+1)}{l_2(l_2+1)} }/2
+    !  nmax - angular momentum cutoff
+    !  ncheck  -  .eq.0  then  ngss=2*ngauss, factor=1d0
+    !             .eq.1  then  ngss = ngauss, factor=2d0
+    !  naxsm   -  .eq.0 : gauss abscissas do not have +/- theta symmetry
+    !             .eq.1 : gauss abscissas have +/- theta symmetry
+    !  ncheck - specifies whether ng=2*ngauss or otherwise
+    !  p=dacos(-1d0)
+    !  pi=p*2d0/lam - wave vector
+    !  ppi=pi*pi
+    !  pir=ppi*mrr
+    !  pii=ppi*mri
+    !  r=r^2(\theta)                       for axially symmetric particles
+    !  dr=[dr(\theta)/(d\theta)]/r(\theta) for axially symmetric particles
+    !  ddr=\lambda/[2*\pi*r(\theta)]=1/(k_out*r)
+    !  drr=(mrr/(mrr**2+mri**2))*(\lambda/[2*\pi*r(\theta)])
+    !                  = re 1/(k_in*r)
+    !  dri=-(mri/(mrr**2+mri**2))*(\lambda/[2*\pi*r(\theta)])
+    !                  = im 1/(k_in*r)
+    !  refractive index outside is assumed to real, whereas inside
+    !  a scatterer, refractive index is allowed to be complex in general.
+    !  consequently, the bessel function j_l(k_in*r) will in general
+    !  be complex. the routine below performs waterman surface integral
+    !  separately for the real and imaginary parts of the integrand.
+    !
+    !--------/---------/---------/---------/---------/---------/---------/--
+    use libcylinder
+    !include 'ampld.par.f'
+    implicit none
+    integer m, ngauss, nmax, ncheck, naxsm
+    integer n, ng, ngss, nm, nnmax, &
+            n1, n2, i, i1, i2, &
+            k1, k2, kk1, kk2, mm1
+    real(dp) ppi, pir, pii
+    real(dp) a11, a12, a21, a22, aa1, aa2, &
+            ar11, ar12, ar21, ar22, &
+            ai11, ai12, ai21, ai22, &
+            an1, an2, an12, &
+            b1r, b1i, b2r, b2i, b3r, b3i, &
+            b4r, b4i, b5r, b5i, b6r, b6i, &
+            b7r, b7i, b8r, b8i, &
+            c1r, c1i, c2r, c2i, c3r, c3i, &
+            c4r, c4i, c5r, c5i, c6r, c6i, &
+            c7r, c7i, c8r, c8i, &
+            d1n1, d1n2, d2n1, d2n2, &
+            dd1, dd2, ddri, drii, drri, &
+            dsi, e1, e2, e3, f1, f2, &
+            factor, &
+            gr11, gr12, gr21, gr22, &
+            gi11, gi12, gi21, gi22, &
+            qdj1, qdjr2, qdji2, qdy1, &
+            qj1, qjr2, qji2, qm, qmm, &
+            qy1, rri, si, &
+            tar11, tar12, tar21, tar22, &
+            tai11, tai12, tai21, tai22, &
+            tgr11, tgr12, tgr21, tgr22, &
+            tgi11, tgi12, tgi21, tgi22, &
+            tpir, tpii, tppi, uri, wr, &
+            x_to_rsp(1), r_from_x(1), dr_from_x(1), xi, &
+            v
+
+
+    real(dp)  x(npng2), w(npng2), an(npn1), s(npng2), ss(npng2), &
+            r(npng2), dr(npng2), sig(npn2), &
+            ddr(npng2), drr(npng2), &
+            d1(npng2, npn1), d2(npng2, npn1), &
+            dri(npng2), ds(npng2), dss(npng2), rr(npng2), &
+            dv1(npn1), dv2(npn1)
+
+    real(dp)  r11(npn1, npn1), r12(npn1, npn1), &
+            r21(npn1, npn1), r22(npn1, npn1), &
+            i11(npn1, npn1), i12(npn1, npn1), &
+            i21(npn1, npn1), i22(npn1, npn1), &
+            rg11(npn1, npn1), rg12(npn1, npn1), &
+            rg21(npn1, npn1), rg22(npn1, npn1), &
+            ig11(npn1, npn1), ig12(npn1, npn1), &
+            ig21(npn1, npn1), ig22(npn1, npn1), &
+            ann(npn1, npn1), &
+            qr(npn2, npn2), qi(npn2, npn2), &
+            rgqr(npn2, npn2), rgqi(npn2, npn2), &
+            tqr(npn2, npn2), tqi(npn2, npn2), &
+            trgqr(npn2, npn2), trgqi(npn2, npn2)
+    !c      real(dp) tr1(npn2,npn2),ti1(npn2,npn2)
+    !________
+    common /tmat99/&
+            r11, r12, r21, r22, i11, i12, i21, i22, rg11, rg12, rg21, rg22, &
+            ig11, ig12, ig21, ig22          !only between tmatr routines
+    !c      common /ct/ tr1,ti1                      !output from tt routine
+    common /ctt/ qr, qi, rgqr, rgqi             !input for tt routine
+    !________
+    mm1 = m
+    qm = dble(m)
+    qmm = qm * qm
+    ng = 2 * ngauss
+    ngss = ng
+    factor = 1d0
+    !
+    if (ncheck==1) then          !theta=pi/2 is mirror symmetry plane
+        ngss = ngauss
+        factor = 2d0
+    endif
+    !
+    si = 1d0
+    nm = nmax + nmax
+
+    do n = 1, nm
+        si = -si
+        sig(n) = si              !=(-1)**n
+    end do
+    !
+    ! assigning wigner d-matrices - assuming mirror symmetry
+    ! in the \theta=\pi/2 plane:
+
+    do i = 1, ngauss
+
+        i1 = ngauss - i + 1
+        i2 = ngauss + i
+        !
+        call vig (x(i1), nmax, m, dv1, dv2)
+        !
+        do n = 1, nmax
+
+            dd1 = dv1(n)
+            dd2 = dv2(n)
+            d1(i1, n) = dd1
+            d2(i1, n) = dd2
+
+            if (naxsm==1) then         !gauss abscissas chosen +/- symmetric
+                ! using (4.2.4) and (4.2.6) of {ed},
+                !           d_{0m}^{(l)}(\pi-\theta) = (-1)^{l+m} d_{0m}^{(l)}(\theta)
+
+                si = sig(n + m)                  !=(-1)**(n+m)
+                !                                          !exactly what follows from {ed}
+                d1(i2, n) = dd1 * si
+                d2(i2, n) = -dd2 * si
+
+            end if
+        enddo
+        !
+        if (naxsm==0) then        !gauss abscissas not chosen +/- symmetric
+            !
+            call vig (x(i2), nmax, m, dv1, dv2)
+            !
+            do n = 1, nmax
+                dd1 = dv1(n)
+                dd2 = dv2(n)
+                d1(i2, n) = dd1
+                d2(i2, n) = dd2
+            enddo
+
+        end if
+
+    end do
+    !
+    !  assigning r^2(\theta)*weight product:
+
+    do i = 1, ngss
+        wr = w(i) * r(i)
+
+        !c           if (dr(i).eq.0.d0) wr=0.d0   !temporarily only
+
+        ds(i) = s(i) * qm * wr       !=dble(m)*w(i)*r^2(\theta)/(|\sin\theta|)
+        dss(i) = ss(i) * qmm       !=dble(m)**2/(\sin^2\theta)
+        rr(i) = wr
+    end do
+    !
+    do n1 = mm1, nmax
+        an1 = an(n1)
+
+        do n2 = mm1, nmax
+            an2 = an(n2)
+            ar11 = 0d0
+            ar12 = 0d0
+            ar21 = 0d0
+            ar22 = 0d0
+            ai11 = 0d0
+            ai12 = 0d0
+            ai21 = 0d0
+            ai22 = 0d0
+            gr11 = 0d0
+            gr12 = 0d0
+            gr21 = 0d0
+            gr22 = 0d0
+            gi11 = 0d0
+            gi12 = 0d0
+            gi21 = 0d0
+            gi22 = 0d0
+            si = sig(n1 + n2)
+
+            integrand%n1 = n1
+            integrand%n2 = n2
+            integrand%nmax = nmax ! used only for bessel evaluation
+
+            do i = 1, ngss
+!                n1 = integrand%n1
+!                n2 = integrand%n2
+                xi = x(i)
+                an1 = dble(n1*(n1+1))
+                an2 = dble(n2*(n2+1))
+                if (mpar%np.ne.-2) stop 'adaptive integration is only implemented for cylinder'
+                x_to_rsp(1) = xi
+                call rsp_cylinder(x_to_rsp, r_from_x, dr_from_x)
+                call vig_1v ( xi, n1, 0, d1n1, d2n1)
+                call vig_1v ( xi, n2, 0, d1n2, d2n2)
+                d1n1 = d1(i, n1)
+                d2n1 = d2(i, n1)
+                d1n2 = d1(i, n2)
+                d2n2 = d2(i, n2)
+                a11 = d1n1 * d1n2
+                a12 = d1n1 * d2n2
+                a21 = d2n1 * d1n2
+                a22 = d2n1 * d2n2
+                aa1 = a12 + a21            != d1n1*d2n2+d2n1*d1n2
+                aa2 = a11 * dss(i) + a22   !=(d1n1*d1n2)*dble(m)**2/(\sin^2\theta)
+                !                          ! +d2n1*d2n2
+                ! vector spherical harmonics:
+                !  since refractive index is allowed to be complex in general,
+                !  the bessel function j_l(k_in*r) is complex. the code below
+                !  performs a separation of the complex integrand in waterman's
+                !  surface integral into its respective real and imaginary
+                !  parts:
+
+                qj1 = cbess%j(i, n1)
+                qy1 = cbess%y(i, n1)
+                qjr2 = cbess%jr(i, n2)
+                qji2 = cbess%ji(i, n2)
+                qdjr2 = cbess%djr(i, n2)
+                qdji2 = cbess%dji(i, n2)
+                qdj1 = cbess%dj(i, n1)
+                qdy1 = cbess%dy(i, n1)
+                ! re and im of j_{n2}(k_{in}r) j_{n1}(k_{out}r):
+
+                c1r = qjr2 * qj1
+                c1i = qji2 * qj1
+                ! re and im of j_{n2}(k_{in}r) h_{n1}(k_{out}r):
+
+                b1r = c1r - qji2 * qy1
+                b1i = c1i + qjr2 * qy1
+                ! re and im of j_{n2}(k_{in}r) j_{n1}'(k_{out}r):
+
+                c2r = qjr2 * qdj1
+                c2i = qji2 * qdj1
+                ! re and im of j_{n2}(k_{in}r) h_{n1}'(k_{out}r):
+
+                b2r = c2r - qji2 * qdy1
+                b2i = c2i + qjr2 * qdy1
+
+                ddri = ddr(i)               !1/(k_{out}r)
+                ! re and im of [1/(k_{out}r)]*j_{n2}(k_{in}r) j_{n1}(k_{out}r)
+
+                c3r = ddri * c1r
+                c3i = ddri * c1i
+                ! re and im of [1/(k_{out}r)]*j_{n2}(k_{in}r) h_{n1}(k_{out}r):
+
+                b3r = ddri * b1r
+                b3i = ddri * b1i
+                ! re and im of j_{n2}'(k_{in}r) j_{n1}(k_{out}r):
+
+                c4r = qdjr2 * qj1
+                c4i = qdji2 * qj1
+                ! re and im of j_{n2}'(k_{in}r) h_{n1}(k_{out}r):
+
+                b4r = c4r - qdji2 * qy1
+                b4i = c4i + qdjr2 * qy1
+
+                drri = drr(i)               !re[1/(k_{in}r)]
+                drii = dri(i)               !im[1/(k_{in}r)]
+                ! re and im of [1/(k_{in}r)] j_{n2}(k_{in}r) j_{n1}(k_{out}r):
+
+                c5r = c1r * drri - c1i * drii
+                c5i = c1i * drri + c1r * drii
+                ! re and im of [1/(k_{in}r)] j_{n2}(k_{in}r) h_{n1}(k_{out}r):
+
+                b5r = b1r * drri - b1i * drii
+                b5i = b1i * drri + b1r * drii
+                ! re and im of j_{n2}'(k_{in}r) j_{n1}'(k_{out}r):
+
+                c6r = qdjr2 * qdj1
+                c6i = qdji2 * qdj1
+                ! re and im of j_{n2}'(k_{in}r) h_{n1}'(k_{out}r):
+
+                b6r = c6r - qdji2 * qdy1
+                b6i = c6i + qdjr2 * qdy1
+                ! re and im of [1/(k_{out}r)] j_{n2}'(k_{in}r) j_{n1}(k_{out}r):
+
+                c7r = c4r * ddri
+                c7i = c4i * ddri
+                ! re and im of [1/(k_{out}r)] j_{n2}'(k_{in}r) h_{n1}(k_{out}r):
+
+                b7r = b4r * ddri
+                b7i = b4i * ddri
+                ! re and im of [1/(k_{in}r)] j_{n2}(k_{in}r) j_{n1}'(k_{out}r):
+
+                c8r = c2r * drri - c2i * drii
+                c8i = c2i * drri + c2r * drii
+                ! re and im of [1/(k_{in}r)] j_{n2}(k_{in}r) h_{n1}'(k_{out}r):
+
+                b8r = b2r * drri - b2i * drii
+                b8i = b2i * drri + b2r * drii
+                ! %%%%%%%%%  forming integrands of j-matrices (j^{11}=j^{22}=0 for m=0):
+
+                uri = dr(i)
+                dsi = ds(i)
+                rri = rr(i)
+
+                if (ncheck==1.and.si>0d0) then
+                    ! w(i)*r^2(\theta)*[(d1n1*d1n2)*dble(m)**2/(\sin^2\theta)+d2n1*d2n2]:
+                    f1 = rri * aa2            !prefactor containing r^2(\theta)<->hat{r} part
+                    ! n1*(n1+1)*w(i)*r(\theta)*[dr/(d\theta)]*d1n1*d2n2:
+                    f2 = rri * uri * an1 * a12     !prefactor containing r(\theta)*[dr/(d\theta)]
+                    !                                          !hat{theta} part
+
+                    ar12 = ar12 + f1 * b2r + f2 * b3r        !~re j^{12}
+                    ai12 = ai12 + f1 * b2i + f2 * b3i        !~im j^{12}
+
+                    gr12 = gr12 + f1 * c2r + f2 * c3r        !~re rg j^{12}
+                    gi12 = gi12 + f1 * c2i + f2 * c3i        !~im rg j^{12}
+                    ! n2*(n2+1)*w(i)*r(\theta)*[dr/(d\theta)]*d2n1*d1n2:
+                    f2 = rri * uri * an2 * a21     !prefactor containing r(\theta)*[dr/(d\theta)]
+                    !                                          !hat{theta} part
+
+                    ar21 = ar21 + f1 * b4r + f2 * b5r
+                    ai21 = ai21 + f1 * b4i + f2 * b5i
+
+                    gr21 = gr21 + f1 * c4r + f2 * c5r
+                    gi21 = gi21 + f1 * c4i + f2 * c5i
+
+                    if (ncheck==1) cycle
+                else
+                    ! [dble(m)*w(i)*r^2(i)/(|\sin\theta|)]*(d1n1*d2n2+d2n1*d1n2):
+                    e1 = dsi * aa1
+
+                    ar11 = ar11 + e1 * b1r
+                    ai11 = ai11 + e1 * b1i
+                    gr11 = gr11 + e1 * c1r
+                    gi11 = gi11 + e1 * c1i
+                end if
+
+                e2 = dsi * uri * a11
+                e3 = e2 * an2
+                e2 = e2 * an1
+
+                ar22 = ar22 + e1 * b6r + e2 * b7r + e3 * b8r
+                ai22 = ai22 + e1 * b6i + e2 * b7i + e3 * b8i
+
+                gr22 = gr22 + e1 * c6r + e2 * c7r + e3 * c8r
+                gi22 = gi22 + e1 * c6i + e2 * c7i + e3 * c8i
+            end do
+
+            an12 = ann(n1, n2) * factor
+
+            r11(n1, n2) = ar11 * an12
+            r12(n1, n2) = ar12 * an12
+            r21(n1, n2) = ar21 * an12
+            r22(n1, n2) = ar22 * an12
+            i11(n1, n2) = ai11 * an12
+            i12(n1, n2) = ai12 * an12
+            i21(n1, n2) = ai21 * an12
+            i22(n1, n2) = ai22 * an12
+
+            rg11(n1, n2) = gr11 * an12
+            rg12(n1, n2) = gr12 * an12
+            rg21(n1, n2) = gr21 * an12
+            rg22(n1, n2) = gr22 * an12
+            ig11(n1, n2) = gi11 * an12
+            ig12(n1, n2) = gi12 * an12
+            ig21(n1, n2) = gi21 * an12
+            ig22(n1, n2) = gi22 * an12
+        end do
+    end do
+
+    tpir = pir                 !re [1/k_{in}^2]
+    tpii = pii                 !im [1/k_{in}^2]
+    tppi = ppi                 !1/k_{out}^2
+
+    nm = nmax - mm1 + 1
+    do n1 = mm1, nmax
+        k1 = n1 - mm1 + 1
+        kk1 = k1 + nm
+
+        do n2 = mm1, nmax
+            k2 = n2 - mm1 + 1
+            kk2 = k2 + nm
+
+            tar11 = -r11(n1, n2)
+            tai11 = -i11(n1, n2)
+            tgr11 = -rg11(n1, n2)
+            tgi11 = -ig11(n1, n2)
+
+            tar12 = i12(n1, n2)
+            tai12 = -r12(n1, n2)
+            tgr12 = ig12(n1, n2)
+            tgi12 = -rg12(n1, n2)
+
+            tar21 = -i21(n1, n2)
+            tai21 = r21(n1, n2)
+            tgr21 = -ig21(n1, n2)
+            tgi21 = rg21(n1, n2)
+
+            tar22 = -r22(n1, n2)
+            tai22 = -i22(n1, n2)
+            tgr22 = -rg22(n1, n2)
+            tgi22 = -ig22(n1, n2)
+
+            tqr(k1, k2) = tpir * tar21 - tpii * tai21 + tppi * tar12
+            tqi(k1, k2) = tpir * tai21 + tpii * tar21 + tppi * tai12
+            trgqr(k1, k2) = tpir * tgr21 - tpii * tgi21 + tppi * tgr12
+            trgqi(k1, k2) = tpir * tgi21 + tpii * tgr21 + tppi * tgi12
+
+            tqr(k1, kk2) = tpir * tar11 - tpii * tai11 + tppi * tar22
+            tqi(k1, kk2) = tpir * tai11 + tpii * tar11 + tppi * tai22
+            trgqr(k1, kk2) = tpir * tgr11 - tpii * tgi11 + tppi * tgr22
+            trgqi(k1, kk2) = tpir * tgi11 + tpii * tgr11 + tppi * tgi22
+
+            tqr(kk1, k2) = tpir * tar22 - tpii * tai22 + tppi * tar11
+            tqi(kk1, k2) = tpir * tai22 + tpii * tar22 + tppi * tai11
+            trgqr(kk1, k2) = tpir * tgr22 - tpii * tgi22 + tppi * tgr11
+            trgqi(kk1, k2) = tpir * tgi22 + tpii * tgr22 + tppi * tgi11
+
+            tqr(kk1, kk2) = tpir * tar12 - tpii * tai12 + tppi * tar21
+            tqi(kk1, kk2) = tpir * tai12 + tpii * tar12 + tppi * tai21
+            trgqr(kk1, kk2) = tpir * tgr12 - tpii * tgi12 + tppi * tgr21
+            trgqi(kk1, kk2) = tpir * tgi12 + tpii * tgr12 + tppi * tgi21
+        end do
+    end do
+
+    nnmax = 2 * nm
+    do n1 = 1, nnmax
+        do n2 = 1, nnmax
+            qr(n1, n2) = tqr(n1, n2)
+            qi(n1, n2) = tqi(n1, n2)
+            rgqr(n1, n2) = trgqr(n1, n2)
+            rgqi(n1, n2) = trgqi(n1, n2)
+        end do
+    end do
+
+    call tt(nm)
+    !
+    return
+end
+
+!**********************************************************************
 !**********************************************************************
 
 subroutine tmatr (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
