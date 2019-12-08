@@ -163,7 +163,7 @@ subroutine tmtaxsp(nmax, rap, zeps1, tmt)
     if (dabs(rat - 1d0)>1d-8.and.np==-1) call sarea (eps, rat)
     if (dabs(rat - 1d0)>1d-8.and.np>=0) call surfch(np, eps, rat)
     if (dabs(rat - 1d0)>1d-8.and.np==-2) call sareac (eps, rat)
-    !     ! todo make a correct evaluation of sareac for nanorod
+    ! todo make a correct evaluation of sareac for nanorod
     if (dabs(rat - 1d0)>1d-8.and.np==-9)&
             call sareananorod (eps, rat)
     if (np==-3) call drop (rat)
@@ -953,10 +953,13 @@ subroutine rsp_spheroid (x, ng, ngauss, rev, eps, r, dr)
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
     implicit none
-    integer ng, ngauss, i
-    real(dp) rev, eps, a, aa, c, cc, ee, ee1, rr
+    integer, intent(in) :: ng, ngauss
+    real(dp), intent(in) :: rev, eps, x(ng)
+    real(dp), intent(out) :: r(ng), dr(ng)
+
+    integer i
+    real(dp) a, aa, c, cc, ee, ee1, rr
     real(dp) s, ss
-    real(dp) x(ng), r(ng), dr(ng)
 
     a = rev * eps**(1d0 / 3d0)
     aa = a * a
@@ -1011,10 +1014,14 @@ subroutine rsp_chebyshev (x, ng, rev, eps, n, r, dr)
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
     implicit none
-    integer ng, i, n
-    real(dp) rev, eps, ep, a, r0, ri, xi
+    integer, intent(in) :: ng, n
+    real(dp), intent(in) :: rev, eps, x(ng)
+    real(dp), intent(out) :: r(ng), dr(ng)
+
+    integer i
+    real(dp) ep, a, r0, ri, xi
     real(dp) dn, dnp, dn4
-    real(dp) x(ng), r(ng), dr(ng)
+
     dnp = dble(n)
     dn = dnp * dnp
     dn4 = dn * 4d0
@@ -1040,7 +1047,7 @@ end
 
 subroutine rsp_nanorod (x, ng, ngauss, rev, eps, epse, r, dr)
     !--------/---------/---------/---------/---------/---------/---------/--
-    ! >>> x,ng,ngauss,rev,eps
+    ! >>> x,ng,ngauss,rev,eps,epse
     ! <<< r,dr
     !=========================
     !   activated for np=-9
@@ -1068,10 +1075,13 @@ subroutine rsp_nanorod (x, ng, ngauss, rev, eps, epse, r, dr)
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
     implicit none
-    integer ng, ngauss, i
-    real(dp) rev, eps, h, a, co, si, rad, rthet
-    real(dp) valdr, c2, s2, alpha, beta, he, hc, epse, epsc
-    real(dp) x(ng), r(ng), dr(ng)
+    integer, intent(in) :: ng, ngauss
+    real(dp), intent(in) :: rev, eps, epse, x(ng)
+    real(dp), intent(out) :: r(ng), dr(ng)
+
+    integer i
+    real(dp) h, a, co, si, rad, rthet
+    real(dp) valdr, c2, s2, alpha, beta, he, hc, epsc
 
     !rev = 2._dp
     !eps = 0.5_dp
@@ -1126,7 +1136,7 @@ end
 
 subroutine rsp_droplet (x, ng, rev, r, dr)
     !--------/---------/---------/---------/---------/---------/---------/--
-    ! >>> x,ng
+    ! >>> x,ng,rev
     ! <<< r,dr
     !=========================
     !   activated for np=-3
@@ -1148,10 +1158,14 @@ subroutine rsp_droplet (x, ng, rev, r, dr)
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
     implicit none
-    integer ng, n, nc, i
+    integer, intent(in) :: ng
+    real(dp), intent(in) :: rev, x(ng)
+    real(dp), intent(out) :: r(ng), dr(ng)
+
+    integer n, nc, i
     parameter (nc = 10)
-    real(dp) rev, dri, r0, ri, xi, xin
-    real(dp) x(ng), r(ng), dr(ng)
+    real(dp) dri, r0, ri, xi, xin
+
     r0 = rev * cdrop%r0v
     do i = 1, ng
         xi = dacos(x(i))
@@ -1213,9 +1227,12 @@ subroutine rsp_sphere_cut_top (x, ng, rev, eps, r, dr)
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
     implicit none
-    integer ng, i
-    real(dp) rev, eps, a, rad, co, cc, rthet, si, ss, theta0
-    real(dp) x(ng), r(ng), dr(ng)
+    integer, intent(in) :: ng
+    real(dp), intent(in) :: rev, eps, x(ng)
+    real(dp), intent(out) :: r(ng), dr(ng)
+
+    integer i
+    real(dp) a, rad, co, cc, rthet, si, ss, theta0
 
     if (eps>=2.d0 * rev) then
         write(6, *)'invalid parameters for a cut sphere!'
@@ -1296,10 +1313,12 @@ subroutine rsp_sphere_cut_bottom (x, ng, rev, eps, r, dr)
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
     implicit none
-    integer ng, i
-    real(dp) rev, eps, rad, rthet, a, &
-            co, cc, si, ss, theta0
-    real(dp) x(ng), r(ng), dr(ng)
+    integer, intent(in) :: ng
+    real(dp), intent(in) :: rev, eps, x(ng)
+    real(dp), intent(out) :: r(ng), dr(ng)
+
+    integer i
+    real(dp) rad, rthet, a, co, cc, si, ss, theta0
 
     if (eps>=2.d0 * rev) then
         write(6, *)'invalid parameters for a cut sphere!'
@@ -1417,10 +1436,12 @@ subroutine rsp_cone_up(x, ng, rev, ht, r, dr)
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
     implicit none
+    integer, intent(in) :: ng
+    real(dp), intent(in) :: rev, ht, x(ng)
+    real(dp), intent(out) :: r(ng), dr(ng)
 
-    integer :: i, ng
-    real(dp) :: ht, ma, co, si, cc, ss, rad, rev, theta0, rthet
-    real(dp) :: x(ng), r(ng), dr(ng)
+    integer :: i
+    real(dp) :: ma, co, si, cc, ss, rad, theta0, rthet
 
     if (ht<1e-8) stop 'ht should be more than zero'
     ma = dsqrt(ht**2 + rev**2)              !=the length of the cone slant

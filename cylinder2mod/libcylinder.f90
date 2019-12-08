@@ -479,11 +479,12 @@ contains
         ! <<< rat
         !=================
         implicit none
-        real(dp) :: rat, eps
-        !
+        real(dp), intent(in) :: eps
+        real(dp), intent(out) :: rat
+
         rat = (1.5d0 / eps)**(1d0 / 3d0)
         rat = rat / dsqrt((eps + 2d0) / (2d0 * eps))
-        !
+
         return
     end
     !=======================================================================
@@ -493,7 +494,8 @@ contains
         ! <<< rat
         !=================
         !--------/---------/---------/---------/---------/---------/---------/--
-        real(dp) :: rat, eps
+        real(dp), intent(in) :: eps
+        real(dp), intent(out) :: rat
         ! TODO: replace with computation of the nanorod surface
         rat = (1.5d0 / eps)**(1d0 / 3d0)
         rat = rat / dsqrt((eps + 2d0) / (2d0 * eps))
@@ -501,27 +503,26 @@ contains
         return
     end
     !=======================================================================
-    subroutine sarea (d, rat)
+    subroutine sarea (eps, rat)
         !--------/---------/---------/---------/---------/---------/---------/--
         ! >>> eps
         ! <<< rat
         !=================
         !--------/---------/---------/---------/---------/---------/---------/--
-        real(dp) :: e, d, rat, r
-        if (d < 1) then
-            e = dsqrt(1d0 - d * d)
-            r = 0.5d0 * (d**(2d0 / 3d0) + d**(-1d0 / 3d0) * dasin(e) / e)
-            r = dsqrt(r)
-            rat = 1d0 / r
-            return
+        real(dp), intent(in) :: eps
+        real(dp), intent(out) :: rat
+        real(dp) :: e, r
+
+        if (eps < 1) then
+            e = dsqrt(1d0 - eps * eps)
+            r = 0.5d0 * (eps**(2d0 / 3d0) + eps**(-1d0 / 3d0) * dasin(e) / e)
         else
-            e = dsqrt(1d0 - 1d0 / (d * d))
-            r = 0.25d0 * (2d0 * d**(2d0 / 3d0) &
-                    + d**(-4d0 / 3d0) * dlog((1d0 + e) / (1d0 - e)) / e)
-            r = dsqrt(r)
-            rat = 1d0 / r
-            !
+            e = dsqrt(1d0 - 1d0 / (eps * eps))
+            r = 0.25d0 * (2d0 * eps**(2d0 / 3d0) &
+                    + eps**(-4d0 / 3d0) * dlog((1d0 + e) / (1d0 - e)) / e)
         end if
+        r = dsqrt(r)
+        rat = 1d0 / r
         return
     end
     !=======================================================================
@@ -532,16 +533,19 @@ contains
         !=================
         !--------/---------/---------/---------/---------/---------/---------/--
         !        implicit real(dp) (a-h, o-z)
-        integer n, ng, i
-        real(dp) e, rat, dn, s, v, xi, dx, dxn, ds, dsn, dcn, a, a2, en, ens, rs, rv
+        integer, intent(in) :: n
+        real(dp), intent(in) :: e
+        real(dp), intent(inout) :: rat
+        integer ng, i
+        real(dp) dn, s, v, xi, dx, dxn, ds, dsn, dcn, a, a2, en, ens, rs, rv
         real(dp) x(60), w(60)
-        !
+
         dn = dble(n)
         en = e * dn
         ng = 60
-        !
+
         ! gif division points and weights
-        !
+
         call gauss (ng, 0, 0, x, w)
         !
         s = 0d0

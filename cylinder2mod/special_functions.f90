@@ -32,7 +32,7 @@ contains
         integer nmax, n
         !
         call reallocate_abess(nmax)
-        xx = dsqrt(x)*cbess%wv
+        xx = dsqrt(x) * cbess%wv
         xr = xx * cbess%mrr
         xi = xx * cbess%mri
         call cjb(xr, xi, abess%ajr, abess%aji, &
@@ -49,7 +49,7 @@ contains
         integer nmax
         !
         call reallocate_abess(nmax)
-        xx = dsqrt(x)*cbess%wv
+        xx = dsqrt(x) * cbess%wv
         call ryb(xx, abess%ay, abess%ady, nmax)
         y = abess%ay(nmax)
         dy = abess%ady(nmax)
@@ -61,7 +61,7 @@ contains
         integer nmax
         !
         call reallocate_abess(nmax)
-        xx = dsqrt(x)*cbess%wv
+        xx = dsqrt(x) * cbess%wv
         call rjb(xx, abess%aj, abess%adj, nmax, abess%nnmax1)
         j = abess%aj(nmax)
         dj = abess%adj(nmax)
@@ -145,10 +145,10 @@ contains
         endif
         if (.not.allocated(cbess%J)) then
             ! Overallocate to reduce number of allocations
-            allocate(cbess%J ( ng*i, nmax*k), cbess%Y  ( ng*i, nmax*k), &
-                    cbess%JR ( ng*i, nmax*k), cbess%JI ( ng*i, nmax*k), &
-                    cbess%DJ ( ng*i, nmax*k), cbess%DY ( ng*i, nmax*k), &
-                    cbess%DJR( ng*i, nmax*k), cbess%DJI( ng*i, nmax*k))
+            allocate(cbess%J (ng * i, nmax * k), cbess%Y  (ng * i, nmax * k), &
+                    cbess%JR (ng * i, nmax * k), cbess%JI (ng * i, nmax * k), &
+                    cbess%DJ (ng * i, nmax * k), cbess%DY (ng * i, nmax * k), &
+                    cbess%DJR(ng * i, nmax * k), cbess%DJI(ng * i, nmax * k))
         endif
     end
 
@@ -740,58 +740,57 @@ contains
         real(dp) a, x, qs, qs1, d1, d2, d3, der, qn, qn1, qn2, &
                 qnm, qnm1, qmm
 
-
         a = 1d0
         qs = dsqrt(1d0 - x * x)
         qs1 = 1d0 / qs
         dv1 = 0d0
         dv2 = 0d0
 
-        if (m.ne.0) go to 20
+        if (m==0) then
 
-        d1 = 1d0
-        d2 = x
-        do n = 1, nmax
-            qn = dble(n)
-            qn1 = dble(n + 1)
-            qn2 = dble(2 * n + 1)
-            !        !recurrence (31) of ref. {mis39}
-            d3 = (qn2 * x * d2 - qn * d1) / qn1
-            !        !recurrence (35) of ref. {mis39}
-            der = qs1 * (qn1 * qn / qn2) * (-d1 + d3)
-            dv1 = d2
-            dv2 = der
-            d1 = d2
-            d2 = d3
-        enddo
-        return
+            d1 = 1d0
+            d2 = x
+            do n = 1, nmax
+                qn = dble(n)
+                qn1 = dble(n + 1)
+                qn2 = dble(2 * n + 1)
+                !        !recurrence (31) of ref. {mis39}
+                d3 = (qn2 * x * d2 - qn * d1) / qn1
+                !        !recurrence (35) of ref. {mis39}
+                der = qs1 * (qn1 * qn / qn2) * (-d1 + d3)
+                dv1 = d2
+                dv2 = der
+                d1 = d2
+                d2 = d3
+            enddo
+        else
+            qmm = dble(m * m)
+            !*a_m initialization - recurrence (34) of ref. {mis39}
+            do i = 1, m
+                i2 = i * 2
+                a = a * dsqrt(dble(i2 - 1) / dble(i2)) * qs
+            enddo
+            !*
+            d1 = 0d0
+            d2 = a
 
-        20 qmm = dble(m * m)
-        !*a_m initialization - recurrence (34) of ref. {mis39}
-        do i = 1, m
-            i2 = i * 2
-            a = a * dsqrt(dble(i2 - 1) / dble(i2)) * qs
-        enddo
-        !*
-        d1 = 0d0
-        d2 = a
-
-        do n = m, nmax
-            qn = dble(n)
-            qn2 = dble(2 * n + 1)
-            qn1 = dble(n + 1)
-            qnm = dsqrt(qn * qn - qmm)
-            qnm1 = dsqrt(qn1 * qn1 - qmm)
-            !        !recurrence (31) of ref. {mis39}
-            d3 = (qn2 * x * d2 - qnm * d1) / qnm1
-            !        !recurrence (35) of ref. {mis39}
-            der = qs1 * (-qn1 * qnm * d1 + qn * qnm1 * d3) / qn2
-            dv1 = d2
-            dv2 = der
-            d1 = d2
-            d2 = d3
-        enddo
-        !*
+            do n = m, nmax
+                qn = dble(n)
+                qn2 = dble(2 * n + 1)
+                qn1 = dble(n + 1)
+                qnm = dsqrt(qn * qn - qmm)
+                qnm1 = dsqrt(qn1 * qn1 - qmm)
+                !        !recurrence (31) of ref. {mis39}
+                d3 = (qn2 * x * d2 - qnm * d1) / qnm1
+                !        !recurrence (35) of ref. {mis39}
+                der = qs1 * (-qn1 * qnm * d1 + qn * qnm1 * d3) / qn2
+                dv1 = d2
+                dv2 = der
+                d1 = d2
+                d2 = d3
+            enddo
+            !*
+        end if
         return
     end
 
