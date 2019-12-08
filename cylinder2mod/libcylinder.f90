@@ -473,7 +473,7 @@ contains
         return
     end
     !=======================================================================
-    subroutine sareac (eps, rat)
+    subroutine rad_sarea_cylinder (eps, rat)
         !--------/---------/---------/---------/---------/---------/---------/--
         ! >>> eps
         ! <<< rat
@@ -488,13 +488,13 @@ contains
         return
     end
     !=======================================================================
-    subroutine sareananorod (eps, rat)
+    subroutine rad_sarea_nanorod (eps, epse, rat)
         !--------/---------/---------/---------/---------/---------/---------/--
-        ! >>> eps
+        ! >>> eps, epse
         ! <<< rat
         !=================
         !--------/---------/---------/---------/---------/---------/---------/--
-        real(dp), intent(in) :: eps
+        real(dp), intent(in) :: eps, epse
         real(dp), intent(out) :: rat
         ! TODO: replace with computation of the nanorod surface
         rat = (1.5d0 / eps)**(1d0 / 3d0)
@@ -503,7 +503,7 @@ contains
         return
     end
     !=======================================================================
-    subroutine sarea (eps, rat)
+    subroutine rad_sarea_spheroid (eps, rat)
         !--------/---------/---------/---------/---------/---------/---------/--
         ! >>> eps
         ! <<< rat
@@ -513,10 +513,10 @@ contains
         real(dp), intent(out) :: rat
         real(dp) :: e, r
 
-        if (eps < 1) then
+        if (eps < 1) then ! Prolate spheroid
             e = dsqrt(1d0 - eps * eps)
             r = 0.5d0 * (eps**(2d0 / 3d0) + eps**(-1d0 / 3d0) * dasin(e) / e)
-        else
+        else ! Oblate spheroid
             e = dsqrt(1d0 - 1d0 / (eps * eps))
             r = 0.25d0 * (2d0 * eps**(2d0 / 3d0) &
                     + eps**(-4d0 / 3d0) * dlog((1d0 + e) / (1d0 - e)) / e)

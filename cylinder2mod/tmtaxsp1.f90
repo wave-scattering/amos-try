@@ -160,13 +160,23 @@ subroutine tmtaxsp(nmax, rap, zeps1, tmt)
     !
     lmtot = (nmax + 1)**2 - 1
 
-    if (dabs(rat - 1d0)>1d-8.and.np==-1) call sarea (eps, rat)
-    if (dabs(rat - 1d0)>1d-8.and.np>=0) call surfch(np, eps, rat)
-    if (dabs(rat - 1d0)>1d-8.and.np==-2) call sareac (eps, rat)
-    ! todo make a correct evaluation of sareac for nanorod
-    if (dabs(rat - 1d0)>1d-8.and.np==-9)&
-            call sareananorod (eps, rat)
-    if (np==-3) call drop (rat)
+    ! Check if the radius is area-equivalent instead od volume-equivalent
+    if (dabs(rat - 1d0)>1d-8) then
+        select case (np)
+        case(0)
+            call surfch(np, eps, rat)
+        case (-1) ! oblate/prolate spheroids
+            call rad_sarea_spheroid(eps, rat)
+        case (-2) ! oblate/prolate cylinder
+            call rad_sarea_cylinder(eps, rat)
+        case (-3) ! a distorted chebyshev droplet
+            call drop(rat)
+        case (-9) ! nanorod
+            ! todo make a correct evaluation of surface-equivalent radius for nanorod
+            call rad_sarea_nanorod(eps, mpar%nanorod_cap_hr, rat)
+        end select
+    end if
+
     !___________________________________________________
     ! determination of the wiscombe value of the floating
     ! angular momentum cutoff nmax:
@@ -1669,26 +1679,26 @@ subroutine tmatr0_adapt(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
                 !
                 do i = 1, ngss    !=ngauss   if ncheck.eq.1
                     !             !=2*ngauss if ncheck.eq.0
-                    ar12 = ar12 + w(i)*m0_ar12(x(i))         !~re j^{12}
-                    ai12 = ai12 + w(i)*m0_ai12(x(i))        !~im j^{12}
+                    ar12 = ar12 + w(i) * m0_ar12(x(i))         !~re j^{12}
+                    ai12 = ai12 + w(i) * m0_ai12(x(i))        !~im j^{12}
 
-                    gr12 = gr12 + w(i)*m0_gr12(x(i))        !~re rg j^{12}
-                    gi12 = gi12 + w(i)*m0_gi12(x(i))        !~im rg j^{12}
+                    gr12 = gr12 + w(i) * m0_gr12(x(i))        !~re rg j^{12}
+                    gi12 = gi12 + w(i) * m0_gi12(x(i))        !~im rg j^{12}
 
-                    ar21 = ar21 + w(i)*m0_ar21(x(i))        !~re j^{21}
-                    ai21 = ai21 + w(i)*m0_ai21(x(i))        !~im j^{21}
+                    ar21 = ar21 + w(i) * m0_ar21(x(i))        !~re j^{21}
+                    ai21 = ai21 + w(i) * m0_ai21(x(i))        !~im j^{21}
 
-                    gr21 = gr21 + w(i)*m0_gr21(x(i))       !~re rg j^{21}
-                    gi21 = gi21 + w(i)*m0_gi21(x(i))        !~im rg j^{21}
+                    gr21 = gr21 + w(i) * m0_gr21(x(i))       !~re rg j^{21}
+                    gi21 = gi21 + w(i) * m0_gi21(x(i))        !~im rg j^{21}
                 end do               !end of gauss integration
-!                call integrate(m0_ar12, 0.0_dp, 1.0_dp, ar12)
-!                call integrate(m0_ai12, 0.0_dp, 1.0_dp, ai12)
-!                call integrate(m0_gr12, 0.0_dp, 1.0_dp, gr12)
-!                call integrate(m0_gi12, 0.0_dp, 1.0_dp, gi12)
-!                call integrate(m0_ar21, 0.0_dp, 1.0_dp, ar21)
-!                call integrate(m0_ai21, 0.0_dp, 1.0_dp, ai21)
-!                call integrate(m0_gr21, 0.0_dp, 1.0_dp, gr21)
-!                call integrate(m0_gi21, 0.0_dp, 1.0_dp, gi21)
+                !                call integrate(m0_ar12, 0.0_dp, 1.0_dp, ar12)
+                !                call integrate(m0_ai12, 0.0_dp, 1.0_dp, ai12)
+                !                call integrate(m0_gr12, 0.0_dp, 1.0_dp, gr12)
+                !                call integrate(m0_gi12, 0.0_dp, 1.0_dp, gi12)
+                !                call integrate(m0_ar21, 0.0_dp, 1.0_dp, ar21)
+                !                call integrate(m0_ai21, 0.0_dp, 1.0_dp, ai21)
+                !                call integrate(m0_gr21, 0.0_dp, 1.0_dp, gr21)
+                !                call integrate(m0_gi21, 0.0_dp, 1.0_dp, gi21)
 
                 !                write(nout+3,*)'n1=',n1,'   n2=',n2
                 !                write(nout+3,*)'ar12=', ar12
@@ -2049,8 +2059,7 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
                     f2 = rri * uri * an1 * a12     !prefactor containing r(\theta)*[dr/(d\theta)]
                     !                                          !hat{theta} part
 
-
-                    ar12=ar12+f1*b2r+f2*b3r        !~re j^{12}
+                    ar12 = ar12 + f1 * b2r + f2 * b3r        !~re j^{12}
                     ai12 = ai12 + f1 * b2i + f2 * b3i        !~im j^{12}
 
                     gr12 = gr12 + f1 * c2r + f2 * c3r        !~re rg j^{12}
@@ -2238,7 +2247,6 @@ subroutine tmatr_adapt (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, d
             x_to_rsp(1), r_from_x(1), dr_from_x(1), xi, &
             v
 
-
     real(dp)  x(npng2), w(npng2), an(npn1), s(npng2), ss(npng2), &
             r(npng2), dr(npng2), sig(npn2), &
             ddr(npng2), drr(npng2), &
@@ -2371,16 +2379,16 @@ subroutine tmatr_adapt (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, d
             integrand%nmax = nmax ! used only for bessel evaluation
 
             do i = 1, ngss
-!                n1 = integrand%n1
-!                n2 = integrand%n2
+                !                n1 = integrand%n1
+                !                n2 = integrand%n2
                 xi = x(i)
-                an1 = dble(n1*(n1+1))
-                an2 = dble(n2*(n2+1))
+                an1 = dble(n1 * (n1 + 1))
+                an2 = dble(n2 * (n2 + 1))
                 if (mpar%np.ne.-2) stop 'adaptive integration is only implemented for cylinder'
                 x_to_rsp(1) = xi
                 call rsp_cylinder(x_to_rsp, r_from_x, dr_from_x)
-                call vig_1v ( xi, n1, 0, d1n1, d2n1)
-                call vig_1v ( xi, n2, 0, d1n2, d2n2)
+                call vig_1v (xi, n1, 0, d1n1, d2n1)
+                call vig_1v (xi, n2, 0, d1n2, d2n2)
                 d1n1 = d1(i, n1)
                 d2n1 = d2(i, n1)
                 d1n2 = d1(i, n2)
