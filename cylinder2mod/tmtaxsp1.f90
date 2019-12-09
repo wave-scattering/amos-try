@@ -37,7 +37,7 @@ subroutine tmtaxsp(nmax, rap, zeps1, tmt)
     ! mpar%ichoice=1 if nag library is available, otherwise mpar%ichoice=2
     !
     ! np,eps: specifies the shape of particles within a given np class:
-    !     np.gt.0 - eps = deformation parameter of a chebyshev particle
+    !     np>0 - eps = deformation parameter of a chebyshev particle
     !     np=-1 - eps = the ratio of the horizontal to rotational axes. eps is
     !             larger than 1 for oblate spheroids and smaller than 1 for
     !             prolate spheroids.
@@ -160,21 +160,23 @@ subroutine tmtaxsp(nmax, rap, zeps1, tmt)
     !
     lmtot = (nmax + 1)**2 - 1
 
-    ! Check if the radius is area-equivalent instead od volume-equivalent
-    if (dabs(rat - 1d0)>1d-8) then
-        select case (np)
-        case(0)
-            call surfch(np, eps, rat)
-        case (-1) ! oblate/prolate spheroids
-            call rad_sarea_spheroid(eps, rat)
-        case (-2) ! oblate/prolate cylinder
-            call rad_sarea_cylinder(eps, rat)
-        case (-3) ! a distorted chebyshev droplet
-            call drop(rat)
-        case (-9) ! nanorod
-            ! todo make a correct evaluation of surface-equivalent radius for nanorod
-            call rad_sarea_nanorod(eps, mpar%nanorod_cap_hr, rat)
-        end select
+    ! Check if the radius is area-equivalent instead of volume-equivalent
+    if (dabs(rat - 1d0) > 1d-8) then
+        if (np >= 0) then ! chebyshev particle
+            call radii_ratio_chebyshev(np, eps, rat)
+        else
+            select case (np)
+            case (-1) ! oblate/prolate spheroids
+                call radii_ratio_spheroid(eps, rat)
+            case (-2) ! oblate/prolate cylinder
+                call radii_ratio_cylinder(eps, rat)
+            case (-3) ! distorted chebyshev droplet
+                call radii_ratio_droplet(rat)
+            case (-9) ! nanorod
+                ! todo make a correct evaluation of surface-equivalent radius for nanorod
+                call radii_ratio_nanorod(eps, mpar%nanorod_cap_hr, rat)
+            end select
+        end if
     end if
 
     !___________________________________________________
@@ -185,8 +187,10 @@ subroutine tmtaxsp(nmax, rap, zeps1, tmt)
     ixxx = xev + 4.05d0 * xev**0.333333d0     !wiscombe conv. criterion for max
     inm1 = max0(4, ixxx)
     !
-    if (inm1>=npn1) print 7333, npn1
-    if (inm1>=npn1) stop
+    if (inm1 >= npn1) then
+        print 7333, npn1
+        stop
+    end if
     7333 format('convergence is not obtained for npn1=', i3, &
             '.  execution terminated')
     !_______________________________________________________________
@@ -194,7 +198,7 @@ subroutine tmtaxsp(nmax, rap, zeps1, tmt)
     ngauss = nmax * ndgs
     !c      nnnggg=ngauss+1
 
-    if (ngauss==npng1) print 7336
+    if (ngauss == npng1) print 7336
     7336    format('warning: ngauss=npng1')
     !
     ! gif division points and weights + other numerical constants
@@ -280,7 +284,7 @@ subroutine tmtaxsp(nmax, rap, zeps1, tmt)
             ! see (5.39) of {mtl}:  !!!iff plane of symmetry perpendicular to the
             !                       !!!axis of rotation
 
-            if ((naxsm==1).and.((-1)**(l1 + l2)/=1)) then
+            if ((naxsm == 1) .and. ((-1)**(l1 + l2) /= 1)) then
                 tmt(2, ja, jb) = czero
                 tmt(1, ja, jb) = czero
             else
@@ -327,7 +331,7 @@ subroutine tmtaxsp(nmax, rap, zeps1, tmt)
                 ! see (5.39) of {mtl}: !!!iff plane of symmetry perpendicular to the
                 !                        !!!axis of rotation
 
-                if ((naxsm==1).and.((-1)**(l1 + l2)/=1)) then
+                if ((naxsm == 1) .and. ((-1)**(l1 + l2) /= 1)) then
                     tmt(2, ja, jb) = czero
                     tmt(2, jam, jbm) = czero
                     tmt(1, ja, jb) = czero
@@ -339,7 +343,7 @@ subroutine tmtaxsp(nmax, rap, zeps1, tmt)
                     tmt(1, jam, jbm) = tmt(1, ja, jb)
                 end if
 
-                if ((naxsm==1).and.((-1)**(l1 + l2)/=-1)) then
+                if ((naxsm == 1) .and. ((-1)**(l1 + l2) /= -1)) then
                     tmt(4, ja, jb) = czero
                     tmt(4, jam, jbm) = czero
                     tmt(3, ja, jb) = czero
@@ -386,8 +390,8 @@ subroutine vigampl (x, nmax, m, ddv1, dv2)
     !     and
     !     dv2(n)=[d/d(arccos x)] dvig(0,m,n,arccos x)  ! = d d_{0m}^{(l)}/d\theta
     !
-    !     for 1.le.n.le.nmax and 0.le.x.le.1
-    !     (for a given m.neq.0, only the m.le.n.le.nmax terms are determined!)
+    !     for 1 <= n <= nmax and 0 <= x <= 1
+    !     (for a given m.neq.0, only the m <= n <= nmax terms are determined!)
     !     according to eq. (4.1.24) of ref. \ct{ed}:
     !
     !             d_{00}^{(l)}(\theta)= p_l(\cos\theta)
@@ -437,9 +441,9 @@ subroutine vigampl (x, nmax, m, ddv1, dv2)
     dx = dabs(x)
     a = 1.d0
     qs = dsqrt(1d0 - x * x)                        !sin\theta
-    !
-    if (m/=0) then          ! m\neq 0 part
-        !
+
+    if (m /= 0) then          ! m\neq 0 part
+
         !    a_m*(sin\theta)**m   initialization - (33) and recurrence (34) of ref. {mis39}
 
         qmm = dble(m * m)
@@ -509,7 +513,7 @@ subroutine vigampl (x, nmax, m, ddv1, dv2)
         !                           m > 0
 
     else if (m>0) then
-        !
+
         ! >>> determine x^m_m according to eq. (3.29) of {tks}:
 
         a = 1.d0 / dsqrt(2.d0)               !x^1_1=a_1
@@ -572,7 +576,7 @@ subroutine const (ngauss, nmax, x, w, an, ann, s, ss, np, eps)
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
     implicit none
-    !include 'ampld.par.f'
+
     integer ngauss, nmax, np, ng, ng1, ng2, nn
     integer neps, jg, i, j, n, n1
     real(dp) eps, d, ddd, xx, y
@@ -607,7 +611,8 @@ subroutine const (ngauss, nmax, x, w, an, ann, s, ss, np, eps)
     !intervals from eps
     neps = max(eps, 1.d0 / eps)
 
-    if (np==-1) then ! spheroid
+    select case (np)
+    case(-1) ! spheroid
 
         if(neps==1) then
 
@@ -692,7 +697,7 @@ subroutine const (ngauss, nmax, x, w, an, ann, s, ss, np, eps)
 
         endif           !neps
 
-    else if (np==-2.or.np==-9) then  ! cylinder or nanorod
+    case(-2, -9) ! cylinder or nanorod
         !*****************   only involves cylinders  **********************
 
         ng1 = dble(ngauss) / 2d0
@@ -728,7 +733,7 @@ subroutine const (ngauss, nmax, x, w, an, ann, s, ss, np, eps)
             x(ng - i + 1) = -x(i)
         end do
         !*****************************************************************
-    else if (np==-4) then         ! cut sphere on top
+    case(-4) ! cut sphere on top
 
         xtheta = dacos((eps - rx) / rx)
         xx = dsin(xtheta) / (pi - xtheta)
@@ -753,7 +758,7 @@ subroutine const (ngauss, nmax, x, w, an, ann, s, ss, np, eps)
         enddo
 
         !*****************************************************************
-    else if (np==-5) then ! cut sphere on its bottom
+    case(-5) ! cut sphere on its bottom
 
         xtheta = dacos((eps - rx) / rx)
         xx = dsin(xtheta) / (pi - xtheta)
@@ -777,12 +782,12 @@ subroutine const (ngauss, nmax, x, w, an, ann, s, ss, np, eps)
         enddo
         !*****************************************************************
 
-    else
+    case default
 
         call gauss(ng, 0, 0, x, w)
         !call gauleg(-1.d0,1.d0,x,w,ng)
 
-    end if
+    end select
 
     if (np>-4) then !mirror symmetry present
 
@@ -860,7 +865,7 @@ subroutine vary (lam, mrr, mri, a, eps, &
     ht = 0d0
 
     ! decision tree to specify particle shape:
-    if (np>0)  then ! chebyshev particle
+    if (np >= 0)  then ! chebyshev particle
         call rsp_chebyshev(x, ng, a, eps, np, r, dr)
     else
         select case (np)
@@ -868,7 +873,7 @@ subroutine vary (lam, mrr, mri, a, eps, &
             call rsp_spheroid(x, ng, ngauss, a, eps, r, dr)
         case (-2) ! oblate/prolate cylinder
             call rsp_cylinder(x, r, dr)
-        case (-3) ! a distorted chebyshev droplet
+        case (-3) ! distorted chebyshev droplet
             call rsp_droplet(x, ng, a, r, dr)
         case (-4) ! sphere cut by a plane on its top
             call rsp_sphere_cut_top(x, ng, rsnm, eps, r, dr)
@@ -959,7 +964,7 @@ subroutine rsp_spheroid (x, ng, ngauss, rev, eps, r, dr)
     !   ngauss ... the number of gif division points
     !   ng=2*ngauss
     !
-    !   1.le.i.le.ngauss
+    !   1 <= i <= ngauss
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
     implicit none
@@ -999,7 +1004,7 @@ subroutine rsp_chebyshev (x, ng, rev, eps, n, r, dr)
     ! >>> x,ng,rev,eps,n
     ! <<< r,dr
     !=========================
-    !   activated for np.gt.0
+    !   activated for np > 0
     !
     !   calculation of the functions r(i)=r(y)**2 and
     !   dr(i)=((d/dy)r(y))/r(y) for a chebyshev particle
@@ -1019,7 +1024,7 @@ subroutine rsp_chebyshev (x, ng, rev, eps, n, r, dr)
     !   ngauss ... the number of gif division points
     !   ng=2*ngauss
     !
-    !   1.le.i.le.ngauss
+    !   1 <= i <= ngauss
     !
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
@@ -1080,7 +1085,7 @@ subroutine rsp_nanorod (x, ng, ngauss, rev, eps, epse, r, dr)
     !   ngauss ... the number of gif division points
     !   ng=2*ngauss
     !
-    !   1.le.i.le.ngauss
+    !   1 <= i <= ngauss
     !
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
@@ -1163,7 +1168,7 @@ subroutine rsp_droplet (x, ng, rev, r, dr)
     !   ngauss ... the number of gif division points
     !   ng=2*ngauss
     !
-    !   1.le.i.le.ngauss
+    !   1 <= i <= ngauss
     !
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
@@ -1222,7 +1227,7 @@ subroutine rsp_sphere_cut_top (x, ng, rev, eps, r, dr)
     !   the origin of coordinates is located along the axis of symmetry
     !                  midway the plane and sphere bottom.
     !
-    !           ===> note that always eps.gt.1
+    !           ===> note that always eps > 1
     !   ===
     !   x - gif division points \cos\theta_j -  y = arccos x
     !   rev ... the radius of the original uncut sphere
@@ -1233,7 +1238,7 @@ subroutine rsp_sphere_cut_top (x, ng, rev, eps, r, dr)
     !              surface and that along the plane surface
     !   ng=2*ngauss ... the number of gif division points
     !
-    !   1.le.i.le.ngauss
+    !   1 <= i <= ngauss
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
     implicit none
@@ -1308,7 +1313,7 @@ subroutine rsp_sphere_cut_bottom (x, ng, rev, eps, r, dr)
     !   the origin of coordinates is located along the axis of symmetry
     !                  midway the plane and sphere top.
     !
-    !                  ===>  note that always eps.gt.1
+    !                  ===>  note that always eps > 1
     !   ===
     !   x - gif division points \cos\theta_j -  y = arccos x
     !   rev ... the radius of the original uncut sphere
@@ -1319,7 +1324,7 @@ subroutine rsp_sphere_cut_bottom (x, ng, rev, eps, r, dr)
     !              surface and that along the plane surface
     !   ng=2*ngauss ... the number of gif division points
     !
-    !   1.le.i.le.ngauss
+    !   1 <= i <= ngauss
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
     implicit none
@@ -1442,7 +1447,7 @@ subroutine rsp_cone_up(x, ng, rev, ht, r, dr)
     !
     !   ng=2*ngauss ... the number of gif division points
     !
-    !   1.le.i.le.ngauss
+    !   1 <= i <= ngauss
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
     implicit none
@@ -2178,7 +2183,7 @@ subroutine tmatr_adapt (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, d
     !=====================
     !
     !  determines the t-matrix of an axially symmetric scatterer
-    !                           for m.gt.0
+    !                           for m > 0
     !
     !  m      - azimuthal number
     !  ngauss - the number of gif division points
@@ -2637,7 +2642,7 @@ subroutine tmatr (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
     !=====================
     !
     !  determines the t-matrix of an axially symmetric scatterer
-    !                           for m.gt.0
+    !                           for m > 0
     !
     !  m      - azimuthal number
     !  ngauss - the number of gif division points
