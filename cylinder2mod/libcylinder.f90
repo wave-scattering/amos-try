@@ -370,7 +370,7 @@ contains
         !   ngauss ... the number of gif division points
         !   ng=2*ngauss
         !
-        !   1.le.i.le.ngauss
+        !   1 <= i <= ngauss
         !
         !--------/---------/---------/---------/---------/---------/---------/--
         implicit none
@@ -414,8 +414,13 @@ contains
         return
     end
     !=======================================================================
-    subroutine drop (rat)
-        !=================
+    subroutine radii_ratio_droplet(rat)
+        !=========================
+        !   activated for np>=0
+        !
+        !   calculation of the ratio between the volume-equivalent and
+        !   the surface-equivalent radii for a distorted chebyshev droplet
+
         implicit none
         integer nout, nc, ng, i, n
         real(dp) s, v, rat, cki, dri, rv, ri, si, risi, rs, wi, xi, xin
@@ -473,11 +478,16 @@ contains
         return
     end
     !=======================================================================
-    subroutine rad_sarea_cylinder (eps, rat)
+    subroutine radii_ratio_cylinder (eps, rat)
         !--------/---------/---------/---------/---------/---------/---------/--
         ! >>> eps
         ! <<< rat
-        !=================
+        !=========================
+        !   activated for np=-2
+        !
+        !   calculation of the ratio between the volume-equivalent and
+        !   the surface-equivalent radii for the cylinder
+
         implicit none
         real(dp), intent(in) :: eps
         real(dp), intent(out) :: rat
@@ -488,12 +498,16 @@ contains
         return
     end
     !=======================================================================
-    subroutine rad_sarea_nanorod (eps, epse, rat)
+    subroutine radii_ratio_nanorod (eps, epse, rat)
         !--------/---------/---------/---------/---------/---------/---------/--
         ! >>> eps, epse
         ! <<< rat
-        !=================
-        !--------/---------/---------/---------/---------/---------/---------/--
+        !=========================
+        !   activated for np=-9
+        !
+        !   calculation of the ratio between the volume-equivalent and
+        !   the surface-equivalent radii for the nanorod
+
         real(dp), intent(in) :: eps, epse
         real(dp), intent(out) :: rat
         ! TODO: replace with computation of the nanorod surface
@@ -503,12 +517,16 @@ contains
         return
     end
     !=======================================================================
-    subroutine rad_sarea_spheroid (eps, rat)
+    subroutine radii_ratio_spheroid (eps, rat)
         !--------/---------/---------/---------/---------/---------/---------/--
         ! >>> eps
         ! <<< rat
-        !=================
-        !--------/---------/---------/---------/---------/---------/---------/--
+        !=========================
+        !   activated for np=-1
+        !
+        !   calculation of the ratio between the volume-equivalent and
+        !   the surface-equivalent radii for the spheroid
+
         real(dp), intent(in) :: eps
         real(dp), intent(out) :: rat
         real(dp) :: e, r
@@ -526,13 +544,15 @@ contains
         return
     end
     !=======================================================================
-    subroutine surfch (n, e, rat)
+    subroutine radii_ratio_chebyshev(n, e, rat)
         !--------/---------/---------/---------/---------/---------/---------/--
         ! >>> n,e,rat
         ! <<< rat
-        !=================
-        !--------/---------/---------/---------/---------/---------/---------/--
-        !        implicit real(dp) (a-h, o-z)
+        !   activated for np>=0
+        !
+        !   calculation of the ratio between the volume-equivalent and
+        !   the surface-equivalent radii for a chebyshev particle
+
         integer, intent(in) :: n
         real(dp), intent(in) :: e
         real(dp), intent(inout) :: rat
