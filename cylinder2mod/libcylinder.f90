@@ -15,7 +15,7 @@ module libcylinder
     type(cdrop_values), public :: cdrop
 
     type, private :: integrand_values
-        integer :: n1, n2, nmax
+        integer :: n1, n2, nmax, m
     end type integrand_values
     type(integrand_values), public :: integrand
 
