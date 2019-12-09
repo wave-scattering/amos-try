@@ -174,6 +174,7 @@ subroutine tmtaxsp(nmax, rap, zeps1, tmt)
                 call radii_ratio_droplet(rat)
             case (-9) ! nanorod
                 ! todo make a correct evaluation of surface-equivalent radius for nanorod
+                ! (2019-12-09) In principle it is done but needs some testing
                 call radii_ratio_nanorod(eps, mpar%nanorod_cap_hr, rat)
             end select
         end if

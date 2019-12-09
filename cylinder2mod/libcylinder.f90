@@ -466,7 +466,7 @@ contains
         enddo
         rs = dsqrt(s * 0.5d0)
         rv = (v * 3d0 * 0.25d0)**(1d0 / 3d0)
-        if (dabs(rat - 1d0)>1d-8) rat = rv / rs
+        if (dabs(rat - 1d0)>1d-8) rat = rv/rs
         cdrop%r0v = 1d0 / rv
         write(nout, 1000) cdrop%r0v
         do n = 0, nc
@@ -510,10 +510,33 @@ contains
 
         real(dp), intent(in) :: eps, epse
         real(dp), intent(out) :: rat
+        real(dp) :: e, epsc, rv, rs
+
         ! TODO: replace with computation of the nanorod surface
-        rat = (1.5d0 / eps)**(1d0 / 3d0)
-        rat = rat / dsqrt((eps + 2d0) / (2d0 * eps))
-        !
+        ! (2019-12-09) In principle it is done but needs some testing
+        epsc = (1d0/eps) - epse
+
+        rv = (1.5d0*epsc + epse)**(1d0 / 3d0)
+
+        if (epse >= 1d0) then ! Prolate spheroid
+            if (dabs(epse - 1d0) > 1d-6) then
+                e = dsqrt(1d0 - 1d0/(epse*epse))
+
+                rs = dsqrt(epsc + 0.5d0*(1d0 + epse*dasin(e)/e))
+            else ! Special case: spherical caps
+                rs = dsqrt(epsc + 1d0)
+            end if
+        else ! Oblate spheroid
+            if (dabs(epse) > 1d-6) then
+                e = dsqrt(1d0 - eps*eps)
+
+                rs = dsqrt(epsc + 0.5d0*(1d0 + epse*dlog((1d0 + e)/(1d0 - e))/e))
+            else ! Special case: plane caps (ie, cylinder)
+                rs = dsqrt(epsc + 0.5d0)
+            end if
+        end if
+        rat = rv/rs
+
         return
     end
     !=======================================================================
@@ -531,7 +554,7 @@ contains
         real(dp), intent(out) :: rat
         real(dp) :: e, r
 
-        if (eps < 1) then ! Prolate spheroid
+        if (eps < 1d0) then ! Prolate spheroid
             e = dsqrt(1d0 - eps * eps)
             r = 0.5d0 * (eps**(2d0 / 3d0) + eps**(-1d0 / 3d0) * dasin(e) / e)
         else ! Oblate spheroid
