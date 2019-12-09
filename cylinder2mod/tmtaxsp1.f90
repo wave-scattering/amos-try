@@ -89,7 +89,7 @@ subroutine tmtaxsp(nmax, rap, zeps1, tmt)
     implicit none
 
     integer lmaxd, lmax1d, lmtd, naxsm
-    parameter (lmaxd = 8, lmax1d = lmaxd + 1, lmtd = lmax1d * lmax1d - 1)
+    parameter (lmaxd = 8, lmax1d = lmaxd + 1, lmtd = lmax1d*lmax1d - 1)
 
     integer ndgs, ngauss, n, nm, np, n1, n2, m, l1, l2, lmtot, k1, k2, kk1, kk2
     integer nmax, ncheck, inm1, ixxx, ja, jam, jb, jbm
@@ -136,17 +136,17 @@ subroutine tmtaxsp(nmax, rap, zeps1, tmt)
     p = dacos(-1d0)                 !local pi constant
     !
     a = rev
-    lam = rev * sqrt(mpar%zeps0) / rap       !vacuum wavelength times sqrt(mpar%zeps0)/
+    lam = rev*sqrt(mpar%zeps0)/rap       !vacuum wavelength times sqrt(mpar%zeps0)/
     !
     ! the real part of the refractive index contrast
     !
-    mrr = dble(sqrt(zeps1 / mpar%zeps0))
+    mrr = dble(sqrt(zeps1/mpar%zeps0))
     !
     ! the imaginary  part of the refractive index contrast
     !
-    mri = aimag(sqrt(zeps1 / mpar%zeps0))
+    mri = aimag(sqrt(zeps1/mpar%zeps0))
     !
-    ddelt = 0.1d0 * ddelt               !conv. test is switched off now!!!
+    ddelt = 0.1d0*ddelt               !conv. test is switched off now!!!
     !
     ! ddelt is used to test the accuracy of computing the
     ! optical cross sections. this accuracy is usually better
@@ -184,8 +184,8 @@ subroutine tmtaxsp(nmax, rap, zeps1, tmt)
     ! determination of the wiscombe value of the floating
     ! angular momentum cutoff nmax:
 
-    xev = 2d0 * p * a / lam
-    ixxx = xev + 4.05d0 * xev**0.333333d0     !wiscombe conv. criterion for max
+    xev = 2d0*p*a/lam
+    ixxx = xev + 4.05d0*xev**0.333333d0     !wiscombe conv. criterion for max
     inm1 = max0(4, ixxx)
     !
     if (inm1 >= npn1) then
@@ -196,7 +196,7 @@ subroutine tmtaxsp(nmax, rap, zeps1, tmt)
             '.  execution terminated')
     !_______________________________________________________________
 
-    ngauss = nmax * ndgs
+    ngauss = nmax*ndgs
     !c      nnnggg=ngauss+1
 
     if (ngauss == npng1) print 7336
@@ -238,11 +238,11 @@ subroutine tmtaxsp(nmax, rap, zeps1, tmt)
         tr1nn1 = tr1(n1, n1)
         ti1nn1 = ti1(n1, n1)
 
-        dn1 = dble(2 * n + 1)
+        dn1 = dble(2*n + 1)
 
-        qsca = qsca + dn1 * (tr1nn * tr1nn + ti1nn * ti1nn&
-                + tr1nn1 * tr1nn1 + ti1nn1 * ti1nn1)
-        qext = qext + (tr1nn + tr1nn1) * dn1
+        qsca = qsca + dn1*(tr1nn*tr1nn + ti1nn*ti1nn&
+                + tr1nn1*tr1nn1 + ti1nn1*ti1nn1)
+        qext = qext + (tr1nn + tr1nn1)*dn1
     end do
     !<<<
     !c      write(nout,*)'nmax=',nmax
@@ -279,8 +279,8 @@ subroutine tmtaxsp(nmax, rap, zeps1, tmt)
             n1 = l1 + nmax
             n2 = l2 + nmax
 
-            ja = l1 * (l1 + 1)       ! (l,m) index with (1-1)=1
-            jb = l2 * (l2 + 1)
+            ja = l1*(l1 + 1)       ! (l,m) index with (1-1)=1
+            jb = l2*(l2 + 1)
             !
             ! see (5.39) of {mtl}:  !!!iff plane of symmetry perpendicular to the
             !                       !!!axis of rotation
@@ -323,10 +323,10 @@ subroutine tmtaxsp(nmax, rap, zeps1, tmt)
                 kk1 = l1 - m + 1 + nm
                 kk2 = l2 - m + 1 + nm
 
-                jam = l1 * (l1 + 1) - m       ! (l,m) index with (1-1)=1
-                jbm = l2 * (l2 + 1) - m
-                ja = l1 * (l1 + 1) + m       ! (l,m) index with (1-1)=1
-                jb = l2 * (l2 + 1) + m
+                jam = l1*(l1 + 1) - m       ! (l,m) index with (1-1)=1
+                jbm = l2*(l2 + 1) - m
+                ja = l1*(l1 + 1) + m       ! (l,m) index with (1-1)=1
+                jb = l2*(l2 + 1) + m
                 !
                 !
                 ! see (5.39) of {mtl}: !!!iff plane of symmetry perpendicular to the
@@ -441,17 +441,17 @@ subroutine vigampl (x, nmax, m, ddv1, dv2)
 
     dx = dabs(x)
     a = 1.d0
-    qs = dsqrt(1d0 - x * x)                        !sin\theta
+    qs = dsqrt(1d0 - x*x)                        !sin\theta
 
     if (m /= 0) then          ! m\neq 0 part
 
         !    a_m*(sin\theta)**m   initialization - (33) and recurrence (34) of ref. {mis39}
 
-        qmm = dble(m * m)
+        qmm = dble(m*m)
 
         do i = 1, m
-            i2 = i * 2
-            a = a * dsqrt(dble(i2 - 1) / dble(i2)) * qs  !recurrence (33,34) of ref. {mis39} f
+            i2 = i*2
+            a = a*dsqrt(dble(i2 - 1)/dble(i2))*qs  !recurrence (33,34) of ref. {mis39} f
         end do
 
     end if
@@ -503,12 +503,12 @@ subroutine vigampl (x, nmax, m, ddv1, dv2)
 
         dv2(1) = qs
 
-        if (nmax>=2) dv2(2) = 3 * x * dv2(1)
+        if (nmax>=2) dv2(2) = 3*x*dv2(1)
 
         if (nmax<3) return
         !
         do n = 3, nmax           !recurrence (3.36) of {tks},
-            dv2(n) = (2 * n - 1) * x * dv2(n - 1) / (n - 1) - n * dv2(n - 2) / (n - 1)
+            dv2(n) = (2*n - 1)*x*dv2(n - 1)/(n - 1) - n*dv2(n - 2)/(n - 1)
         enddo
         !**********************************************************************
         !                           m > 0
@@ -517,23 +517,23 @@ subroutine vigampl (x, nmax, m, ddv1, dv2)
 
         ! >>> determine x^m_m according to eq. (3.29) of {tks}:
 
-        a = 1.d0 / dsqrt(2.d0)               !x^1_1=a_1
+        a = 1.d0/dsqrt(2.d0)               !x^1_1=a_1
 
         do i = 1, m - 1
-            a = qs * dble(i + 1) * dsqrt(2 * i + 1.d0) * a / (i * dsqrt(2 * i + 2.d0))
+            a = qs*dble(i + 1)*dsqrt(2*i + 1.d0)*a/(i*dsqrt(2*i + 2.d0))
         enddo
         ! <<< a is now x^m_m; see (3.29) of {tks}
 
         ddv1(m) = a
-        dv2(m) = x * a                        !see (3.34) of {tks}
+        dv2(m) = x*a                        !see (3.34) of {tks}
         ! >>> determine x^{m+1}_m:
 
         if (m/=nmax)  then
             !see (3.30) of {tks}
-            der = x * dsqrt(2 * m + 1.d0) * a          ! der=x^{m+1}_m;
+            der = x*dsqrt(2*m + 1.d0)*a          ! der=x^{m+1}_m;
             ddv1(m + 1) = der
             !(3.35) of {tks}
-            dv2(m + 1) = ((m + 1) * x * der - a * dsqrt(2 * m + 1.d0)) / dble(m)
+            dv2(m + 1) = ((m + 1)*x*der - a*dsqrt(2*m + 1.d0))/dble(m)
             ! >>> determine remaining x^{l}_m's
         end if
 
@@ -541,11 +541,11 @@ subroutine vigampl (x, nmax, m, ddv1, dv2)
             do n = m + 2, nmax
                 !see (3.31) of {tks}
                 d3 = dsqrt(dble(n)**2 - dble(m)**2)
-                ddv1(n) = ((2 * n - 1) * x * ddv1(n - 1) - &
-                        dsqrt(dble(n - 1)**2 - dble(m)**2) * ddv1(n - 2)) / d3
+                ddv1(n) = ((2*n - 1)*x*ddv1(n - 1) - &
+                        dsqrt(dble(n - 1)**2 - dble(m)**2)*ddv1(n - 2))/d3
 
                 !see (3.35) of {tks}
-                dv2(n) = (n * x * ddv1(n) - ddv1(n - 1) * d3) / dble(m)
+                dv2(n) = (n*x*ddv1(n) - ddv1(n - 1)*d3)/dble(m)
             enddo
         end if
 
@@ -593,24 +593,24 @@ subroutine const (ngauss, nmax, x, w, an, ann, s, ss, np, eps)
     !data pi/3.141592653589793d0/
 
     do n = 1, nmax
-        nn = n * (n + 1)
+        nn = n*(n + 1)
         an(n) = dble(nn)
-        d = dsqrt(dble(2 * n + 1) / dble(nn))
+        d = dsqrt(dble(2*n + 1)/dble(nn))
         dd(n) = d
         do n1 = 1, n
-            ddd = d * dd(n1) * 0.5d0
+            ddd = d*dd(n1)*0.5d0
             ann(n, n1) = ddd
             ann(n1, n) = ddd
         end do
     end do
 
-    ng = 2 * ngauss
+    ng = 2*ngauss
 
     ! gif division points and weights
 
     !number of gauss integration
     !intervals from eps
-    neps = max(eps, 1.d0 / eps)
+    neps = max(eps, 1.d0/eps)
 
     select case (np)
     case(-1) ! spheroid
@@ -632,22 +632,22 @@ subroutine const (ngauss, nmax, x, w, an, ann, s, ss, np, eps)
 
         else if (neps>2) then
 
-            neps = 3 * neps
-            ng1 = dble(ngauss) / neps
+            neps = 3*neps
+            ng1 = dble(ngauss)/neps
 
-            ee = eps * eps
+            ee = eps*eps
             ee1 = ee - 1d0
 
             xav = 0.d0
 
             do i = 1, neps
 
-                xi1 = dble(i) / (neps + 1)
+                xi1 = dble(i)/(neps + 1)
 
-                cc = xi1 * xi1
+                cc = xi1*xi1
                 si = 1d0 - cc
-                x2(i) = abs(xi1 * si * ee1 / (si + ee * cc))       !|dr(theta)/dtheta|
-                xav = xav + 1.d0 / x2(i)
+                x2(i) = abs(xi1*si*ee1/(si + ee*cc))       !|dr(theta)/dtheta|
+                xav = xav + 1.d0/x2(i)
 
             enddo
 
@@ -657,7 +657,7 @@ subroutine const (ngauss, nmax, x, w, an, ann, s, ss, np, eps)
 
             do i = 1, neps
 
-                x2(i) = 1.d0 / (xav * x2(i))
+                x2(i) = 1.d0/(xav*x2(i))
 
             enddo
 
@@ -674,9 +674,9 @@ subroutine const (ngauss, nmax, x, w, an, ann, s, ss, np, eps)
 
                 end if
 
-                jg = ngauss + (i - 1) * ng1
+                jg = ngauss + (i - 1)*ng1
 
-                if(i==neps) ng1 = ngauss - (i - 1) * ng1
+                if(i==neps) ng1 = ngauss - (i - 1)*ng1
 
                 call gauleg(xi1, xi2, x1, w1, ng1)
 
@@ -701,7 +701,7 @@ subroutine const (ngauss, nmax, x, w, an, ann, s, ss, np, eps)
     case(-2, -9) ! cylinder or nanorod
         !*****************   only involves cylinders  **********************
 
-        ng1 = dble(ngauss) / 2d0
+        ng1 = dble(ngauss)/2d0
         ng2 = ngauss - ng1
         !-cos of separation angle between
         !horizontal and vertical cylinder
@@ -719,12 +719,12 @@ subroutine const (ngauss, nmax, x, w, an, ann, s, ss, np, eps)
         ! ind2 = 1 results are printed.
 
         do i = 1, ng1
-            w(i) = 0.5d0 * (xx + 1d0) * w1(i)
-            x(i) = 0.5d0 * (xx + 1d0) * x1(i) + 0.5d0 * (xx - 1d0)
+            w(i) = 0.5d0*(xx + 1d0)*w1(i)
+            x(i) = 0.5d0*(xx + 1d0)*x1(i) + 0.5d0*(xx - 1d0)
         end do
         do i = 1, ng2
-            w(i + ng1) = -0.5d0 * xx * w2(i)
-            x(i + ng1) = -0.5d0 * xx * x2(i) + 0.5d0 * xx
+            w(i + ng1) = -0.5d0*xx*w2(i)
+            x(i + ng1) = -0.5d0*xx*x2(i) + 0.5d0*xx
         end do
 
         ! assuming mirror symmetry in the $\theta=\pi/2$ plane
@@ -736,11 +736,11 @@ subroutine const (ngauss, nmax, x, w, an, ann, s, ss, np, eps)
         !*****************************************************************
     case(-4) ! cut sphere on top
 
-        xtheta = dacos((eps - rx) / rx)
-        xx = dsin(xtheta) / (pi - xtheta)
-        ng2 = xx * dble(ng)
+        xtheta = dacos((eps - rx)/rx)
+        xx = dsin(xtheta)/(pi - xtheta)
+        ng2 = xx*dble(ng)
         ng1 = ng - ng2
-        theta0 = 1.d0 / sqrt(8.d0 * rx / eps - 3.d0)  !cosine of the separation angle
+        theta0 = 1.d0/sqrt(8.d0*rx/eps - 3.d0)  !cosine of the separation angle
         xx = theta0
 
         call gauleg(-1.d0, theta0, x1, w1, ng1)       !for (0,ng1)
@@ -761,11 +761,11 @@ subroutine const (ngauss, nmax, x, w, an, ann, s, ss, np, eps)
         !*****************************************************************
     case(-5) ! cut sphere on its bottom
 
-        xtheta = dacos((eps - rx) / rx)
-        xx = dsin(xtheta) / (pi - xtheta)
-        ng1 = xx * dble(ng)
+        xtheta = dacos((eps - rx)/rx)
+        xx = dsin(xtheta)/(pi - xtheta)
+        ng1 = xx*dble(ng)
         ng2 = ng - ng1
-        theta0 = -1.d0 / sqrt(8.d0 * rx / eps - 3.d0)  !cosine of the separation angle
+        theta0 = -1.d0/sqrt(8.d0*rx/eps - 3.d0)  !cosine of the separation angle
 
         call gauleg(-1.d0, theta0, x1, w1, ng1)       !for (0,ng1)
         call gauleg(theta0, 1.d0, x2, w2, ng2)        !for (ng2+1,ng=ng1+ng2)
@@ -794,7 +794,7 @@ subroutine const (ngauss, nmax, x, w, an, ann, s, ss, np, eps)
 
         do i = 1, ngauss
             y = x(i)
-            y = 1d0 / (1d0 - y * y)
+            y = 1d0/(1d0 - y*y)
             ss(i) = y
             ss(ng - i + 1) = y
             y = dsqrt(y)
@@ -806,7 +806,7 @@ subroutine const (ngauss, nmax, x, w, an, ann, s, ss, np, eps)
 
         do i = 1, ng
             y = x(i)
-            y = 1d0 / (1d0 - y * y)
+            y = 1d0/(1d0 - y*y)
             ss(i) = y
             y = dsqrt(y)
             s(i) = y
@@ -862,7 +862,7 @@ subroutine vary (lam, mrr, mri, a, eps, &
             z(npng2), zr(npng2), zi(npng2), &
             ddr(npng2), drr(npng2), dri(npng2)
 
-    ng = ngauss * 2
+    ng = ngauss*2
     ht = 0d0
 
     ! decision tree to specify particle shape:
@@ -892,24 +892,24 @@ subroutine vary (lam, mrr, mri, a, eps, &
         end select
     end if
 
-    wv = p * 2d0 / lam                 !wave vector
-    ppi = wv * wv
-    pir = ppi * mrr
-    pii = ppi * mri
-    v = 1d0 / (mrr * mrr + mri * mri)
-    prr = mrr * v
-    pri = -mri * v
+    wv = p*2d0/lam                 !wave vector
+    ppi = wv*wv
+    pir = ppi*mrr
+    pii = ppi*mri
+    v = 1d0/(mrr*mrr + mri*mri)
+    prr = mrr*v
+    pri = -mri*v
     ta = 0d0
     do i = 1, ng
         vv = dsqrt(r(i))
-        v = vv * wv
+        v = vv*wv
         ta = max(ta, v)            !max. size parameter
-        vv = 1d0 / v
+        vv = 1d0/v
         ddr(i) = vv
-        drr(i) = prr * vv
-        dri(i) = pri * vv
-        v1 = v * mrr
-        v2 = v * mri
+        drr(i) = prr*vv
+        dri(i) = pri*vv
+        v1 = v*mrr
+        v2 = v*mri
         z(i) = v              !=(2\pi/\lambda)*r
         zr(i) = v1            !=(2\pi/\lambda)*r*mrr
         zi(i) = v2            !=(2\pi/\lambda)*r*mri
@@ -922,11 +922,11 @@ subroutine vary (lam, mrr, mri, a, eps, &
 
     ! ta is the ``max. size parameter", max(2*pi*sqrt(ri)/lambda)
 
-    tb = ta * dsqrt(mrr * mrr + mri * mri)     !=ta*epsin
+    tb = ta*dsqrt(mrr*mrr + mri*mri)     !=ta*epsin
     tb = dmax1(tb, dble(nmax))
     !
-    nnmax1 = 1.2d0 * dsqrt(dmax1(ta, dble(nmax))) + 3d0
-    nnmax2 = (tb + 4d0 * (tb**0.33333d0) + 1.2d0 * dsqrt(tb))  !wiscombe bound
+    nnmax1 = 1.2d0*dsqrt(dmax1(ta, dble(nmax))) + 3d0
+    nnmax2 = (tb + 4d0*(tb**0.33333d0) + 1.2d0*dsqrt(tb))  !wiscombe bound
     nnmax2 = nnmax2 - nmax + 5
 
     ! generate arrays of bessel functions at ngauss gif division
@@ -977,20 +977,20 @@ subroutine rsp_spheroid (x, ng, ngauss, rev, eps, r, dr)
     real(dp) a, aa, c, cc, ee, ee1, rr
     real(dp) s, ss
 
-    a = rev * eps**(1d0 / 3d0)
-    aa = a * a
-    ee = eps * eps
+    a = rev*eps**(1d0/3d0)
+    aa = a*a
+    ee = eps*eps
     ee1 = ee - 1d0
 
     do i = 1, ngauss
         c = x(i)
-        cc = c * c
+        cc = c*c
         ss = 1d0 - cc
         s = dsqrt(ss)                 !=\sin\theta
-        rr = 1d0 / (ss + ee * cc)
-        r(i) = aa * rr
+        rr = 1d0/(ss + ee*cc)
+        r(i) = aa*rr
         r(ng - i + 1) = r(i)
-        dr(i) = rr * c * s * ee1
+        dr(i) = rr*c*s*ee1
         dr(ng - i + 1) = -dr(i)
     end do
 
@@ -1039,20 +1039,20 @@ subroutine rsp_chebyshev (x, ng, rev, eps, n, r, dr)
     real(dp) dn, dnp, dn4
 
     dnp = dble(n)
-    dn = dnp * dnp
-    dn4 = dn * 4d0
-    ep = eps * eps
-    a = 1d0 + 1.5d0 * ep * (dn4 - 2d0) / (dn4 - 1d0)
-    i = (dnp + 0.1d0) * 0.5d0
-    i = 2 * i
-    if (i==n) a = a - 3d0 * eps * (1d0 + 0.25d0 * ep) / &
-            (dn - 1d0) - 0.25d0 * ep * eps / (9d0 * dn - 1d0)
-    r0 = rev * a**(-1d0 / 3d0)
+    dn = dnp*dnp
+    dn4 = dn*4d0
+    ep = eps*eps
+    a = 1d0 + 1.5d0*ep*(dn4 - 2d0)/(dn4 - 1d0)
+    i = (dnp + 0.1d0)*0.5d0
+    i = 2*i
+    if (i==n) a = a - 3d0*eps*(1d0 + 0.25d0*ep)/&
+            (dn - 1d0) - 0.25d0*ep*eps/(9d0*dn - 1d0)
+    r0 = rev*a**(-1d0/3d0)
     do i = 1, ng
-        xi = dacos(x(i)) * dnp
-        ri = r0 * (1d0 + eps * dcos(xi))    !the chebyshev shape function (*)
-        r(i) = ri * ri
-        dr(i) = -r0 * eps * dnp * dsin(xi) / ri
+        xi = dacos(x(i))*dnp
+        ri = r0*(1d0 + eps*dcos(xi))    !the chebyshev shape function (*)
+        r(i) = ri*ri
+        dr(i) = -r0*eps*dnp*dsin(xi)/ri
         !        write(nout,*) i,r(i),dr(i)
     end do
 
@@ -1109,36 +1109,36 @@ subroutine rsp_nanorod (x, ng, ngauss, rev, eps, epse, r, dr)
     !end do
 
     !cylider radius
-    a = rev * (2d0 * eps / (3d0 - eps * epse)) ** (1d0 / 3d0)
-    h = a / eps      ! nanorod half-height
-    he = a * epse  ! spheroid cap half-height
+    a = rev*(2d0*eps/(3d0 - eps*epse)) ** (1d0/3d0)
+    h = a/eps      ! nanorod half-height
+    he = a*epse  ! spheroid cap half-height
     hc = h - he     ! cylinder half-height
-    epsc = hc / a    ! cylider aspect ratio
+    epsc = hc/a    ! cylider aspect ratio
 
     do i = 1, ngauss, 1
         co = -x(i)
-        si = dsqrt(1_dp - co * co)
+        si = dsqrt(1_dp - co*co)
 
-        if ((hc * si)>(a * co)) then
+        if ((hc*si)>(a*co)) then
             ! along the circular surface:
-            rad = a / si
-            rthet = -a * co / (si * si)
-            valdr = -rthet / rad
+            rad = a/si
+            rthet = -a*co/(si*si)
+            valdr = -rthet/rad
         else
             !  along elliptic cap
             c2 = co**2
             s2 = si**2
             ! solution of square euation of ellipse move from the origin
-            alpha = dsqrt((epse**2 - epsc**2) * s2 + c2)
-            beta = epse**2 * s2 + c2
-            rad = (hc * co + he * alpha) / beta
-            valdr = -((-alpha * hc * si&
-                    + he * (epse**2 - epsc**2 - 1._dp) * si * co&
-                    ) / (he * alpha**2 + alpha * hc * co)&
-                    - (2 * (epse**2 - 1._dp) * si * co / beta))
+            alpha = dsqrt((epse**2 - epsc**2)*s2 + c2)
+            beta = epse**2*s2 + c2
+            rad = (hc*co + he*alpha)/beta
+            valdr = -((-alpha*hc*si&
+                    + he*(epse**2 - epsc**2 - 1._dp)*si*co&
+                    )/(he*alpha**2 + alpha*hc*co)&
+                    - (2*(epse**2 - 1._dp)*si*co/beta))
 
         endif
-        r(i) = rad * rad
+        r(i) = rad*rad
         r(ng - i + 1) = r(i)          !using mirror symmetry
 
         dr(i) = valdr
@@ -1182,20 +1182,20 @@ subroutine rsp_droplet (x, ng, rev, r, dr)
     parameter (nc = 10)
     real(dp) dri, r0, ri, xi, xin
 
-    r0 = rev * cdrop%r0v
+    r0 = rev*cdrop%r0v
     do i = 1, ng
         xi = dacos(x(i))
         ri = 1d0 + cdrop%c(0)
         dri = 0d0
         do n = 1, nc
-            xin = xi * n
-            ri = ri + cdrop%c(n) * dcos(xin)
-            dri = dri - cdrop%c(n) * n * dsin(xin)
+            xin = xi*n
+            ri = ri + cdrop%c(n)*dcos(xin)
+            dri = dri - cdrop%c(n)*n*dsin(xin)
         enddo
-        ri = ri * r0
-        dri = dri * r0
-        r(i) = ri * ri
-        dr(i) = dri / ri
+        ri = ri*r0
+        dri = dri*r0
+        r(i) = ri*ri
+        dr(i) = dri/ri
         !write(nout,*) i,r(i),dr(i)
     enddo
 
@@ -1250,39 +1250,39 @@ subroutine rsp_sphere_cut_top (x, ng, rev, eps, r, dr)
     integer i
     real(dp) a, rad, co, cc, rthet, si, ss, theta0
 
-    if (eps>=2.d0 * rev) then
+    if (eps>=2.d0*rev) then
         write(6, *)'invalid parameters for a cut sphere!'
         write(6, *)'execution stopped!'
         stop
     end if
 
-    theta0 = 1.d0 / sqrt(8.d0 * rev / eps - 3.d0)  !cosine of the separation angle
+    theta0 = 1.d0/sqrt(8.d0*rev/eps - 3.d0)  !cosine of the separation angle
 
     do i = 1, ng
 
         co = x(i)
-        cc = co * co
+        cc = co*co
         ss = 1.d0 - cc
         si = dsqrt(ss)                    !=\sin\theta
 
         if (co<theta0) then        ! r(\theta) along the sphere surface
 
-            a = rev - eps / 2.d0
+            a = rev - eps/2.d0
 
-            rad = a * co + sqrt(rev**2 - (a * si)**2)
-            rthet = -a * si - co * si * a**2 / sqrt(rev**2 - (a * si)**2)
+            rad = a*co + sqrt(rev**2 - (a*si)**2)
+            rthet = -a*si - co*si*a**2/sqrt(rev**2 - (a*si)**2)
             !c          rad=1.d-10
             !c          rthet=0.d0
 
         else if (co>=theta0) then   ! r(\theta) along the plane surface
             !                                         !    (co positive)
-            rad = eps / (2.d0 * co)
-            rthet = eps * si / (2.d0 * co**2)
+            rad = eps/(2.d0*co)
+            rthet = eps*si/(2.d0*co**2)
 
         end if
 
-        dr(i) = rthet / rad
-        r(i) = rad * rad
+        dr(i) = rthet/rad
+        r(i) = rad*rad
 
     end do
 
@@ -1336,39 +1336,39 @@ subroutine rsp_sphere_cut_bottom (x, ng, rev, eps, r, dr)
     integer i
     real(dp) rad, rthet, a, co, cc, si, ss, theta0
 
-    if (eps>=2.d0 * rev) then
+    if (eps>=2.d0*rev) then
         write(6, *)'invalid parameters for a cut sphere!'
         write(6, *)'execution stopped!'
         stop
     end if
 
-    theta0 = -1.d0 / sqrt(8.d0 * rev / eps - 3.d0)  !cosine of the separation angle resent
+    theta0 = -1.d0/sqrt(8.d0*rev/eps - 3.d0)  !cosine of the separation angle resent
     !                                           !case
     do i = 1, ng
 
         co = x(i)
-        cc = co * co
+        cc = co*co
         ss = 1.d0 - cc
         si = dsqrt(ss)                  !=\sin\theta
 
         if (co>theta0) then        !r(\theta) along the sphere surface
 
-            a = rev - eps / 2.d0
+            a = rev - eps/2.d0
 
-            rad = -a * co + sqrt(rev**2 - (a * si)**2)
-            rthet = a * si - co * si * a**2 / sqrt(rev**2 - (a * si)**2)
+            rad = -a*co + sqrt(rev**2 - (a*si)**2)
+            rthet = a*si - co*si*a**2/sqrt(rev**2 - (a*si)**2)
             !c          rad=1.d-10
             !c          rthet=0.d0
 
         else if (co<=theta0) then   ! r(\theta) along the plane surface
             !                                         !        (co negative)
-            rad = -eps / (2.d0 * co)
-            rthet = -eps * si / (2.d0 * co**2)
+            rad = -eps/(2.d0*co)
+            rthet = -eps*si/(2.d0*co**2)
 
         end if
 
-        dr(i) = rthet / rad
-        r(i) = rad * rad
+        dr(i) = rthet/rad
+        r(i) = rad*rad
 
     end do
 
@@ -1461,35 +1461,35 @@ subroutine rsp_cone_up(x, ng, rev, ht, r, dr)
 
     if (ht<1e-8) stop 'ht should be more than zero'
     ma = dsqrt(ht**2 + rev**2)              !=the length of the cone slant
-    ma = dsqrt(ma**2 + 8.d0 * rev**2) / 2.d0    !=the length of the median of the slant
+    ma = dsqrt(ma**2 + 8.d0*rev**2)/2.d0    !=the length of the median of the slant
 
-    theta0 = -ht / (2.d0 * ma)                !=cos of the separation angle
+    theta0 = -ht/(2.d0*ma)                !=cos of the separation angle
     !                                         !  (always negative)
 
     do i = 1, ng
 
         co = x(i)
-        cc = co * co
+        cc = co*co
         ss = 1.d0 - cc
         si = dsqrt(ss)                    !=\sin\theta
 
         if (co>theta0) then          ! theta < theta0,
             !                                           ! i.e. r(\theta) along the cone slant surface
 
-            ma = co + ht * si / rev
-            rad = 2.d0 * ht / (3.d0 * ma)
-            rthet = 2.d0 * ht * (si - ht * co / rev) / (3.d0 * ma**2)
+            ma = co + ht*si/rev
+            rad = 2.d0*ht/(3.d0*ma)
+            rthet = 2.d0*ht*(si - ht*co/rev)/(3.d0*ma**2)
 
         else if (co<=theta0) then     ! theta > theta0,
             !                                           ! i.e. r(\theta) along the cone base surface
 
-            rad = -ht / (3.d0 * co)               !always positive (co<0 on the base)
-            rthet = rad * si / co                 !always negative
+            rad = -ht/(3.d0*co)               !always positive (co<0 on the base)
+            rthet = rad*si/co                 !always negative
 
         end if
 
-        r(i) = rad * rad
-        dr(i) = rthet / rad
+        r(i) = rad*rad
+        dr(i) = rthet/rad
 
     end do
 
@@ -1583,7 +1583,7 @@ subroutine tmatr0_adapt(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
     !
     mm1 = 1
     nnmax = nmax + nmax
-    ng = 2 * ngauss
+    ng = 2*ngauss
     ngss = ng
     factor = 1d0
     !
@@ -1626,8 +1626,8 @@ subroutine tmatr0_adapt(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
                 ! (4.2.5) of {ed}:                   = (-1)^{l} d_{0 -m}^{(l)}(\theta)
 
                 si = sig(n)                  !=(-1)**n
-                d1(i2, n) = dd1 * si
-                d2(i2, n) = -dd2 * si
+                d1(i2, n) = dd1*si
+                d2(i2, n) = -dd2*si
 
             end if
 
@@ -1652,7 +1652,7 @@ subroutine tmatr0_adapt(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
     !  assigning r^2(\theta)*weight product:
 
     do i = 1, ngss
-        rr(i) = w(i) * r(i)
+        rr(i) = w(i)*r(i)
 
         !c           if (dr(i).eq.0.d0) rr(i)=0.d0   !temporarily only
     end do
@@ -1685,17 +1685,17 @@ subroutine tmatr0_adapt(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
                 !
                 do i = 1, ngss    !=ngauss   if ncheck.eq.1
                     !             !=2*ngauss if ncheck.eq.0
-                    ar12 = ar12 + w(i) * m0_ar12(x(i))         !~re j^{12}
-                    ai12 = ai12 + w(i) * m0_ai12(x(i))        !~im j^{12}
+                    ar12 = ar12 + w(i)*m0_ar12(x(i))         !~re j^{12}
+                    ai12 = ai12 + w(i)*m0_ai12(x(i))        !~im j^{12}
 
-                    gr12 = gr12 + w(i) * m0_gr12(x(i))        !~re rg j^{12}
-                    gi12 = gi12 + w(i) * m0_gi12(x(i))        !~im rg j^{12}
+                    gr12 = gr12 + w(i)*m0_gr12(x(i))        !~re rg j^{12}
+                    gi12 = gi12 + w(i)*m0_gi12(x(i))        !~im rg j^{12}
 
-                    ar21 = ar21 + w(i) * m0_ar21(x(i))        !~re j^{21}
-                    ai21 = ai21 + w(i) * m0_ai21(x(i))        !~im j^{21}
+                    ar21 = ar21 + w(i)*m0_ar21(x(i))        !~re j^{21}
+                    ai21 = ai21 + w(i)*m0_ai21(x(i))        !~im j^{21}
 
-                    gr21 = gr21 + w(i) * m0_gr21(x(i))       !~re rg j^{21}
-                    gi21 = gi21 + w(i) * m0_gi21(x(i))        !~im rg j^{21}
+                    gr21 = gr21 + w(i)*m0_gr21(x(i))       !~re rg j^{21}
+                    gi21 = gi21 + w(i)*m0_gi21(x(i))        !~im rg j^{21}
                 end do               !end of gauss integration
                 !                call integrate(m0_ar12, 0.0_dp, 1.0_dp, ar12)
                 !                call integrate(m0_ai12, 0.0_dp, 1.0_dp, ai12)
@@ -1718,17 +1718,17 @@ subroutine tmatr0_adapt(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
                 !%%%%%%%%%%%%%  forming j-matrices (j^{11}=j^{22}=0 for m=0):
             end if
 
-            an12 = ann(n1, n2) * factor
+            an12 = ann(n1, n2)*factor
 
-            r12(n1, n2) = ar12 * an12
-            r21(n1, n2) = ar21 * an12
-            i12(n1, n2) = ai12 * an12
-            i21(n1, n2) = ai21 * an12
+            r12(n1, n2) = ar12*an12
+            r21(n1, n2) = ar21*an12
+            i12(n1, n2) = ai12*an12
+            i21(n1, n2) = ai21*an12
 
-            rg12(n1, n2) = gr12 * an12
-            rg21(n1, n2) = gr21 * an12
-            ig12(n1, n2) = gi12 * an12
-            ig21(n1, n2) = gi21 * an12
+            rg12(n1, n2) = gr12*an12
+            rg21(n1, n2) = gr21*an12
+            ig12(n1, n2) = gi12*an12
+            ig21(n1, n2) = gi21*an12
         end do
     end do            !end of the loop over angular momenta
 
@@ -1758,10 +1758,10 @@ subroutine tmatr0_adapt(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
             tgr21 = -ig21(n1, n2)
             tgi21 = rg21(n1, n2)
 
-            tqr(k1, k2) = tpir * tar21 - tpii * tai21 + tppi * tar12
-            tqi(k1, k2) = tpir * tai21 + tpii * tar21 + tppi * tai12
-            trgqr(k1, k2) = tpir * tgr21 - tpii * tgi21 + tppi * tgr12
-            trgqi(k1, k2) = tpir * tgi21 + tpii * tgr21 + tppi * tgi12
+            tqr(k1, k2) = tpir*tar21 - tpii*tai21 + tppi*tar12
+            tqi(k1, k2) = tpir*tai21 + tpii*tar21 + tppi*tai12
+            trgqr(k1, k2) = tpir*tgr21 - tpii*tgi21 + tppi*tgr12
+            trgqi(k1, k2) = tpir*tgi21 + tpii*tgr21 + tppi*tgi12
 
             tqr(k1, kk2) = 0d0
             tqi(k1, kk2) = 0d0
@@ -1773,14 +1773,14 @@ subroutine tmatr0_adapt(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
             trgqr(kk1, k2) = 0d0
             trgqi(kk1, k2) = 0d0
 
-            tqr(kk1, kk2) = tpir * tar12 - tpii * tai12 + tppi * tar21
-            tqi(kk1, kk2) = tpir * tai12 + tpii * tar12 + tppi * tai21
-            trgqr(kk1, kk2) = tpir * tgr12 - tpii * tgi12 + tppi * tgr21
-            trgqi(kk1, kk2) = tpir * tgi12 + tpii * tgr12 + tppi * tgi21
+            tqr(kk1, kk2) = tpir*tar12 - tpii*tai12 + tppi*tar21
+            tqi(kk1, kk2) = tpir*tai12 + tpii*tar12 + tppi*tai21
+            trgqr(kk1, kk2) = tpir*tgr12 - tpii*tgi12 + tppi*tgr21
+            trgqi(kk1, kk2) = tpir*tgi12 + tpii*tgr12 + tppi*tgi21
         end do
     end do
 
-    nnmax = 2 * nm
+    nnmax = 2*nm
     do n1 = 1, nnmax
         do n2 = 1, nnmax
             qr(n1, n2) = tqr(n1, n2)
@@ -1884,7 +1884,7 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
     !
     mm1 = 1
     nnmax = nmax + nmax
-    ng = 2 * ngauss
+    ng = 2*ngauss
     ngss = ng
     factor = 1d0
     !
@@ -1927,8 +1927,8 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
                 ! (4.2.5) of {ed}:                   = (-1)^{l} d_{0 -m}^{(l)}(\theta)
 
                 si = sig(n)                  !=(-1)**n
-                d1(i2, n) = dd1 * si
-                d2(i2, n) = -dd2 * si
+                d1(i2, n) = dd1*si
+                d2(i2, n) = -dd2*si
 
             end if
 
@@ -1953,7 +1953,7 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
     !  assigning r^2(\theta)*weight product:
 
     do i = 1, ngss
-        rr(i) = w(i) * r(i)
+        rr(i) = w(i)*r(i)
 
         !c           if (dr(i).eq.0.d0) rr(i)=0.d0   !temporarily only
     end do
@@ -1985,9 +1985,9 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
                     d2n1 = d2(i, n1)
                     d1n2 = d1(i, n2)
                     d2n2 = d2(i, n2)
-                    a12 = d1n1 * d2n2
-                    a21 = d2n1 * d1n2
-                    a22 = d2n1 * d2n2
+                    a12 = d1n1*d2n2
+                    a21 = d2n1*d1n2
+                    a22 = d2n1*d2n2
                     !                    aa1=a12+a21
                     ! vector spherical harmonics:
                     !  since refractive index is allowed to be complex in general,
@@ -2010,76 +2010,76 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
                     !_____________________
                     ! re and im of j_{n2}(k_{in}r) j_{n1}(k_{out}r):
 
-                    c1r = qjr2 * qj1
-                    c1i = qji2 * qj1
+                    c1r = qjr2*qj1
+                    c1i = qji2*qj1
                     ! re and im of j_{n2}(k_{in}r) h_{n1}(k_{out}r):
 
-                    b1r = c1r - qji2 * qy1
-                    b1i = c1i + qjr2 * qy1
+                    b1r = c1r - qji2*qy1
+                    b1i = c1i + qjr2*qy1
                     ! re and im of j_{n2}(k_{in}r) [k_{out}r j_{n1}(k_{out}r)]'/(k_{out}r):
 
-                    c2r = qjr2 * qdj1
-                    c2i = qji2 * qdj1
+                    c2r = qjr2*qdj1
+                    c2i = qji2*qdj1
                     ! re and im of j_{n2}(k_{in}r) [k_{out}r h_{n1}(k_{out}r)]'/(k_{out}r):
 
-                    b2r = c2r - qji2 * qdy1
-                    b2i = c2i + qjr2 * qdy1
+                    b2r = c2r - qji2*qdy1
+                    b2i = c2i + qjr2*qdy1
 
                     ddri = ddr(i)               !1/(k_{out}r)
                     ! re and im of [1/(k_{out}r)]*j_{n2}(k_{in}r) j_{n1}(k_{out}r)
 
-                    c3r = ddri * c1r
-                    c3i = ddri * c1i
+                    c3r = ddri*c1r
+                    c3i = ddri*c1i
                     ! re and im of [1/(k_{out}r)]*j_{n2}(k_{in}r) h_{n1}(k_{out}r):
 
-                    b3r = ddri * b1r
-                    b3i = ddri * b1i
+                    b3r = ddri*b1r
+                    b3i = ddri*b1i
                     ! re and im of  [k_{in}r j_{n2}(k_{in}r)]'/(k_{in}r)
-                    !                          * j_{n1}(k_{out}r):
+                    !                         *j_{n1}(k_{out}r):
 
-                    c4r = qdjr2 * qj1
-                    c4i = qdji2 * qj1
+                    c4r = qdjr2*qj1
+                    c4i = qdji2*qj1
                     ! re and im of [k_{in}r j_{n2}(k_{in}r)]'/(k_{in}r)
-                    !                          *  h_{n1}(k_{out}r):
+                    !                         * h_{n1}(k_{out}r):
 
-                    b4r = c4r - qdji2 * qy1
-                    b4i = c4i + qdjr2 * qy1
+                    b4r = c4r - qdji2*qy1
+                    b4i = c4i + qdjr2*qy1
 
                     drri = drr(i)               !re[1/(k_{in}r)]
                     drii = dri(i)               !im[1/(k_{in}r)]
                     ! re and im of [1/(k_{in}r)] j_{n2}(k_{in}r) j_{n1}(k_{out}r):
 
-                    c5r = c1r * drri - c1i * drii
-                    c5i = c1i * drri + c1r * drii
+                    c5r = c1r*drri - c1i*drii
+                    c5i = c1i*drri + c1r*drii
                     ! re and im of [1/(k_{in}r)] j_{n2}(k_{in}r) h_{n1}(k_{out}r):
 
-                    b5r = b1r * drri - b1i * drii
-                    b5i = b1i * drri + b1r * drii
+                    b5r = b1r*drri - b1i*drii
+                    b5i = b1i*drri + b1r*drii
                     !%%%%%%%  forming integrands of j-matrices (j^{11}=j^{22}=0 for m=0): %%%%%%%%
 
                     uri = dr(i)        !dr/(d\theta)
                     rri = rr(i)        !w(i)*r^2(\theta)
                     ! w(i)*r^2(\theta)*d2n1*d2n2:
-                    f1 = rri * a22      !prefactor containing r^2(\theta)<->hat{r} part
+                    f1 = rri*a22      !prefactor containing r^2(\theta)<->hat{r} part
                     ! n1*(n1+1)*w(i)*r(\theta)*[dr/(d\theta)]*d1n1*d2n2:
-                    f2 = rri * uri * an1 * a12     !prefactor containing r(\theta)*[dr/(d\theta)]
+                    f2 = rri*uri*an1*a12     !prefactor containing r(\theta)*[dr/(d\theta)]
                     !                                          !hat{theta} part
 
-                    ar12 = ar12 + f1 * b2r + f2 * b3r        !~re j^{12}
-                    ai12 = ai12 + f1 * b2i + f2 * b3i        !~im j^{12}
+                    ar12 = ar12 + f1*b2r + f2*b3r        !~re j^{12}
+                    ai12 = ai12 + f1*b2i + f2*b3i        !~im j^{12}
 
-                    gr12 = gr12 + f1 * c2r + f2 * c3r        !~re rg j^{12}
-                    gi12 = gi12 + f1 * c2i + f2 * c3i        !~im rg j^{12}
+                    gr12 = gr12 + f1*c2r + f2*c3r        !~re rg j^{12}
+                    gi12 = gi12 + f1*c2i + f2*c3i        !~im rg j^{12}
 
                     !*  n2*(n2+1)*w(i)*r(\theta)*[dr/(d\theta)]*d2n1*d1n2:
-                    f2 = rri * uri * an2 * a21     !prefactor containing r(\theta)*[dr/(d\theta)]
+                    f2 = rri*uri*an2*a21     !prefactor containing r(\theta)*[dr/(d\theta)]
                     !                                          !hat{theta} part
 
-                    ar21 = ar21 + f1 * b4r + f2 * b5r        !~re j^{21}
-                    ai21 = ai21 + f1 * b4i + f2 * b5i        !~im j^{21}
+                    ar21 = ar21 + f1*b4r + f2*b5r        !~re j^{21}
+                    ai21 = ai21 + f1*b4i + f2*b5i        !~im j^{21}
 
-                    gr21 = gr21 + f1 * c4r + f2 * c5r        !~re rg j^{21}
-                    gi21 = gi21 + f1 * c4i + f2 * c5i        !~im rg j^{21}
+                    gr21 = gr21 + f1*c4r + f2*c5r        !~re rg j^{21}
+                    gi21 = gi21 + f1*c4i + f2*c5i        !~im rg j^{21}
                 end do               !end of gauss integration
 
                 !                write(nout+3,*)'n1=',n1,'   n2=',n2
@@ -2094,17 +2094,17 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
                 !%%%%%%%%%%%%%  forming j-matrices (j^{11}=j^{22}=0 for m=0):
             end if
 
-            an12 = ann(n1, n2) * factor
+            an12 = ann(n1, n2)*factor
 
-            r12(n1, n2) = ar12 * an12
-            r21(n1, n2) = ar21 * an12
-            i12(n1, n2) = ai12 * an12
-            i21(n1, n2) = ai21 * an12
+            r12(n1, n2) = ar12*an12
+            r21(n1, n2) = ar21*an12
+            i12(n1, n2) = ai12*an12
+            i21(n1, n2) = ai21*an12
 
-            rg12(n1, n2) = gr12 * an12
-            rg21(n1, n2) = gr21 * an12
-            ig12(n1, n2) = gi12 * an12
-            ig21(n1, n2) = gi21 * an12
+            rg12(n1, n2) = gr12*an12
+            rg21(n1, n2) = gr21*an12
+            ig12(n1, n2) = gi12*an12
+            ig21(n1, n2) = gi21*an12
         end do
     end do            !end of the loop over angular momenta
 
@@ -2134,10 +2134,10 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
             tgr21 = -ig21(n1, n2)
             tgi21 = rg21(n1, n2)
 
-            tqr(k1, k2) = tpir * tar21 - tpii * tai21 + tppi * tar12
-            tqi(k1, k2) = tpir * tai21 + tpii * tar21 + tppi * tai12
-            trgqr(k1, k2) = tpir * tgr21 - tpii * tgi21 + tppi * tgr12
-            trgqi(k1, k2) = tpir * tgi21 + tpii * tgr21 + tppi * tgi12
+            tqr(k1, k2) = tpir*tar21 - tpii*tai21 + tppi*tar12
+            tqi(k1, k2) = tpir*tai21 + tpii*tar21 + tppi*tai12
+            trgqr(k1, k2) = tpir*tgr21 - tpii*tgi21 + tppi*tgr12
+            trgqi(k1, k2) = tpir*tgi21 + tpii*tgr21 + tppi*tgi12
 
             tqr(k1, kk2) = 0d0
             tqi(k1, kk2) = 0d0
@@ -2149,14 +2149,14 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
             trgqr(kk1, k2) = 0d0
             trgqi(kk1, k2) = 0d0
 
-            tqr(kk1, kk2) = tpir * tar12 - tpii * tai12 + tppi * tar21
-            tqi(kk1, kk2) = tpir * tai12 + tpii * tar12 + tppi * tai21
-            trgqr(kk1, kk2) = tpir * tgr12 - tpii * tgi12 + tppi * tgr21
-            trgqi(kk1, kk2) = tpir * tgi12 + tpii * tgr12 + tppi * tgi21
+            tqr(kk1, kk2) = tpir*tar12 - tpii*tai12 + tppi*tar21
+            tqi(kk1, kk2) = tpir*tai12 + tpii*tar12 + tppi*tai21
+            trgqr(kk1, kk2) = tpir*tgr12 - tpii*tgi12 + tppi*tgr21
+            trgqi(kk1, kk2) = tpir*tgi12 + tpii*tgr12 + tppi*tgi21
         end do
     end do
 
-    nnmax = 2 * nm
+    nnmax = 2*nm
     do n1 = 1, nnmax
         do n2 = 1, nnmax
             qr(n1, n2) = tqr(n1, n2)
@@ -2283,8 +2283,8 @@ subroutine tmatr_adapt (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, d
     !________
     mm1 = m
     qm = dble(m)
-    qmm = qm * qm
-    ng = 2 * ngauss
+    qmm = qm*qm
+    ng = 2*ngauss
     ngss = ng
     factor = 1d0
     !
@@ -2324,8 +2324,8 @@ subroutine tmatr_adapt (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, d
 
                 si = sig(n + m)                  !=(-1)**(n+m)
                 !                                          !exactly what follows from {ed}
-                d1(i2, n) = dd1 * si
-                d2(i2, n) = -dd2 * si
+                d1(i2, n) = dd1*si
+                d2(i2, n) = -dd2*si
 
             end if
         enddo
@@ -2348,12 +2348,12 @@ subroutine tmatr_adapt (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, d
     !  assigning r^2(\theta)*weight product:
 
     do i = 1, ngss
-        wr = w(i) * r(i)
+        wr = w(i)*r(i)
 
         !c           if (dr(i).eq.0.d0) wr=0.d0   !temporarily only
 
-        ds(i) = s(i) * qm * wr       !=dble(m)*w(i)*r^2(\theta)/(|\sin\theta|)
-        dss(i) = ss(i) * qmm       !=dble(m)**2/(\sin^2\theta)
+        ds(i) = s(i)*qm*wr       !=dble(m)*w(i)*r^2(\theta)/(|\sin\theta|)
+        dss(i) = ss(i)*qmm       !=dble(m)**2/(\sin^2\theta)
         rr(i) = wr
     end do
     !
@@ -2391,21 +2391,21 @@ subroutine tmatr_adapt (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, d
                 !                m = integrand%m
                 !                si = sig(n1 + n2)
                 xi = x(i)
-                an1 = dble(n1 * (n1 + 1))
-                an2 = dble(n2 * (n2 + 1))
+                an1 = dble(n1*(n1 + 1))
+                an2 = dble(n2*(n2 + 1))
                 if (mpar%np.ne.-2) stop 'adaptive integration is only implemented for cylinder'
                 x_to_rsp(1) = xi
                 call rsp_cylinder(x_to_rsp, r_from_x, dr_from_x)
                 call vig_1v (xi, n1, m, d1n1, d2n1)
                 call vig_1v (xi, n2, m, d1n2, d2n2)
-                a11 = d1n1 * d1n2
-                a12 = d1n1 * d2n2
-                a21 = d2n1 * d1n2
-                a22 = d2n1 * d2n2
+                a11 = d1n1*d1n2
+                a12 = d1n1*d2n2
+                a21 = d2n1*d1n2
+                a22 = d2n1*d2n2
 
                 dssi = dble(m**2)/ (1d0 - xi*xi)       !=dble(m)**2/(\sin^2\theta)
                 aa1 = a12 + a21            != d1n1*d2n2+d2n1*d1n2
-                aa2 = a11 * dssi + a22   !=(d1n1*d1n2)*dble(m)**2/(\sin^2\theta)
+                aa2 = a11*dssi + a22   !=(d1n1*d1n2)*dble(m)**2/(\sin^2\theta)
                 !                          ! +d2n1*d2n2
                 ! vector spherical harmonics:
                 !  since refractive index is allowed to be complex in general,
@@ -2420,12 +2420,12 @@ subroutine tmatr_adapt (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, d
                 call cbesscjcdj(r_from_x(1),n2, integrand%nmax, qjr2, qji2, qdjr2, qdji2)
                 ! re and im of j_{n2}(k_{in}r) j_{n1}(k_{out}r):
 
-                c1r = qjr2 * qj1
-                c1i = qji2 * qj1
+                c1r = qjr2*qj1
+                c1i = qji2*qj1
                 ! re and im of j_{n2}(k_{in}r) h_{n1}(k_{out}r):
 
-                b1r = c1r - qji2 * qy1
-                b1i = c1i + qjr2 * qy1
+                b1r = c1r - qji2*qy1
+                b1i = c1i + qjr2*qy1
                 ! re and im of j_{n2}(k_{in}r) j_{n1}'(k_{out}r):
 
                 c2r = qjr2*qdj1
@@ -2454,9 +2454,9 @@ subroutine tmatr_adapt (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, d
                 b4i = c4i + qdjr2*qy1
                 ! re and im of [1/(k_{in}r)] j_{n2}(k_{in}r) j_{n1}(k_{out}r):
 
-                v = 1.0_dp / (cbess%mrr**2 + cbess%mri**2)
-                drri = cbess%mrr * v * ddri               !re[1/(k_{in}r)]
-                drii = -cbess%mri * v * ddri               !im[1/(k_{in}r)]
+                v = 1.0_dp/(cbess%mrr**2 + cbess%mri**2)
+                drri = cbess%mrr*v*ddri               !re[1/(k_{in}r)]
+                drii = -cbess%mri*v*ddri               !im[1/(k_{in}r)]
 
                 c5r = c1r*drri - c1i*drii
                 c5i = c1i*drri + c1r*drii
@@ -2493,8 +2493,8 @@ subroutine tmatr_adapt (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, d
                 uri = -dr_from_x(1)  ! todo: why 'minus' sign was need to fit previous line?
 !                uri = dr(i)
 
-!                wr = w(i) * r_from_x(1)
-                dsi = w(i) * r_from_x(1) * dsqrt(1d0 / (1d0 - xi*xi)) * dble(m)      !=dble(m)*w(i)*r^2(\theta)/(|\sin\theta|)
+!                wr = w(i)*r_from_x(1)
+                dsi = w(i)*r_from_x(1)*dsqrt(1d0/(1d0 - xi*xi))*dble(m)      !=dble(m)*w(i)*r^2(\theta)/(|\sin\theta|)
                 rri = w(i)*r_from_x(1)
 
                 if (ncheck==1.and.si>0d0) then
@@ -2540,25 +2540,25 @@ subroutine tmatr_adapt (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, d
                 gi22 = gi22 + e1*c6i + e2*c7i + e3*c8i
             end do ! end of gauss integration loop
 
-            an12 = ann(n1, n2) * factor
+            an12 = ann(n1, n2)*factor
 
-            r11(n1, n2) = ar11 * an12
-            r12(n1, n2) = ar12 * an12
-            r21(n1, n2) = ar21 * an12
-            r22(n1, n2) = ar22 * an12
-            i11(n1, n2) = ai11 * an12
-            i12(n1, n2) = ai12 * an12
-            i21(n1, n2) = ai21 * an12
-            i22(n1, n2) = ai22 * an12
+            r11(n1, n2) = ar11*an12
+            r12(n1, n2) = ar12*an12
+            r21(n1, n2) = ar21*an12
+            r22(n1, n2) = ar22*an12
+            i11(n1, n2) = ai11*an12
+            i12(n1, n2) = ai12*an12
+            i21(n1, n2) = ai21*an12
+            i22(n1, n2) = ai22*an12
 
-            rg11(n1, n2) = gr11 * an12
-            rg12(n1, n2) = gr12 * an12
-            rg21(n1, n2) = gr21 * an12
-            rg22(n1, n2) = gr22 * an12
-            ig11(n1, n2) = gi11 * an12
-            ig12(n1, n2) = gi12 * an12
-            ig21(n1, n2) = gi21 * an12
-            ig22(n1, n2) = gi22 * an12
+            rg11(n1, n2) = gr11*an12
+            rg12(n1, n2) = gr12*an12
+            rg21(n1, n2) = gr21*an12
+            rg22(n1, n2) = gr22*an12
+            ig11(n1, n2) = gi11*an12
+            ig12(n1, n2) = gi12*an12
+            ig21(n1, n2) = gi21*an12
+            ig22(n1, n2) = gi22*an12
         end do
     end do
 
@@ -2595,29 +2595,29 @@ subroutine tmatr_adapt (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, d
             tgr22 = -rg22(n1, n2)
             tgi22 = -ig22(n1, n2)
 
-            tqr(k1, k2) = tpir * tar21 - tpii * tai21 + tppi * tar12
-            tqi(k1, k2) = tpir * tai21 + tpii * tar21 + tppi * tai12
-            trgqr(k1, k2) = tpir * tgr21 - tpii * tgi21 + tppi * tgr12
-            trgqi(k1, k2) = tpir * tgi21 + tpii * tgr21 + tppi * tgi12
+            tqr(k1, k2) = tpir*tar21 - tpii*tai21 + tppi*tar12
+            tqi(k1, k2) = tpir*tai21 + tpii*tar21 + tppi*tai12
+            trgqr(k1, k2) = tpir*tgr21 - tpii*tgi21 + tppi*tgr12
+            trgqi(k1, k2) = tpir*tgi21 + tpii*tgr21 + tppi*tgi12
 
-            tqr(k1, kk2) = tpir * tar11 - tpii * tai11 + tppi * tar22
-            tqi(k1, kk2) = tpir * tai11 + tpii * tar11 + tppi * tai22
-            trgqr(k1, kk2) = tpir * tgr11 - tpii * tgi11 + tppi * tgr22
-            trgqi(k1, kk2) = tpir * tgi11 + tpii * tgr11 + tppi * tgi22
+            tqr(k1, kk2) = tpir*tar11 - tpii*tai11 + tppi*tar22
+            tqi(k1, kk2) = tpir*tai11 + tpii*tar11 + tppi*tai22
+            trgqr(k1, kk2) = tpir*tgr11 - tpii*tgi11 + tppi*tgr22
+            trgqi(k1, kk2) = tpir*tgi11 + tpii*tgr11 + tppi*tgi22
 
-            tqr(kk1, k2) = tpir * tar22 - tpii * tai22 + tppi * tar11
-            tqi(kk1, k2) = tpir * tai22 + tpii * tar22 + tppi * tai11
-            trgqr(kk1, k2) = tpir * tgr22 - tpii * tgi22 + tppi * tgr11
-            trgqi(kk1, k2) = tpir * tgi22 + tpii * tgr22 + tppi * tgi11
+            tqr(kk1, k2) = tpir*tar22 - tpii*tai22 + tppi*tar11
+            tqi(kk1, k2) = tpir*tai22 + tpii*tar22 + tppi*tai11
+            trgqr(kk1, k2) = tpir*tgr22 - tpii*tgi22 + tppi*tgr11
+            trgqi(kk1, k2) = tpir*tgi22 + tpii*tgr22 + tppi*tgi11
 
-            tqr(kk1, kk2) = tpir * tar12 - tpii * tai12 + tppi * tar21
-            tqi(kk1, kk2) = tpir * tai12 + tpii * tar12 + tppi * tai21
-            trgqr(kk1, kk2) = tpir * tgr12 - tpii * tgi12 + tppi * tgr21
-            trgqi(kk1, kk2) = tpir * tgi12 + tpii * tgr12 + tppi * tgi21
+            tqr(kk1, kk2) = tpir*tar12 - tpii*tai12 + tppi*tar21
+            tqi(kk1, kk2) = tpir*tai12 + tpii*tar12 + tppi*tai21
+            trgqr(kk1, kk2) = tpir*tgr12 - tpii*tgi12 + tppi*tgr21
+            trgqi(kk1, kk2) = tpir*tgi12 + tpii*tgr12 + tppi*tgi21
         end do
     end do
 
-    nnmax = 2 * nm
+    nnmax = 2*nm
     do n1 = 1, nnmax
         do n2 = 1, nnmax
             qr(n1, n2) = tqr(n1, n2)
@@ -2740,8 +2740,8 @@ subroutine tmatr (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
     !________
     mm1 = m
     qm = dble(m)
-    qmm = qm * qm
-    ng = 2 * ngauss
+    qmm = qm*qm
+    ng = 2*ngauss
     ngss = ng
     factor = 1d0
     !
@@ -2781,8 +2781,8 @@ subroutine tmatr (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
 
                 si = sig(n + m)                  !=(-1)**(n+m)
                 !                                          !exactly what follows from {ed}
-                d1(i2, n) = dd1 * si
-                d2(i2, n) = -dd2 * si
+                d1(i2, n) = dd1*si
+                d2(i2, n) = -dd2*si
 
             end if
         enddo
@@ -2805,12 +2805,12 @@ subroutine tmatr (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
     !  assigning r^2(\theta)*weight product:
 
     do i = 1, ngss
-        wr = w(i) * r(i)
+        wr = w(i)*r(i)
 
         !c           if (dr(i).eq.0.d0) wr=0.d0   !temporarily only
 
-        ds(i) = s(i) * qm * wr       !=dble(m)*w(i)*r^2(\theta)/(|\sin\theta|)
-        dss(i) = ss(i) * qmm       !=dble(m)**2/(\sin^2\theta)
+        ds(i) = s(i)*qm*wr       !=dble(m)*w(i)*r^2(\theta)/(|\sin\theta|)
+        dss(i) = ss(i)*qmm       !=dble(m)**2/(\sin^2\theta)
         rr(i) = wr
     end do
     !
@@ -2842,12 +2842,12 @@ subroutine tmatr (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
                 d2n1 = d2(i, n1)
                 d1n2 = d1(i, n2)
                 d2n2 = d2(i, n2)
-                a11 = d1n1 * d1n2
-                a12 = d1n1 * d2n2
-                a21 = d2n1 * d1n2
-                a22 = d2n1 * d2n2
+                a11 = d1n1*d1n2
+                a12 = d1n1*d2n2
+                a21 = d2n1*d1n2
+                a22 = d2n1*d2n2
                 aa1 = a12 + a21            != d1n1*d2n2+d2n1*d1n2
-                aa2 = a11 * dss(i) + a22   !=(d1n1*d1n2)*dble(m)**2/(\sin^2\theta)
+                aa2 = a11*dss(i) + a22   !=(d1n1*d1n2)*dble(m)**2/(\sin^2\theta)
                 !                          ! +d2n1*d2n2
                 ! vector spherical harmonics:
                 !  since refractive index is allowed to be complex in general,
@@ -2866,73 +2866,73 @@ subroutine tmatr (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
                 qdy1 = cbess%dy(i, n1)
                 ! re and im of j_{n2}(k_{in}r) j_{n1}(k_{out}r):
 
-                c1r = qjr2 * qj1
-                c1i = qji2 * qj1
+                c1r = qjr2*qj1
+                c1i = qji2*qj1
                 ! re and im of j_{n2}(k_{in}r) h_{n1}(k_{out}r):
 
-                b1r = c1r - qji2 * qy1
-                b1i = c1i + qjr2 * qy1
+                b1r = c1r - qji2*qy1
+                b1i = c1i + qjr2*qy1
                 ! re and im of j_{n2}(k_{in}r) j_{n1}'(k_{out}r):
 
-                c2r = qjr2 * qdj1
-                c2i = qji2 * qdj1
+                c2r = qjr2*qdj1
+                c2i = qji2*qdj1
                 ! re and im of j_{n2}(k_{in}r) h_{n1}'(k_{out}r):
 
-                b2r = c2r - qji2 * qdy1
-                b2i = c2i + qjr2 * qdy1
+                b2r = c2r - qji2*qdy1
+                b2i = c2i + qjr2*qdy1
 
                 ddri = ddr(i)               !1/(k_{out}r)
                 ! re and im of [1/(k_{out}r)]*j_{n2}(k_{in}r) j_{n1}(k_{out}r)
 
-                c3r = ddri * c1r
-                c3i = ddri * c1i
+                c3r = ddri*c1r
+                c3i = ddri*c1i
                 ! re and im of [1/(k_{out}r)]*j_{n2}(k_{in}r) h_{n1}(k_{out}r):
 
-                b3r = ddri * b1r
-                b3i = ddri * b1i
+                b3r = ddri*b1r
+                b3i = ddri*b1i
                 ! re and im of j_{n2}'(k_{in}r) j_{n1}(k_{out}r):
 
-                c4r = qdjr2 * qj1
-                c4i = qdji2 * qj1
+                c4r = qdjr2*qj1
+                c4i = qdji2*qj1
                 ! re and im of j_{n2}'(k_{in}r) h_{n1}(k_{out}r):
 
-                b4r = c4r - qdji2 * qy1
-                b4i = c4i + qdjr2 * qy1
+                b4r = c4r - qdji2*qy1
+                b4i = c4i + qdjr2*qy1
 
                 drri = drr(i)               !re[1/(k_{in}r)]
                 drii = dri(i)               !im[1/(k_{in}r)]
                 ! re and im of [1/(k_{in}r)] j_{n2}(k_{in}r) j_{n1}(k_{out}r):
 
-                c5r = c1r * drri - c1i * drii
-                c5i = c1i * drri + c1r * drii
+                c5r = c1r*drri - c1i*drii
+                c5i = c1i*drri + c1r*drii
                 ! re and im of [1/(k_{in}r)] j_{n2}(k_{in}r) h_{n1}(k_{out}r):
 
-                b5r = b1r * drri - b1i * drii
-                b5i = b1i * drri + b1r * drii
+                b5r = b1r*drri - b1i*drii
+                b5i = b1i*drri + b1r*drii
                 ! re and im of j_{n2}'(k_{in}r) j_{n1}'(k_{out}r):
 
-                c6r = qdjr2 * qdj1
-                c6i = qdji2 * qdj1
+                c6r = qdjr2*qdj1
+                c6i = qdji2*qdj1
                 ! re and im of j_{n2}'(k_{in}r) h_{n1}'(k_{out}r):
 
-                b6r = c6r - qdji2 * qdy1
-                b6i = c6i + qdjr2 * qdy1
+                b6r = c6r - qdji2*qdy1
+                b6i = c6i + qdjr2*qdy1
                 ! re and im of [1/(k_{out}r)] j_{n2}'(k_{in}r) j_{n1}(k_{out}r):
 
-                c7r = c4r * ddri
-                c7i = c4i * ddri
+                c7r = c4r*ddri
+                c7i = c4i*ddri
                 ! re and im of [1/(k_{out}r)] j_{n2}'(k_{in}r) h_{n1}(k_{out}r):
 
-                b7r = b4r * ddri
-                b7i = b4i * ddri
+                b7r = b4r*ddri
+                b7i = b4i*ddri
                 ! re and im of [1/(k_{in}r)] j_{n2}(k_{in}r) j_{n1}'(k_{out}r):
 
-                c8r = c2r * drri - c2i * drii
-                c8i = c2i * drri + c2r * drii
+                c8r = c2r*drri - c2i*drii
+                c8i = c2i*drri + c2r*drii
                 ! re and im of [1/(k_{in}r)] j_{n2}(k_{in}r) h_{n1}'(k_{out}r):
 
-                b8r = b2r * drri - b2i * drii
-                b8i = b2i * drri + b2r * drii
+                b8r = b2r*drri - b2i*drii
+                b8i = b2i*drri + b2r*drii
                 ! %%%%%%%%%  forming integrands of j-matrices (j^{11}=j^{22}=0 for m=0):
 
                 uri = dr(i)
@@ -2941,66 +2941,66 @@ subroutine tmatr (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
 
                 if (ncheck==1.and.si>0d0) then
                     ! w(i)*r^2(\theta)*[(d1n1*d1n2)*dble(m)**2/(\sin^2\theta)+d2n1*d2n2]:
-                    f1 = rri * aa2            !prefactor containing r^2(\theta)<->hat{r} part
+                    f1 = rri*aa2            !prefactor containing r^2(\theta)<->hat{r} part
                     ! n1*(n1+1)*w(i)*r(\theta)*[dr/(d\theta)]*d1n1*d2n2:
-                    f2 = rri * uri * an1 * a12     !prefactor containing r(\theta)*[dr/(d\theta)]
+                    f2 = rri*uri*an1*a12     !prefactor containing r(\theta)*[dr/(d\theta)]
                     !                                          !hat{theta} part
 
-                    ar12 = ar12 + f1 * b2r + f2 * b3r        !~re j^{12}
-                    ai12 = ai12 + f1 * b2i + f2 * b3i        !~im j^{12}
+                    ar12 = ar12 + f1*b2r + f2*b3r        !~re j^{12}
+                    ai12 = ai12 + f1*b2i + f2*b3i        !~im j^{12}
 
-                    gr12 = gr12 + f1 * c2r + f2 * c3r        !~re rg j^{12}
-                    gi12 = gi12 + f1 * c2i + f2 * c3i        !~im rg j^{12}
+                    gr12 = gr12 + f1*c2r + f2*c3r        !~re rg j^{12}
+                    gi12 = gi12 + f1*c2i + f2*c3i        !~im rg j^{12}
                     ! n2*(n2+1)*w(i)*r(\theta)*[dr/(d\theta)]*d2n1*d1n2:
-                    f2 = rri * uri * an2 * a21     !prefactor containing r(\theta)*[dr/(d\theta)]
+                    f2 = rri*uri*an2*a21     !prefactor containing r(\theta)*[dr/(d\theta)]
                     !                                          !hat{theta} part
 
-                    ar21 = ar21 + f1 * b4r + f2 * b5r
-                    ai21 = ai21 + f1 * b4i + f2 * b5i
+                    ar21 = ar21 + f1*b4r + f2*b5r
+                    ai21 = ai21 + f1*b4i + f2*b5i
 
-                    gr21 = gr21 + f1 * c4r + f2 * c5r
-                    gi21 = gi21 + f1 * c4i + f2 * c5i
+                    gr21 = gr21 + f1*c4r + f2*c5r
+                    gi21 = gi21 + f1*c4i + f2*c5i
 
                     cycle
                 end if
                 ! [dble(m)*w(i)*r^2(i)/(|\sin\theta|)]*(d1n1*d2n2+d2n1*d1n2):
-                e1 = dsi * aa1
+                e1 = dsi*aa1
 
-                ar11 = ar11 + e1 * b1r
-                ai11 = ai11 + e1 * b1i
-                gr11 = gr11 + e1 * c1r
-                gi11 = gi11 + e1 * c1i
+                ar11 = ar11 + e1*b1r
+                ai11 = ai11 + e1*b1i
+                gr11 = gr11 + e1*c1r
+                gi11 = gi11 + e1*c1i
 
-                e2 = dsi * uri * a11
-                e3 = e2 * an2
-                e2 = e2 * an1
+                e2 = dsi*uri*a11
+                e3 = e2*an2
+                e2 = e2*an1
 
-                ar22 = ar22 + e1 * b6r + e2 * b7r + e3 * b8r
-                ai22 = ai22 + e1 * b6i + e2 * b7i + e3 * b8i
+                ar22 = ar22 + e1*b6r + e2*b7r + e3*b8r
+                ai22 = ai22 + e1*b6i + e2*b7i + e3*b8i
 
-                gr22 = gr22 + e1 * c6r + e2 * c7r + e3 * c8r
-                gi22 = gi22 + e1 * c6i + e2 * c7i + e3 * c8i
+                gr22 = gr22 + e1*c6r + e2*c7r + e3*c8r
+                gi22 = gi22 + e1*c6i + e2*c7i + e3*c8i
             end do  ! end of Gauss integration
 
-            an12 = ann(n1, n2) * factor
+            an12 = ann(n1, n2)*factor
 
-            r11(n1, n2) = ar11 * an12
-            r12(n1, n2) = ar12 * an12
-            r21(n1, n2) = ar21 * an12
-            r22(n1, n2) = ar22 * an12
-            i11(n1, n2) = ai11 * an12
-            i12(n1, n2) = ai12 * an12
-            i21(n1, n2) = ai21 * an12
-            i22(n1, n2) = ai22 * an12
+            r11(n1, n2) = ar11*an12
+            r12(n1, n2) = ar12*an12
+            r21(n1, n2) = ar21*an12
+            r22(n1, n2) = ar22*an12
+            i11(n1, n2) = ai11*an12
+            i12(n1, n2) = ai12*an12
+            i21(n1, n2) = ai21*an12
+            i22(n1, n2) = ai22*an12
 
-            rg11(n1, n2) = gr11 * an12
-            rg12(n1, n2) = gr12 * an12
-            rg21(n1, n2) = gr21 * an12
-            rg22(n1, n2) = gr22 * an12
-            ig11(n1, n2) = gi11 * an12
-            ig12(n1, n2) = gi12 * an12
-            ig21(n1, n2) = gi21 * an12
-            ig22(n1, n2) = gi22 * an12
+            rg11(n1, n2) = gr11*an12
+            rg12(n1, n2) = gr12*an12
+            rg21(n1, n2) = gr21*an12
+            rg22(n1, n2) = gr22*an12
+            ig11(n1, n2) = gi11*an12
+            ig12(n1, n2) = gi12*an12
+            ig21(n1, n2) = gi21*an12
+            ig22(n1, n2) = gi22*an12
         end do
     end do
 
@@ -3037,29 +3037,29 @@ subroutine tmatr (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
             tgr22 = -rg22(n1, n2)
             tgi22 = -ig22(n1, n2)
 
-            tqr(k1, k2) = tpir * tar21 - tpii * tai21 + tppi * tar12
-            tqi(k1, k2) = tpir * tai21 + tpii * tar21 + tppi * tai12
-            trgqr(k1, k2) = tpir * tgr21 - tpii * tgi21 + tppi * tgr12
-            trgqi(k1, k2) = tpir * tgi21 + tpii * tgr21 + tppi * tgi12
+            tqr(k1, k2) = tpir*tar21 - tpii*tai21 + tppi*tar12
+            tqi(k1, k2) = tpir*tai21 + tpii*tar21 + tppi*tai12
+            trgqr(k1, k2) = tpir*tgr21 - tpii*tgi21 + tppi*tgr12
+            trgqi(k1, k2) = tpir*tgi21 + tpii*tgr21 + tppi*tgi12
 
-            tqr(k1, kk2) = tpir * tar11 - tpii * tai11 + tppi * tar22
-            tqi(k1, kk2) = tpir * tai11 + tpii * tar11 + tppi * tai22
-            trgqr(k1, kk2) = tpir * tgr11 - tpii * tgi11 + tppi * tgr22
-            trgqi(k1, kk2) = tpir * tgi11 + tpii * tgr11 + tppi * tgi22
+            tqr(k1, kk2) = tpir*tar11 - tpii*tai11 + tppi*tar22
+            tqi(k1, kk2) = tpir*tai11 + tpii*tar11 + tppi*tai22
+            trgqr(k1, kk2) = tpir*tgr11 - tpii*tgi11 + tppi*tgr22
+            trgqi(k1, kk2) = tpir*tgi11 + tpii*tgr11 + tppi*tgi22
 
-            tqr(kk1, k2) = tpir * tar22 - tpii * tai22 + tppi * tar11
-            tqi(kk1, k2) = tpir * tai22 + tpii * tar22 + tppi * tai11
-            trgqr(kk1, k2) = tpir * tgr22 - tpii * tgi22 + tppi * tgr11
-            trgqi(kk1, k2) = tpir * tgi22 + tpii * tgr22 + tppi * tgi11
+            tqr(kk1, k2) = tpir*tar22 - tpii*tai22 + tppi*tar11
+            tqi(kk1, k2) = tpir*tai22 + tpii*tar22 + tppi*tai11
+            trgqr(kk1, k2) = tpir*tgr22 - tpii*tgi22 + tppi*tgr11
+            trgqi(kk1, k2) = tpir*tgi22 + tpii*tgr22 + tppi*tgi11
 
-            tqr(kk1, kk2) = tpir * tar12 - tpii * tai12 + tppi * tar21
-            tqi(kk1, kk2) = tpir * tai12 + tpii * tar12 + tppi * tai21
-            trgqr(kk1, kk2) = tpir * tgr12 - tpii * tgi12 + tppi * tgr21
-            trgqi(kk1, kk2) = tpir * tgi12 + tpii * tgr12 + tppi * tgi21
+            tqr(kk1, kk2) = tpir*tar12 - tpii*tai12 + tppi*tar21
+            tqi(kk1, kk2) = tpir*tai12 + tpii*tar12 + tppi*tai21
+            trgqr(kk1, kk2) = tpir*tgr12 - tpii*tgi12 + tppi*tgr21
+            trgqi(kk1, kk2) = tpir*tgi12 + tpii*tgr12 + tppi*tgi21
         end do
     end do
 
-    nnmax = 2 * nm
+    nnmax = 2*nm
     do n1 = 1, nnmax
         do n2 = 1, nnmax
             qr(n1, n2) = tqr(n1, n2)
@@ -3081,7 +3081,7 @@ subroutine tt(nmax)
     !  nmax=nmax-m+1 here, where nmax is the angular momentum cutoff in main
     !  ncheck -
     !
-    !   calculation of the matrix    t = - rg(q) * (q**(-1))
+    !   calculation of the matrix    t = - rg(q)*(q**(-1))
     !
     !   input  in common /ctt/
     !   output in common /ct/
@@ -3104,7 +3104,7 @@ subroutine tt(nmax)
     !
     data emach/0.d0/                 !/1.d-17/
     !
-    nnmax = 2 * nmax
+    nnmax = 2*nmax
     allocate(zq(1:nnmax, 1:nnmax), ipiv(1:nnmax), &
             zx(1:nnmax), zw(1:nnmax))
     do i = 1, nnmax
@@ -3127,7 +3127,7 @@ subroutine tt(nmax)
             !solving zx*zq=zb by backsubstition (zx overwritten on exit)
             call zsur(zq, ipiv, zx, emach)
             do k = 1, nnmax
-                ! assign t-matrix elements = - rg(q) * (q**(-1))
+                ! assign t-matrix elements = - rg(q)*(q**(-1))
                 tr1(i, k) = -dble(zx(k))
                 ti1(i, k) = -aimag(zx(k))
             enddo
@@ -3151,7 +3151,7 @@ subroutine tt(nmax)
         if (info/=0) write (6, 1100) info
 
         1100      format ('warning:  info=', i2)
-        ! calculate t-matrix = - rg(q) * (q**(-1))
+        ! calculate t-matrix = - rg(q)*(q**(-1))
         !
         do i = 1, nnmax
             do j = 1, nnmax
@@ -3162,8 +3162,8 @@ subroutine tt(nmax)
                     ari = rgqi(i, k)
                     ar = zq(k, j)
                     ai = aimag(zq(k, j))
-                    tr = tr - arr * ar + ari * ai
-                    ti = ti - arr * ai - ari * ar
+                    tr = tr - arr*ar + ari*ai
+                    ti = ti - arr*ai - ari*ar
                 enddo
                 tr1(i, j) = tr
                 ti1(i, j) = ti

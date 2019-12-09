@@ -53,7 +53,7 @@ contains
         if ( x <= 0.0D+00 ) then
             f03 = 0.0D+00
         else
-            f03 = log ( x ) / sqrt ( x )
+            f03 = log ( x )/sqrt ( x )
         end if
 
         return
@@ -67,10 +67,10 @@ contains
 
         integer ( kind = 4 ), parameter :: limit = 1500
         integer ( kind = 4 ), parameter :: npts = 1
-        integer ( kind = 4 ), parameter :: npts2 = 2 * npts
+        integer ( kind = 4 ), parameter :: npts2 = 2*npts
 
-        integer ( kind = 4 ), parameter :: leniw = 2 * limit + npts2
-        integer ( kind = 4 ), parameter :: lenw = leniw * 2 - npts2
+        integer ( kind = 4 ), parameter :: leniw = 2*limit + npts2
+        integer ( kind = 4 ), parameter :: lenw = leniw*2 - npts2
 
         real ( kind = 8 ) :: a, b
         real ( kind = 8 ) abserr
@@ -108,7 +108,7 @@ contains
         !
         implicit none
         integer ( kind = 4 ), parameter :: limit = 500
-        integer ( kind = 4 ), parameter :: lenw = limit * 4
+        integer ( kind = 4 ), parameter :: lenw = limit*4
 
         real ( kind = 8 ) :: a,b
         real ( kind = 8 ) abserr
@@ -206,9 +206,9 @@ contains
         call rsp_cylinder(x_to_rsp, r_from_x, dr_from_x)
         call vig_1v ( xi, n1, 0, d1n1, d2n1)
         call vig_1v ( xi, n2, 0, d1n2, d2n2)
-        a12 = d1n1 * d2n2
-        a21 = d2n1 * d1n2
-        a22 = d2n1 * d2n2
+        a12 = d1n1*d2n2
+        a21 = d2n1*d1n2
+        a22 = d2n1*d2n2
 
         call cbessjdj(r_from_x(1),n1, qj1, qdj1)
         call cbessydy(r_from_x(1),n1, qy1, qdy1)
@@ -216,73 +216,73 @@ contains
         call cbesscjcdj(r_from_x(1),n2, integrand%nmax, qjr2, qji2, qdjr2, qdji2)
         ! re and im of j_{n2}(k_{in}r) j_{n1}(k_{out}r):
 
-        c1r = qjr2 * qj1
-        c1i = qji2 * qj1
+        c1r = qjr2*qj1
+        c1i = qji2*qj1
         ! re and im of j_{n2}(k_{in}r) h_{n1}(k_{out}r):
-        b1r = c1r - qji2 * qy1
-        b1i = c1i + qjr2 * qy1
+        b1r = c1r - qji2*qy1
+        b1i = c1i + qjr2*qy1
         ! re and im of j_{n2}(k_{in}r) [k_{out}r j_{n1}(k_{out}r)]'/(k_{out}r):
-        c2r = qjr2 * qdj1
-        c2i = qji2 * qdj1
+        c2r = qjr2*qdj1
+        c2i = qji2*qdj1
         ! re and im of j_{n2}(k_{in}r) [k_{out}r h_{n1}(k_{out}r)]'/(k_{out}r):
-        b2r = c2r - qji2 * qdy1
-        b2i = c2i + qjr2 * qdy1
+        b2r = c2r - qji2*qdy1
+        b2i = c2i + qjr2*qdy1
 
         ddri=1.0_dp/(dsqrt(r_from_x(1))*cbess%wv) !1/(k_{out}r)
         ! re and im of [1/(k_{out}r)]*j_{n2}(k_{in}r) j_{n1}(k_{out}r)
 
-        c3r = ddri * c1r
-        c3i = ddri * c1i
+        c3r = ddri*c1r
+        c3i = ddri*c1i
         ! re and im of [1/(k_{out}r)]*j_{n2}(k_{in}r) h_{n1}(k_{out}r):
 
-        b3r = ddri * b1r
-        b3i = ddri * b1i
+        b3r = ddri*b1r
+        b3i = ddri*b1i
         ! re and im of  [k_{in}r j_{n2}(k_{in}r)]'/(k_{in}r)
-        !                          * j_{n1}(k_{out}r):
+        !                         *j_{n1}(k_{out}r):
 
-        c4r = qdjr2 * qj1
-        c4i = qdji2 * qj1
+        c4r = qdjr2*qj1
+        c4i = qdji2*qj1
         ! re and im of [k_{in}r j_{n2}(k_{in}r)]'/(k_{in}r)
-        !                          *  h_{n1}(k_{out}r):
+        !                         * h_{n1}(k_{out}r):
 
-        b4r = c4r - qdji2 * qy1
-        b4i = c4i + qdjr2 * qy1
+        b4r = c4r - qdji2*qy1
+        b4i = c4i + qdjr2*qy1
 
-        v = 1.0_dp / (cbess%mrr**2 + cbess%mri**2)
-        drri = cbess%mrr * v * ddri               !re[1/(k_{in}r)]
-        drii = -cbess%mri * v * ddri               !im[1/(k_{in}r)]
+        v = 1.0_dp/(cbess%mrr**2 + cbess%mri**2)
+        drri = cbess%mrr*v*ddri               !re[1/(k_{in}r)]
+        drii = -cbess%mri*v*ddri               !im[1/(k_{in}r)]
         ! re and im of [1/(k_{in}r)] j_{n2}(k_{in}r) j_{n1}(k_{out}r):
 
-        c5r = c1r * drri - c1i * drii
-        c5i = c1i * drri + c1r * drii
+        c5r = c1r*drri - c1i*drii
+        c5i = c1i*drri + c1r*drii
         ! re and im of [1/(k_{in}r)] j_{n2}(k_{in}r) h_{n1}(k_{out}r):
 
-        b5r = b1r * drri - b1i * drii
-        b5i = b1i * drri + b1r * drii
+        b5r = b1r*drri - b1i*drii
+        b5i = b1i*drri + b1r*drii
         !%%%%%%%  forming integrands of j-matrices (j^{11}=j^{22}=0 for m=0): %%%%%%%%
         !                   uri=dr(i)        !dr/(d\theta)
         uri = -dr_from_x(1)  ! todo: why 'minus' sign was need to fit previous line?
 !        rri=rr(i)        !w(i)*r^2(\theta)
         ! w(i)*r^2(\theta)*d2n1*d2n2:
-        f1 = r_from_x(1) * a22      !prefactor containing r^2(\theta)<->hat{r} part
+        f1 = r_from_x(1)*a22      !prefactor containing r^2(\theta)<->hat{r} part
         ! n1*(n1+1)*w(i)*r(\theta)*[dr/(d\theta)]*d1n1*d2n2:
-        f2 = r_from_x(1) * uri * an1 * a12     !prefactor containing r(\theta)*[dr/(d\theta)]
+        f2 = r_from_x(1)*uri*an1*a12     !prefactor containing r(\theta)*[dr/(d\theta)]
         !hat{theta} part
         ar12 = f1*b2r + f2*b3r        !~re j^{12}
-        ai12 = f1 * b2i + f2 * b3i        !~im j^{12}
+        ai12 = f1*b2i + f2*b3i        !~im j^{12}
 
-        gr12 = f1 * c2r + f2 * c3r        !~re rg j^{12}
-        gi12 = f1 * c2i + f2 * c3i        !~im rg j^{12}
+        gr12 = f1*c2r + f2*c3r        !~re rg j^{12}
+        gi12 = f1*c2i + f2*c3i        !~im rg j^{12}
 
         !*  n2*(n2+1)*w(i)*r(\theta)*[dr/(d\theta)]*d2n1*d1n2:
-        f2 = r_from_x(1) * uri * an2 * a21     !prefactor containing r(\theta)*[dr/(d\theta)]
+        f2 = r_from_x(1)*uri*an2*a21     !prefactor containing r(\theta)*[dr/(d\theta)]
         !                                          !hat{theta} part
 
-        ar21 = f1 * b4r + f2 * b5r        !~re j^{21}
-        ai21 = f1 * b4i + f2 * b5i        !~im j^{21}
+        ar21 = f1*b4r + f2*b5r        !~re j^{21}
+        ai21 = f1*b4i + f2*b5i        !~im j^{21}
 
-        gr21 = f1 * c4r + f2 * c5r        !~re rg j^{21}
-        gi21 = f1 * c4i + f2 * c5i        !~im rg j^{21}
+        gr21 = f1*c4r + f2*c5r        !~re rg j^{21}
+        gi21 = f1*c4i + f2*c5i        !~im rg j^{21}
 
         m0_integrand = (/ ar12, ai12, gr12, gi12, ar21, ai21, gr21, gi21/)        !~re j^{12}
         return
@@ -380,33 +380,33 @@ contains
         rev = mpar%rev
         eps = mpar%eps
         ! determine half-length of the cylinder
-        h = rev * ((2.0_dp / (3.0_dp * eps * eps))**(1.0_dp / 3.0_dp))
+        h = rev*((2.0_dp/(3.0_dp*eps*eps))**(1.0_dp/3.0_dp))
         ! determine cylinder radius:
-        a = h * eps
+        a = h*eps
         ng = size(x)
-        ngauss = ng / 2
+        ngauss = ng/2
         if (ng == 1) ngauss = 1
         do i = 1, ngauss
             co = -x(i)
-            si = dsqrt(1.0_dp - co * co)
+            si = dsqrt(1.0_dp - co*co)
 
-            if ((h * si)>(a * co)) then
+            if ((h*si)>(a*co)) then
                 ! along the circular surface:
-                rad = a / si
-                rthet = -a * co / (si * si)
+                rad = a/si
+                rthet = -a*co/(si*si)
                 !rad=1.d-10
                 !rthet=0.0_dp
 !                write(*,*) 'cyl'
             else
                 ! along the plane cuts:
-                rad = h / co
-                rthet = h * si / (co * co)
+                rad = h/co
+                rthet = h*si/(co*co)
             end if
 
-            r(i) = rad * rad
+            r(i) = rad*rad
             r(ng - i + 1) = r(i)          !using mirror symmetry
 
-            dr(i) = -rthet / rad
+            dr(i) = -rthet/rad
             dr(ng - i + 1) = -dr(i)       !using mirror symmetry
 
         end do
@@ -454,20 +454,20 @@ contains
             ri = 1d0 + cdrop%c(0)
             dri = 0d0
             do n = 1, nc
-                xin = xi * n
-                ri = ri + cdrop%c(n) * dcos(xin)
-                dri = dri - cdrop%c(n) * n * dsin(xin)
+                xin = xi*n
+                ri = ri + cdrop%c(n)*dcos(xin)
+                dri = dri - cdrop%c(n)*n*dsin(xin)
             enddo
             si = dsin(xi)
             cki = x(i)
-            risi = ri * si
-            s = s + wi * ri * dsqrt(ri * ri + dri * dri)
-            v = v + wi * ri * risi * (risi - dri * cki)
+            risi = ri*si
+            s = s + wi*ri*dsqrt(ri*ri + dri*dri)
+            v = v + wi*ri*risi*(risi - dri*cki)
         enddo
-        rs = dsqrt(s * 0.5d0)
-        rv = (v * 3d0 * 0.25d0)**(1d0 / 3d0)
+        rs = dsqrt(s*0.5d0)
+        rv = (v*3d0*0.25d0)**(1d0/3d0)
         if (dabs(rat - 1d0)>1d-8) rat = rv/rs
-        cdrop%r0v = 1d0 / rv
+        cdrop%r0v = 1d0/rv
         write(nout, 1000) cdrop%r0v
         do n = 0, nc
             write(nout, 1001) n, cdrop%c(n)
@@ -492,8 +492,8 @@ contains
         real(dp), intent(in) :: eps
         real(dp), intent(out) :: rat
 
-        rat = (1.5d0 / eps)**(1d0 / 3d0)
-        rat = rat / dsqrt((eps + 2d0) / (2d0 * eps))
+        rat = (1.5d0/eps)**(1d0/3d0)
+        rat = rat/dsqrt((eps + 2d0)/(2d0*eps))
 
         return
     end
@@ -516,7 +516,7 @@ contains
         ! (2019-12-09) In principle it is done but needs some testing
         epsc = (1d0/eps) - epse
 
-        rv = (1.5d0*epsc + epse)**(1d0 / 3d0)
+        rv = (1.5d0*epsc + epse)**(1d0/3d0)
 
         if (epse >= 1d0) then ! Prolate spheroid
             if (dabs(epse - 1d0) > 1d-6) then
@@ -555,15 +555,15 @@ contains
         real(dp) :: e, r
 
         if (eps < 1d0) then ! Prolate spheroid
-            e = dsqrt(1d0 - eps * eps)
-            r = 0.5d0 * (eps**(2d0 / 3d0) + eps**(-1d0 / 3d0) * dasin(e) / e)
+            e = dsqrt(1d0 - eps*eps)
+            r = 0.5d0*(eps**(2d0/3d0) + eps**(-1d0/3d0)*dasin(e)/e)
         else ! Oblate spheroid
-            e = dsqrt(1d0 - 1d0 / (eps * eps))
-            r = 0.25d0 * (2d0 * eps**(2d0 / 3d0) &
-                    + eps**(-4d0 / 3d0) * dlog((1d0 + e) / (1d0 - e)) / e)
+            e = dsqrt(1d0 - 1d0/(eps*eps))
+            r = 0.25d0*(2d0*eps**(2d0/3d0) &
+                    + eps**(-4d0/3d0)*dlog((1d0 + e)/(1d0 - e))/e)
         end if
         r = dsqrt(r)
-        rat = 1d0 / r
+        rat = 1d0/r
         return
     end
     !=======================================================================
@@ -584,7 +584,7 @@ contains
         real(dp) x(60), w(60)
 
         dn = dble(n)
-        en = e * dn
+        en = e*dn
         ng = 60
 
         ! gif division points and weights
@@ -596,19 +596,19 @@ contains
         do i = 1, ng
             xi = x(i)
             dx = dacos(xi)
-            dxn = dn * dx
+            dxn = dn*dx
             ds = dsin(dx)
             dsn = dsin(dxn)
             dcn = dcos(dxn)
-            a = 1d0 + e * dcn
-            a2 = a * a
-            ens = en * dsn
-            s = s + w(i) * a * dsqrt(a2 + ens * ens)
-            v = v + w(i) * (ds * a + xi * ens) * ds * a2
+            a = 1d0 + e*dcn
+            a2 = a*a
+            ens = en*dsn
+            s = s + w(i)*a*dsqrt(a2 + ens*ens)
+            v = v + w(i)*(ds*a + xi*ens)*ds*a2
         end do
-        rs = dsqrt(s * 0.5d0)
-        rv = (v * 3d0 / 4d0)**(1d0 / 3d0)
-        rat = rv / rs
+        rs = dsqrt(s*0.5d0)
+        rv = (v*3d0/4d0)**(1d0/3d0)
+        rat = rv/rs
         !
         return
     end
@@ -628,14 +628,14 @@ contains
         integer i, j, m
         double precision p1, p2, p3, pp, xl, xm, z, z1
 
-        m = (n + 1) / 2    !the roots are symmetric in the interval, so we only
-        xm = 0.5d0 * (x2 + x1)   !have to find half of them
-        xl = 0.5d0 * (x2 - x1)
+        m = (n + 1)/2    !the roots are symmetric in the interval, so we only
+        xm = 0.5d0*(x2 + x1)   !have to find half of them
+        xl = 0.5d0*(x2 - x1)
 
         ! loop over the desired roots:
 
         do i = 1, m
-            z = cos(3.141592654d0 * (i - .25d0) / (n + .5d0))
+            z = cos(3.141592654d0*(i - .25d0)/(n + .5d0))
             ! starting with the above approximation to the ith root, we enter
             ! the main loop of refinement by newton's method.
             do
@@ -645,23 +645,23 @@ contains
                 do j = 1, n !loop up the recurrence relation to get legendre
                     p3 = p2     !polynomial evaluated at z.
                     p2 = p1
-                    p1 = ((2.d0 * j - 1.d0) * z * p2 - (j - 1.d0) * p3) / j
+                    p1 = ((2.d0*j - 1.d0)*z*p2 - (j - 1.d0)*p3)/j
                 end do
 
                 ! p1 is now the desired  legendre polynomial. we next compute pp, its derivative,
                 ! by a standard relation involving also p2, the polynomial of one lower order:
 
-                pp = n * (z * p1 - p2) / (z * z - 1.d0)
+                pp = n*(z*p1 - p2)/(z*z - 1.d0)
                 z1 = z
-                z = z1 - p1 / pp                   !newton's method
+                z = z1 - p1/pp                   !newton's method
 
                 if (abs(z - z1)<=eps) exit
             end do
             ! scale the root to the desired interval, and put in its symmetric counterpart:
-            x(i) = xm - xl * z
-            x(n + 1 - i) = xm + xl * z
+            x(i) = xm - xl*z
+            x(n + 1 - i) = xm + xl*z
             ! compute the weight and its symmetric counterpart:
-            w(i) = 2.d0 * xl / ((1.d0 - z * z) * pp * pp)
+            w(i) = 2.d0*xl/((1.d0 - z*z)*pp*pp)
             w(n + 1 - i) = w(i)
 
         end do
@@ -694,19 +694,19 @@ contains
         c = 3d0
         !        data a, b, c /1d0, 2d0, 3d0/
         ind = mod(n, 2)
-        k = n / 2 + ind
+        k = n/2 + ind
         f = dble(n)
         do i = 1, k
             m = n + 1 - i
             select case (i)
             case(1)
-                x = a - b / ((f + a) * f)
+                x = a - b/((f + a)*f)
             case(2)
-                x = (z(n) - a) * 4d0 + z(n)
+                x = (z(n) - a)*4d0 + z(n)
             case(3)
-                x = (z(n - 1) - z(n)) * 1.6d0 + z(n - 1)
+                x = (z(n - 1) - z(n))*1.6d0 + z(n - 1)
             case default
-                x = (z(m + 1) - z(m + 2)) * c + z(m + 3)
+                x = (z(m + 1) - z(m + 2))*c + z(m + 3)
             end select
 
             if(i==k.and.ind==1) x = 0d0
@@ -716,7 +716,7 @@ contains
                 pb = 1d0
                 niter = niter + 1
                 if (niter>100) then
-                    check = check * 10d0
+                    check = check*10d0
                 end if
                 pc = x
                 dj = a
@@ -724,16 +724,16 @@ contains
                     dj = dj + a
                     pa = pb
                     pb = pc
-                    pc = x * pb + (x * pb - pa) * (dj - a) / dj
+                    pc = x*pb + (x*pb - pa)*(dj - a)/dj
                 end do
-                pa = a / ((pb - x * pc) * f)
-                pb = pa * pc * (a - x * x)
+                pa = a/((pb - x*pc)*f)
+                pb = pa*pc*(a - x*x)
                 x = x - pb
-                if (dabs(pb)<=check * dabs(x)) exit
+                if (dabs(pb)<=check*dabs(x)) exit
             end do
             z(m) = x
-            w(m) = pa * pa * (a - x * x)
-            if(ind1==0) w(m) = b * w(m)
+            w(m) = pa*pa*(a - x*x)
+            if(ind1==0) w(m) = b*w(m)
             if(i/=k.or.ind/=1) then
                 z(i) = -z(m)
                 w(i) = w(m)
@@ -753,7 +753,7 @@ contains
         else
             if(ind1/=0) then
                 do i = 1, n
-                    z(i) = (a + z(i)) / b
+                    z(i) = (a + z(i))/b
                 end do
             end if
         end if

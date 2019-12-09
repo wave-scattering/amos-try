@@ -462,10 +462,10 @@ program axspartcl1
         !             larger than 1 for oblate spheroids and smaller than 1 for
         !             prolate spheroids.
         !
-        defp = rsnm / hlength              !always revolution axis length
+        defp = rsnm/hlength              !always revolution axis length
         !                                    !in the denominator
         !
-        rev = rsnm / defp**(1.d0 / 3.d0)     !=equal-volume-sphere radius
+        rev = rsnm/defp**(1.d0/3.d0)     !=equal-volume-sphere radius
         !                            !room for improvement here - it would be
         !                                  !more resonable to replace rev
         !                              !by the size parameter k*rev
@@ -480,7 +480,7 @@ program axspartcl1
                 stop
             end if
 
-            revin = rev * revin
+            revin = rev*revin
         end if               !lcs.gt.1
         !
         rat = 1.d0
@@ -521,17 +521,17 @@ program axspartcl1
             write(6, *)'auto-set cylinder radius from *.ini', rsnm
         end if
 
-        rsnm = rsnm * 2
+        rsnm = rsnm*2
         ! specify the shape:
         ! np=-2 - defp = the ratio of the cylinder diameter to its length.
         !
-        hlength_max = rsnm / rl_min / 2.d0
-        hlength_min = rsnm / rl_max / 2.d0
-        defp = rsnm / hlength_max
-        rsnm = rsnm / 2.d0                                  !cylinder radius
-        hlength_max = hlength_max / 2.d0
-        hlength_min = hlength_min / 2.d0        !cylinder half-length
-        rev = hlength_max * (3.d0 * defp * defp / 2.d0)**(1.d0 / 3.d0)  !=equal-volume-sphere radius
+        hlength_max = rsnm/rl_min/2.d0
+        hlength_min = rsnm/rl_max/2.d0
+        defp = rsnm/hlength_max
+        rsnm = rsnm/2.d0                                  !cylinder radius
+        hlength_max = hlength_max/2.d0
+        hlength_min = hlength_min/2.d0        !cylinder half-length
+        rev = hlength_max*(3.d0*defp*defp/2.d0)**(1.d0/3.d0)  !=equal-volume-sphere radius
 
         rat = 1.d0
         !
@@ -555,7 +555,7 @@ program axspartcl1
         !
         write(6, *)'the height of the cut sphere in your units'
         read(5, *) defp
-        defp = defp / rsnm
+        defp = defp/rsnm
         !
         rat = 1.d0
         !
@@ -569,8 +569,8 @@ program axspartcl1
         write(6, *)'the cone heigth of in your units'
         read(5, *) hlength
         !
-        rsnm = rsnm / 2.d0
-        rev = (hlength * rsnm**2 / 4.d0)**(1.d0 / 3.d0)   !=equal-volume-sphere radius
+        rsnm = rsnm/2.d0
+        rev = (hlength*rsnm**2/4.d0)**(1.d0/3.d0)   !=equal-volume-sphere radius
         rat = 1.d0
         !
     else if (np==-7) then
@@ -736,11 +736,11 @@ program axspartcl1
         ndgs = 16
     else if (np==-6) then
         ndgs = 16
-    else if ((np==-1).and.(max(defp, 1.d0 / defp)>1.5d0)) then !spheroids
+    else if ((np==-1).and.(max(defp, 1.d0/defp)>1.5d0)) then !spheroids
         if (ynintens) then
-            ndgs = min(40.d0, 14 * max(defp, 1.d0 / defp))
+            ndgs = min(40.d0, 14*max(defp, 1.d0/defp))
         else
-            ndgs = min(16.d0, 4 * max(defp, 1.d0 / defp))
+            ndgs = min(16.d0, 4*max(defp, 1.d0/defp))
         end if
     else
         ndgs = 4
@@ -816,7 +816,7 @@ program axspartcl1
         stop
     end if
     !
-    if((np==-4).and.(defp>=2.d0 * rev)) then
+    if((np==-4).and.(defp>=2.d0*rev)) then
         write(6, *)'invalid parameters for a cut sphere!'
         write(6, *)'execution stopped!'
         write(6, *)'the defp has to be less than 2*(sphere radius) !!!'
@@ -866,10 +866,10 @@ program axspartcl1
                 !
                 write(6, *)'read in r(l) for l=', ikl
                 read (5, *) rff(ikl)
-                rff(ikl) = rff(ikl) / rsnm
+                rff(ikl) = rff(ikl)/rsnm
 
                 !      rff(1)=0.75d0
-                rmf(ikl) = rff(ikl) * rmuf
+                rmf(ikl) = rff(ikl)*rmuf
 
                 if ((lcs>2).and.(ikl>=2)) then
                     write(6, *)'read in the lth-sphere layer diel. const. for l=', ikl
@@ -903,7 +903,7 @@ program axspartcl1
         write(6, *)'auto-set x_min from *.ini ', x_min
     end if
 
-    lambda = 2 * pi * rsnm / x_min
+    lambda = 2*pi*rsnm/x_min
     !v      lambda=633.d0                      !jap89_5776 for gold ellipsod
     !      lambda=354.d0                      !jap89_5776 for silver sphere
     !c      lambda=500d0
@@ -920,7 +920,7 @@ program axspartcl1
     ! is the wavelengths (in nm)
     ! in the vacuum:
 
-    omega = 2.d0 * pi * rev / (lambda * rmuf)
+    omega = 2.d0*pi*rev/(lambda*rmuf)
     omega0 = omega
 
     !      write(6,*)'read omega'
@@ -949,7 +949,7 @@ program axspartcl1
             write(6, *)'auto-set x_max from *.ini ', x_max
         end if
 
-        enw = 2 * pi * rsnm / x_max
+        enw = 2*pi*rsnm/x_max
         !      enw=500
         nstep = mpar%nstep
         if (nstep <= 0) then
@@ -966,11 +966,11 @@ program axspartcl1
         xstep = 0
         delo = 0.d0
     else
-        xstep = (lambda - enw) / nstep
+        xstep = (lambda - enw)/nstep
         ! ::: width of the searched frequency interval
-        enw = 2.d0 * pi * rev / (enw * rmuf)
+        enw = 2.d0*pi*rev/(enw*rmuf)
         enw = enw - omega0
-        delo = enw / dble(nstep - 1)
+        delo = enw/dble(nstep - 1)
     end if
     !
     !--------/---------/---------/---------/---------/---------/---------/--
@@ -1328,7 +1328,7 @@ program axspartcl1
         do ieps = 1, nfin
             read(30, *) omf(ieps), ceps1(ieps)
             !          omf(ieps)=2.d0*pi*rev*omf(ieps)/(1240.d0*rmuf)
-            omf(ieps) = 2.d0 * pi * rev / (omf(ieps) * rmuf)
+            omf(ieps) = 2.d0*pi*rev/(omf(ieps)*rmuf)
         enddo
         close(30)
 
@@ -1341,7 +1341,7 @@ program axspartcl1
         rewind(30)
         do ieps = 1, nfin
             read(30, *) omf(ieps), ceps1(ieps)
-            omf(ieps) = 2.d0 * pi * rev / (omf(ieps) * rmuf)
+            omf(ieps) = 2.d0*pi*rev/(omf(ieps)*rmuf)
         enddo
         close(30)
 
@@ -1352,7 +1352,7 @@ program axspartcl1
         rewind(30)
         do ieps = 1, nfin
             read(30, *) omf(ieps), ceps1(ieps)
-            omf(ieps) = 2.d0 * pi * rev / (omf(ieps) * rmuf)
+            omf(ieps) = 2.d0*pi*rev/(omf(ieps)*rmuf)
         enddo
         close(30)
 
@@ -1363,7 +1363,7 @@ program axspartcl1
         rewind(30)
         do ieps = 1, nfin
             read(30, *) omf(ieps), ceps1(ieps)
-            omf(ieps) = 2.d0 * pi * rev / (omf(ieps) * rmuf)
+            omf(ieps) = 2.d0*pi*rev/(omf(ieps)*rmuf)
         enddo
         close(30)
 
@@ -1379,7 +1379,7 @@ program axspartcl1
             !         ceps1real(ieps) = real(ceps1(ieps))
             !          ceps1imag(ieps)=0
             !          ceps1(ieps) = cmplx(ceps1real(ieps), ceps1imag(ieps))
-            omf(ieps) = 2.d0 * pi * rev / (omf(ieps) * rmuf)
+            omf(ieps) = 2.d0*pi*rev/(omf(ieps)*rmuf)
         enddo
         close(30)
 
@@ -1391,7 +1391,7 @@ program axspartcl1
         do ieps = 1, nfin
             read(30, *) omf(ieps), ceps1real(ieps), ceps1imag(ieps)
             ceps1(ieps) = cmplx(ceps1real(ieps), ceps1imag(ieps))
-            omf(ieps) = 2.d0 * pi * rev / ((3.d8 / omf(ieps)) * rmuf)
+            omf(ieps) = 2.d0*pi*rev/((3.d8/omf(ieps))*rmuf)
         enddo
         close(30)
 
@@ -1404,14 +1404,14 @@ program axspartcl1
 
     do itter = 1, ndefp
 
-        defp = rsnm / hlength_max + (rsnm / hlength_min - rsnm / hlength_max) * &
-                dble(itter - 1) / dble(ndefp - 1)
+        defp = rsnm/hlength_max + (rsnm/hlength_min - rsnm/hlength_max)*&
+                dble(itter - 1)/dble(ndefp - 1)
         defpp = defp
-        hlength = rsnm / defp
-        rev = hlength * (3.d0 * defp * defp / 2.d0)**(1.d0 / 3.d0)
+        hlength = rsnm/defp
+        rev = hlength*(3.d0*defp*defp/2.d0)**(1.d0/3.d0)
         do istep = 1, nstep
 
-            omega = omega0 + dble(istep - 1) * delo
+            omega = omega0 + dble(istep - 1)*delo
 
             write(6, *) itter, istep, defp, hlength
             !omega_max = omega0 + dble(nstep)*delo
@@ -1419,7 +1419,7 @@ program axspartcl1
             !lambda_max=2.d0*pi*rev/(omega0*rmuf)
             !lambda = lambda_min + (lambda_max - lambda_min)*dble(istep) &
             !         /dble(nstep)
-            lambda = 2.d0 * pi * rev_beg / (omega * rmuf)
+            lambda = 2.d0*pi*rev_beg/(omega*rmuf)
 
             !xs=rmuf*omega*dble(sqrt(zeps0))  !equiv. size parameter
 
@@ -1430,14 +1430,14 @@ program axspartcl1
                 !     plasma=2.d0*pi*sphere radius in nm/(lambda_z in nm*rmuf)
                 ! where lambda_z is the wavelength for which re eps_s=0.
 
-                reepsz = 2.d0 * pi * rev / (323.83d0 * rmuf)
+                reepsz = 2.d0*pi*rev/(323.83d0*rmuf)
 
                 select case (nmat)
                 case (1) !material decision if - drude metal
 
                     plasma = reepsz
-                    omxp = plasma / omega
-                    zeps1 = 1.d0 - omxp**2 / (1.d0 + ci * plasma / (144.d0 * omega))
+                    omxp = plasma/omega
+                    zeps1 = 1.d0 - omxp**2/(1.d0 + ci*plasma/(144.d0*omega))
 
                 case (4) !material decision if - zns
                     !
@@ -1453,9 +1453,9 @@ program axspartcl1
                     ! reepsz differs from plasma!!! the plasma wavelength is
                     ! calculated below:
 
-                    plasma = reepsz * 7.2d0 / 3.8291d0
+                    plasma = reepsz*7.2d0/3.8291d0
                     ! security trap - remainder (not optimized!)
-                    omxf = omega / reepsz
+                    omxf = omega/reepsz
                     if (omxf>omf(1)) then
                         write(6, *)'calculation of has to stop with'
                         write(6, *)' omf(1)'
@@ -1464,8 +1464,8 @@ program axspartcl1
                     end if
 
                     if (omxf<omf(nfin)) then
-                        omxp = plasma / omega
-                        zeps1 = 1.d0 - omxp**2 / (1.d0 + ci * plasma / (144.d0 * omega))
+                        omxp = plasma/omega
+                        zeps1 = 1.d0 - omxp**2/(1.d0 + ci*plasma/(144.d0*omega))
                         ! damping coefficient for silver is plasma/144 where plasma is different from
                         ! the re eps zero crossing at 3.8291 ev according to palik!!!
                     else if (omxf==omf(1)) then
@@ -1475,8 +1475,8 @@ program axspartcl1
                             ! data file ordered with the increased wavelength
                             ! omxf increases in the loop and is oriented opposite to the data file
                             if (omxf>omf(ieps)) then     ! linear interpolation
-                                zeps1 = ceps1(ieps) + (omxf - omf(ieps)) * (ceps1(ieps - 1) - ceps1(ieps))&
-                                        / (omf(ieps - 1) - omf(ieps))
+                                zeps1 = ceps1(ieps) + (omxf - omf(ieps))*(ceps1(ieps - 1) - ceps1(ieps))&
+                                       /(omf(ieps - 1) - omf(ieps))
                                 exit
                             end if
                         enddo
@@ -1502,8 +1502,8 @@ program axspartcl1
                     else
                         do ieps = 1, nfin - 1
                             if (omega<omf(ieps + 1)) then     ! linear interpolation
-                                zeps1 = ceps1(ieps) + (omega - omf(ieps)) * (ceps1(ieps + 1) - ceps1(ieps))&
-                                        / (omf(ieps + 1) - omf(ieps))
+                                zeps1 = ceps1(ieps) + (omega - omf(ieps))*(ceps1(ieps + 1) - ceps1(ieps))&
+                                       /(omf(ieps + 1) - omf(ieps))
                                 exit
                             end if
                         enddo
@@ -1525,8 +1525,8 @@ program axspartcl1
                     else
                         do ieps = 1, nfin - 1
                             if (omega<omf(ieps + 1)) then     ! linear interpolation
-                                zeps1 = ceps1(ieps) + (omega - omf(ieps)) * (ceps1(ieps + 1) - ceps1(ieps))&
-                                        / (omf(ieps + 1) - omf(ieps))
+                                zeps1 = ceps1(ieps) + (omega - omf(ieps))*(ceps1(ieps + 1) - ceps1(ieps))&
+                                       /(omf(ieps + 1) - omf(ieps))
                                 exit
                             end if
                         enddo
@@ -1548,8 +1548,8 @@ program axspartcl1
                     else
                         do ieps = 1, nfin - 1
                             if (omega<omf(ieps + 1)) then     ! linear interpolation
-                                zeps1 = ceps1(ieps) + (omega - omf(ieps)) * (ceps1(ieps + 1) - ceps1(ieps))&
-                                        / (omf(ieps + 1) - omf(ieps))
+                                zeps1 = ceps1(ieps) + (omega - omf(ieps))*(ceps1(ieps + 1) - ceps1(ieps))&
+                                       /(omf(ieps + 1) - omf(ieps))
                                 exit
                             end if
                         enddo
@@ -1562,13 +1562,13 @@ program axspartcl1
 
                 if (ynbrug) then
                     ff = 0.8d0
-                    z1 = (3.d0 * ff - 1.d0) * zeps1 + (2.d0 - 3.d0 * ff) * zeps0
-                    z2 = sqrt(z1 * z1 + 8.d0 * zeps1 * zeps0)
+                    z1 = (3.d0*ff - 1.d0)*zeps1 + (2.d0 - 3.d0*ff)*zeps0
+                    z2 = sqrt(z1*z1 + 8.d0*zeps1*zeps0)
                     !
                     if (aimag(z2)>=0.0) then
-                        zeps1 = (z1 + z2) / 4.d0
+                        zeps1 = (z1 + z2)/4.d0
                     else
-                        zeps1 = (z1 - z2) / 4.d0
+                        zeps1 = (z1 - z2)/4.d0
                     end if
                 end if
 
@@ -1582,9 +1582,9 @@ program axspartcl1
             !
             if ((np==-1).and.(lcs>1)) then
 
-                revinl = revin * 2.d0 * pi * sqrt(zeps0) / lambda
+                revinl = revin*2.d0*pi*sqrt(zeps0)/lambda
 
-                revl = rev * 2.d0 * pi * sqrt(zeps0) / lambda
+                revl = rev*2.d0*pi*sqrt(zeps0)/lambda
 
                 !test
                 !c      defpp=0.5
@@ -1912,19 +1912,19 @@ contains
         p = dacos(-1d0)                   !local pi constant
         !
         a = rev
-        lam = lambda / sqrt(zeps0)          !wavelength in the ambient
+        lam = lambda/sqrt(zeps0)          !wavelength in the ambient
 
         !c      write(6,*)'lam,lambda in ampl=', lam, lambda
         !
         ! the real part of the refractive index contrast
         !
-        mrr = dble(sqrt(zeps1 / zeps0))
+        mrr = dble(sqrt(zeps1/zeps0))
         !
         ! the imaginary  part of the refractive index contrast
         !
-        mri = aimag(sqrt(zeps1 / zeps0))
+        mri = aimag(sqrt(zeps1/zeps0))
         !
-        ddelta = 0.1d0 * ddelt
+        ddelta = 0.1d0*ddelt
         !
         ! ddelt is used to test the accuracy of computing the
         ! optical cross sections. this accuracy is usually better
@@ -1950,8 +1950,8 @@ contains
         ! determination of the wiscombe value of the floating
         ! angular momentum cutoff nmax:
 
-        xev = 2d0 * p * a / lam
-        ixxx = xev + 4.05d0 * xev**0.333333d0     !wiscombe conv. criterion for nmax
+        xev = 2d0*p*a/lam
+        ixxx = xev + 4.05d0*xev**0.333333d0     !wiscombe conv. criterion for nmax
         if (xev>1.) then
             inm1 = max0(3, ixxx)
         else
@@ -1965,7 +1965,7 @@ contains
                 '.  execution terminated')
         !_______________________________________________________________
 
-        ngauss = nmax * ndgs
+        ngauss = nmax*ndgs
 
         if (yncheck) then
 
@@ -1986,7 +1986,7 @@ contains
 
             do nma = inm1, npn1
                 nmax = nma
-                ngauss = nmax * ndgs    !the number of the gauss integration points
+                ngauss = nmax*ndgs    !the number of the gauss integration points
 
                 if (ngauss>npng1) print 7340, ngauss
                 if (ngauss>npng1) stop
@@ -2023,10 +2023,10 @@ contains
                     ti1nn = ti1(n, n)
                     tr1nn1 = tr1(n1, n1)
                     ti1nn1 = ti1(n1, n1)
-                    dn1 = dble(2 * n + 1)
-                    qsca = qsca + dn1 * (tr1nn * tr1nn + ti1nn * ti1nn &
-                            + tr1nn1 * tr1nn1 + ti1nn1 * ti1nn1)
-                    qext = qext + (tr1nn + tr1nn1) * dn1
+                    dn1 = dble(2*n + 1)
+                    qsca = qsca + dn1*(tr1nn*tr1nn + ti1nn*ti1nn &
+                            + tr1nn1*tr1nn1 + ti1nn1*ti1nn1)
+                    qext = qext + (tr1nn + tr1nn1)*dn1
                 end do
                 !>>> for debugging:
                 !c      open(nout+1,file='tr1diag.dat')
@@ -2045,8 +2045,8 @@ contains
                 write(6, *)'qext1=', qext1
                 write(6, *)'qext=', qext
                 !<<<
-                dsca = dabs((qsca1 - qsca) / qsca)
-                dext = dabs((qext1 - qext) / qext)
+                dsca = dabs((qsca1 - qsca)/qsca)
+                dext = dabs((qext1 - qext)/qext)
                 qext1 = qext
                 qsca1 = qsca
 
@@ -2110,16 +2110,16 @@ contains
                         tr1nn1 = tr1(n1, n1)
                         ti1nn1 = ti1(n1, n1)
 
-                        dn1 = dble(2 * n + 1)
+                        dn1 = dble(2*n + 1)
 
-                        qsca = qsca + dn1 * (tr1nn * tr1nn + ti1nn * ti1nn&
-                                + tr1nn1 * tr1nn1 + ti1nn1 * ti1nn1)
-                        qext = qext + (tr1nn + tr1nn1) * dn1
+                        qsca = qsca + dn1*(tr1nn*tr1nn + ti1nn*ti1nn&
+                                + tr1nn1*tr1nn1 + ti1nn1*ti1nn1)
+                        qext = qext + (tr1nn + tr1nn1)*dn1
 
                     end do
 
-                    dsca = dabs((qsca1 - qsca) / qsca)
-                    dext = dabs((qext1 - qext) / qext)
+                    dsca = dabs((qsca1 - qsca)/qsca)
+                    dext = dabs((qext1 - qext)/qext)
 
                     !        print 7337, nggg,dsca,dext
                     ! 7337    format(' ng=',i3,'  dc2=',d8.2,'   dc1=',d8.2)
@@ -2176,7 +2176,7 @@ contains
 
         qsca = 0d0
         qext = 0d0
-        nnm = 2 * nmax
+        nnm = 2*nmax
         !   >>>  determination of qext and qsca contributions for m=0
 
         do n = 1, nnm
@@ -2214,14 +2214,14 @@ contains
                 zz8 = ti1(nn1, nn2)
                 it22(1, n1, n2) = zz8
                 !
-                qsca = qsca + zz1 * zz1 + zz2 * zz2 + zz3 * zz3 + zz4 * zz4&
-                        + zz5 * zz5 + zz6 * zz6 + zz7 * zz7 + zz8 * zz8
+                qsca = qsca + zz1*zz1 + zz2*zz2 + zz3*zz3 + zz4*zz4&
+                        + zz5*zz5 + zz6*zz6 + zz7*zz7 + zz8*zz8
             end do
         end do !end of the loop over orbital numbers
         !________________
         !<<<
 
-        if (abs(qsca)>(1.0001d0 * abs(qext))) then
+        if (abs(qsca)>(1.0001d0*abs(qext))) then
             write(6, *)'m=', 0
             write(6, *)'qsca=', qsca
             write(6, *)'qext=', qext
@@ -2300,22 +2300,22 @@ contains
                     zz8 = ti1(n11, n22)
                     it22(m1, nn1, nn2) = zz8
                     !
-                    qsc = qsc + (zz1 * zz1 + zz2 * zz2 + zz3 * zz3 + zz4 * zz4&
-                            + zz5 * zz5 + zz6 * zz6 + zz7 * zz7 + zz8 * zz8) * 2d0
+                    qsc = qsc + (zz1*zz1 + zz2*zz2 + zz3*zz3 + zz4*zz4&
+                            + zz5*zz5 + zz6*zz6 + zz7*zz7 + zz8*zz8)*2d0
                     !
                     ! multiplication by 2d0 here accounts for +/-m symmetry of resulting
                     ! expressions
                 end do
             end do     !end of the loop over orbital numbers
 
-            nnm = 2 * nm
+            nnm = 2*nm
             qxt = 0d0
 
             do n = 1, nnm
                 !multiplication by 2d0 accounts
                 !for +/-m symmetry of resulting
                 !expressions
-                qxt = qxt + tr1(n, n) * 2d0
+                qxt = qxt + tr1(n, n)*2d0
             end do
             !<<<
             ! summation over magnetic quantum number:
@@ -2324,7 +2324,7 @@ contains
             qext = qext + qxt
             !<<<
 
-            if (abs(qsc)>(1.0001d0 * abs(qxt))) then
+            if (abs(qsc)>(1.0001d0*abs(qxt))) then
                 write(6, *)'m=', m
                 write(6, *)'qsca=', qsca
                 write(6, *)'qsc=', qsc
@@ -2359,7 +2359,7 @@ contains
         ! and extinction (=\sum_{al} \sin^2\eta_{al}).
 
         qabs = -qext - qsca       !absorption
-        walb = -qsca / qext       !albedo
+        walb = -qsca/qext       !albedo
 
         if (abs(walb)>1d0 + ddelta) then
             print 9111
@@ -2378,11 +2378,11 @@ contains
         ! (lambda here is the wavelength in the exterior ambient medium)
         !c      write(6,*)'lam in ampl=', lam
         !         fac=lam**2/(2.d0*p**2*rev**2)     !=2/xs**2
-        fac = 2.d0 / xev**2
-        write(nout, *)    lambda, fac * qsca
-        write(nout + 1, *)  lambda, -fac * qext
-        write(nout + 2, *)  lambda, fac * qabs
-        write(nout + 5, *)  lambda, fac * walb
+        fac = 2.d0/xev**2
+        write(nout, *)    lambda, fac*qsca
+        write(nout + 1, *)  lambda, -fac*qext
+        write(nout + 2, *)  lambda, fac*qabs
+        write(nout + 5, *)  lambda, fac*walb
         write(nout + 10, *)
         write(nout + 10, *) lambda
         write(nout + 12, *)
@@ -2398,26 +2398,26 @@ contains
                 s11, s12, s21, s22)
         !
         !  phase matrix [eqs. (13)-(29) of ref. 6]
-        z11 = 0.5d0 * (s11 * conjg(s11) + s12 * conjg(s12)&
-                + s21 * conjg(s21) + s22 * conjg(s22))
-        z12 = 0.5d0 * (s11 * conjg(s11) - s12 * conjg(s12)&
-                + s21 * conjg(s21) - s22 * conjg(s22))
-        z13 = -s11 * conjg(s12) - s22 * conjg(s21)
-        z14 = (0d0, 1d0) * (s11 * conjg(s12) - s22 * conjg(s21))
-        z21 = 0.5d0 * (s11 * conjg(s11) + s12 * conjg(s12)&
-                - s21 * conjg(s21) - s22 * conjg(s22))
-        z22 = 0.5d0 * (s11 * conjg(s11) - s12 * conjg(s12)&
-                - s21 * conjg(s21) + s22 * conjg(s22))
-        z23 = -s11 * conjg(s12) + s22 * conjg(s21)
-        z24 = (0d0, 1d0) * (s11 * conjg(s12) + s22 * conjg(s21))
-        z31 = -s11 * conjg(s21) - s22 * conjg(s12)
-        z32 = -s11 * conjg(s21) + s22 * conjg(s12)
-        z33 = s11 * conjg(s22) + s12 * conjg(s21)
-        z34 = (0d0, -1d0) * (s11 * conjg(s22) + s21 * conjg(s12))
-        z41 = (0d0, 1d0) * (s21 * conjg(s11) + s22 * conjg(s12))
-        z42 = (0d0, 1d0) * (s21 * conjg(s11) - s22 * conjg(s12))
-        z43 = (0d0, -1d0) * (s22 * conjg(s11) - s12 * conjg(s21))
-        z44 = s22 * conjg(s11) - s12 * conjg(s21)
+        z11 = 0.5d0*(s11*conjg(s11) + s12*conjg(s12)&
+                + s21*conjg(s21) + s22*conjg(s22))
+        z12 = 0.5d0*(s11*conjg(s11) - s12*conjg(s12)&
+                + s21*conjg(s21) - s22*conjg(s22))
+        z13 = -s11*conjg(s12) - s22*conjg(s21)
+        z14 = (0d0, 1d0)*(s11*conjg(s12) - s22*conjg(s21))
+        z21 = 0.5d0*(s11*conjg(s11) + s12*conjg(s12)&
+                - s21*conjg(s21) - s22*conjg(s22))
+        z22 = 0.5d0*(s11*conjg(s11) - s12*conjg(s12)&
+                - s21*conjg(s21) + s22*conjg(s22))
+        z23 = -s11*conjg(s12) + s22*conjg(s21)
+        z24 = (0d0, 1d0)*(s11*conjg(s12) + s22*conjg(s21))
+        z31 = -s11*conjg(s21) - s22*conjg(s12)
+        z32 = -s11*conjg(s21) + s22*conjg(s12)
+        z33 = s11*conjg(s22) + s12*conjg(s21)
+        z34 = (0d0, -1d0)*(s11*conjg(s22) + s21*conjg(s12))
+        z41 = (0d0, 1d0)*(s21*conjg(s11) + s22*conjg(s12))
+        z42 = (0d0, 1d0)*(s21*conjg(s11) - s22*conjg(s12))
+        z43 = (0d0, -1d0)*(s22*conjg(s11) - s12*conjg(s21))
+        z44 = s22*conjg(s11) - s12*conjg(s21)
 
         write(nout + 10, 5001) z11, z12, z13, z14
         write(nout + 10, 5001) z21, z22, z23, z24
@@ -2526,18 +2526,18 @@ contains
         ! specifying numerical constants:
 
         pin = dacos(-1d0)         !=pi
-        pin2 = pin * 0.5d0        !=pi/2
-        pigrad = pin / 180d0      !=pi/180
+        pin2 = pin*0.5d0        !=pi/2
+        pigrad = pin/180d0      !=pi/180
         ! conversion from degrees to radians:
-        alph = alpha * pigrad
-        bet = beta * pigrad
-        thetl = tl * pigrad
-        phil = pl * pigrad
-        thetl1 = tl1 * pigrad
-        phil1 = pl1 * pigrad
+        alph = alpha*pigrad
+        bet = beta*pigrad
+        thetl = tl*pigrad
+        phil = pl*pigrad
+        thetl1 = tl1*pigrad
+        phil1 = pl1*pigrad
         ! initialization of the vacuum wavelength lambda
 
-        lambda = dlam * sqrt(zeps0)         !vacuum wavelength
+        lambda = dlam*sqrt(zeps0)         !vacuum wavelength
 
         eps = 1d-7
         if (thetl<pin2) thetl = thetl + eps
@@ -2564,15 +2564,15 @@ contains
         cp = dcos(phil - alph)
         sp = dsin(phil - alph)
 
-        ctp = ct * cb + st * sb * cp       !eq. (9)
+        ctp = ct*cb + st*sb*cp       !eq. (9)
         thetp = dacos(ctp)
-        cpp = cb * st * cp - sb * ct       !eq. (20)
-        spp = st * sp                      !eq. (21)
-        phip = datan(spp / cpp)
+        cpp = cb*st*cp - sb*ct       !eq. (20)
+        spp = st*sp                      !eq. (21)
+        phip = datan(spp/cpp)
 
         if (phip>0d0.and.sp<0d0) phip = phip + pin
         if (phip<0d0.and.sp>0d0) phip = phip + pin
-        if (phip<0d0) phip = phip + 2d0 * pin
+        if (phip<0d0) phip = phip + 2d0*pin
 
         ! scattered beam:
 
@@ -2581,28 +2581,28 @@ contains
         cp1 = dcos(phil1 - alph)
         sp1 = dsin(phil1 - alph)
 
-        ctp1 = ct1 * cb + st1 * sb * cp1    !eq. (9)
+        ctp1 = ct1*cb + st1*sb*cp1    !eq. (9)
         thetp1 = dacos(ctp1)
-        cpp1 = cb * st1 * cp1 - sb * ct1    !eq. (20)
-        spp1 = st1 * sp1                    !eq. (21)
-        phip1 = datan(spp1 / cpp1)
+        cpp1 = cb*st1*cp1 - sb*ct1    !eq. (20)
+        spp1 = st1*sp1                    !eq. (21)
+        phip1 = datan(spp1/cpp1)
 
         if (phip1>0d0.and.sp1<0d0) phip1 = phip1 + pin
         if (phip1<0d0.and.sp1>0d0) phip1 = phip1 + pin
-        if (phip1<0d0) phip1 = phip1 + 2d0 * pin
+        if (phip1<0d0) phip1 = phip1 + 2d0*pin
 
         !____________compute matrix beta, eq. (22) of {mis39}
 
         ca = dcos(alph)
         sa = dsin(alph)
-        b(1, 1) = ca * cb
-        b(1, 2) = sa * cb
+        b(1, 1) = ca*cb
+        b(1, 2) = sa*cb
         b(1, 3) = -sb
         b(2, 1) = -sa
         b(2, 2) = ca
         b(2, 3) = 0d0
-        b(3, 1) = ca * sb
-        b(3, 2) = sa * sb
+        b(3, 1) = ca*sb
+        b(3, 2) = sa*sb
         b(3, 3) = cb
 
         !____________compute 3x2 matrices al and al1 for incident and
@@ -2615,17 +2615,17 @@ contains
         sp1 = dsin(phil1)
 
         ! incident beam:
-        al(1, 1) = ct * cp
+        al(1, 1) = ct*cp
         al(1, 2) = -sp
-        al(2, 1) = ct * sp
+        al(2, 1) = ct*sp
         al(2, 2) = cp
         al(3, 1) = -st
         al(3, 2) = 0d0
 
         ! scattered beam:
-        al1(1, 1) = ct1 * cp1
+        al1(1, 1) = ct1*cp1
         al1(1, 2) = -sp1
-        al1(2, 1) = ct1 * sp1
+        al1(2, 1) = ct1*sp1
         al1(2, 2) = cp1
         al1(3, 1) = -st1
         al1(3, 2) = 0d0
@@ -2642,15 +2642,15 @@ contains
         cp1 = dcos(phip1)
         sp1 = dsin(phip1)
         ! incident beam:
-        ap(1, 1) = ct * cp
-        ap(1, 2) = ct * sp
+        ap(1, 1) = ct*cp
+        ap(1, 2) = ct*sp
         ap(1, 3) = -st
         ap(2, 1) = -sp
         ap(2, 2) = cp
         ap(2, 3) = 0d0
         ! scattered beam:
-        ap1(1, 1) = ct1 * cp1
-        ap1(1, 2) = ct1 * sp1
+        ap1(1, 1) = ct1*cp1
+        ap1(1, 2) = ct1*sp1
         ap1(1, 3) = -st1
         ap1(2, 1) = -sp1
         ap1(2, 2) = cp1
@@ -2663,7 +2663,7 @@ contains
             do j = 1, 2
                 x = 0d0
                 do k = 1, 3
-                    x = x + b(i, k) * al(k, j)
+                    x = x + b(i, k)*al(k, j)
                 enddo
                 c(i, j) = x
             enddo
@@ -2672,7 +2672,7 @@ contains
             do j = 1, 2
                 x = 0d0
                 do k = 1, 3
-                    x = x + ap(i, k) * c(k, j)
+                    x = x + ap(i, k)*c(k, j)
                 enddo
                 r(i, j) = x
             enddo
@@ -2684,7 +2684,7 @@ contains
             do j = 1, 2
                 x = 0d0
                 do k = 1, 3
-                    x = x + b(i, k) * al1(k, j)
+                    x = x + b(i, k)*al1(k, j)
                 enddo
                 c(i, j) = x
             enddo
@@ -2693,7 +2693,7 @@ contains
             do j = 1, 2
                 x = 0d0
                 do k = 1, 3
-                    x = x + ap1(i, k) * c(k, j)
+                    x = x + ap1(i, k)*c(k, j)
                 enddo
                 r1(i, j) = x
             enddo
@@ -2701,12 +2701,12 @@ contains
         !====
         ! r for scattered beam determined, now cramers rule:
 
-        d = 1d0 / (r1(1, 1) * r1(2, 2) - r1(1, 2) * r1(2, 1))
+        d = 1d0/(r1(1, 1)*r1(2, 2) - r1(1, 2)*r1(2, 1))
         x = r1(1, 1)
-        r1(1, 1) = r1(2, 2) * d
-        r1(1, 2) = -r1(1, 2) * d
-        r1(2, 1) = -r1(2, 1) * d
-        r1(2, 2) = x * d
+        r1(1, 1) = r1(2, 2)*d
+        r1(1, 2) = -r1(1, 2)*d
+        r1(2, 1) = -r1(2, 1)*d
+        r1(2, 2) = x*d
 
         !____________matrices r and r^(-1) determined
         !=========================================================
@@ -2720,10 +2720,10 @@ contains
         do nn = 1, nmax
             do n = 1, nmax
                 cn = ci**(nn - n - 1)
-                dnn = dble((2 * n + 1) * (2 * nn + 1))
-                dnn = dnn / dble(n * nn * (n + 1) * (nn + 1))
+                dnn = dble((2*n + 1)*(2*nn + 1))
+                dnn = dnn/dble(n*nn*(n + 1)*(nn + 1))
                 rn = dsqrt(dnn)
-                cal(n, nn) = cn * rn
+                cal(n, nn) = cn*rn
             end do
         end do
 
@@ -2748,8 +2748,8 @@ contains
             call vigampl (dcth, nmax, m, dv1, dv2)
             call vigampl (dcth0, nmax, m, dv01, dv02)
             !
-            fc = 2d0 * dcos(m * ph)    !takes into account +/- m contribution
-            fs = 2d0 * dsin(m * ph)
+            fc = 2d0*dcos(m*ph)    !takes into account +/- m contribution
+            fs = 2d0*dsin(m*ph)
             !
             do nn = nmin, nmax
 
@@ -2765,10 +2765,10 @@ contains
 
                     if (m==0) then     !t^{21}=t^{12}=0 in particle frame
 
-                        cn = cal(n, nn) * dv2n * dv2nn
+                        cn = cal(n, nn)*dv2n*dv2nn
 
-                        vv = vv + cn * ct22
-                        hh = hh + cn * ct11
+                        vv = vv + cn*ct22
+                        hh = hh + cn*ct11
 
                     else   !t^{21}\neq t^{12}\neq 0
 
@@ -2780,25 +2780,25 @@ contains
                         !     t^{11}_{-mnn'} = t^{11}_{mnn'}; t^{22}_{-mnn'} = t^{22}_{mnn'}
                         !  t^{12}_{-mnn'} = - t^{12}_{mnn'}; t^{21}_{-mnn'} = - t^{21}_{mnn'}
 
-                        cn1 = cal(n, nn) * fc
-                        cn2 = cal(n, nn) * fs
+                        cn1 = cal(n, nn)*fc
+                        cn2 = cal(n, nn)*fs
 
-                        d11 = dv1n * dv1nn    !\pi-\pi
-                        d12 = dv1n * dv2nn    !\pi-\tau
-                        d21 = dv2n * dv1nn    !\tau-\pi
-                        d22 = dv2n * dv2nn    !\tau-\tau
+                        d11 = dv1n*dv1nn    !\pi-\pi
+                        d12 = dv1n*dv2nn    !\pi-\tau
+                        d21 = dv2n*dv1nn    !\tau-\pi
+                        d22 = dv2n*dv2nn    !\tau-\tau
 
-                        vv = vv + (ct11 * d11 + ct21 * d21&
-                                + ct12 * d12 + ct22 * d22) * cn1
+                        vv = vv + (ct11*d11 + ct21*d21&
+                                + ct12*d12 + ct22*d22)*cn1
 
-                        vh = vh + (ct11 * d12 + ct21 * d22&
-                                + ct12 * d11 + ct22 * d21) * cn2
+                        vh = vh + (ct11*d12 + ct21*d22&
+                                + ct12*d11 + ct22*d21)*cn2
 
-                        hv = hv - (ct11 * d21 + ct21 * d11&
-                                + ct12 * d22 + ct22 * d12) * cn2
+                        hv = hv - (ct11*d21 + ct21*d11&
+                                + ct12*d22 + ct22*d12)*cn2
 
-                        hh = hh + (ct11 * d22 + ct21 * d12&
-                                + ct12 * d21 + ct22 * d11) * cn1
+                        hh = hh + (ct11*d22 + ct21*d12&
+                                + ct12*d21 + ct22*d11)*cn1
                     endif
                 end do
             end do     !(over n,n')
@@ -2807,25 +2807,25 @@ contains
         ! final multiplication of s11,s12,s21,s22 by (1/k) in the
         ! original code:
 
-        dk = 2d0 * pin / dlam     !wavevector in surrounding medium
-        vv = vv / dk
-        vh = vh / dk
-        hv = hv / dk
-        hh = hh / dk
+        dk = 2d0*pin/dlam     !wavevector in surrounding medium
+        vv = vv/dk
+        vh = vh/dk
+        hv = hv/dk
+        hh = hh/dk
 
         !   amplitude scattering matrix elements s11,s12,s21,s22 determined
         !==================================================================
         ! transformation of the amplitude matrix from particle to
         ! laboratory frame:
 
-        cvv = vv * r(1, 1) + vh * r(2, 1)
-        cvh = vv * r(1, 2) + vh * r(2, 2)
-        chv = hv * r(1, 1) + hh * r(2, 1)
-        chh = hv * r(1, 2) + hh * r(2, 2)
-        vv = r1(1, 1) * cvv + r1(1, 2) * chv
-        vh = r1(1, 1) * cvh + r1(1, 2) * chh
-        hv = r1(2, 1) * cvv + r1(2, 2) * chv
-        hh = r1(2, 1) * cvh + r1(2, 2) * chh
+        cvv = vv*r(1, 1) + vh*r(2, 1)
+        cvh = vv*r(1, 2) + vh*r(2, 2)
+        chv = hv*r(1, 1) + hh*r(2, 1)
+        chh = hv*r(1, 2) + hh*r(2, 2)
+        vv = r1(1, 1)*cvv + r1(1, 2)*chv
+        vh = r1(1, 1)*cvh + r1(1, 2)*chh
+        hv = r1(2, 1)*cvv + r1(2, 2)*chv
+        hh = r1(2, 1)*cvh + r1(2, 2)*chh
 
         print 1101, vv
         print 1102, vh
@@ -2844,28 +2844,28 @@ contains
         !
         ! for particles with plane of symmetry:
         ! extiction for e along the axis of axial symmetry:
-        cext1 = 2.d0 * dlam * aimag(vv)      !eq. (2.159)
+        cext1 = 2.d0*dlam*aimag(vv)      !eq. (2.159)
 
         ! extiction for e perpendicular to the axis of axial symmetry:
-        cext2 = 2.d0 * dlam * aimag(hh)      !eq. (2.159)
+        cext2 = 2.d0*dlam*aimag(hh)      !eq. (2.159)
 
         ! orientationally averaged extiction
-        cext = dlam * aimag(vv + hh)         !eq. (5.97)
+        cext = dlam*aimag(vv + hh)         !eq. (5.97)
 
         write(6, *)'c_{ext}=\fr{2\pi}{k_1} im (s_{11}+s_{22})=', &
                 cext               !=2.d0*pin*aimag(vv+hh)/k_1
 
         write(10, *) lambda, cext1, cext2
         !c      fac=lambda**2/(2.d0*pin**2*rev**2)     !=2/xs**2
-        fac = 1.d0 / (pin * rev**2)   !an effective geom. cross section
+        fac = 1.d0/(pin*rev**2)   !an effective geom. cross section
 
-        write(nout + 3, 1107)lambda, fac * cext, fac * cext1, fac * cext2
+        write(nout + 3, 1107)lambda, fac*cext, fac*cext1, fac*cext2
         write(nout + 12, 1105) lambda, vv, vh
         write(nout + 12, 1105) lambda, hv, hh
-        write(nout + 13, 1106) lambda, dble(vv * conjg(vv) + vh * conjg(vh)), &
-                dble((vv + vh) * conjg(vv + vh))
-        write(nout + 14, 1106) lambda, dble(hv * conjg(hv) + hh * conjg(hh)), &
-                dble((hv + hh) * conjg(hv + hh))
+        write(nout + 13, 1106) lambda, dble(vv*conjg(vv) + vh*conjg(vh)), &
+                dble((vv + vh)*conjg(vv + vh))
+        write(nout + 14, 1106) lambda, dble(hv*conjg(hv) + hh*conjg(hh)), &
+                dble((hv + hh)*conjg(hv + hh))
 
         1101 format ('s11=', d11.5, ' + i*', d11.5)
         1102 format ('s12=', d11.5, ' + i*', d11.5)
@@ -2980,8 +2980,8 @@ contains
         !________
         mm1 = m
         qm = dble(m)
-        qmm = qm * qm
-        ng = 2 * ngauss
+        qmm = qm*qm
+        ng = 2*ngauss
         nm = nmax + nmax
         factor = 1d0
         !
@@ -3049,9 +3049,9 @@ contains
 
                     si = sig(n + m)           !=(-1)**(n+m)
                     !                                 !exactly what follows from {ed}
-                    d1(i2, n) = dd1 * si
-                    d2(i2, n) = -dd2 * si
-                    d3(i2, n) = dd3 * si
+                    d1(i2, n) = dd1*si
+                    d2(i2, n) = -dd2*si
+                    d3(i2, n) = dd3*si
 
                 end if
             enddo
@@ -3075,7 +3075,7 @@ contains
         !  assigning r^2(\theta)*weight product:
 
         do i = 1, ngss
-            wr = w(i) * r(i)
+            wr = w(i)*r(i)
 
             !c          if (dr(i).eq.0.d0) wr=0.d0   !temporarily only
 
@@ -3113,12 +3113,12 @@ contains
                     d1n2 = d1(i, n2)
                     d2n2 = d2(i, n2)
                     d3n2 = d3(i, n2)
-                    a11 = d1n1 * d3n2            !pi(n1)*d(n2)
-                    a12 = d3n1 * d2n2            !d(n1)*tau(n2)
-                    a21 = d2n1 * d3n2            !tau(n1)*d(n2)
-                    a22 = d2n1 * d2n2            !tau(n1)*tau(n2)
-                    aa1 = d1n1 * d2n2 + d2n1 * d1n2  !pi(n1)*tau(n2)+tau(n1)*pi(n2)
-                    aa2 = d1n1 * d1n2 + a22       !pi(n1)*pi(n2)+tau(n1)*tau(n2)
+                    a11 = d1n1*d3n2            !pi(n1)*d(n2)
+                    a12 = d3n1*d2n2            !d(n1)*tau(n2)
+                    a21 = d2n1*d3n2            !tau(n1)*d(n2)
+                    a22 = d2n1*d2n2            !tau(n1)*tau(n2)
+                    aa1 = d1n1*d2n2 + d2n1*d1n2  !pi(n1)*tau(n2)+tau(n1)*pi(n2)
+                    aa2 = d1n1*d1n2 + a22       !pi(n1)*pi(n2)+tau(n1)*tau(n2)
                     ! vector spherical harmonics:
                     !  since refractive index is allowed to be complex in general,
                     !  the bessel function j_l(k_in*r) is complex. the code below
@@ -3139,75 +3139,75 @@ contains
                     qdji2 = cbess%dji(i, n2)
                     ! re and im of j_{n2}(k_{in}r) j_{n1}(k_{out}r):
 
-                    c1r = qjr2 * qj1
-                    c1i = qji2 * qj1
+                    c1r = qjr2*qj1
+                    c1i = qji2*qj1
                     ! re and im of j_{n2}(k_{in}r) h_{n1}(k_{out}r):
 
-                    b1r = c1r - qji2 * qy1
-                    b1i = c1i + qjr2 * qy1
+                    b1r = c1r - qji2*qy1
+                    b1i = c1i + qjr2*qy1
                     ! re and im of j_{n2}(k_{in}r) j_{n1}'(k_{out}r)/(k_{out}r):
 
-                    c2r = qjr2 * qdj1
-                    c2i = qji2 * qdj1
+                    c2r = qjr2*qdj1
+                    c2i = qji2*qdj1
                     ! re and im of j_{n2}(k_{in}r) h_{n1}'(k_{out}r)/(k_{out}r):
 
-                    b2r = c2r - qji2 * qdy1
-                    b2i = c2i + qjr2 * qdy1
+                    b2r = c2r - qji2*qdy1
+                    b2i = c2i + qjr2*qdy1
 
                     ddri = ddr(i)               !1/(k_{out}r)
                     ! re and im of [1/(k_{out}r)]*j_{n2}(k_{in}r) j_{n1}(k_{out}r)
 
-                    c3r = ddri * c1r
-                    c3i = ddri * c1i
+                    c3r = ddri*c1r
+                    c3i = ddri*c1i
                     ! re and im of [1/(k_{out}r)]*j_{n2}(k_{in}r) h_{n1}(k_{out}r):
 
-                    b3r = ddri * b1r
-                    b3i = ddri * b1i
+                    b3r = ddri*b1r
+                    b3i = ddri*b1i
                     ! re and im of [k_{in}r j_{n2}(k_{in}r)]'/(k_{in}r)
-                    !                          * j_{n1}(k_{out}r):
+                    !                         *j_{n1}(k_{out}r):
 
-                    c4r = qdjr2 * qj1
-                    c4i = qdji2 * qj1
+                    c4r = qdjr2*qj1
+                    c4i = qdji2*qj1
                     ! re and im of [k_{in}r j_{n2}(k_{in}r)]'/(k_{in}r)
-                    !                          *  h_{n1}(k_{out}r):
+                    !                         * h_{n1}(k_{out}r):
 
-                    b4r = c4r - qdji2 * qy1
-                    b4i = c4i + qdjr2 * qy1
+                    b4r = c4r - qdji2*qy1
+                    b4i = c4i + qdjr2*qy1
 
                     drri = drr(i)               !re[1/(k_{in}r)]
                     drii = dri(i)               !im[1/(k_{in}r)]
                     ! re and im of [1/(k_{in}r)] j_{n2}(k_{in}r) j_{n1}(k_{out}r):
 
-                    c5r = c1r * drri - c1i * drii
-                    c5i = c1i * drri + c1r * drii
+                    c5r = c1r*drri - c1i*drii
+                    c5i = c1i*drri + c1r*drii
                     ! re and im of [1/(k_{in}r)] j_{n2}(k_{in}r) h_{n1}(k_{out}r):
 
-                    b5r = b1r * drri - b1i * drii
-                    b5i = b1i * drri + b1r * drii
+                    b5r = b1r*drri - b1i*drii
+                    b5i = b1i*drri + b1r*drii
                     ! re and im of j_{n2}'(k_{in}r) j_{n1}'(k_{out}r):
 
-                    c6r = qdjr2 * qdj1
-                    c6i = qdji2 * qdj1
+                    c6r = qdjr2*qdj1
+                    c6i = qdji2*qdj1
                     ! re and im of j_{n2}'(k_{in}r) h_{n1}'(k_{out}r):
 
-                    b6r = c6r - qdji2 * qdy1
-                    b6i = c6i + qdjr2 * qdy1
+                    b6r = c6r - qdji2*qdy1
+                    b6i = c6i + qdjr2*qdy1
                     ! re and im of [1/(k_{out}r)] j_{n2}'(k_{in}r) j_{n1}(k_{out}r):
 
-                    c7r = c4r * ddri
-                    c7i = c4i * ddri
+                    c7r = c4r*ddri
+                    c7i = c4i*ddri
                     ! re and im of [1/(k_{out}r)] j_{n2}'(k_{in}r) h_{n1}(k_{out}r):
 
-                    b7r = b4r * ddri
-                    b7i = b4i * ddri
+                    b7r = b4r*ddri
+                    b7i = b4i*ddri
                     ! re and im of [1/(k_{in}r)] j_{n2}(k_{in}r) j_{n1}'(k_{out}r):
 
-                    c8r = c2r * drri - c2i * drii
-                    c8i = c2i * drri + c2r * drii
+                    c8r = c2r*drri - c2i*drii
+                    c8i = c2i*drri + c2r*drii
                     ! re and im of [1/(k_{in}r)] j_{n2}(k_{in}r) h_{n1}'(k_{out}r):
 
-                    b8r = b2r * drri - b2i * drii
-                    b8i = b2i * drri + b2r * drii
+                    b8r = b2r*drri - b2i*drii
+                    b8i = b2i*drri + b2r*drii
                     ! %%%%%%%%%  forming integrands of j-matrices (j^{11}=j^{22}=0 for m.eq.0):
 
                     uri = dr(i)
@@ -3216,12 +3216,12 @@ contains
                     if (ncheck==1.and.si>0d0) goto 150
                     ! w(i)*r^2(i)*(pi(n1)*tau(n2)+tau(n1)*pi(n2):
 
-                    e1 = rr(i) * aa1             ! <-- aa1
+                    e1 = rr(i)*aa1             ! <-- aa1
 
-                    ar11 = ar11 + e1 * b1r
-                    ai11 = ai11 + e1 * b1i
-                    gr11 = gr11 + e1 * c1r
-                    gi11 = gi11 + e1 * c1i
+                    ar11 = ar11 + e1*b1r
+                    ai11 = ai11 + e1*b1i
+                    gr11 = gr11 + e1*c1r
+                    gi11 = gi11 + e1*c1i
 
                     if (ncheck==1) goto 160
 
@@ -3229,27 +3229,27 @@ contains
                     ! w(i)*r^2(\theta)*[pi(n1)*pi(n2)+tau(n1)*tau(n2)]
                     ! (prefactor containing r^2(\theta)<->hat{r} part)
 
-                    f1 = rri * aa2             ! <-- aa2
+                    f1 = rri*aa2             ! <-- aa2
                     ! n1*(n1+1)*w(i)*r(\theta)*[dr/(d\theta)]*d(n1)*tau(n2):
                     !  (prefactor containing r(\theta)*[dr/(d\theta)] - hat{theta} part)
 
-                    f2 = rri * uri * an1 * a12             ! <-- a12
+                    f2 = rri*uri*an1*a12             ! <-- a12
 
-                    ar12 = ar12 + f1 * b2r + f2 * b3r        !~re j^{12}
-                    ai12 = ai12 + f1 * b2i + f2 * b3i        !~im j^{12}
+                    ar12 = ar12 + f1*b2r + f2*b3r        !~re j^{12}
+                    ai12 = ai12 + f1*b2i + f2*b3i        !~im j^{12}
 
-                    gr12 = gr12 + f1 * c2r + f2 * c3r        !~re rg j^{12}
-                    gi12 = gi12 + f1 * c2i + f2 * c3i        !~im rg j^{12}
+                    gr12 = gr12 + f1*c2r + f2*c3r        !~re rg j^{12}
+                    gi12 = gi12 + f1*c2i + f2*c3i        !~im rg j^{12}
                     ! n2*(n2+1)*w(i)*r(\theta)*[dr/(d\theta)]*tau(n1)*d(n2):
                     ! (!prefactor containing r(\theta)*[dr/(d\theta)] - hat{theta} part)
 
-                    f2 = rri * uri * an2 * a21             ! <-- a21
+                    f2 = rri*uri*an2*a21             ! <-- a21
 
-                    ar21 = ar21 + f1 * b4r + f2 * b5r
-                    ai21 = ai21 + f1 * b4i + f2 * b5i
+                    ar21 = ar21 + f1*b4r + f2*b5r
+                    ai21 = ai21 + f1*b4i + f2*b5i
 
-                    gr21 = gr21 + f1 * c4r + f2 * c5r
-                    gi21 = gi21 + f1 * c4i + f2 * c5i
+                    gr21 = gr21 + f1*c4r + f2*c5r
+                    gi21 = gi21 + f1*c4i + f2*c5i
 
                     if (ncheck==1) cycle
 
@@ -3257,38 +3257,38 @@ contains
                     ! w(i)*r^2(\theta)*[dr/(d\theta)]*pi(n1)*d(n2):
                     ! (!prefactor containing r^2(\theta)*[dr/(d\theta)] - hat{theta} part)
 
-                    e2 = rri * uri * a11
-                    e3 = e2 * an2
-                    e2 = e2 * an1
+                    e2 = rri*uri*a11
+                    e3 = e2*an2
+                    e2 = e2*an1
 
-                    ar22 = ar22 + e1 * b6r + e2 * b7r + e3 * b8r
-                    ai22 = ai22 + e1 * b6i + e2 * b7i + e3 * b8i
+                    ar22 = ar22 + e1*b6r + e2*b7r + e3*b8r
+                    ai22 = ai22 + e1*b6i + e2*b7i + e3*b8i
 
-                    gr22 = gr22 + e1 * c6r + e2 * c7r + e3 * c8r
-                    gi22 = gi22 + e1 * c6i + e2 * c7i + e3 * c8i
+                    gr22 = gr22 + e1*c6r + e2*c7r + e3*c8r
+                    gi22 = gi22 + e1*c6i + e2*c7i + e3*c8i
 
                 end do   !gauss integration
                 !%%%%%%%%%%%%%  forming j-matrices (j^{11}=j^{22}=0 for m.eq.0):
 
-                an12 = ann(n1, n2) * factor
+                an12 = ann(n1, n2)*factor
 
-                r11(n1, n2) = ar11 * an12       !re j^{11}
-                r12(n1, n2) = ar12 * an12       !re j^{12}
-                r21(n1, n2) = ar21 * an12       !re j^{21}
-                r22(n1, n2) = ar22 * an12       !re j^{22}
-                i11(n1, n2) = ai11 * an12       !im j^{11}
-                i12(n1, n2) = ai12 * an12       !im j^{12}
-                i21(n1, n2) = ai21 * an12       !im j^{21}
-                i22(n1, n2) = ai22 * an12       !im j^{22}
+                r11(n1, n2) = ar11*an12       !re j^{11}
+                r12(n1, n2) = ar12*an12       !re j^{12}
+                r21(n1, n2) = ar21*an12       !re j^{21}
+                r22(n1, n2) = ar22*an12       !re j^{22}
+                i11(n1, n2) = ai11*an12       !im j^{11}
+                i12(n1, n2) = ai12*an12       !im j^{12}
+                i21(n1, n2) = ai21*an12       !im j^{21}
+                i22(n1, n2) = ai22*an12       !im j^{22}
 
-                rg11(n1, n2) = gr11 * an12       !re (rg j^{11})
-                rg12(n1, n2) = gr12 * an12       !re (rg j^{12})
-                rg21(n1, n2) = gr21 * an12       !re (rg j^{21})
-                rg22(n1, n2) = gr22 * an12       !re (rg j^{22})
-                ig11(n1, n2) = gi11 * an12       !im (rg j^{11})
-                ig12(n1, n2) = gi12 * an12       !im (rg j^{12})
-                ig21(n1, n2) = gi21 * an12       !im (rg j^{21})
-                ig22(n1, n2) = gi22 * an12       !im (rg j^{22})
+                rg11(n1, n2) = gr11*an12       !re (rg j^{11})
+                rg12(n1, n2) = gr12*an12       !re (rg j^{12})
+                rg21(n1, n2) = gr21*an12       !re (rg j^{21})
+                rg22(n1, n2) = gr22*an12       !re (rg j^{22})
+                ig11(n1, n2) = gi11*an12       !im (rg j^{11})
+                ig12(n1, n2) = gi12*an12       !im (rg j^{12})
+                ig21(n1, n2) = gi21*an12       !im (rg j^{21})
+                ig22(n1, n2) = gi22*an12       !im (rg j^{22})
 
             end do
         end do
@@ -3327,29 +3327,29 @@ contains
                 tgr22 = -rg22(n1, n2)
                 tgi22 = -ig22(n1, n2)
 
-                tqr(k1, k2) = tpir * tar21 - tpii * tai21 + tppi * tar12
-                tqi(k1, k2) = tpir * tai21 + tpii * tar21 + tppi * tai12
-                trgqr(k1, k2) = tpir * tgr21 - tpii * tgi21 + tppi * tgr12
-                trgqi(k1, k2) = tpir * tgi21 + tpii * tgr21 + tppi * tgi12
+                tqr(k1, k2) = tpir*tar21 - tpii*tai21 + tppi*tar12
+                tqi(k1, k2) = tpir*tai21 + tpii*tar21 + tppi*tai12
+                trgqr(k1, k2) = tpir*tgr21 - tpii*tgi21 + tppi*tgr12
+                trgqi(k1, k2) = tpir*tgi21 + tpii*tgr21 + tppi*tgi12
 
-                tqr(k1, kk2) = tpir * tar11 - tpii * tai11 + tppi * tar22
-                tqi(k1, kk2) = tpir * tai11 + tpii * tar11 + tppi * tai22
-                trgqr(k1, kk2) = tpir * tgr11 - tpii * tgi11 + tppi * tgr22
-                trgqi(k1, kk2) = tpir * tgi11 + tpii * tgr11 + tppi * tgi22
+                tqr(k1, kk2) = tpir*tar11 - tpii*tai11 + tppi*tar22
+                tqi(k1, kk2) = tpir*tai11 + tpii*tar11 + tppi*tai22
+                trgqr(k1, kk2) = tpir*tgr11 - tpii*tgi11 + tppi*tgr22
+                trgqi(k1, kk2) = tpir*tgi11 + tpii*tgr11 + tppi*tgi22
 
-                tqr(kk1, k2) = tpir * tar22 - tpii * tai22 + tppi * tar11
-                tqi(kk1, k2) = tpir * tai22 + tpii * tar22 + tppi * tai11
-                trgqr(kk1, k2) = tpir * tgr22 - tpii * tgi22 + tppi * tgr11
-                trgqi(kk1, k2) = tpir * tgi22 + tpii * tgr22 + tppi * tgi11
+                tqr(kk1, k2) = tpir*tar22 - tpii*tai22 + tppi*tar11
+                tqi(kk1, k2) = tpir*tai22 + tpii*tar22 + tppi*tai11
+                trgqr(kk1, k2) = tpir*tgr22 - tpii*tgi22 + tppi*tgr11
+                trgqi(kk1, k2) = tpir*tgi22 + tpii*tgr22 + tppi*tgi11
 
-                tqr(kk1, kk2) = tpir * tar12 - tpii * tai12 + tppi * tar21
-                tqi(kk1, kk2) = tpir * tai12 + tpii * tar12 + tppi * tai21
-                trgqr(kk1, kk2) = tpir * tgr12 - tpii * tgi12 + tppi * tgr21
-                trgqi(kk1, kk2) = tpir * tgi12 + tpii * tgr12 + tppi * tgi21
+                tqr(kk1, kk2) = tpir*tar12 - tpii*tai12 + tppi*tar21
+                tqi(kk1, kk2) = tpir*tai12 + tpii*tar12 + tppi*tai21
+                trgqr(kk1, kk2) = tpir*tgr12 - tpii*tgi12 + tppi*tgr21
+                trgqi(kk1, kk2) = tpir*tgi12 + tpii*tgr12 + tppi*tgi21
             end do
         end do
 
-        nnmax = 2 * nm
+        nnmax = 2*nm
         do n1 = 1, nnmax
             do n2 = 1, nnmax
                 qr(n1, n2) = tqr(n1, n2)

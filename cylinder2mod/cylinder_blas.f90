@@ -48,7 +48,7 @@ contains
             ! forming a matrix product
             !
             do j = ii, n
-                if((abs(a(i, j)) - emach)>0) x(j) = x(j) - x(i) * a(i, j)
+                if((abs(a(i, j)) - emach)>0) x(j) = x(j) - x(i)*a(i, j)
             end do
         end do
         !                 !the i-th row of a multiplied by x(i)
@@ -59,13 +59,13 @@ contains
             ij = i + 1
             if((i - n)/=0) then
                 do j = ij, n
-                    x(i) = x(i) - x(j) * a(j, i)
+                    x(i) = x(i) - x(j)*a(j, i)
                 end do
             end if
-            if((abs(a(i, i)) - emach * 1.0d-7)<0)  then
-                a(i, i) = emach * (1.0d-7) * (1.d0, 1.d0)
+            if((abs(a(i, i)) - emach*1.0d-7)<0)  then
+                a(i, i) = emach*(1.0d-7)*(1.d0, 1.d0)
             end if
-            x(i) = x(i) / a(i, i)
+            x(i) = x(i)/a(i, i)
         end do
         return
     end
@@ -125,9 +125,9 @@ contains
             !     ! in the sub-matrix beginning with the (i+1,i+1) diag. element
             do j = ii, n
                 if((abs(a(i, j)) - emach)>0) then
-                    a(i, j) = a(i, j) / yr
+                    a(i, j) = a(i, j)/yr
                     do k = ii, n
-                        a(k, j) = a(k, j) - a(i, j) * a(k, i)   !k-t element of j-th column
+                        a(k, j) = a(k, j) - a(i, j)*a(k, i)   !k-t element of j-th column
                     end do
                 end if
             end do                   !the elements in the ith row
@@ -150,7 +150,7 @@ contains
     !            do j = 1, n
     !                cij = 0d0
     !                do k = 1, n
-    !                    cij = cij + a(i, k) * b(k, j)
+    !                    cij = cij + a(i, k)*b(k, j)
     !                end do
     !                c(i, j) = cij
     !            end do
@@ -185,16 +185,16 @@ contains
     !                p1(npn1,npn1), p2(npn1,npn1), ipvt(npn1), ind1(npn1), ind2(npn1))
     !
     !        ndim = npn1
-    !        nn1 = (dble(nmax) - 0.1d0) * 0.5d0 + 1d0
+    !        nn1 = (dble(nmax) - 0.1d0)*0.5d0 + 1d0
     !        nn2 = nmax - nn1
     !        !
     !        do i = 1, nmax
-    !            ind1(i) = 2 * i - 1
-    !            if(i.gt.nn1) ind1(i) = nmax + 2 * (i - nn1)
-    !            ind2(i) = 2 * i
-    !            if(i.gt.nn2) ind2(i) = nmax + 2 * (i - nn2) - 1
+    !            ind1(i) = 2*i - 1
+    !            if(i.gt.nn1) ind1(i) = nmax + 2*(i - nn1)
+    !            ind2(i) = 2*i
+    !            if(i.gt.nn2) ind2(i) = nmax + 2*(i - nn2) - 1
     !        end do
-    !        nnmax = 2 * nmax
+    !        nnmax = 2*nmax
     !        !
     !        do i = 1, nmax
     !            i1 = ind1(i)
@@ -292,7 +292,7 @@ contains
     !            a(k, k) = t
     !            if (t.eq.0d0) go to 35
     !            do i = kp1, n
-    !                a(i, k) = -a(i, k) / t
+    !                a(i, k) = -a(i, k)/t
     !            end do
     !            do j = kp1, n
     !                t = a(m, j)
@@ -300,7 +300,7 @@ contains
     !                a(k, j) = t
     !                if (t.eq.0d0) go to 30
     !                do i = kp1, n
-    !                    a(i, j) = a(i, j) + a(i, k) * t
+    !                    a(i, j) = a(i, j) + a(i, k)*t
     !                end do
     !                30     continue
     !            end do
@@ -311,19 +311,19 @@ contains
     !            if (k.eq.1) go to 45
     !            km1 = k - 1
     !            do i = 1, km1
-    !                t = t + a(i, k) * work(i)
+    !                t = t + a(i, k)*work(i)
     !            end do
     !            45       ek = 1d0
     !            if (t.lt.0d0) ek = -1d0
     !            if (a(k, k).eq.0d0) go to 90
-    !            work(k) = -(ek + t) / a(k, k)
+    !            work(k) = -(ek + t)/a(k, k)
     !        end do
     !        do kb = 1, nm1
     !            k = n - kb
     !            t = 0d0
     !            kp1 = k + 1
     !            do i = kp1, n
-    !                t = t + a(i, k) * work(k)
+    !                t = t + a(i, k)*work(k)
     !            end do
     !            work(k) = t
     !            m = ipvt(k)
@@ -344,7 +344,7 @@ contains
     !        do i = 1, n
     !            znorm = znorm + dabs(work(i))
     !        end do
-    !        cond = anorm * znorm / ynorm
+    !        cond = anorm*znorm/ynorm
     !        if (cond.lt.1d0) cond = 1d0
     !        return
     !        80 cond = 1d0
@@ -371,7 +371,7 @@ contains
     !        ndim = array_shape(1)
     !        n = array_shape(2)
     !        if (n.eq.1) then
-    !            b(1) = b(1) / a(1, 1)
+    !            b(1) = b(1)/a(1, 1)
     !            return
     !        end if
     !        nm1 = n - 1
@@ -382,19 +382,19 @@ contains
     !            b(m) = b(k)
     !            b(k) = t
     !            do i = kp1, n
-    !                b(i) = b(i) + a(i, k) * t
+    !                b(i) = b(i) + a(i, k)*t
     !            end do
     !        end do
     !        do kb = 1, nm1
     !            km1 = n - kb
     !            k = km1 + 1
-    !            b(k) = b(k) / a(k, k)
+    !            b(k) = b(k)/a(k, k)
     !            t = -b(k)
     !            do i = 1, km1
-    !                b(i) = b(i) + a(i, k) * t
+    !                b(i) = b(i) + a(i, k)*t
     !            end do
     !        end do
-    !        b(1) = b(1) / a(1, 1)
+    !        b(1) = b(1)/a(1, 1)
     !        !
     !        return
     !    end
@@ -442,9 +442,9 @@ contains
     !            if(abs(yr) - emach > 0) then
     !                do j = ii, n
     !                    if(abs(a(j, i)) - emach<=0) cycle
-    !                    a(j, i) = a(j, i) / yr
+    !                    a(j, i) = a(j, i)/yr
     !                    do k = ii, n
-    !                        a(j, k) = a(j, k) - a(i, k) * a(j, i)
+    !                        a(j, k) = a(j, k) - a(i, k)*a(j, i)
     !                    end do
     !                end do
     !            end if
@@ -484,7 +484,7 @@ contains
     !                x(i) = dum
     !            end if
     !            do j = ii, n
-    !                if(abs(a(j, i)) - emach >0) x(j) = x(j) - a(j, i) * x(i)
+    !                if(abs(a(j, i)) - emach >0) x(j) = x(j) - a(j, i)*x(i)
     !            end do
     !        end do
     !        do ii = 1, n
@@ -492,13 +492,13 @@ contains
     !            ij = i + 1
     !            if(i - n /= 0) then
     !                do j = ij, n
-    !                    x(i) = x(i) - a(i, j) * x(j)
+    !                    x(i) = x(i) - a(i, j)*x(j)
     !                end do
     !            end if
-    !            if(abs(a(i, i)) - emach * 1.0d-7 < 0) then
-    !                a(i, i) = emach * 1.0d-7 * (1.0_dp, 1.0_dp)
+    !            if(abs(a(i, i)) - emach*1.0d-7 < 0) then
+    !                a(i, i) = emach*1.0d-7*(1.0_dp, 1.0_dp)
     !            else
-    !                x(i) = x(i) / a(i, i)
+    !                x(i) = x(i)/a(i, i)
     !            endif
     !
     !        end do
