@@ -162,22 +162,20 @@ subroutine tmtaxsp(nmax, rap, zeps1, tmt)
 
     ! Check if the radius is area-equivalent instead of volume-equivalent
     if (dabs(rat - 1d0) > 1d-8) then
-        if (np >= 0) then ! chebyshev particle
+        select case (np)
+        case(0:)
             call radii_ratio_chebyshev(np, eps, rat)
-        else
-            select case (np)
-            case (-1) ! oblate/prolate spheroids
-                call radii_ratio_spheroid(eps, rat)
-            case (-2) ! oblate/prolate cylinder
-                call radii_ratio_cylinder(eps, rat)
-            case (-3) ! distorted chebyshev droplet
-                call radii_ratio_droplet(rat)
-            case (-9) ! nanorod
-                ! todo make a correct evaluation of surface-equivalent radius for nanorod
-                ! (2019-12-09) In principle it is done but needs some testing
-                call radii_ratio_nanorod(eps, mpar%nanorod_cap_hr, rat)
-            end select
-        end if
+        case (-1) ! oblate/prolate spheroids
+            call radii_ratio_spheroid(eps, rat)
+        case (-2) ! oblate/prolate cylinder
+            call radii_ratio_cylinder(eps, rat)
+        case (-3) ! distorted chebyshev droplet
+            call radii_ratio_droplet(rat)
+        case (-9) ! nanorod
+            ! todo make a correct evaluation of surface-equivalent radius for nanorod
+            ! (2019-12-09) In principle it is done but needs some testing
+            call radii_ratio_nanorod(eps, mpar%nanorod_cap_hr, rat)
+        end select
     end if
 
     !___________________________________________________
@@ -866,31 +864,28 @@ subroutine vary (lam, mrr, mri, a, eps, &
     ht = 0d0
 
     ! decision tree to specify particle shape:
-    if (np >= 0)  then ! chebyshev particle
+    select case (np)
+    case(0:) ! chebyshev particle
         call rsp_chebyshev(x, ng, a, eps, np, r, dr)
-    else
-        select case (np)
-        case (-1) ! oblate/prolate spheroids
-            call rsp_spheroid(x, ng, ngauss, a, eps, r, dr)
-        case (-2) ! oblate/prolate cylinder
-            call rsp_cylinder(x, r, dr)
-        case (-3) ! distorted chebyshev droplet
-            call rsp_droplet(x, ng, a, r, dr)
-        case (-4) ! sphere cut by a plane on its top
-            call rsp_sphere_cut_top(x, ng, rsnm, eps, r, dr)
-        case (-5) ! sphere cut by a plane on its bottom
-            call rsp_sphere_cut_bottom(x, ng, rsnm, eps, r, dr)
-        case (-6) ! upwardly oriented cone
-            call rsp_cone_up(x, ng, rsnm, ht, r, dr)
-        !case (-7) ! cone cut on its top
-        !    call rsp_cone_cut_top(x, ng, rsnm, ht, r, dr)
-        !case (-8) ! cone on a cylinder
-        !    call rsp_cone_on_cylinder(x, ng, rsnm, ht, r, dr)
-        case (-9) ! nanorod
-            call rsp_nanorod (x, ng, ngauss, a, eps, &
-                    mpar%nanorod_cap_hr, r, dr)
-        end select
-    end if
+    case (-1) ! oblate/prolate spheroids
+        call rsp_spheroid(x, ng, ngauss, a, eps, r, dr)
+    case (-2) ! oblate/prolate cylinder
+        call rsp_cylinder(x, r, dr)
+    case (-3) ! distorted chebyshev droplet
+        call rsp_droplet(x, ng, a, r, dr)
+    case (-4) ! sphere cut by a plane on its top
+        call rsp_sphere_cut_top(x, ng, rsnm, eps, r, dr)
+    case (-5) ! sphere cut by a plane on its bottom
+        call rsp_sphere_cut_bottom(x, ng, rsnm, eps, r, dr)
+    case (-6) ! upwardly oriented cone
+        call rsp_cone_up(x, ng, rsnm, ht, r, dr)
+    !case (-7) ! cone cut on its top
+    !    call rsp_cone_cut_top(x, ng, rsnm, ht, r, dr)
+    !case (-8) ! cone on a cylinder
+    !    call rsp_cone_on_cylinder(x, ng, rsnm, ht, r, dr)
+    case (-9) ! nanorod
+        call rsp_nanorod (x, ng, ngauss, a, eps, mpar%nanorod_cap_hr, r, dr)
+    end select
 
     wv = p*2d0/lam                 !wave vector
     ppi = wv*wv
