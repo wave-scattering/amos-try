@@ -2381,158 +2381,31 @@ subroutine tmatr_adapt (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, d
             integrand%m = m
 
             do i = 1, ngss
-                !                n1 = integrand%n1
-                !                n2 = integrand%n2
-                !                m = integrand%m
-                !                si = sig(n1 + n2)
-                xi = x(i)
-                an1 = dble(n1*(n1 + 1))
-                an2 = dble(n2*(n2 + 1))
-                if (mpar%np.ne.-2) stop 'adaptive integration is only implemented for cylinder'
-                x_to_rsp(1) = xi
-                call rsp_cylinder(x_to_rsp, r_from_x, dr_from_x)
-                call vig_1v (xi, n1, m, d1n1, d2n1)
-                call vig_1v (xi, n2, m, d1n2, d2n2)
-                a11 = d1n1*d1n2
-                a12 = d1n1*d2n2
-                a21 = d2n1*d1n2
-                a22 = d2n1*d2n2
-
-                dssi = dble(m**2)/ (1d0 - xi*xi)       !=dble(m)**2/(\sin^2\theta)
-                aa1 = a12 + a21            != d1n1*d2n2+d2n1*d1n2
-                aa2 = a11*dssi + a22   !=(d1n1*d1n2)*dble(m)**2/(\sin^2\theta)
-                !                          ! +d2n1*d2n2
-                ! vector spherical harmonics:
-                !  since refractive index is allowed to be complex in general,
-                !  the bessel function j_l(k_in*r) is complex. the code below
-                !  performs a separation of the complex integrand in waterman's
-                !  surface integral into its respective real and imaginary
-                !  parts:
-
-                call cbessjdj(r_from_x(1),n1, qj1, qdj1)
-                call cbessydy(r_from_x(1),n1, qy1, qdy1)
-                ! bessel functions of the interior argument:
-                call cbesscjcdj(r_from_x(1),n2, integrand%nmax, qjr2, qji2, qdjr2, qdji2)
-                ! re and im of j_{n2}(k_{in}r) j_{n1}(k_{out}r):
-
-                c1r = qjr2*qj1
-                c1i = qji2*qj1
-                ! re and im of j_{n2}(k_{in}r) h_{n1}(k_{out}r):
-
-                b1r = c1r - qji2*qy1
-                b1i = c1i + qjr2*qy1
-                ! re and im of j_{n2}(k_{in}r) j_{n1}'(k_{out}r):
-
-                c2r = qjr2*qdj1
-                c2i = qji2*qdj1
-                ! re and im of j_{n2}(k_{in}r) h_{n1}'(k_{out}r):
-
-                b2r = c2r - qji2*qdy1
-                b2i = c2i + qjr2*qdy1
-
-                ddri=1.0_dp/(dsqrt(r_from_x(1))*cbess%wv) !1/(k_{out}r)
-                ! re and im of [1/(k_{out}r)]*j_{n2}(k_{in}r) j_{n1}(k_{out}r)
-
-                c3r = ddri*c1r
-                c3i = ddri*c1i
-                ! re and im of [1/(k_{out}r)]*j_{n2}(k_{in}r) h_{n1}(k_{out}r):
-
-                b3r = ddri*b1r
-                b3i = ddri*b1i
-                ! re and im of j_{n2}'(k_{in}r) j_{n1}(k_{out}r):
-
-                c4r = qdjr2*qj1
-                c4i = qdji2*qj1
-                ! re and im of j_{n2}'(k_{in}r) h_{n1}(k_{out}r):
-
-                b4r = c4r - qdji2*qy1
-                b4i = c4i + qdjr2*qy1
-                ! re and im of [1/(k_{in}r)] j_{n2}(k_{in}r) j_{n1}(k_{out}r):
-
-                v = 1.0_dp/(cbess%mrr**2 + cbess%mri**2)
-                drri = cbess%mrr*v*ddri               !re[1/(k_{in}r)]
-                drii = -cbess%mri*v*ddri               !im[1/(k_{in}r)]
-
-                c5r = c1r*drri - c1i*drii
-                c5i = c1i*drri + c1r*drii
-                ! re and im of [1/(k_{in}r)] j_{n2}(k_{in}r) h_{n1}(k_{out}r):
-
-                b5r = b1r*drri - b1i*drii
-                b5i = b1i*drri + b1r*drii
-                ! re and im of j_{n2}'(k_{in}r) j_{n1}'(k_{out}r):
-
-                c6r = qdjr2*qdj1
-                c6i = qdji2*qdj1
-                ! re and im of j_{n2}'(k_{in}r) h_{n1}'(k_{out}r):
-
-                b6r = c6r - qdji2*qdy1
-                b6i = c6i + qdjr2*qdy1
-                ! re and im of [1/(k_{out}r)] j_{n2}'(k_{in}r) j_{n1}(k_{out}r):
-
-                c7r = c4r*ddri
-                c7i = c4i*ddri
-                ! re and im of [1/(k_{out}r)] j_{n2}'(k_{in}r) h_{n1}(k_{out}r):
-
-                b7r = b4r*ddri
-                b7i = b4i*ddri
-                ! re and im of [1/(k_{in}r)] j_{n2}(k_{in}r) j_{n1}'(k_{out}r):
-
-                c8r = c2r*drri - c2i*drii
-                c8i = c2i*drri + c2r*drii
-                ! re and im of [1/(k_{in}r)] j_{n2}(k_{in}r) h_{n1}'(k_{out}r):
-
-                b8r = b2r*drri - b2i*drii
-                b8i = b2i*drri + b2r*drii
-                ! %%%%%%%%%  forming integrands of j-matrices (j^{11}=j^{22}=0 for m=0):
-
-                uri = -dr_from_x(1)  ! todo: why 'minus' sign was need to fit previous line?
-!                uri = dr(i)
-
-!                wr = w(i)*r_from_x(1)
-                dsi = w(i)*r_from_x(1)*dsqrt(1d0/(1d0 - xi*xi))*dble(m)      !=dble(m)*w(i)*r^2(\theta)/(|\sin\theta|)
-                rri = w(i)*r_from_x(1)
-
                 if (ncheck==1.and.si>0d0) then
-                    ! w(i)*r^2(\theta)*[(d1n1*d1n2)*dble(m)**2/(\sin^2\theta)+d2n1*d2n2]:
-                    f1 = rri*aa2            !prefactor containing r^2(\theta)<->hat{r} part
-                    ! n1*(n1+1)*w(i)*r(\theta)*[dr/(d\theta)]*d1n1*d2n2:
-                    f2 = rri*uri*an1*a12     !prefactor containing r(\theta)*[dr/(d\theta)]
-                    !                                          !hat{theta} part
+                    ar12 = ar12 + w(i)*mi_ar12(x(i))       !~re j^{12}
+                    ai12 = ai12 + w(i)*mi_ai12(x(i))       !~im j^{12}
 
-                    ar12 = ar12 + f1*b2r + f2*b3r        !~re j^{12}
-                    ai12 = ai12 + f1*b2i + f2*b3i        !~im j^{12}
+                    gr12 = gr12 + w(i)*mi_gr12(x(i))       !~re rg j^{12}
+                    gi12 = gi12 + w(i)*mi_gi12(x(i))        !~im rg j^{12}
 
-                    gr12 = gr12 + f1*c2r + f2*c3r        !~re rg j^{12}
-                    gi12 = gi12 + f1*c2i + f2*c3i        !~im rg j^{12}
-                    ! n2*(n2+1)*w(i)*r(\theta)*[dr/(d\theta)]*d2n1*d1n2:
-                    f2 = rri*uri*an2*a21     !prefactor containing r(\theta)*[dr/(d\theta)]
-                    !                                          !hat{theta} part
+                    ar21 = ar21 + w(i)*mi_ar21(x(i))
+                    ai21 = ai21 + w(i)*mi_ai21(x(i))
 
-                    ar21 = ar21 + f1*b4r + f2*b5r
-                    ai21 = ai21 + f1*b4i + f2*b5i
-
-                    gr21 = gr21 + f1*c4r + f2*c5r
-                    gi21 = gi21 + f1*c4i + f2*c5i
-
+                    gr21 = gr21 + w(i)*mi_gr21(x(i))
+                    gi21 = gi21 + w(i)*mi_gi21(x(i))
                     cycle
                 end if
-                ! [dble(m)*w(i)*r^2(i)/(|\sin\theta|)]*(d1n1*d2n2+d2n1*d1n2):
-                e1 = dsi*aa1
 
-                ar11 = ar11 + e1*b1r
-                ai11 = ai11 + e1*b1i
-                gr11 = gr11 + e1*c1r
-                gi11 = gi11 + e1*c1i
+                ar11 = ar11 + w(i)*mi_ar11(x(i))
+                ai11 = ai11 + w(i)*mi_ai11(x(i))
+                gr11 = gr11 + w(i)*mi_gr11(x(i))
+                gi11 = gi11 + w(i)*mi_gi11(x(i))
 
-                e2 = dsi*uri*a11
-                e3 = e2*an2
-                e2 = e2*an1
+                ar22 = ar22 + w(i)*mi_ar22(x(i))
+                ai22 = ai22 + w(i)*mi_ai22(x(i))
 
-                ar22 = ar22 + e1*b6r + e2*b7r + e3*b8r
-                ai22 = ai22 + e1*b6i + e2*b7i + e3*b8i
-
-                gr22 = gr22 + e1*c6r + e2*c7r + e3*c8r
-                gi22 = gi22 + e1*c6i + e2*c7i + e3*c8i
+                gr22 = gr22 + w(i)*mi_gr22(x(i))
+                gi22 = gi22 + w(i)*mi_gi22(x(i))
             end do ! end of gauss integration loop
 
             an12 = ann(n1, n2)*factor
