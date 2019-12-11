@@ -518,23 +518,18 @@ contains
 
         rv = (1.5d0*epsc + epse)**(1d0/3d0)
 
-        if (epse >= 1d0) then ! Prolate spheroid
-            if (dabs(epse - 1d0) > 1d-6) then
-                e = dsqrt(1d0 - 1d0/(epse*epse))
-
-                rs = dsqrt(epsc + 0.5d0*(1d0 + epse*dasin(e)/e))
-            else ! Special case: spherical caps
-                rs = dsqrt(epsc + 1d0)
-            end if
+        if (dabs(epse) <= 1d-6) then ! Plane caps (ie, cylinder)
+            rs = dsqrt(epsc + 0.5d0)
+        elseif (dabs(epse - 1d0) <= 1d-6) then ! Spherical caps
+            rs = dsqrt(epsc + 1d0)
+        elseif (epse > 1d0) then ! Prolate spheroid
+            e = dsqrt(1d0 - 1d0/(epse*epse))
+            rs = dsqrt(epsc + 0.5d0*(1d0 + epse*dasin(e)/e))
         else ! Oblate spheroid
-            if (dabs(epse) > 1d-6) then
-                e = dsqrt(1d0 - eps*eps)
-
-                rs = dsqrt(epsc + 0.5d0*(1d0 + epse*dlog((1d0 + e)/(1d0 - e))/e))
-            else ! Special case: plane caps (ie, cylinder)
-                rs = dsqrt(epsc + 0.5d0)
-            end if
+            e = dsqrt(1d0 - eps*eps)
+            rs = dsqrt(epsc + 0.5d0*(1d0 + epse*dlog((1d0 + e)/(1d0 - e))/e))
         end if
+
         rat = rv/rs
 
         return

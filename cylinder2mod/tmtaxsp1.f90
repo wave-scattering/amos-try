@@ -1123,7 +1123,7 @@ subroutine rsp_nanorod (x, ng, ngauss, rev, eps, epse, r, dr)
             !  along elliptic cap
             c2 = co**2
             s2 = si**2
-            ! solution of square euation of ellipse move from the origin
+            ! solution of square equation of ellipse move from the origin
             alpha = dsqrt((epse**2 - epsc**2)*s2 + c2)
             beta = epse**2*s2 + c2
             rad = (hc*co + he*alpha)/beta
