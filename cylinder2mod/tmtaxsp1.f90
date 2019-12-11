@@ -1678,28 +1678,28 @@ subroutine tmatr0_adapt(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
 
                 ! gauss integration loop (other vars):
                 !
-                do i = 1, ngss    !=ngauss   if ncheck.eq.1
-                    !             !=2*ngauss if ncheck.eq.0
-                    ar12 = ar12 + w(i)*m0_ar12(x(i))         !~re j^{12}
-                    ai12 = ai12 + w(i)*m0_ai12(x(i))        !~im j^{12}
-
-                    gr12 = gr12 + w(i)*m0_gr12(x(i))        !~re rg j^{12}
-                    gi12 = gi12 + w(i)*m0_gi12(x(i))        !~im rg j^{12}
-
-                    ar21 = ar21 + w(i)*m0_ar21(x(i))        !~re j^{21}
-                    ai21 = ai21 + w(i)*m0_ai21(x(i))        !~im j^{21}
-
-                    gr21 = gr21 + w(i)*m0_gr21(x(i))       !~re rg j^{21}
-                    gi21 = gi21 + w(i)*m0_gi21(x(i))        !~im rg j^{21}
-                end do               !end of gauss integration
-                !                call integrate(m0_ar12, 0.0_dp, 1.0_dp, ar12)
-                !                call integrate(m0_ai12, 0.0_dp, 1.0_dp, ai12)
-                !                call integrate(m0_gr12, 0.0_dp, 1.0_dp, gr12)
-                !                call integrate(m0_gi12, 0.0_dp, 1.0_dp, gi12)
-                !                call integrate(m0_ar21, 0.0_dp, 1.0_dp, ar21)
-                !                call integrate(m0_ai21, 0.0_dp, 1.0_dp, ai21)
-                !                call integrate(m0_gr21, 0.0_dp, 1.0_dp, gr21)
-                !                call integrate(m0_gi21, 0.0_dp, 1.0_dp, gi21)
+!                do i = 1, ngss    !=ngauss   if ncheck.eq.1
+!                    !             !=2*ngauss if ncheck.eq.0
+!                    ar12 = ar12 + w(i)*m0_ar12(x(i))         !~re j^{12}
+!                    ai12 = ai12 + w(i)*m0_ai12(x(i))        !~im j^{12}
+!
+!                    gr12 = gr12 + w(i)*m0_gr12(x(i))        !~re rg j^{12}
+!                    gi12 = gi12 + w(i)*m0_gi12(x(i))        !~im rg j^{12}
+!
+!                    ar21 = ar21 + w(i)*m0_ar21(x(i))        !~re j^{21}
+!                    ai21 = ai21 + w(i)*m0_ai21(x(i))        !~im j^{21}
+!
+!                    gr21 = gr21 + w(i)*m0_gr21(x(i))       !~re rg j^{21}
+!                    gi21 = gi21 + w(i)*m0_gi21(x(i))        !~im rg j^{21}
+!                end do               !end of gauss integration
+                call integrate(m0_ar12, -1.0_dp, 0.0_dp, ar12)
+                call integrate(m0_ai12, -1.0_dp, 0.0_dp, ai12)
+                call integrate(m0_gr12, -1.0_dp, 0.0_dp, gr12)
+                call integrate(m0_gi12, -1.0_dp, 0.0_dp, gi12)
+                call integrate(m0_ar21, -1.0_dp, 0.0_dp, ar21)
+                call integrate(m0_ai21, -1.0_dp, 0.0_dp, ai21)
+                call integrate(m0_gr21, -1.0_dp, 0.0_dp, gr21)
+                call integrate(m0_gi21, -1.0_dp, 0.0_dp, gi21)
 
                 !                write(nout+3,*)'n1=',n1,'   n2=',n2
                 !                write(nout+3,*)'ar12=', ar12
@@ -2380,33 +2380,51 @@ subroutine tmatr_adapt (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, d
             integrand%nmax = nmax ! used only for bessel evaluation
             integrand%m = m
 
-            do i = 1, ngss
-                if (ncheck==1.and.si>0d0) then
-                    ar12 = ar12 + w(i)*mi_ar12(x(i))       !~re j^{12}
-                    ai12 = ai12 + w(i)*mi_ai12(x(i))       !~im j^{12}
+            if (ncheck==1.and.si>0d0) then
+!                do i = 1, ngss
+!                    ar12 = ar12 + w(i)*mi_ar12(x(i))       !~re j^{12}
+!                    ai12 = ai12 + w(i)*mi_ai12(x(i))       !~im j^{12}
+!
+!                    gr12 = gr12 + w(i)*mi_gr12(x(i))       !~re rg j^{12}
+!                    gi12 = gi12 + w(i)*mi_gi12(x(i))        !~im rg j^{12}
+!
+!                    ar21 = ar21 + w(i)*mi_ar21(x(i))
+!                    ai21 = ai21 + w(i)*mi_ai21(x(i))
+!
+!                    gr21 = gr21 + w(i)*mi_gr21(x(i))
+!                    gi21 = gi21 + w(i)*mi_gi21(x(i))
+!                end do ! end of gauss integration loop
+                call integrate(mi_ar12, -1.0_dp, 0.0_dp, ar12)
+                call integrate(mi_ai12, -1.0_dp, 0.0_dp, ai12)
+                call integrate(mi_gr12, -1.0_dp, 0.0_dp, gr12)
+                call integrate(mi_gi12, -1.0_dp, 0.0_dp, gi12)
+                call integrate(mi_ar21, -1.0_dp, 0.0_dp, ar21)
+                call integrate(mi_ai21, -1.0_dp, 0.0_dp, ai21)
+                call integrate(mi_gr21, -1.0_dp, 0.0_dp, gr21)
+                call integrate(mi_gi21, -1.0_dp, 0.0_dp, gi21)
 
-                    gr12 = gr12 + w(i)*mi_gr12(x(i))       !~re rg j^{12}
-                    gi12 = gi12 + w(i)*mi_gi12(x(i))        !~im rg j^{12}
-
-                    ar21 = ar21 + w(i)*mi_ar21(x(i))
-                    ai21 = ai21 + w(i)*mi_ai21(x(i))
-
-                    gr21 = gr21 + w(i)*mi_gr21(x(i))
-                    gi21 = gi21 + w(i)*mi_gi21(x(i))
-                    cycle
-                end if
-
-                ar11 = ar11 + w(i)*mi_ar11(x(i))
-                ai11 = ai11 + w(i)*mi_ai11(x(i))
-                gr11 = gr11 + w(i)*mi_gr11(x(i))
-                gi11 = gi11 + w(i)*mi_gi11(x(i))
-
-                ar22 = ar22 + w(i)*mi_ar22(x(i))
-                ai22 = ai22 + w(i)*mi_ai22(x(i))
-
-                gr22 = gr22 + w(i)*mi_gr22(x(i))
-                gi22 = gi22 + w(i)*mi_gi22(x(i))
-            end do ! end of gauss integration loop
+            else
+!                do i = 1, ngss
+!                    ar11 = ar11 + w(i)*mi_ar11(x(i))
+!                    ai11 = ai11 + w(i)*mi_ai11(x(i))
+!                    gr11 = gr11 + w(i)*mi_gr11(x(i))
+!                    gi11 = gi11 + w(i)*mi_gi11(x(i))
+!
+!                    ar22 = ar22 + w(i)*mi_ar22(x(i))
+!                    ai22 = ai22 + w(i)*mi_ai22(x(i))
+!
+!                    gr22 = gr22 + w(i)*mi_gr22(x(i))
+!                    gi22 = gi22 + w(i)*mi_gi22(x(i))
+!                end do ! end of gauss integration loop
+                call integrate(mi_ar11, -1.0_dp, 0.0_dp, ar11)
+                call integrate(mi_ai11, -1.0_dp, 0.0_dp, ai11)
+                call integrate(mi_gr11, -1.0_dp, 0.0_dp, gr11)
+                call integrate(mi_gi11, -1.0_dp, 0.0_dp, gi11)
+                call integrate(mi_ar22, -1.0_dp, 0.0_dp, ar22)
+                call integrate(mi_ai22, -1.0_dp, 0.0_dp, ai22)
+                call integrate(mi_gr22, -1.0_dp, 0.0_dp, gr22)
+                call integrate(mi_gi22, -1.0_dp, 0.0_dp, gi22)
+            end if
 
             an12 = ann(n1, n2)*factor
 
