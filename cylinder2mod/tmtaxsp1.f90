@@ -1534,6 +1534,7 @@ subroutine tmatr0_adapt(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
     !
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
+    use lib_adaptive_integration
     implicit none
     integer ngauss, nmax, ncheck, naxsm, i, i1, i2, k1, k2, kk1, kk2, &
             mm1, n, n1, n2, ng, ngss, nm, nnmax
@@ -2214,6 +2215,7 @@ subroutine tmatr_adapt (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, d
     !
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
+    use lib_adaptive_integration
     !include 'ampld.par.f'
     implicit none
     integer m, ngauss, nmax, ncheck, naxsm

@@ -27,8 +27,14 @@ target_link_libraries(libcylinder
         special_functions
         model_parameters
         cylinder_blas
-        quadpack::quadpack
         )
+
+add_library(lib_adaptive_integration lib_adaptive_integration.f90)
+target_link_libraries(lib_adaptive_integration
+        constants
+        special_functions
+        libcylinder
+        quadpack::quadpack)
 
 ADD_EXECUTABLE(${PROJECTNAME}
         tmtaxsp1.f90
@@ -45,6 +51,7 @@ target_link_libraries(${PROJECTNAME}
         constants
         model_parameters
         libcylinder
+        lib_adaptive_integration
         errfun
         amos
         dense_solve
