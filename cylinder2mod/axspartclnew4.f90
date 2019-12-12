@@ -111,8 +111,8 @@ program axspartcl1
     !
     ! if convergence test in the calculation of the scattering cross sections
     ! is to be performed, yncheck=.true., otherwise yncheck=.false.
-    !     parameter (yncheck=.false.)
-    parameter (yncheck = .true.)
+         parameter (yncheck=.false.)
+!    parameter (yncheck = .true.)
     !
     ! if particle is coated, ync=y, otherwise ync=n
     parameter (ync = 'n')
@@ -2137,8 +2137,8 @@ contains
 
                 end do
                 ! %%%%%%%%%%%%%%%%%% successful ngauss-convergence test %%%%%%%%%%%%%%%
-
-            else if (.not.yncheck) then
+            end if
+        else if (.not.yncheck) then
                 ! gif division points and weights + other numerical constants
                 !
                 call const(ngauss, nmax, x, w, an, ann, s, ss, np, eps, rsnm, ht)     !in ampldr
@@ -2161,8 +2161,7 @@ contains
                 !
                 !<<<
                 !
-            end if !yncheck
-        end if
+        end if !yncheck
 
         write(6, *)
         write(6, *)'nmax=', nmax

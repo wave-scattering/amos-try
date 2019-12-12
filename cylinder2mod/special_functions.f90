@@ -154,10 +154,13 @@ contains
             yr = xr(i)
             yi = xi(i)
             !
-            call rjb(xx, abess%aj, abess%adj, nmax, nnmax1)
+!            call rjb(xx, abess%aj, abess%adj, nmax, nnmax1)
             call ryb(xx, abess%ay, abess%ady, nmax)
-            call cjb(yr, yi, abess%ajr, abess%aji, abess%adjr, abess%adji, nmax, 2)
-!            call cjb_amos(yr, yi, abess%ajr, abess%aji, abess%adjr, abess%adji, nmax)
+!            call cjb(yr, yi, abess%ajr, abess%aji, abess%adjr, abess%adji, nmax, 2)
+
+            call rjb_amos(xx, abess%aj, abess%adj, nmax)
+!            call ryb_amos(xx, abess%ay, abess%ady, nmax)
+            call cjb_amos(yr, yi, abess%ajr, abess%aji, abess%adjr, abess%adji, nmax)
             !
             do n = 1, nmax
                 cbess%j(i, n) = abess%aj(n)
@@ -258,6 +261,7 @@ contains
         ! u = j(x)/x + j'(x)
         ur(1:nmax) = real(cy(2:nmax+1)/z + cdy(1:nmax))
         ui(1:nmax) = aimag(cy(2:nmax+1)/z + cdy(1:nmax))
+        return
     end subroutine
 
     !=======================================================================
@@ -351,6 +355,16 @@ contains
         return
     end
     !=======================================================================
+    subroutine rjb_amos(x, y, u, nmax)
+        real(dp), intent(out) :: y(:), u(:)
+        real(dp), intent(in) :: x
+        integer, intent(in) :: nmax
+        real(dp) zi, yi(nmax), ui(nmax)
+        zi = 0.0_dp
+        call cjb_amos(x, zi, y, yi, u, ui, nmax)
+        return
+    end
+    !=======================================================================
     subroutine rjb(x, y, u, nmax, nnmax)
         !=================
         !  x =(2\pi/\lambda)*r
@@ -388,7 +402,59 @@ contains
         return
 
     end
+    !=======================================================================
+    subroutine cyb_amos(zr, zi, yr, yi, ur, ui, nmax)
+        !     ------------------------------------------------------------------
+        !     This subroutine computes the spherical Bessel functions of
+        !     second kind and its derivative using Amos lib
+        !     from 1 to nmax (without zero order)
+        !     ------------------------------------------------------------------
+        real(dp), intent(in) :: zr, zi
+        real(dp), intent(out) :: yr(:), yi(:), ur(:), ui(:)
+        integer, intent(in) :: nmax
+        ! local
+        integer kode, n, nz, ierr, nmax1, k
+        real(dp) :: fnu
+        real(dp), allocatable :: cyr(:), cyi(:), cwrkr(:), cwrki(:)
+        complex(dp), allocatable :: cy(:), cdy(:)
+        complex(dp) :: z
+        !-----------------------------------------------------------------------
+        nmax1 = nmax+1
+        allocate(cy(1:nmax1));
+        allocate(cdy(1:nmax));
+        allocate(cyr(1:nmax1)); allocate(cyi(1:nmax1))
+        allocate(cwrki(1:nmax1));  allocate(cwrkr(1:nmax1))
+        fnu = 0.5_dp;   kode = 1;   n = nmax1
+        cwrkr = 0.0_dp; cwrki = 0.0_dp
+        call zbesy(zr, zi, fnu, kode, n, cyr, cyi, nz, cwrkr, cwrki, ierr)
+        if (ierr /= 0) stop "Error in zbesy() call"
+        ! convert to spherical function
+        z = zr + ci*zi
+        cy = (cyr + ci*cyi) * sqrt(pi / (2.0_dp*z))
+        yr(1:nmax) = real(cy(2:nmax+1))
+        yi(1:nmax) = aimag(cy(2:nmax+1))
+        do k=2, nmax
+            n = k
+            ! cdy(n) stores n-th derivative, n=1,2,...
+            ! cy(n+1) stores n th value, n=0,1,2,...
+            cdy(n-1) = cy(n-1) - (n/z)*cy(n) ! DLFM, eq. 10.51.2
+        end do
+        ! u = j(x)/x + j'(x)
+        ur(1:nmax) = real(cy(2:nmax+1)/z + cdy(1:nmax))
+        ui(1:nmax) = aimag(cy(2:nmax+1)/z + cdy(1:nmax))
+        return
+    end subroutine
 
+    !=======================================================================
+    subroutine ryb_amos(x, y, u, nmax)
+        real(dp), intent(out) :: y(:), u(:)
+        real(dp), intent(in) :: x
+        integer, intent(in) :: nmax
+        real(dp) zi, yi(nmax), ui(nmax)
+        zi = 0.0_dp
+        call cyb_amos(x, zi, y, yi, u, ui, nmax)
+        return
+    end
     !=======================================================================
     subroutine ryb(x, y, v, nmax)
         !=================
