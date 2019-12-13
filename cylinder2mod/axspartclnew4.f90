@@ -1937,15 +1937,15 @@ contains
         if (dabs(rat - 1d0) > 1d-8) then
             select case(np)
             case(0:)
-                call radii_ratio_chebyshev(np, eps, rat)
+                rat = radii_ratio_chebyshev(np, eps)
             case(-1)
-                call radii_ratio_spheroid(eps, rat)
+                rat = radii_ratio_spheroid(eps)
             case(-2)
-                call radii_ratio_cylinder(eps, rat)
+                rat = radii_ratio_cylinder(eps)
             case(-3)
-                call radii_ratio_droplet (rat)
+                rat = radii_ratio_droplet ()
             case(-9)
-                call radii_ratio_nanorod(eps, mpar%nanorod_cap_hr, rat)
+                rat = radii_ratio_nanorod(eps, mpar%nanorod_cap_hr)
             end select
         end if
 

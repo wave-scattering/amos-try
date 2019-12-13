@@ -99,7 +99,7 @@ contains
         return
     end
     !=======================================================================
-    subroutine radii_ratio_droplet(rat)
+    function radii_ratio_droplet() result(rat)
         !=========================
         !   activated for np>=0
         !
@@ -161,9 +161,9 @@ contains
         1001 format ('c_', i2, '=', f7.4)
 
         return
-    end
+    end function radii_ratio_droplet
     !=======================================================================
-    subroutine radii_ratio_cylinder (eps, rat)
+    function radii_ratio_cylinder (eps) result(rat)
         !--------/---------/---------/---------/---------/---------/---------/--
         ! >>> eps
         ! <<< rat
@@ -175,15 +175,15 @@ contains
 
         implicit none
         real(dp), intent(in) :: eps
-        real(dp), intent(out) :: rat
+        real(dp) :: rat
 
         rat = (1.5d0/eps)**(1d0/3d0)
         rat = rat/dsqrt((eps + 2d0)/(2d0*eps))
 
         return
-    end
+    end function radii_ratio_cylinder
     !=======================================================================
-    subroutine radii_ratio_nanorod (eps, epse, rat)
+    function radii_ratio_nanorod (eps, epse) result(rat)
         !--------/---------/---------/---------/---------/---------/---------/--
         ! >>> eps, epse
         ! <<< rat
@@ -194,7 +194,7 @@ contains
         !   the surface-equivalent radii for the nanorod
 
         real(dp), intent(in) :: eps, epse
-        real(dp), intent(out) :: rat
+        real(dp) :: rat
         real(dp) :: e, epsc, rv, rs
 
         ! TODO: replace with computation of the nanorod surface
@@ -218,9 +218,9 @@ contains
         rat = rv/rs
 
         return
-    end
+    end function radii_ratio_nanorod
     !=======================================================================
-    subroutine radii_ratio_spheroid (eps, rat)
+    function radii_ratio_spheroid (eps) result(rat)
         !--------/---------/---------/---------/---------/---------/---------/--
         ! >>> eps
         ! <<< rat
@@ -231,7 +231,7 @@ contains
         !   the surface-equivalent radii for the spheroid
 
         real(dp), intent(in) :: eps
-        real(dp), intent(out) :: rat
+        real(dp) :: rat
         real(dp) :: e, r
 
         if (eps < 1d0) then ! Prolate spheroid
@@ -245,9 +245,9 @@ contains
         r = dsqrt(r)
         rat = 1d0/r
         return
-    end
+    end function radii_ratio_spheroid
     !=======================================================================
-    subroutine radii_ratio_chebyshev(n, e, rat)
+    function radii_ratio_chebyshev(n, e) result(rat)
         !--------/---------/---------/---------/---------/---------/---------/--
         ! >>> n,e,rat
         ! <<< rat
@@ -258,7 +258,7 @@ contains
 
         integer, intent(in) :: n
         real(dp), intent(in) :: e
-        real(dp), intent(inout) :: rat
+        real(dp) :: rat
         integer ng, i
         real(dp) dn, s, v, xi, dx, dxn, ds, dsn, dcn, a, a2, en, ens, rs, rv
         real(dp) x(60), w(60)
@@ -291,7 +291,7 @@ contains
         rat = rv/rs
         !
         return
-    end
+    end function radii_ratio_chebyshev
     !=======================================================================
     subroutine gauleg(x1, x2, x, w, n)
         !--------/---------/---------/---------/---------/---------/---------/--
