@@ -3,6 +3,7 @@ module special_functions
     !use dense_solve
     !use multem_blas
     use amos
+    use model_parameters
     !use errfun, only : wpop
     implicit none
 
@@ -102,14 +103,16 @@ contains
             xx = x(i)
             yr = xr(i)
             yi = xi(i)
-            !
-            call rjb(xx, abess%aj, abess%adj, nmax, nnmax1)
-            call ryb(xx, abess%ay, abess%ady, nmax)
-            call cjb(yr, yi, abess%ajr, abess%aji, abess%adjr, abess%adji, nmax, 2)
 
-!            call rjb_amos(xx, abess%aj, abess%adj, nmax)
-!            call ryb_amos(xx, abess%ay, abess%ady, nmax)
-!            call cjb_amos(yr, yi, abess%ajr, abess%aji, abess%adjr, abess%adji, nmax)
+            if (mpar%use_amos == 0) then
+                call rjb(xx, abess%aj, abess%adj, nmax, nnmax1)
+                call ryb(xx, abess%ay, abess%ady, nmax)
+                call cjb(yr, yi, abess%ajr, abess%aji, abess%adjr, abess%adji, nmax, 2)
+            else
+                call rjb_amos(xx, abess%aj, abess%adj, nmax)
+                call ryb_amos(xx, abess%ay, abess%ady, nmax)
+                call cjb_amos(yr, yi, abess%ajr, abess%aji, abess%adjr, abess%adji, nmax)
+            end if
 
             do n = 1, nmax
                 cbess%j(i, n) = abess%aj(n)

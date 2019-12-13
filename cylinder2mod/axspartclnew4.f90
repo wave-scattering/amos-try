@@ -84,7 +84,7 @@ program axspartcl1
     !  different ndgs-values are recommended.
     !
     !
-    !  computation can be speed up if one sets yncheck=.false..
+    !  computation can be speed up if one sets mpar%yncheck=0
     !  however, then the check of gauss integrations
     !  convergence is not performed.
     !---------------------------------------------------------------------
@@ -97,7 +97,7 @@ program axspartcl1
     real(dp) hlength_max, hlength_min, rl_min, rl_max
     complex(dp) zeps0, cceps, cseps           !,zartan
     character(1) ync, yncv
-    logical ynperfcon, ynperfconv, ynintens, ynoptth, ynbrug, yncheck
+    logical ynperfcon, ynperfconv, ynintens, ynoptth, ynbrug
     !c      external zartan
 
     ! parameters:
@@ -110,9 +110,10 @@ program axspartcl1
     !     parameter (lmx=100)
     !
     ! if convergence test in the calculation of the scattering cross sections
-    ! is to be performed, yncheck=.true., otherwise yncheck=.false.
-!         parameter (yncheck=.false.)
-    parameter (yncheck = .true.)
+    ! is to be performed, yncheck=.true., otherwise yncheck=.false. ! Moved to *.ini config
+!   parameter (yncheck=.false.)
+!   parameter (yncheck = .true.)
+
     !
     ! if particle is coated, ync=y, otherwise ync=n
     parameter (ync = 'n')
@@ -1591,7 +1592,7 @@ program axspartcl1
                 !c      revinl=0.5
                 !c      revl=10.d0
                 !test
-                if (yncheck) then
+                if (mpar%yncheck /= 0) then
                     ide = 2
                 else
                     ide = 4
@@ -1610,7 +1611,7 @@ program axspartcl1
 
                 !      write(90,*) lambda,  global_eps_r,
                 !     & global_eps_i
-                call ampldr(yncheck, lmax, npp, defpp, &
+                call ampldr(lmax, npp, defpp, &
                         rsnm, hlength, lambda, zeps(1), zeps0)
             end if
             !
@@ -1786,14 +1787,14 @@ contains
 
     !**********************************************************************
 
-    subroutine ampldr(yncheck, nmax, np, eps, &
+    subroutine ampldr(nmax, np, eps, &
             rsnm, ht, lambda, zeps1, zeps0)
 
         ! warning in module ampldr in file ampldr.f: variables set but never used:
         !    nggg set at line 493 file ampldr.f
         !--------/---------/---------/---------/---------/---------/---------/--
-        ! yncheck=.true. if you want to check gauss integrations
-        ! convergence; otherwise yncheck=.false.
+        ! mpar%yncheck== 1 if you want to check gauss integrations
+        ! convergence; otherwise mpar%yncheck=0
         ! nmax - angular momentum cut off
         ! lambda - the vacuum wavelength
         !
@@ -1852,7 +1853,6 @@ contains
         !--------/---------/---------/---------/---------/---------/---------/--
         implicit none
         integer nout, naxsm
-        logical yncheck
         integer nmax, np, inm1, ixxx, m, m1, n, n1, n11, n2, n22, ncheck, &
                 ndgs, ngaus, ngauss, nm, nma, nn1, nn2, nnm, nnnggg
         ! number of the output unit
@@ -1974,7 +1974,7 @@ contains
 
         ngauss = nmax*ndgs
 
-        if (yncheck) then
+        if (mpar%yncheck /= 0) then
 
             write(6, *)
             write(6, *)'nmax-convergence test'
@@ -2145,7 +2145,7 @@ contains
                 end do
                 ! %%%%%%%%%%%%%%%%%% successful ngauss-convergence test %%%%%%%%%%%%%%%
             end if
-        else if (.not.yncheck) then
+        else if (mpar%yncheck == 0) then
                 ! gif division points and weights + other numerical constants
                 !
                 call const(ngauss, nmax, x, w, an, ann, s, ss, np, eps, rsnm, ht)     !in ampldr

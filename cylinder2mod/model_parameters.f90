@@ -25,8 +25,11 @@ module model_parameters
         ! choice of integration: 0 - fixed Gaussian-Legendre, 1 - adaptive from quadpack
         integer, public :: yn_adaptive
 
-        ! choice of implementation of Bessel functions: 0 - backward reccurence, 1 - Amos library
-        integer, public :: yn_amos
+        ! choice of implementation of Bessel functions: 0 - backward recurrence, 1 - Amos library
+        integer, public :: use_amos
+        
+        ! choice to check the convergence: 0 - do not check, 1 - check
+        integer, public :: yncheck
 
     end type model_parameters_type
     type(model_parameters_type), public :: mpar
@@ -72,10 +75,14 @@ contains
 
         call fini%get(section_name = 'general', option_name = 'use_amos', &
                 val = num, error = error)
-        mpar%yn_amos = 0
-        if (error==0) mpar%yn_amos = num
+        mpar%use_amos = 0
+        if (error==0) mpar%use_amos = num
 
-
+        call fini%get(section_name = 'general', option_name = 'check_convergence', &
+                val = num, error = error)
+        mpar%yncheck = 1
+        if (error==0) mpar%yncheck = num
+        
         call fini%get(section_name = 'nanorod', &
                 option_name = 'nanorod_cap_hr', val = double, error = error)
         mpar%nanorod_cap_hr = 1_dp ! default is round cap
