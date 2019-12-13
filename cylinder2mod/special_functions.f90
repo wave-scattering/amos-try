@@ -68,57 +68,6 @@ contains
         return
     end subroutine cbessjdj
     !=======================================================================
-    subroutine bess_amos(bj, y, h, arg)
-        !     ------------------------------------------------------------------
-        !     This  subroutine computes the  spherical Bessel functions of
-        !     first, second  and  third  kind  using Amos lib
-        !
-        !     2019.07.17 change to use Amos lib
-        !
-        !     on input--->
-        !     arg    argument of the Bessel functions
-        !     on output--->
-        !     bj     an array containing the Bessel functions of
-        !            the first kind up to lmax1 if lj is true.
-        !            remember, that bj(1) contains the function of
-        !            l=0 and so on.
-        !     y      an array containing the Bessel functions of
-        !            the second kind up to lmax1 if ly is true.
-        !            remember,that  y(1) contains the function of l=0 and so on.
-        !     h      an array containing the Bessel functions of
-        !            the third kind up to lmax1 if lh is true.
-        !            remember,that h (1) contains the function of l=0 and so on.
-        !
-        !     the Bessel functions of 3rd kind are defined as: h(l)=bj(l)+i*y(l)
-        !     ------------------------------------------------------------------
-        complex(dp), intent(in) :: arg
-        complex(dp), intent(out) :: bj(:), h(:), y(:)
-        ! local
-        integer :: lmax1
-        integer kode, n, nz, ierr
-        real(dp) :: zr, zi, fnu
-        real(dp), allocatable :: cyr(:), cyi(:), cwrkr(:), cwrki(:)
-        complex(dp), allocatable :: cy(:)
-        !-----------------------------------------------------------------------
-        lmax1 = size(bj) ! to store from l=0 to l=lmax
-        if (size(bj)/=size(y) .or. size(bj)/=size(h)) stop 1
-        allocate(cy(1:lmax1)); allocate(cyr(1:lmax1)); allocate(cyi(1:lmax1))
-        allocate(cwrki(1:lmax1));  allocate(cwrkr(1:lmax1))
-        zr = real(arg); zi = aimag(arg)
-        fnu = 0.5_dp;   kode = 1;   n = lmax1
-        call zbesj(zr, zi, fnu, kode, n, cyr, cyi, nz, ierr)
-        if (ierr /= 0) stop 1
-        ! convert to spherical function
-        cy = (cyr + ci * cyi) * sqrt(pi / 2.0_dp / arg)
-        bj = cy
-        cwrkr = 0.0_dp; cwrki = 0.0_dp
-        call zbesy(zr, zi, fnu, kode, n, cyr, cyi, nz, cwrkr, cwrki, ierr)
-        if (ierr /= 0) stop 1
-        cy = (cyr + ci * cyi) * sqrt(pi / 2.0_dp / arg)
-        y = cy
-        h = bj + ci * y
-    end subroutine
-    !=======================================================================
     subroutine bess (x, xr, xi, ng, nmax, nnmax1)
         !--------/---------/---------/---------/---------/---------/---------/--
         ! >>> x,xr,xi,ng,nmax,nnmax1,nnmax2
@@ -154,14 +103,14 @@ contains
             yr = xr(i)
             yi = xi(i)
             !
-!            call rjb(xx, abess%aj, abess%adj, nmax, nnmax1)
+            call rjb(xx, abess%aj, abess%adj, nmax, nnmax1)
             call ryb(xx, abess%ay, abess%ady, nmax)
-!            call cjb(yr, yi, abess%ajr, abess%aji, abess%adjr, abess%adji, nmax, 2)
+            call cjb(yr, yi, abess%ajr, abess%aji, abess%adjr, abess%adji, nmax, 2)
 
-            call rjb_amos(xx, abess%aj, abess%adj, nmax)
+!            call rjb_amos(xx, abess%aj, abess%adj, nmax)
 !            call ryb_amos(xx, abess%ay, abess%ady, nmax)
-            call cjb_amos(yr, yi, abess%ajr, abess%aji, abess%adjr, abess%adji, nmax)
-            !
+!            call cjb_amos(yr, yi, abess%ajr, abess%aji, abess%adjr, abess%adji, nmax)
+
             do n = 1, nmax
                 cbess%j(i, n) = abess%aj(n)
                 cbess%y(i, n) = abess%ay(n)
@@ -239,9 +188,9 @@ contains
         complex(dp), allocatable :: cy(:), cdy(:)
         complex(dp) :: z
         !-----------------------------------------------------------------------
-        nmax1 = nmax+1
+        nmax1 = nmax+2  ! TODO: nmax1=nmax+1 should be enough?
         allocate(cy(1:nmax1));
-        allocate(cdy(1:nmax));
+        allocate(cdy(1:nmax1-1));
         allocate(cyr(1:nmax1)); allocate(cyi(1:nmax1))
         allocate(cwrki(1:nmax1));  allocate(cwrkr(1:nmax1))
         fnu = 0.5_dp;   kode = 1;   n = nmax1
@@ -252,7 +201,7 @@ contains
         cy = (cyr + ci*cyi) * sqrt(pi / (2.0_dp*z))
         yr(1:nmax) = real(cy(2:nmax+1))
         yi(1:nmax) = aimag(cy(2:nmax+1))
-        do k=2, nmax
+        do k=2, nmax1-1
             n = k
             ! cdy(n) stores n-th derivative, n=1,2,...
             ! cy(n+1) stores n th value, n=0,1,2,...
@@ -419,9 +368,9 @@ contains
         complex(dp), allocatable :: cy(:), cdy(:)
         complex(dp) :: z
         !-----------------------------------------------------------------------
-        nmax1 = nmax+1
+        nmax1 = nmax+2  ! TODO: nmax1=nmax+1 should be enough?
         allocate(cy(1:nmax1));
-        allocate(cdy(1:nmax));
+        allocate(cdy(1:nmax1-1));
         allocate(cyr(1:nmax1)); allocate(cyi(1:nmax1))
         allocate(cwrki(1:nmax1));  allocate(cwrkr(1:nmax1))
         fnu = 0.5_dp;   kode = 1;   n = nmax1
@@ -433,7 +382,7 @@ contains
         cy = (cyr + ci*cyi) * sqrt(pi / (2.0_dp*z))
         yr(1:nmax) = real(cy(2:nmax+1))
         yi(1:nmax) = aimag(cy(2:nmax+1))
-        do k=2, nmax
+        do k=2, nmax1-1
             n = k
             ! cdy(n) stores n-th derivative, n=1,2,...
             ! cy(n+1) stores n th value, n=0,1,2,...

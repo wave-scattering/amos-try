@@ -25,6 +25,9 @@ module model_parameters
         ! choice of integration: 0 - fixed Gaussian-Legendre, 1 - adaptive from quadpack
         integer, public :: yn_adaptive
 
+        ! choice of implementation of Bessel functions: 0 - backward reccurence, 1 - Amos library
+        integer, public :: yn_amos
+
     end type model_parameters_type
     type(model_parameters_type), public :: mpar
 
@@ -66,6 +69,12 @@ contains
                 val = num, error = error)
         mpar%yn_adaptive = 0
         if (error==0) mpar%yn_adaptive = num
+
+        call fini%get(section_name = 'general', option_name = 'use_amos', &
+                val = num, error = error)
+        mpar%yn_amos = 0
+        if (error==0) mpar%yn_amos = num
+
 
         call fini%get(section_name = 'nanorod', &
                 option_name = 'nanorod_cap_hr', val = double, error = error)

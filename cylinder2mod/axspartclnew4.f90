@@ -111,8 +111,8 @@ program axspartcl1
     !
     ! if convergence test in the calculation of the scattering cross sections
     ! is to be performed, yncheck=.true., otherwise yncheck=.false.
-         parameter (yncheck=.false.)
-!    parameter (yncheck = .true.)
+!         parameter (yncheck=.false.)
+    parameter (yncheck = .true.)
     !
     ! if particle is coated, ync=y, otherwise ync=n
     parameter (ync = 'n')
