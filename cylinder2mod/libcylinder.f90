@@ -9,6 +9,7 @@ module libcylinder
     !use errfun, only : wpop
 
     implicit none
+
     type, private :: cdrop_values
         real(dp) :: c(0:10), r0v
     end type cdrop_values
@@ -62,15 +63,21 @@ contains
         real(dp) rev, eps, h, a, si, co, rthet, rad
         integer ng, ngauss, i
         real(dp) x(:), r(:), dr(:)
+
+        ! Assign model parameters
         rev = mpar%rev
         eps = mpar%eps
+
+        ! Set ng and ngauss
+        ng = size(x)
+        ngauss = ng/2
+        if (ng == 1) ngauss = 1
+
         ! determine half-length of the cylinder
         h = rev*((2.0_dp/(3.0_dp*eps*eps))**(1.0_dp/3.0_dp))
         ! determine cylinder radius:
         a = h*eps
-        ng = size(x)
-        ngauss = ng/2
-        if (ng == 1) ngauss = 1
+
         do i = 1, ngauss
             co = -x(i)
             si = dsqrt(1.0_dp - co*co)
@@ -81,7 +88,7 @@ contains
                 rthet = -a*co/(si*si)
                 !rad=1.d-10
                 !rthet=0.0_dp
-!                write(*,*) 'cyl'
+                !write(*,*) 'cyl'
             else
                 ! along the plane cuts:
                 rad = h/co
@@ -98,6 +105,7 @@ contains
 
         return
     end
+
     !=======================================================================
     function radii_ratio_droplet() result(rat)
         !=========================
@@ -126,11 +134,10 @@ contains
         cdrop%c(8) = -0.0016_dp
         cdrop%c(9) = -0.0002_dp
         cdrop%c(10) = 0.0010_dp
-        !
+
         ! gif division points and weights
-        !
         call gauss (ng, 0, 0, x, w)
-        !
+
         s = 0d0
         v = 0d0
         do i = 1, ng
@@ -151,7 +158,7 @@ contains
         enddo
         rs = dsqrt(s*0.5d0)
         rv = (v*3d0*0.25d0)**(1d0/3d0)
-        if (dabs(rat - 1d0)>1d-8) rat = rv/rs
+
         cdrop%r0v = 1d0/rv
         write(nout, 1000) cdrop%r0v
         do n = 0, nc
@@ -160,10 +167,15 @@ contains
         1000 format ('r_0/r_ev=', f7.4)
         1001 format ('c_', i2, '=', f7.4)
 
-        return
+        if (dabs(rat - 1d0) > 1d-8) then
+            rat = rv/rs
+        else
+            rat = 1d0
+        end if
     end function radii_ratio_droplet
+
     !=======================================================================
-    function radii_ratio_cylinder (eps) result(rat)
+    function radii_ratio_cylinder () result(rat)
         !--------/---------/---------/---------/---------/---------/---------/--
         ! >>> eps
         ! <<< rat
@@ -171,19 +183,20 @@ contains
         !   activated for np=-2
         !
         !   calculation of the ratio between the volume-equivalent and
-        !   the surface-equivalent radii for the cylinder
+        !   the surface-equivalent radii for the cylinder (rv/rs)
 
         implicit none
-        real(dp), intent(in) :: eps
-        real(dp) :: rat
+        real(dp) :: eps, rat
 
-        rat = (1.5d0/eps)**(1d0/3d0)
-        rat = rat/dsqrt((eps + 2d0)/(2d0*eps))
+        ! Assign model parameters
+        eps = mpar%eps
 
-        return
+        rat = (1.5d0/eps)**(1d0/3d0)/ &
+                dsqrt((eps + 2d0)/(2d0*eps))
     end function radii_ratio_cylinder
+
     !=======================================================================
-    function radii_ratio_nanorod (eps, epse) result(rat)
+    function radii_ratio_nanorod () result(rat)
         !--------/---------/---------/---------/---------/---------/---------/--
         ! >>> eps, epse
         ! <<< rat
@@ -193,9 +206,12 @@ contains
         !   calculation of the ratio between the volume-equivalent and
         !   the surface-equivalent radii for the nanorod
 
-        real(dp), intent(in) :: eps, epse
-        real(dp) :: rat
-        real(dp) :: e, epsc, rv, rs
+        real(dp) :: eps, epse, epsc, rat
+        real(dp) :: e, rv, rs
+
+        ! Assign model parameters
+        eps = mpar%eps
+        epse = mpar%nanorod_cap_hr
 
         ! TODO: replace with computation of the nanorod surface
         ! (2019-12-09) In principle it is done but needs some testing
@@ -216,11 +232,10 @@ contains
         end if
 
         rat = rv/rs
-
-        return
     end function radii_ratio_nanorod
+
     !=======================================================================
-    function radii_ratio_spheroid (eps) result(rat)
+    function radii_ratio_spheroid() result(rat)
         !--------/---------/---------/---------/---------/---------/---------/--
         ! >>> eps
         ! <<< rat
@@ -230,9 +245,11 @@ contains
         !   calculation of the ratio between the volume-equivalent and
         !   the surface-equivalent radii for the spheroid
 
-        real(dp), intent(in) :: eps
-        real(dp) :: rat
+        real(dp) :: eps, rat
         real(dp) :: e, r
+
+        ! Assign model parameters
+        eps = mpar%eps
 
         if (eps < 1d0) then ! Prolate spheroid
             e = dsqrt(1d0 - eps*eps)
@@ -242,35 +259,39 @@ contains
             r = 0.25d0*(2d0*eps**(2d0/3d0) &
                     + eps**(-4d0/3d0)*dlog((1d0 + e)/(1d0 - e))/e)
         end if
-        r = dsqrt(r)
-        rat = 1d0/r
-        return
+
+        rat = 1d0/dsqrt(r)
     end function radii_ratio_spheroid
+
     !=======================================================================
-    function radii_ratio_chebyshev(n, e) result(rat)
+    function radii_ratio_chebyshev(n) result(rat)
         !--------/---------/---------/---------/---------/---------/---------/--
-        ! >>> n,e,rat
+        ! >>> n, eps
         ! <<< rat
         !   activated for np>=0
         !
         !   calculation of the ratio between the volume-equivalent and
         !   the surface-equivalent radii for a chebyshev particle
 
+        integer, parameter :: ng = 60
+
         integer, intent(in) :: n
-        real(dp), intent(in) :: e
-        real(dp) :: rat
-        integer ng, i
-        real(dp) dn, s, v, xi, dx, dxn, ds, dsn, dcn, a, a2, en, ens, rs, rv
-        real(dp) x(60), w(60)
+
+        integer :: i
+        real(dp) :: eps, rat
+        real(dp) :: dn, s, v, xi, dx, dxn, ds, &
+                dsn, dcn, a, a2, en, ens, rs, rv
+        real(dp) :: x(ng), w(ng)
+
+        ! Assign model parameters
+        eps = mpar%eps
 
         dn = dble(n)
-        en = e*dn
-        ng = 60
+        en = eps*dn
 
         ! gif division points and weights
+        call gauss(ng, 0, 0, x, w)
 
-        call gauss (ng, 0, 0, x, w)
-        !
         s = 0d0
         v = 0d0
         do i = 1, ng
@@ -280,7 +301,7 @@ contains
             ds = dsin(dx)
             dsn = dsin(dxn)
             dcn = dcos(dxn)
-            a = 1d0 + e*dcn
+            a = 1d0 + eps*dcn
             a2 = a*a
             ens = en*dsn
             s = s + w(i)*a*dsqrt(a2 + ens*ens)
@@ -288,10 +309,10 @@ contains
         end do
         rs = dsqrt(s*0.5d0)
         rv = (v*3d0/4d0)**(1d0/3d0)
+
         rat = rv/rs
-        !
-        return
     end function radii_ratio_chebyshev
+
     !=======================================================================
     subroutine gauleg(x1, x2, x, w, n)
         !--------/---------/---------/---------/---------/---------/---------/--
@@ -350,7 +371,7 @@ contains
     end
 
     !=======================================================================
-    subroutine gauss (n, ind1, ind2, z, w)
+    subroutine gauss(n, ind1, ind2, z, w)
         !--------/---------/---------/---------/---------/---------/---------/--
         ! >>> n,ind1,ind2
         ! <<< z,w
@@ -363,16 +384,17 @@ contains
         !    z - division points
         !    w - weights
         !--------/---------/---------/---------/---------/---------/---------/--
-        !        implicit real(dp) (a-h, p-z)
-        implicit none
+
         integer, intent(in) :: n, ind1, ind2
+        real(dp), intent(out) :: z(:), w(:)
+
         integer i, k, ind, j, m, niter
         real(dp) x, a, b, c, check, dj, f, pa, pb, pc, zz
-        real(dp), intent(out) :: z(:), w(:)
+
         a = 1d0
         b = 2d0
         c = 3d0
-        !        data a, b, c /1d0, 2d0, 3d0/
+        !data a, b, c /1d0, 2d0, 3d0/
         ind = mod(n, 2)
         k = n/2 + ind
         f = dble(n)
@@ -389,13 +411,13 @@ contains
                 x = (z(m + 1) - z(m + 2))*c + z(m + 3)
             end select
 
-            if(i==k.and.ind==1) x = 0d0
+            if(i == k .and. ind ==1 ) x = 0d0
             niter = 0
             check = 1d-16
             do
                 pb = 1d0
                 niter = niter + 1
-                if (niter>100) then
+                if (niter > 100) then
                     check = check*10d0
                 end if
                 pc = x
@@ -419,7 +441,7 @@ contains
                 w(i) = w(m)
             end if
         end do
-        if (ind2==1) then
+        if (ind2 == 1) then
             print 1100, n
             1100 format(' ***  points and weights of gaussian quadrature formula', &
                     ' of ', i4, '-th order')
@@ -431,7 +453,7 @@ contains
             !     print 1300,n
             ! 1300 format(' gaussian quadrature formula of ',i4,'-th order is used')
         else
-            if(ind1/=0) then
+            if(ind1 /= 0) then
                 do i = 1, n
                     z(i) = (a + z(i))/b
                 end do
