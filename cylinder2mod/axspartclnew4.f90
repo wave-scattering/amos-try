@@ -1934,13 +1934,20 @@ contains
         ! is rescaled by a factor 0.1 before entering the test of the
         ! accuracy of computing the optical cross sections.
 
-        if (dabs(rat - 1d0)>1d-8.and.np==-1) call radii_ratio_spheroid(eps, rat)
-        if (dabs(rat - 1d0)>1d-8.and.np>=0) call radii_ratio_chebyshev(np, eps, rat)
-        if (dabs(rat - 1d0)>1d-8.and.np==-2) call radii_ratio_cylinder(eps, rat)
-        if (dabs(rat - 1d0)>1d-8.and.np==-9)&
-                call radii_ratio_nanorod(eps, eps, rat)
-        ! call radii_ratio_nanorod(eps, mpar%nanorod_cap_hr, rat)
-        if (np==-3) call radii_ratio_droplet (rat)
+        if (dabs(rat - 1d0) > 1d-8) then
+            select case(np)
+            case(0:)
+                call radii_ratio_chebyshev(np, eps, rat)
+            case(-1)
+                call radii_ratio_spheroid(eps, rat)
+            case(-2)
+                call radii_ratio_cylinder(eps, rat)
+            case(-3)
+                call radii_ratio_droplet (rat)
+            case(-9)
+                call radii_ratio_nanorod(eps, mpar%nanorod_cap_hr, rat)
+            end select
+        end if
 
         print 7400, lam, mrr, mri
 
