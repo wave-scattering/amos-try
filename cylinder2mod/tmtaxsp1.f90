@@ -848,7 +848,6 @@ subroutine vary (lam, mrr, mri, a, eps, &
     !  dri=-(mri/(mrr**2+mri**2))*(\lambda/[2*\pi*r(\theta)])
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
-    !include 'ampld.par.f'
     implicit none
     integer np, ng, ngauss, nmax, nnmax1, nnmax2, i
     real(dp) a, eps
@@ -864,13 +863,13 @@ subroutine vary (lam, mrr, mri, a, eps, &
     ! decision tree to specify particle shape:
     select case (np)
     case(0:) ! chebyshev particle
-        call rsp_chebyshev(x, ng, a, eps, np, r, dr)
+        call rsp_chebyshev(x, np, r, dr)
     case (-1) ! oblate/prolate spheroids
-        call rsp_spheroid(x, ng, ngauss, a, eps, r, dr)
+        call rsp_spheroid(x, r, dr)
     case (-2) ! oblate/prolate cylinder
         call rsp_cylinder(x, r, dr)
     case (-3) ! distorted chebyshev droplet
-        call rsp_droplet(x, ng, a, r, dr)
+        call rsp_droplet(x, r, dr)
     case (-4) ! sphere cut by a plane on its top
         call rsp_sphere_cut_top(x, ng, rsnm, eps, r, dr)
     case (-5) ! sphere cut by a plane on its bottom
@@ -882,7 +881,7 @@ subroutine vary (lam, mrr, mri, a, eps, &
     !case (-8) ! cone on a cylinder
     !    call rsp_cone_on_cylinder(x, ng, rsnm, ht, r, dr)
     case (-9) ! nanorod
-        call rsp_nanorod (x, ng, ngauss, a, eps, mpar%nanorod_cap_hr, r, dr)
+        call rsp_nanorod (x, r, dr)
     end select
 
     wv = p*2d0/lam                 !wave vector
@@ -932,269 +931,6 @@ subroutine vary (lam, mrr, mri, a, eps, &
 
     return
 end
-
-!**********************************************************************
-
-subroutine rsp_spheroid (x, ng, ngauss, rev, eps, r, dr)
-    !--------/---------/---------/---------/---------/---------/---------/--
-    ! >>> x,ng,ngauss,rev,eps
-    ! <<< r,dr
-    !=========================
-    !   activated for np=-1
-    !
-    !   calculation of the functions
-    !              r(i)=r(y)**2 and dr(i)=((d/dy)r(y))/r(y)
-    !   for an oblate/prolate spheroids droplet specified by the parameters
-    !   rev and  eps at ngauss gauss integration formula (gif) division points
-    !   in the integral over theta. here y=acos(x)=theta.
-    !
-    !      r(\theta,\phi)=a\left[\sin^2\theta + (a^2/b^2)\cos^2\theta]^{-1/2}
-    !
-    !   x - gif division points \cos\theta_j -  y = arccos x
-    !   rev ... equal-volume-sphere radius
-    !   eps ... the ratio of the horizontal to rotational axes.  eps is
-    !           larger than 1 for oblate spheroids and smaller than 1 for
-    !           prolate spheroids.
-    !   ngauss ... the number of gif division points
-    !   ng=2*ngauss
-    !
-    !   1 <= i <= ngauss
-    !--------/---------/---------/---------/---------/---------/---------/--
-    use libcylinder
-    implicit none
-    integer, intent(in) :: ng, ngauss
-    real(dp), intent(in) :: rev, eps, x(ng)
-    real(dp), intent(out) :: r(ng), dr(ng)
-
-    integer i
-    real(dp) a, aa, c, cc, ee, ee1, rr
-    real(dp) s, ss
-
-    a = rev*eps**(1d0/3d0)
-    aa = a*a
-    ee = eps*eps
-    ee1 = ee - 1d0
-
-    do i = 1, ngauss
-        c = x(i)
-        cc = c*c
-        ss = 1d0 - cc
-        s = dsqrt(ss)                 !=\sin\theta
-        rr = 1d0/(ss + ee*cc)
-        r(i) = aa*rr
-        r(ng - i + 1) = r(i)
-        dr(i) = rr*c*s*ee1
-        dr(ng - i + 1) = -dr(i)
-    end do
-
-    return
-end
-
-
-!**********************************************************************
-
-subroutine rsp_chebyshev (x, ng, rev, eps, n, r, dr)
-    !--------/---------/---------/---------/---------/---------/---------/--
-    ! >>> x,ng,rev,eps,n
-    ! <<< r,dr
-    !=========================
-    !   activated for np > 0
-    !
-    !   calculation of the functions r(i)=r(y)**2 and
-    !   dr(i)=((d/dy)r(y))/r(y) for a chebyshev particle
-    !   specified by the parameters rev, eps, and n,
-    !
-    !       r(\theta,\phi)=r_0[1+\eps t_n(\cos\theta)]    (*)
-    !
-    !   eps ... deformation parameter of a chebyshev particle; |eps|<1
-    !   n   ... the degree of the chebyshev polynomial
-    !   all chebyshev particles with n.ge.2 become partially concave
-    !   as the absolute value of the deformation parameter eps increases
-    !   and exhibit surface roughness in the form of waves running
-    !   completely around the particle.
-    !
-    !   x - gif division points \cos\theta_j -  y = arccos x
-    !   rev ... equal-volume-sphere radius r_ev
-    !   ngauss ... the number of gif division points
-    !   ng=2*ngauss
-    !
-    !   1 <= i <= ngauss
-    !
-    !--------/---------/---------/---------/---------/---------/---------/--
-    use libcylinder
-    implicit none
-    integer, intent(in) :: ng, n
-    real(dp), intent(in) :: rev, eps, x(ng)
-    real(dp), intent(out) :: r(ng), dr(ng)
-
-    integer i
-    real(dp) ep, a, r0, ri, xi
-    real(dp) dn, dnp, dn4
-
-    dnp = dble(n)
-    dn = dnp*dnp
-    dn4 = dn*4d0
-    ep = eps*eps
-    a = 1d0 + 1.5d0*ep*(dn4 - 2d0)/(dn4 - 1d0)
-    i = (dnp + 0.1d0)*0.5d0
-    i = 2*i
-    if (i==n) a = a - 3d0*eps*(1d0 + 0.25d0*ep)/&
-            (dn - 1d0) - 0.25d0*ep*eps/(9d0*dn - 1d0)
-    r0 = rev*a**(-1d0/3d0)
-    do i = 1, ng
-        xi = dacos(x(i))*dnp
-        ri = r0*(1d0 + eps*dcos(xi))    !the chebyshev shape function (*)
-        r(i) = ri*ri
-        dr(i) = -r0*eps*dnp*dsin(xi)/ri
-        !        write(nout,*) i,r(i),dr(i)
-    end do
-
-    return
-end
-
-!**********************************************************************
-
-subroutine rsp_nanorod (x, ng, ngauss, rev, eps, epse, r, dr)
-    !--------/---------/---------/---------/---------/---------/---------/--
-    ! >>> x,ng,ngauss,rev,eps,epse
-    ! <<< r,dr
-    !=========================
-    !   activated for np=-9
-    !
-    !   calculation of the functions r(i)=r(y)**2 and
-    !   dr(i)=((d/dy)r(y))/r(y) for a nanorod particle
-    !   specified by the parameters rev, eps, and cap  at ngauss  gauss
-    !   integration points in the integral over theta.
-    !
-    !   x - gif division points \cos\theta_j -  y = arccos x
-    !   rev ... equal-volume-sphere radius r_ev
-    !   eps ... the ratio of the nanorod diameter to its length
-    !   epse ... the ratio of half-spheroid caps height to cylider radius
-    !   epsc ... the ration of cylinder half-height to cylinder radius
-    !   h   ... half-length of the nanorod
-    !   he .. cap height
-    !   hc .. cylinder height
-    !   a  ... cylinder radius   ====>
-    !
-    !   ngauss ... the number of gif division points
-    !   ng=2*ngauss
-    !
-    !   1 <= i <= ngauss
-    !
-    !--------/---------/---------/---------/---------/---------/---------/--
-    use libcylinder
-    implicit none
-    integer, intent(in) :: ng, ngauss
-    real(dp), intent(in) :: rev, eps, epse, x(ng)
-    real(dp), intent(out) :: r(ng), dr(ng)
-
-    integer i
-    real(dp) h, a, co, si, rad, rthet
-    real(dp) valdr, c2, s2, alpha, beta, he, hc, epsc
-
-    !rev = 2._dp
-    !eps = 0.5_dp
-    !epse = 0.65_dp
-    !xstep = pi/(ng-1)
-    !do i = 1,ng, 1
-    !    todo: remove testing setting of x
-    !    x(i)=cos(pi-(i-1)*xstep)
-    !end do
-
-    !cylider radius
-    a = rev*(2d0*eps/(3d0 - eps*epse)) ** (1d0/3d0)
-    h = a/eps      ! nanorod half-height
-    he = a*epse  ! spheroid cap half-height
-    hc = h - he     ! cylinder half-height
-    epsc = hc/a    ! cylider aspect ratio
-
-    do i = 1, ngauss, 1
-        co = -x(i)
-        si = dsqrt(1_dp - co*co)
-
-        if ((hc*si)>(a*co)) then
-            ! along the circular surface:
-            rad = a/si
-            rthet = -a*co/(si*si)
-            valdr = -rthet/rad
-        else
-            !  along elliptic cap
-            c2 = co**2
-            s2 = si**2
-            ! solution of square equation of ellipse move from the origin
-            alpha = dsqrt((epse**2 - epsc**2)*s2 + c2)
-            beta = epse**2*s2 + c2
-            rad = (hc*co + he*alpha)/beta
-            valdr = -((-alpha*hc*si&
-                    + he*(epse**2 - epsc**2 - 1._dp)*si*co&
-                    )/(he*alpha**2 + alpha*hc*co)&
-                    - (2*(epse**2 - 1._dp)*si*co/beta))
-
-        endif
-        r(i) = rad*rad
-        r(ng - i + 1) = r(i)          !using mirror symmetry
-
-        dr(i) = valdr
-        dr(ng - i + 1) = -dr(i)       !using mirror symmetry
-
-    enddo
-
-    return
-end
-
-
-subroutine rsp_droplet (x, ng, rev, r, dr)
-    !--------/---------/---------/---------/---------/---------/---------/--
-    ! >>> x,ng,rev
-    ! <<< r,dr
-    !=========================
-    !   activated for np=-3
-    !
-    !   calculation of the functions r(i)=r(y)**2 and
-    !   dr(i)=((d/dy)r(y))/r(y) for a distorted
-    !   droplet (generalized chebyshev particle) specified by the
-    !   parameters rev and c_n (chebyshev expansion coefficients).
-    !   the coefficients of the chebyshev polynomial expansion are
-    !   specified in the subroutine drop.
-    !
-    !   x - gif division points \cos\theta_j -  y = arccos x
-    !   rev ... equal-volume-sphere radius  r_ev
-    !   ngauss ... the number of gif division points
-    !   ng=2*ngauss
-    !
-    !   1 <= i <= ngauss
-    !
-    !--------/---------/---------/---------/---------/---------/---------/--
-    use libcylinder
-    implicit none
-    integer, intent(in) :: ng
-    real(dp), intent(in) :: rev, x(ng)
-    real(dp), intent(out) :: r(ng), dr(ng)
-
-    integer n, nc, i
-    parameter (nc = 10)
-    real(dp) dri, r0, ri, xi, xin
-
-    r0 = rev*cdrop%r0v
-    do i = 1, ng
-        xi = dacos(x(i))
-        ri = 1d0 + cdrop%c(0)
-        dri = 0d0
-        do n = 1, nc
-            xin = xi*n
-            ri = ri + cdrop%c(n)*dcos(xin)
-            dri = dri - cdrop%c(n)*n*dsin(xin)
-        enddo
-        ri = ri*r0
-        dri = dri*r0
-        r(i) = ri*ri
-        dr(i) = dri/ri
-        !write(nout,*) i,r(i),dr(i)
-    enddo
-
-    return
-end
-
 
 !**********************************************************************
 
