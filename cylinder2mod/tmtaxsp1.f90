@@ -1299,7 +1299,7 @@ subroutine tmatr0_adapt(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
             tqr(npn2, npn2), tqi(npn2, npn2), &
             trgqr(npn2, npn2), trgqi(npn2, npn2)
     !c      real(dp) tr1(npn2,npn2),ti1(npn2,npn2)
-    !
+
     common /tmat99/&
             r11, r12, r21, r22, i11, i12, i21, i22, rg11, rg12, rg21, rg22, &
             ig11, ig12, ig21, ig22           !only between tmatr routines
@@ -1315,7 +1315,7 @@ subroutine tmatr0_adapt(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
     if (ncheck==1) then         !theta=pi/2 is scatterer mirror symmetry plane
         ngss = ngauss
         factor = 2d0
-    else                       !theta=pi/2 is not a scatterer mirror symmetry plane
+    else                        !theta=pi/2 is not a scatterer mirror symmetry plane
 
     endif
     !
@@ -1325,7 +1325,7 @@ subroutine tmatr0_adapt(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
         sig(n) = si              !=(-1)**n
     end do
     !
-    ! assigning wigner d-matrices - assuming mirror symmetry
+    ! Assigning wigner d-matrices - assuming mirror symmetry
     ! in the \theta=\pi/2 plane:
 
     do i = 1, ngauss
@@ -1342,21 +1342,24 @@ subroutine tmatr0_adapt(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
             dd2 = dv2(n)
             d1(i1, n) = dd1
             d2(i1, n) = dd2
-            ! if theta=pi/2 is not a scatterer mirror symmetry plane but
-            ! gauss abscissas are still chosen symmetrically:
 
-            if ((ncheck==0).and.(naxsm==1)) then
-                ! using (4.2.4) and (4.2.6) of {ed},
-                !           d_{0m}^{(l)}(\pi-\theta) = (-1)^{l+m} d_{0m}^{(l)}(\theta)
-                ! (4.2.5) of {ed}:                   = (-1)^{l} d_{0 -m}^{(l)}(\theta)
+        ! if theta=pi/2 is not a scatterer mirror symmetry plane but
+        ! gauss abscissas are still chosen symmetrically:
 
-                si = sig(n)                  !=(-1)**n
-                d1(i2, n) = dd1*si
-                d2(i2, n) = -dd2*si
+        if ((ncheck==0).and.(naxsm==1)) then
 
-            end if
+        ! using (4.2.4) and (4.2.6) of {ed},
+        !           d_{0m}^{(l)}(\pi-\theta) = (-1)^{l+m} d_{0m}^{(l)}(\theta)
+        ! (4.2.5) of {ed}:                   = (-1)^{l} d_{0 -m}^{(l)}(\theta)
+
+            si = sig(n)                  !=(-1)**n
+            d1(i2, n) = dd1*si
+            d2(i2, n) = -dd2*si
+
+        end if
 
         enddo
+
         ! if neither scatterer nor gauss abscissas have theta=pi/2
         ! as a mirror symmetry plane:
 
@@ -1373,20 +1376,25 @@ subroutine tmatr0_adapt(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
 
         end if
     end do
-    !
-    !  assigning r^2(\theta)*weight product:
+
+    !  Assigning r^2(\theta)*weight product and Bessel function independent factors:
+    !  In Ru et al formulas:
+    !  s=n_2/n_1$ is the refractive index constrast and $x(\theta)=k_1 r(\theta)$ is the
+    !  {\em polar} angle dependent size parameter of an axially symmetric scatterer.
 
     do i = 1, ngss
-        rr(i) = w(i)*r(i)
-
-        !c           if (dr(i).eq.0.d0) rr(i)=0.d0   !temporarily only
+        rr(i) = w(i)*r(i)          !r^2(\cos\theta)+w(i)
+    !c           if (dr(i).eq.0.d0) rr(i)=0.d0   !temporarily only
     end do
-    !
+
+    !  Assigning Bessel function dependent factors:
+    !  n1,n2\ge |m|
+
     do n1 = mm1, nmax
         an1 = an(n1)
         do n2 = mm1, nmax
             an2 = an(n2)
-
+    ! Init:
             ar12 = 0d0
             ar21 = 0d0
             ai12 = 0d0
@@ -1396,12 +1404,15 @@ subroutine tmatr0_adapt(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
             gi12 = 0d0
             gi21 = 0d0
 
-            !        open(nout+3,file='surfint.dat')   !gauss convergence check
+        !        open(nout+3,file='surfint.dat')   !gauss convergence check
 
-            if (ncheck/=1.or.sig(n1 + n2)>=0d0) then
-                !
-                ! gauss integration loop for ar12 only:
-                !
+        if (ncheck/=1.or.sig(n1 + n2)>=0d0) then
+    !
+    ! gauss integration loop for ar12 only:
+    ! Gauss integration loop:
+    ! Traditional integration transforms \int_0^\pi X* \sin\theta d\theta --> \int_{-1}^1 X* d(\cos\theta)
+    ! and generates weights for the independent variable "\cos\theta"
+    !
                 integrand%n1 = n1
                 integrand%n2 = n2
                 integrand%nmax = nmax ! used only for bessel evaluation
@@ -1600,6 +1611,16 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
             tqr(npn2, npn2), tqi(npn2, npn2), &
             trgqr(npn2, npn2), trgqi(npn2, npn2)
     !c      real(dp) tr1(npn2,npn2),ti1(npn2,npn2)
+    !Ru_patch:
+    !real(dp)complex(dp)
+    integer m
+    real(dp) :: drd,qs,vv,xkr,A(nmax)
+    !complex(dp), parameter:: czero=cmplx_dp(0.0_dp,0.0_dp) !, ci=cmplx_dp(0.0_dp, 1.0_dp),&
+
+    complex(dp) :: znf,zxipsi,zxidpsi,zdxipsi,zdxidpsi,&
+            zk1,zk2,zl1,zl2,zl3,zl4,zk1i,zk2i,zl1i,zl2i,zl3i,zl4i
+    complex(dp) zq11(NPN2,NPN2),zq12(NPN2,NPN2),zq21(NPN2,NPN2),&
+            zq22(NPN2,NPN2)
     !
     common /tmat99/&
             r11, r12, r21, r22, i11, i12, i21, i22, rg11, rg12, rg21, rg22, &
@@ -1612,6 +1633,7 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
     ng = 2*ngauss
     ngss = ng
     factor = 1d0
+    m=0   !dummy here, because m\equiv 0 in tmatr0
     !
     if (ncheck==1) then         !theta=pi/2 is scatterer mirror symmetry plane
         ngss = ngauss
@@ -1643,8 +1665,10 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
             dd2 = dv2(n)
             d1(i1, n) = dd1
             d2(i1, n) = dd2
-            ! if theta=pi/2 is not a scatterer mirror symmetry plane but
-            ! gauss abscissas are still chosen symmetrically:
+            A(n)=sqrt(dble(2*n+1)/(2*n*(n+1)))
+
+        ! if theta=pi/2 is not a scatterer mirror symmetry plane but
+        ! gauss abscissas are still chosen symmetrically:
 
             if ((ncheck==0).and.(naxsm==1)) then
                 ! using (4.2.4) and (4.2.6) of {ed},
@@ -1674,20 +1698,28 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
 
         end if
     end do
-    !
+    !  Assigning r^2(\theta)*weight product and Bessel function independent factors:
+    !  In Ru et al formulas:
+    !  s=n_2/n_1$ is the refractive index constrast and $x(\theta)=k_1 r(\theta)$ is the
+    !  {\em polar} angle dependent size parameter of an axially symmetric scatterer.
     !  assigning r^2(\theta)*weight product:
 
     do i = 1, ngss
-        rr(i) = w(i)*r(i)
+        rr(i) = w(i)*r(i)           !r^2(\theta)*weight
 
         !c           if (dr(i).eq.0.d0) rr(i)=0.d0   !temporarily only
     end do
     !
+    ! Before the n1, n2 (or l,l') loop:
+
+    znf=cmplx_dp(pir,pii)/ppi       !in general complex ref. index contrast n_2/n_1;
+                                  !the parameter 's' in Ru et al formulas
+
     do n1 = mm1, nmax
         an1 = an(n1)
         do n2 = mm1, nmax
             an2 = an(n2)
-
+    ! Init:
             ar12 = 0d0
             ar21 = 0d0
             ai12 = 0d0
@@ -1697,12 +1729,22 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
             gi12 = 0d0
             gi21 = 0d0
 
-            !        open(nout+3,file='surfint.dat')   !gauss convergence check
+    ! Init of Ru et al integrals:
+            zk1=czero
+            zk2=czero
+            zl1=czero
+            zl2=czero
+            zl3=czero
+            zl4=czero
+
+    !        open(nout+3,file='surfint.dat')   !gauss convergence check
 
             if (ncheck/=1.or.sig(n1 + n2)>=0d0) then
-                !
-                ! gauss integration loop:
-                !
+
+    ! Gauss integration loop:
+    ! Traditional integration transforms
+    ! \int_0^\pi X* \sin\theta d\theta --> \int_{-1}^1 X* d(\cos\theta)
+    ! and generates weights for the independent variable "\cos\theta"
                 do i = 1, ngss    !=ngauss   if ncheck.eq.1
                     !                                  !=2*ngauss if ncheck.eq.0
 
@@ -1714,26 +1756,129 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
                     a21 = d2n1*d1n2
                     a22 = d2n1*d2n2
                     !                    aa1=a12+a21
-                    ! vector spherical harmonics:
-                    !  since refractive index is allowed to be complex in general,
-                    !  the bessel function j_l(k_in*r) is complex. the code below
-                    !  performs a separation of the complex integrand in waterman's
-                    !  surface integral into its respective real and imaginary
-                    !  parts:
-                    ! bessel functions of the exterior argument:
+
+    ! Spherical Bessel functions:
+    ! Since refractive index is allowed to be complex in general,
+    ! the Bessel function j_l(k_in*r) is complex. The code below
+    ! performs a separation of the complex integrand in Waterman's
+    ! surface integral into its respective real and imaginary
+    ! parts.
+
+    ! Bessel functions of the exterior argument:
 
                     qj1 = cbess%j(i, n1)
                     qy1 = cbess%y(i, n1)
                     qdj1 = cbess%dj(i, n1)
                     qdy1 = cbess%dy(i, n1)
-                    ! bessel functions of the interior argument:
 
+    ! Bessel functions of the interior argument:
                     qjr2 = cbess%jr(i, n2)
                     qji2 = cbess%ji(i, n2)
                     qdjr2 = cbess%djr(i, n2)
                     qdji2 = cbess%dji(i, n2)
-                    !_____________________
-                    ! re and im of j_{n2}(k_{in}r) j_{n1}(k_{out}r):
+
+    !--------/---------/---------/---------/---------/---------/---------/--
+    !Assigning integrads by eqs 2-7 of Ru2012
+    !Bessel function part:
+    !Amend for the Riccati-Bessel functions of Ru et al.
+    !The Riccati-Bessel functions \xi_l(z)=zh_l(z) (\psi_l(z)=zj_l(z)) are the functions of
+    !the exterior (interior) argument there.
+    ! \xi or d\xi carry always the subscript n (=n1 here) and
+    ! \psi or d\psi carry always the subscript k (=n2 here)
+    !The latter allows one to initiate their complex valued products.
+    !  PI=P*2D0/LAM                 !wave vector k=2\pi/\ld in the host medium
+    !  PPI=PI*PI                    !k^2
+    !  PIR=PPI*MRR                  !k^2*mrr
+    !  PII=PPI*MRI                  !k^2*mri
+    !  R(I):=r^2(\theta)
+
+            xkr=sqrt(ppi*r(i))        !k_out*r(\theta)
+
+            zxipsi=cmplx_dp(pir,pii)*cmplx_dp(qj1,qy1)*cmplx_dp(qjr2,qji2)*r(i)
+
+            zxidpsi=xkr*cmplx_dp(qj1,qy1)*cmplx_dp(qjr2,qji2) + &
+                cmplx_dp(pir,pii)*cmplx_dp(qj1,qy1)*cmplx_dp(qdjr2,qdji2)*r(i)
+
+            zdxipsi=znf*xkr*cmplx_dp(qj1,qy1)*cmplx_dp(qjr2,qji2) + &
+                cmplx_dp(pir,pii)*cmplx_dp(qdj1,qdy1)*cmplx_dp(qjr2,qji2)*r(i)
+
+            zdxidpsi=cmplx_dp(qj1,qy1)*cmplx_dp(qjr2,qji2) + &
+                znf*xkr*cmplx_dp(pir,pii)*cmplx_dp(qj1,qy1)*cmplx_dp(qdjr2,qdji2)+&
+                xkr*cmplx_dp(pir,pii)*cmplx_dp(qdj1,qdy1)*cmplx_dp(qjr2,qji2)+&
+                cmplx_dp(pir,pii)*cmplx_dp(qdj1,qdy1)*cmplx_dp(qdjr2,qdji2)*r(i)
+    !--------/---------/---------/---------/---------/---------/---------/--
+
+    ! Gauss integration weigths and variables are in the variable '\cos\theta'.
+    ! Amend for that on the routine input at the present code of Ref. \ct{MTL}:
+    ! r(i) contains $r^2(\theta)$ instead of $r(\theta)$ and
+    ! dr(i) contains $r'(\theta)/r(\theta)$ instead of $r'(\theta)$.
+
+                    qs=dsqrt(1.d0-x(i)**2)          !\sin\theta
+                    vv=sqrt(r(i))                   !r(\theta)
+                    drd=vv*dr(i)*sqrt(ppi)          !x_\theta=k_out*r'(\theta) of Ru et al
+
+    ! Amend for the Riccati-Bessel functions of Ru et al
+    ! on using that they only contain combinations of
+    ! \xi or d\xi with the subscript n (=n1 here) and
+    ! \psi or d\psi with the subscript k (=n2 here)
+    ! Assigning integrads by eqs 2-7 of Ru2012:
+
+        if (ncheck==1) then         !theta=pi/2 is scatterer mirror symmetry plane
+                                                !eqs 18-19 of Ru2012
+            if (mod(n1+n2,2)==0) then     !n1+n2 even
+
+                zk1i=czero
+                zk2i=czero
+
+                zl1i=dv1(n2)*dv2(n1)*drd*zxipsi
+                zl2i=dv1(n1)*dv2(n2)*drd*zxipsi
+                zl3i=dv1(n2)*(dv2(n1)*drd*zdxidpsi &
+                  -dble(n1*(n1+1))*dv1(n1)*zxidpsi)
+                zl4i=dv1(n1)*(znf*dv2(n2)*drd*zdxidpsi &
+                             -dble(n2*(n2+1))*dv1(n2)*zdxipsi)
+
+            else                    !n1+n2 odd
+
+                zk1i=dble(m)*dv1(n1)*dv1(n2)*drd*zxidpsi/qs
+                zk2i=dble(m)*dv1(n1)*dv1(n2)*drd*zdxipsi/qs
+        ! qs=dsqrt(1.d0-x(i)**2) is \sin\theta for missing in the integration measure;
+        ! By dividing by qs, the integrand will, as before, be integrated with the measure
+        ! d(\cos\theta) for which the GIF weights are supplied
+
+                zl1i=czero
+                zl2i=czero
+                zl3i=czero
+                zl4i=czero
+
+            end if
+
+            else if (ncheck==0) then        !theta=pi/2 is not a scatterer mirror symmetry plane
+
+                zk1i=dble(m)*dv1(n1)*dv1(n2)*drd*zxidpsi/qs
+                zk2i=dble(m)*dv1(n1)*dv1(n2)*drd*zdxipsi/qs
+                zl1i=dv1(n2)*dv2(n1)*drd*zxipsi
+                zl2i=dv1(n1)*dv2(n2)*drd*zxipsi
+                zl3i=dv1(n2)*(dv2(n1)*drd*zdxidpsi &
+                            -dble(n1*(n1+1))*dv1(n1)*zxidpsi)
+                zl4i=dv1(n1)*(znf*dv2(n2)*drd*zdxidpsi &
+                            -dble(n2*(n2+1))*dv1(n2)*zdxipsi)
+        !--------/---------/---------/---------/---------/---------/---------/--
+
+            end if
+
+    ! Integrate Ru et al integrals:
+                    zk1=zk1+zk1i*w(i)
+                    zk2=zk2+zk2i*w(i)
+                    zl1=zl1+zl1i*w(i)
+                    zl2=zl2+zl2i*w(i)
+                    zl3=zl3+zl3i*w(i)
+                    zl4=zl4+zl4i*w(i)
+
+        ! todo: a switch can be implemented here to run the code
+        ! either by following Ru et al integration or
+        ! following the original MTL path
+        !__________________
+        ! re and im of j_{n2}(k_{in}r) j_{n1}(k_{out}r):
 
                     c1r = qjr2*qj1
                     c1i = qji2*qj1
@@ -1807,6 +1952,35 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
                     gi21 = gi21 + f1*c4i + f2*c5i        !~im rg j^{21}
                 end do               !end of gauss integration
 
+    ! Taking into account the "factor":
+    ! factor=1 or 2 depending on ncheck==0 or ncheck==1
+
+            if (factor==2) then
+                    zk1=zk1*factor
+                    zk2=zk2*factor
+                    zl1=zl1*factor
+                    zl2=zl2*factor
+                    zl3=zl3*factor
+                    zl4=zl4*factor
+            end if
+
+    !After performing surface integrals, forming the Q-matrices
+    !by eqs 12-17 of Ru2012
+
+            if (n1/=n2) then
+                zq11(n1,n2)=ci*A(n1)*A(n2)*(znf**2-cone)* &
+                    (n1*(n1+1)*zl2-n2*(n2+1)*zl1)/((n1*(n1+1)-n2*(n2+1))*znf)
+                zq22(n1,n2)=ci*A(n1)*A(n2)*(znf**2-cone)* &
+                    (zl3+znf*(n1*(n1+1))*(zl2-zl1))/((n1*(n1+1)-n2*(n2+1))*znf)
+            else
+                zq11(n1,n2)=-ci*A(n1)*A(n2)*(-znf*zl1+zl3+(zl2-zl4)/znf)
+                zq22(n1,n2)=-ci*A(n1)*A(n2)*(-zl1+zl2-zl4 +zl3/znf)
+            end if
+
+                zq12(n1,n2)=A(n1)*A(n2)*(znf**2-cone)*zk1/znf
+                zq21(n1,n2)=-A(n1)*A(n2)*(znf**2-cone)*zk2/znf
+
+
                 !                write(nout+3,*)'n1=',n1,'   n2=',n2
                 !                write(nout+3,*)'ar12=', ar12
                 !                write(nout+3,*)'ai12=', ai12
@@ -1816,7 +1990,7 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
                 !                write(nout+3,*)'gi12=', gi12
                 !                write(nout+3,*)'gr21=', gr21
                 !                write(nout+3,*)'gi21=', gi21
-                !%%%%%%%%%%%%%  forming j-matrices (j^{11}=j^{22}=0 for m=0):
+        !%%%%%%%%%%%%%  forming j-matrices (j^{11}=j^{22}=0 for m=0):
             end if
 
             an12 = ann(n1, n2)*factor
