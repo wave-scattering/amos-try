@@ -132,22 +132,20 @@ subroutine tmtaxsp(nmax, rap, zeps1, tmt)
     !
     !****************************************************************
     !     data czero/(0.d0,0.d0)/
-    !
+
     p = dacos(-1d0)                 !local pi constant
-    !
+
     a = rev
     lam = rev*sqrt(mpar%zeps0)/rap       !vacuum wavelength times sqrt(mpar%zeps0)/
-    !
+
     ! the real part of the refractive index contrast
-    !
     mrr = dble(sqrt(zeps1/mpar%zeps0))
-    !
+
     ! the imaginary  part of the refractive index contrast
-    !
     mri = aimag(sqrt(zeps1/mpar%zeps0))
-    !
+
     ddelt = 0.1d0*ddelt               !conv. test is switched off now!!!
-    !
+
     ! ddelt is used to test the accuracy of computing the
     ! optical cross sections. this accuracy is usually better
     ! than the absolute accuracy of computing the expansion coefficients
@@ -164,17 +162,17 @@ subroutine tmtaxsp(nmax, rap, zeps1, tmt)
     if (dabs(rat - 1d0) > 1d-8) then
         select case (np)
         case(0:)
-            call radii_ratio_chebyshev(np, eps, rat)
+            rat = radii_ratio_chebyshev(np)
         case (-1) ! oblate/prolate spheroids
-            call radii_ratio_spheroid(eps, rat)
+            rat = radii_ratio_spheroid()
         case (-2) ! oblate/prolate cylinder
-            call radii_ratio_cylinder(eps, rat)
+            rat = radii_ratio_cylinder()
         case (-3) ! distorted chebyshev droplet
-            call radii_ratio_droplet(rat)
+            rat = radii_ratio_droplet()
         case (-9) ! nanorod
             ! todo make a correct evaluation of surface-equivalent radius for nanorod
             ! (2019-12-09) In principle it is done but needs some testing
-            call radii_ratio_nanorod(eps, mpar%nanorod_cap_hr, rat)
+            rat = radii_ratio_nanorod()
         end select
     end if
 

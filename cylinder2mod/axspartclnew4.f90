@@ -1937,15 +1937,15 @@ contains
         if (dabs(rat - 1d0) > 1d-8) then
             select case(np)
             case(0:)
-                call radii_ratio_chebyshev(np, eps, rat)
-            case(-1)
-                call radii_ratio_spheroid(eps, rat)
-            case(-2)
-                call radii_ratio_cylinder(eps, rat)
-            case(-3)
-                call radii_ratio_droplet (rat)
-            case(-9)
-                call radii_ratio_nanorod(eps, mpar%nanorod_cap_hr, rat)
+                rat = radii_ratio_chebyshev(np)
+            case (-1) ! oblate/prolate spheroids
+                rat = radii_ratio_spheroid()
+            case (-2) ! oblate/prolate cylinder
+                rat = radii_ratio_cylinder()
+            case (-3) ! distorted chebyshev droplet
+                rat = radii_ratio_droplet()
+            case (-9) ! nanorod
+                rat = radii_ratio_nanorod()
             end select
         end if
 
