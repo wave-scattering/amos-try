@@ -99,7 +99,7 @@ contains
     end
 
     !=======================================================================
-    subroutine rsp_cylinder (x, r, dr)
+    subroutine rsp_cylinder(x, r, dr)
         !--------/---------/---------/---------/---------/---------/---------/--
         ! >>> x,ng,ngauss,rev,eps
         ! <<< r,dr
@@ -178,7 +178,7 @@ contains
     end
 
     !=======================================================================
-    subroutine rsp_nanorod (x, r, dr)
+    subroutine rsp_nanorod(x, r, dr)
         !--------/---------/---------/---------/---------/---------/---------/--
         ! >>> x,ng,ngauss,rev,eps,epse
         ! <<< r,dr
@@ -276,7 +276,7 @@ contains
     end
 
     !=======================================================================
-    subroutine rsp_chebyshev (x, n, r, dr)
+    subroutine rsp_chebyshev(x, n, r, dr)
         !--------/---------/---------/---------/---------/---------/---------/--
         ! >>> x,ng,rev,eps,n
         ! <<< r,dr
@@ -345,7 +345,7 @@ contains
     end
 
     !=======================================================================
-    subroutine rsp_droplet (x, r, dr)
+    subroutine rsp_droplet(x, r, dr)
         !--------/---------/---------/---------/---------/---------/---------/--
         ! >>> x,ng,rev
         ! <<< r,dr
@@ -433,7 +433,7 @@ contains
     end function radii_ratio_spheroid
 
     !=======================================================================
-    function radii_ratio_cylinder () result(rat)
+    function radii_ratio_cylinder() result(rat)
         !--------/---------/---------/---------/---------/---------/---------/--
         ! >>> eps
         ! <<< rat
@@ -454,7 +454,7 @@ contains
     end function radii_ratio_cylinder
 
     !=======================================================================
-    function radii_ratio_nanorod () result(rat)
+    function radii_ratio_nanorod() result(rat)
         !--------/---------/---------/---------/---------/---------/---------/--
         ! >>> eps, epse
         ! <<< rat
@@ -550,15 +550,13 @@ contains
         !   calculation of the ratio between the volume-equivalent and
         !   the surface-equivalent radii for a distorted chebyshev droplet
 
-        implicit none
-        integer nout, nc, ng, i, n
-        real(dp) s, v, rat, cki, dri, rv, ri, si, risi, rs, wi, xi, xin
-        ! number of the output unit
-        parameter (nout = 35)
-        parameter (ng = 60)
+        ! nout: number of the output unit
+        integer, parameter :: nout = 35, ng = 60, nc = 10
 
+        integer i, n
+        real(dp) s, v, rat, cki, dri, rv, ri, si, risi, rs, wi, xi, xin
         real(dp) x(ng), w(ng)
-        nc = 10
+
         cdrop%c(0) = -0.0481_dp
         cdrop%c(1) = 0.0359_dp
         cdrop%c(2) = -0.1263_dp
@@ -572,7 +570,7 @@ contains
         cdrop%c(10) = 0.0010_dp
 
         ! gif division points and weights
-        call gauss (ng, 0, 0, x, w)
+        call gauss(ng, 0, 0, x, w)
 
         s = 0d0
         v = 0d0
@@ -600,8 +598,8 @@ contains
         do n = 0, nc
             write(nout, 1001) n, cdrop%c(n)
         enddo
-        1000 format ('r_0/r_ev=', f7.4)
-        1001 format ('c_', i2, '=', f7.4)
+        1000 format('r_0/r_ev=', f7.4)
+        1001 format('c_', i2, '=', f7.4)
 
         if (dabs(rat - 1d0) > 1d-8) then
             rat = rv/rs
@@ -621,8 +619,7 @@ contains
         integer, intent(in) :: n
         real(dp), intent(in) :: x1, x2
         real(dp), intent(out) :: x(n), w(n)
-        real(dp) eps
-        parameter (eps = 3.d-14)
+        real(dp), parameter :: eps = 3.d-14
         integer i, j, m
         double precision p1, p2, p3, pp, xl, xm, z, z1
 

@@ -88,10 +88,10 @@ subroutine tmtaxsp(nmax, rap, zeps1, tmt)
     use libcylinder
     implicit none
 
-    integer lmaxd, lmax1d, lmtd, naxsm
-    parameter (lmaxd = 8, lmax1d = lmaxd + 1, lmtd = lmax1d*lmax1d - 1)
+    integer, parameter :: lmaxd = 8, lmax1d = lmaxd + 1, lmtd = lmax1d*lmax1d - 1
 
-    integer ndgs, ngauss, n, nm, np, n1, n2, m, l1, l2, lmtot, k1, k2, kk1, kk2
+    integer ndgs, ngauss, n, nm, np, naxsm
+    integer n1, n2, m, l1, l2, lmtot, k1, k2, kk1, kk2
     integer nmax, ncheck, inm1, ixxx, ja, jam, jb, jbm
     real(dp) rev, eps, ht, a, alpha, beta, ddelt, dn1
     real(dp) p, pir, pii, ppi, qext, qsca, rat, rap, rsnm
@@ -100,38 +100,33 @@ subroutine tmtaxsp(nmax, rap, zeps1, tmt)
             an(npn1), r(npng2), dr(npng2), &
             ddr(npng2), drr(npng2), dri(npng2), ann(npn1, npn1)
     real(dp) tr1(npn2, npn2), ti1(npn2, npn2)
-    !      real(dp) xalpha(300),xbeta(300),walpha(300),wbeta(300)
+    !real(dp) xalpha(300),xbeta(300),walpha(300),wbeta(300)
 
-    !     complex(dp) czero
+    !complex(dp) czero
     complex(dp) zeps1
     complex(dp) tmt(4, lmtd, lmtd)
-    !
+
     common /ct/ tr1, ti1
     ! transfers the real and imaginary part of the t matrix (2*nmax,2*nmax)
     ! array for a given value of m from tt via (tmatr0 and tmatr) to the main
-    !
-    !c      common /tmat/ rt11,rt12,rt21,rt22,it11,it12,it21,it22
+
+    !common /tmat/ rt11,rt12,rt21,rt22,it11,it12,it21,it22
     ! transfers t matrix arrays obtained from tr1,ti1 in the main to the
     ! ampl routine --->  not used here
-    !
 
-    !     common /choice/ ichoice
+    !common /choice/ ichoice
     ! transfers the choice of inversion from here to tt
-    !
+
     common/revval/ a
-    !
     ! transfers rev to const routine
-    !
     common /toitmt/np, ncheck, naxsm, ndgs
-    !
     ! transfers integers np,ncheck,naxsm,ndgs from the main here
-    !
+
     common /totmt/eps, rat, rev, alpha, beta, ddelt
-    !
     ! transfers real(dp) rat,a(rev),alpha,beta,ddelt from the main here
-    !
+
     !****************************************************************
-    !     data czero/(0.d0,0.d0)/
+    !data czero/(0.d0,0.d0)/
 
     p = dacos(-1d0)                 !local pi constant
 
@@ -375,7 +370,7 @@ end
 
 !********************************************************************
 
-subroutine vigampl (x, nmax, m, ddv1, dv2)
+subroutine vigampl(x, nmax, m, ddv1, dv2)
     !--------/---------/---------/---------/---------/---------/---------/--
     ! >>> x,nmax,m (only nonnegative)
     ! <<< dv1, dv2
@@ -551,7 +546,7 @@ subroutine vigampl (x, nmax, m, ddv1, dv2)
 end
 !**********************************************************************
 
-subroutine const (ngauss, nmax, x, w, an, ann, s, ss, np, eps)
+subroutine const(ngauss, nmax, x, w, an, ann, s, ss, np, eps)
     !--------/---------/---------/---------/---------/---------/---------/--
     ! >>> ngauss,nmax,np,eps
     ! <<< x,w,an,ann,s,ss
@@ -815,7 +810,7 @@ end
 
 !**********************************************************************
 
-subroutine vary (lam, mrr, mri, a, eps, &
+subroutine vary(lam, mrr, mri, a, eps, &
         rsnm, ht, np, ngauss, x, &
         p, ppi, pir, pii, r, dr, ddr, drr, dri, nmax)
     !--------/---------/---------/---------/---------/---------/---------/--
@@ -934,7 +929,7 @@ end
 
 !**********************************************************************
 
-subroutine rsp_sphere_cut_top (x, ng, rev, eps, r, dr)
+subroutine rsp_sphere_cut_top(x, ng, rev, eps, r, dr)
     !--------/---------/---------/---------/---------/---------/---------/--
     ! >>> x,ng,rev,eps
     ! <<< r,dr
@@ -1020,7 +1015,7 @@ end
 
 !**********************************************************************
 
-subroutine rsp_sphere_cut_bottom (x, ng, rev, eps, r, dr)
+subroutine rsp_sphere_cut_bottom(x, ng, rev, eps, r, dr)
     !--------/---------/---------/---------/---------/---------/---------/--
     ! >>> x,ng,rev,eps
     ! <<< r,dr
@@ -1906,7 +1901,7 @@ end
 
 !**********************************************************************
 
-subroutine tmatr_adapt (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
+subroutine tmatr_adapt(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
         drr, dri, nmax, ncheck, naxsm)
     !--------/---------/---------/---------/---------/---------/---------/--
     ! >>> ngauss,x,w,an,ann,s,ss,ppi,pir,pii,r,dr,ddr,drr,dri,nmax,ncheck
@@ -2257,7 +2252,7 @@ end
 !**********************************************************************
 !**********************************************************************
 
-subroutine tmatr (m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
+subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
         drr, dri, nmax, ncheck, naxsm)
     !--------/---------/---------/---------/---------/---------/---------/--
     ! >>> ngauss,x,w,an,ann,s,ss,ppi,pir,pii,r,dr,ddr,drr,dri,nmax,ncheck
