@@ -1,6 +1,6 @@
 #cmake_minimum_required(VERSION 3.0.2)
 SET (PROJECTNAME "ampl")
-PROJECT (${PROJECTNAME} Fortran)
+PROJECT (${PROJECTNAME} Fortran C)
 FIND_PACKAGE(LAPACK REQUIRED)
 
 #include_directories(${CMAKE_BINARY_DIR}/amos
