@@ -1542,6 +1542,8 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
     ! >>> ngauss,x,w,an,ann,ppi,pir,pii,r,dr,ddr,drr,dri,nmax,ncheck
     ! <<< common blocks /tmat99/, /ct/ (for main),  and /ctt/ (for tt)
     !=====================
+    ! complex(dp), parameter:: czero=cmplx_dp(0.0_dp,0.0_dp), ci=cmplx_dp(0.0_dp, 1.0_dp)
+    ! are supplied here by the "constants" routine
     !
     !  determines the t-matrix of an axially symmetric scatterer
     !                           for m=0
@@ -1613,10 +1615,8 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
     !c      real(dp) tr1(npn2,npn2),ti1(npn2,npn2)
     !Ru_patch:
     !real(dp)complex(dp)
-    integer m
+    !integer m    m\equiv 0 in tmatr0
     real(dp) :: drd,qs,vv,xkr,A(nmax)
-    !complex(dp), parameter:: czero=cmplx_dp(0.0_dp,0.0_dp) !, ci=cmplx_dp(0.0_dp, 1.0_dp),&
-
     complex(dp) :: znf,zxipsi,zxidpsi,zdxipsi,zdxidpsi,&
             zk1,zk2,zl1,zl2,zl3,zl4,zk1i,zk2i,zl1i,zl2i,zl3i,zl4i
     complex(dp) zq11(NPN2,NPN2),zq12(NPN2,NPN2),zq21(NPN2,NPN2),&
@@ -1633,7 +1633,6 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
     ng = 2*ngauss
     ngss = ng
     factor = 1d0
-    m=0   !dummy here, because m\equiv 0 in tmatr0
     !
     if (ncheck==1) then         !theta=pi/2 is scatterer mirror symmetry plane
         ngss = ngauss
@@ -2431,6 +2430,8 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
     ! >>> ngauss,x,w,an,ann,s,ss,ppi,pir,pii,r,dr,ddr,drr,dri,nmax,ncheck
     ! <<< common blocks /tmat99/, /ct/ (for main),  and /ctt/ (for tt)
     !=====================
+    ! complex(dp), parameter:: czero=cmplx_dp(0.0_dp,0.0_dp), ci=cmplx_dp(0.0_dp, 1.0_dp)
+    ! are supplied here by the "constants" routine
     !
     !  determines the t-matrix of an axially symmetric scatterer
     !                           for m > 0
@@ -2523,10 +2524,7 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
             trgqr(npn2, npn2), trgqi(npn2, npn2)
     !c      real(dp) tr1(npn2,npn2),ti1(npn2,npn2)
     !Ru_patch:
-    !real(dp)complex(dp)
     real(dp) :: drd,qs,vv,xkr,a(nmax)
-    !complex(dp), parameter:: czero=cmplx_dp(0.0_dp,0.0_dp) !, ci=cmplx_dp(0.0_dp, 1.0_dp),&
-
     complex(dp) :: znf,zxipsi,zxidpsi,zdxipsi,zdxidpsi,&
             zk1,zk2,zl1,zl2,zl3,zl4,zk1i,zk2i,zl1i,zl2i,zl3i,zl4i
     complex(dp) zq11(NPN2,NPN2),zq12(NPN2,NPN2),zq21(NPN2,NPN2),&
