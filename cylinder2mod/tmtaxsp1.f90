@@ -1557,11 +1557,13 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
     !             .eq.1  then  ngss = ngauss, factor=2d0
     !  naxsm   -  .eq.0 : gauss abscissas do not have +/- theta symmetry
     !             .eq.1 : gauss abscissas have +/- theta symmetry
+    !  MRR - the real part of the rel.  refractive index
+    !  MRI - the imaginary of the rel. the refractive index
     !  p=dacos(-1d0)
-    !  pi=p*2d0/lam - wave vector
-    !  ppi=pi*pi
-    !  pir=ppi*mrr
-    !  pii=ppi*mri
+    !  pi=p*2d0/lam      !wave vector k=2\pi/\ld in the host medium
+    !  ppi=pi*pi         !k^2
+    !  pir=ppi*mrr       !k^2*mrr
+    !  pii=ppi*mri       !k^2*mri
     !  r=r^2(\theta)                        for axially symmetric particles
     !  dr=[dr(\theta)/(d\theta)]/r(\theta)  for axially symmetric particles
     !  ddr=\lambda/[2*\pi*r(\theta)]=1/(k_out*r)
@@ -1569,12 +1571,11 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
     !                  = re 1/(k_in*r)
     !  dri=-(mri/(mrr**2+mri**2))*(\lambda/[2*\pi*r(\theta)])
     !                  = im 1/(k_in*r)
-    !  refractive index outside is assumed to real, whereas inside
+    !  Refractive index outside is assumed to real, whereas inside
     !  a scatterer, refractive index is allowed to be complex in general.
-    !  consequently, the bessel function j_l(k_in*r) will in general
-    !  be complex. the routine below performs waterman surface integral
+    !  Consequently, the bessel function j_l(k_in*r) will in general
+    !  be complex. The routine below performs Waterman surface integral
     !  separately for the real and imaginary parts of the integrand.
-    !
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
     implicit none
@@ -1838,8 +1839,8 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
 
             else                    !n1+n2 odd
 
-                zk1i=dble(m)*dv1(n1)*dv1(n2)*drd*zxidpsi/qs
-                zk2i=dble(m)*dv1(n1)*dv1(n2)*drd*zdxipsi/qs
+                zk1i=czero  !dble(m)*dv1(n1)*dv1(n2)*drd*zxidpsi/qs
+                zk2i=czero  !dble(m)*dv1(n1)*dv1(n2)*drd*zdxipsi/qs
         ! qs=dsqrt(1.d0-x(i)**2) is \sin\theta for missing in the integration measure;
         ! By dividing by qs, the integrand will, as before, be integrated with the measure
         ! d(\cos\theta) for which the GIF weights are supplied
@@ -1853,8 +1854,8 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
 
             else if (ncheck==0) then        !theta=pi/2 is not a scatterer mirror symmetry plane
 
-                zk1i=dble(m)*dv1(n1)*dv1(n2)*drd*zxidpsi/qs
-                zk2i=dble(m)*dv1(n1)*dv1(n2)*drd*zdxipsi/qs
+                zk1i=czero  !dble(m)*dv1(n1)*dv1(n2)*drd*zxidpsi/qs  !equiv 0 for m=0
+                zk2i=czero  !dble(m)*dv1(n1)*dv1(n2)*drd*zdxipsi/qs
                 zl1i=dv1(n2)*dv2(n1)*drd*zxipsi
                 zl2i=dv1(n1)*dv2(n2)*drd*zxipsi
                 zl3i=dv1(n2)*(dv2(n1)*drd*zdxidpsi &
@@ -2447,11 +2448,13 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
     !  naxsm   -  .eq.0 : gauss abscissas do not have +/- theta symmetry
     !             .eq.1 : gauss abscissas have +/- theta symmetry
     !  ncheck - specifies whether ng=2*ngauss or otherwise
+    !  MRR - the real part of the rel.  refractive index
+    !  MRI - the imaginary of the rel. the refractive index
     !  p=dacos(-1d0)
-    !  pi=p*2d0/lam - wave vector
-    !  ppi=pi*pi
-    !  pir=ppi*mrr
-    !  pii=ppi*mri
+    !  pi=p*2d0/lam      !wave vector k=2\pi/\ld in the host medium
+    !  ppi=pi*pi         !k^2
+    !  pir=ppi*mrr       !k^2*mrr
+    !  pii=ppi*mri       !k^2*mri
     !  r=r^2(\theta)                       for axially symmetric particles
     !  dr=[dr(\theta)/(d\theta)]/r(\theta) for axially symmetric particles
     !  ddr=\lambda/[2*\pi*r(\theta)]=1/(k_out*r)
@@ -2459,12 +2462,11 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
     !                  = re 1/(k_in*r)
     !  dri=-(mri/(mrr**2+mri**2))*(\lambda/[2*\pi*r(\theta)])
     !                  = im 1/(k_in*r)
-    !  refractive index outside is assumed to real, whereas inside
+    !  Refractive index outside is assumed to real, whereas inside
     !  a scatterer, refractive index is allowed to be complex in general.
-    !  consequently, the bessel function j_l(k_in*r) will in general
-    !  be complex. the routine below performs waterman surface integral
+    !  Consequently, the bessel function j_l(k_in*r) will in general
+    !  be complex. The routine below performs Waterman surface integral
     !  separately for the real and imaginary parts of the integrand.
-    !
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
     !include 'ampld.par.f'
