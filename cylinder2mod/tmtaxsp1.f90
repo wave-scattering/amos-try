@@ -1578,9 +1578,11 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
     implicit none
-    integer ngauss, nmax, ncheck, naxsm, i, i1, i2, k1, k2, kk1, kk2, &
+    integer, intent(in) :: ngauss, nmax, ncheck, naxsm
+    integer i, i1, i2, k1, k2, kk1, kk2, &
             mm1, n, n1, n2, ng, ngss, nm, nnmax
-    real(dp) :: ppi, pir, pii, d1n1, a12, a21, a22, ai12, ai21, an1, &
+    real(dp), intent(in) :: ppi, pir, pii
+    real(dp) d1n1, a12, a21, a22, ai12, ai21, an1, &
             an12, an2, ar12, ar21, b1i, b1r, b2i, b2r, b3i, b3r, b4i, b4r, &
             b5r, b5i, c1r, c1i, c2r, c2i, c3r, c3i, c4r, c4i, c5r, c5i, &
             d1n2, d2n1, d2n2, dd1, dd2, ddri, drii, drri, f1, f2, &
@@ -1590,14 +1592,12 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
             tar12, tar21, tgi12, tgi21, &
             tgr12, tgr21, tppi, tpii, tpir, uri
 
-    real(dp)  x(npng2), w(npng2), an(npn1), &
-            r(npng2), dr(npng2), sig(npn2), &
-            ddr(npng2), drr(npng2), &
-            d1(npng2, npn1), d2(npng2, npn1), &
-            dri(npng2), rr(npng2), &
-            dv1(npn1), dv2(npn1)
+    real(dp), intent(in) :: an(npn1), ann(npn1, npn1), r(npng2), dr(npng2), &
+            ddr(npng2), drr(npng2), dri(npng2), x(npng2), w(npng2)
+    real(dp) sig(npn2), d1(npng2, npn1), d2(npng2, npn1), &
+            rr(npng2), dv1(npn1), dv2(npn1)
 
-    real(dp)  r11(npn1, npn1), r12(npn1, npn1), &
+    real(dp) r11(npn1, npn1), r12(npn1, npn1), &
             r21(npn1, npn1), r22(npn1, npn1), &
             i11(npn1, npn1), i12(npn1, npn1), &
             i21(npn1, npn1), i22(npn1, npn1), &
@@ -1605,7 +1605,6 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
             rg21(npn1, npn1), rg22(npn1, npn1), &
             ig11(npn1, npn1), ig12(npn1, npn1), &
             ig21(npn1, npn1), ig22(npn1, npn1), &
-            ann(npn1, npn1), &
             qr(npn2, npn2), qi(npn2, npn2), &
             rgqr(npn2, npn2), rgqi(npn2, npn2), &
             tqr(npn2, npn2), tqi(npn2, npn2), &
@@ -1713,7 +1712,7 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
     ! Before the n1, n2 (or l,l') loop:
 
     znf=cmplx_dp(pir,pii)/ppi       !in general complex ref. index contrast n_2/n_1;
-                                  !the parameter 's' in Ru et al formulas
+                                    !the parameter 's' in Ru et al formulas
 
     do n1 = mm1, nmax
         an1 = an(n1)
@@ -1746,7 +1745,7 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
     ! \int_0^\pi X* \sin\theta d\theta --> \int_{-1}^1 X* d(\cos\theta)
     ! and generates weights for the independent variable "\cos\theta"
                 do i = 1, ngss    !=ngauss   if ncheck.eq.1
-                    !                                  !=2*ngauss if ncheck.eq.0
+                                  !=2*ngauss if ncheck.eq.0
 
                     d1n1 = d1(i, n1)
                     d2n1 = d2(i, n1)
@@ -2424,7 +2423,6 @@ subroutine tmatr_adapt(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, dd
 end
 
 !**********************************************************************
-!**********************************************************************
 
 subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
         drr, dri, nmax, ncheck, naxsm)
@@ -2471,11 +2469,10 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
     use libcylinder
     !include 'ampld.par.f'
     implicit none
-    integer m, ngauss, nmax, ncheck, naxsm
-    integer n, ng, ngss, nm, nnmax, &
-            n1, n2, i, i1, i2, &
-            k1, k2, kk1, kk2, mm1
-    real(dp) ppi, pir, pii
+    integer, intent(in) :: m, ngauss, nmax, ncheck, naxsm
+    integer i, i1, i2, k1, k2, kk1, kk2, &
+            mm1, n, n1, n2, ng, ngss, nm, nnmax
+    real(dp), intent(in) :: ppi, pir, pii
     real(dp) a11, a12, a21, a22, aa1, aa2, &
             ar11, ar12, ar21, ar22, &
             ai11, ai12, ai21, ai22, &
@@ -2501,11 +2498,13 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
             tgi11, tgi12, tgi21, tgi22, &
             tpir, tpii, tppi, uri, wr
 
-    real(dp)  x(npng2), w(npng2), an(npn1), s(npng2), ss(npng2), &
-            r(npng2), dr(npng2), sig(npn2), &
-            ddr(npng2), drr(npng2), &
+    real(dp), intent(in) :: an(npn1),ann(npn1,npn1), s(npng2), &
+            ss(npng2),r(npng2), dr(npng2), ddr(npng2), drr(npng2), &
+            dri(npng2), x(npng2), w(npng2)
+
+    real(dp)  sig(npn2), &
             d1(npng2, npn1), d2(npng2, npn1), &
-            dri(npng2), ds(npng2), dss(npng2), rr(npng2), &
+            ds(npng2), dss(npng2), rr(npng2), &
             dv1(npn1), dv2(npn1)
 
     real(dp)  r11(npn1, npn1), r12(npn1, npn1), &
@@ -2516,12 +2515,20 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
             rg21(npn1, npn1), rg22(npn1, npn1), &
             ig11(npn1, npn1), ig12(npn1, npn1), &
             ig21(npn1, npn1), ig22(npn1, npn1), &
-            ann(npn1, npn1), &
             qr(npn2, npn2), qi(npn2, npn2), &
             rgqr(npn2, npn2), rgqi(npn2, npn2), &
             tqr(npn2, npn2), tqi(npn2, npn2), &
             trgqr(npn2, npn2), trgqi(npn2, npn2)
     !c      real(dp) tr1(npn2,npn2),ti1(npn2,npn2)
+    !Ru_patch:
+    !real(dp)complex(dp)
+    real(dp) :: drd,qs,vv,xkr,a(nmax)
+    !complex(dp), parameter:: czero=cmplx_dp(0.0_dp,0.0_dp) !, ci=cmplx_dp(0.0_dp, 1.0_dp),&
+
+    complex(dp) :: znf,zxipsi,zxidpsi,zdxipsi,zdxidpsi,&
+            zk1,zk2,zl1,zl2,zl3,zl4,zk1i,zk2i,zl1i,zl2i,zl3i,zl4i
+    complex(dp) zq11(NPN2,NPN2),zq12(NPN2,NPN2),zq21(NPN2,NPN2),&
+            zq22(NPN2,NPN2)
     !________
     common /tmat99/&
             r11, r12, r21, r22, i11, i12, i21, i22, rg11, rg12, rg21, rg22, &
@@ -2565,6 +2572,7 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
             dd2 = dv2(n)
             d1(i1, n) = dd1
             d2(i1, n) = dd2
+            A(n)=sqrt(dble(2*n+1)/(2*n*(n+1)))
 
             if (naxsm==1) then         !gauss abscissas chosen +/- symmetric
                 ! using (4.2.4) and (4.2.6) of {ed},
@@ -2592,7 +2600,11 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
         end if
 
     end do
-    !
+
+    !  Assigning r^2(\theta)*weight product and Bessel function independent factors:
+    !  In Ru et al formulas:
+    !  s=n_2/n_1$ is the refractive index constrast and $x(\theta)=k_1 r(\theta)$ is the
+    !  {\em polar} angle dependent size parameter of an axially symmetric scatterer.
     !  assigning r^2(\theta)*weight product:
 
     do i = 1, ngss
@@ -2602,14 +2614,20 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
 
         ds(i) = s(i)*qm*wr       !=dble(m)*w(i)*r^2(\theta)/(|\sin\theta|)
         dss(i) = ss(i)*qmm       !=dble(m)**2/(\sin^2\theta)
-        rr(i) = wr
+        rr(i) = wr               !r^2(\theta)*weight
     end do
-    !
+
+    ! Before the n1, n2 (or l,l') loop:
+
+    znf=cmplx_dp(pir,pii)/ppi       !in general complex ref. index contrast n_2/n_1;
+    !the parameter 's' in Ru et al formulas
+
     do n1 = mm1, nmax
         an1 = an(n1)
 
         do n2 = mm1, nmax
             an2 = an(n2)
+    !Init:
             ar11 = 0d0
             ar12 = 0d0
             ar21 = 0d0
@@ -2628,7 +2646,21 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
             gi22 = 0d0
             si = sig(n1 + n2)
 
-            do i = 1, ngss
+    ! Init of Ru et al integrals:
+            zk1=czero
+            zk2=czero
+            zl1=czero
+            zl2=czero
+            zl3=czero
+            zl4=czero
+
+
+    ! Gauss integration loop:
+    ! Traditional integration transforms
+    ! \int_0^\pi X* \sin\theta d\theta --> \int_{-1}^1 X* d(\cos\theta)
+    ! and generates weights for the independent variable "\cos\theta"
+            do i = 1, ngss    !=ngauss   if ncheck.eq.1
+                              !=2*ngauss if ncheck.eq.0
                 d1n1 = d1(i, n1)
                 d2n1 = d2(i, n1)
                 d1n2 = d1(i, n2)
@@ -2638,54 +2670,158 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
                 a21 = d2n1*d1n2
                 a22 = d2n1*d2n2
                 aa1 = a12 + a21            != d1n1*d2n2+d2n1*d1n2
-                aa2 = a11*dss(i) + a22   !=(d1n1*d1n2)*dble(m)**2/(\sin^2\theta)
-                !                          ! +d2n1*d2n2
-                ! vector spherical harmonics:
-                !  since refractive index is allowed to be complex in general,
-                !  the bessel function j_l(k_in*r) is complex. the code below
-                !  performs a separation of the complex integrand in waterman's
-                !  surface integral into its respective real and imaginary
-                !  parts:
+                aa2 = a11*dss(i) + a22     !=(d1n1*d1n2)*dble(m)**2/(\sin^2\theta)
+                                           ! +d2n1*d2n2
+    ! Spherical Bessel functions:
+    ! Since refractive index is allowed to be complex in general,
+    ! the Bessel function j_l(k_in*r) is complex. The code below
+    ! performs a separation of the complex integrand in Waterman's
+    ! surface integral into its respective real and imaginary
+    ! parts.
+
+    ! Bessel functions of the exterior argument:
 
                 qj1 = cbess%j(i, n1)
                 qy1 = cbess%y(i, n1)
+                qdj1 = cbess%dj(i, n1)
+                qdy1 = cbess%dy(i, n1)
+
+    ! Bessel functions of the interior argument:
                 qjr2 = cbess%jr(i, n2)
                 qji2 = cbess%ji(i, n2)
                 qdjr2 = cbess%djr(i, n2)
                 qdji2 = cbess%dji(i, n2)
-                qdj1 = cbess%dj(i, n1)
-                qdy1 = cbess%dy(i, n1)
-                ! re and im of j_{n2}(k_{in}r) j_{n1}(k_{out}r):
 
+    !--------/---------/---------/---------/---------/---------/---------/--
+    !Assigning integrads by eqs 2-7 of Ru2012
+    !Bessel function part:
+    !Amend for the Riccati-Bessel functions of Ru et al.
+    !The Riccati-Bessel functions \xi_l(z)=zh_l(z) (\psi_l(z)=zj_l(z)) are the functions of
+    !the exterior (interior) argument there.
+    ! \xi or d\xi carry always the subscript n (=n1 here) and
+    ! \psi or d\psi carry always the subscript k (=n2 here)
+    !The latter allows one to initiate their complex valued products.
+    !  PI=P*2D0/LAM                 !wave vector k=2\pi/\ld in the host medium
+    !  PPI=PI*PI                    !k^2
+    !  PIR=PPI*MRR                  !k^2*mrr
+    !  PII=PPI*MRI                  !k^2*mri
+    !  R(I):=r^2(\theta)
+
+                xkr=sqrt(ppi*r(i))        !k_out*r(\theta)
+
+                zxipsi=cmplx_dp(pir,pii)*cmplx_dp(qj1,qy1)*cmplx_dp(qjr2,qji2)*r(i)
+
+                zxidpsi=xkr*cmplx_dp(qj1,qy1)*cmplx_dp(qjr2,qji2) + &
+                        cmplx_dp(pir,pii)*cmplx_dp(qj1,qy1)*cmplx_dp(qdjr2,qdji2)*r(i)
+
+                zdxipsi=znf*xkr*cmplx_dp(qj1,qy1)*cmplx_dp(qjr2,qji2) + &
+                        cmplx_dp(pir,pii)*cmplx_dp(qdj1,qdy1)*cmplx_dp(qjr2,qji2)*r(i)
+
+                zdxidpsi=cmplx_dp(qj1,qy1)*cmplx_dp(qjr2,qji2) + &
+                        znf*xkr*cmplx_dp(pir,pii)*cmplx_dp(qj1,qy1)*cmplx_dp(qdjr2,qdji2)+&
+                        xkr*cmplx_dp(pir,pii)*cmplx_dp(qdj1,qdy1)*cmplx_dp(qjr2,qji2)+&
+                        cmplx_dp(pir,pii)*cmplx_dp(qdj1,qdy1)*cmplx_dp(qdjr2,qdji2)*r(i)
+    !--------/---------/---------/---------/---------/---------/---------/--
+    ! Gauss integration weigths and variables are in the variable '\cos\theta'.
+    ! Amend for that on the routine input at the present code of Ref. \ct{MTL}:
+    ! r(i) contains $r^2(\theta)$ instead of $r(\theta)$ and
+    ! dr(i) contains $r'(\theta)/r(\theta)$ instead of $r'(\theta)$.
+
+                qs=dsqrt(1.d0-x(i)**2)          !\sin\theta
+                vv=sqrt(r(i))                   !r(\theta)
+                drd=vv*dr(i)*sqrt(ppi)          !x_\theta=k_out*r'(\theta) of Ru et al
+
+    ! Amend for the Riccati-Bessel functions of Ru et al
+    ! on using that they only contain combinations of
+    ! \xi or d\xi with the subscript n (=n1 here) and
+    ! \psi or d\psi with the subscript k (=n2 here)
+    ! Assigning integrads by eqs 2-7 of Ru2012:
+
+        if (ncheck==1) then         !theta=pi/2 is scatterer mirror symmetry plane
+                                        !eqs 18-19 of Ru2012
+            if (mod(n1+n2,2)==0) then     !n1+n2 even
+
+                zk1i=czero
+                zk2i=czero
+
+                zl1i=dv1(n2)*dv2(n1)*drd*zxipsi
+                zl2i=dv1(n1)*dv2(n2)*drd*zxipsi
+                zl3i=dv1(n2)*(dv2(n1)*drd*zdxidpsi &
+                            -dble(n1*(n1+1))*dv1(n1)*zxidpsi)
+                zl4i=dv1(n1)*(znf*dv2(n2)*drd*zdxidpsi &
+                            -dble(n2*(n2+1))*dv1(n2)*zdxipsi)
+
+            else                    !n1+n2 odd
+
+                zk1i=qm*dv1(n1)*dv1(n2)*drd*zxidpsi/qs
+                zk2i=qm*dv1(n1)*dv1(n2)*drd*zdxipsi/qs
+    ! qs=dsqrt(1.d0-x(i)**2) is \sin\theta for missing in the integration measure;
+    ! By dividing by qs, the integrand will, as before, be integrated with the measure
+    ! d(\cos\theta) for which the GIF weights are supplied
+
+                zl1i=czero
+                zl2i=czero
+                zl3i=czero
+                zl4i=czero
+
+            end if
+
+        else if (ncheck==0) then        !theta=pi/2 is not a scatterer mirror symmetry plane
+
+                zk1i=qm*dv1(n1)*dv1(n2)*drd*zxidpsi/qs
+                zk2i=qm*dv1(n1)*dv1(n2)*drd*zdxipsi/qs
+                zl1i=dv1(n2)*dv2(n1)*drd*zxipsi
+                zl2i=dv1(n1)*dv2(n2)*drd*zxipsi
+                zl3i=dv1(n2)*(dv2(n1)*drd*zdxidpsi &
+                        -dble(n1*(n1+1))*dv1(n1)*zxidpsi)
+                zl4i=dv1(n1)*(znf*dv2(n2)*drd*zdxidpsi &
+                        -dble(n2*(n2+1))*dv1(n2)*zdxipsi)
+    !--------/---------/---------/---------/---------/---------/---------/--
+
+        end if
+
+    ! Integrate Ru et al integrals:
+                zk1=zk1+zk1i*w(i)
+                zk2=zk2+zk2i*w(i)
+                zl1=zl1+zl1i*w(i)
+                zl2=zl2+zl2i*w(i)
+                zl3=zl3+zl3i*w(i)
+                zl4=zl4+zl4i*w(i)
+
+    ! todo: a switch can be implemented here to run the code
+    ! either by following Ru et al integration or
+    ! following the original MTL path
+
+    ! re and im of j_{n2}(k_{in}r) j_{n1}(k_{out}r):
                 c1r = qjr2*qj1
                 c1i = qji2*qj1
-                ! re and im of j_{n2}(k_{in}r) h_{n1}(k_{out}r):
+    ! re and im of j_{n2}(k_{in}r) h_{n1}(k_{out}r):
 
                 b1r = c1r - qji2*qy1
                 b1i = c1i + qjr2*qy1
-                ! re and im of j_{n2}(k_{in}r) j_{n1}'(k_{out}r):
+    ! re and im of j_{n2}(k_{in}r) j_{n1}'(k_{out}r):
 
                 c2r = qjr2*qdj1
                 c2i = qji2*qdj1
-                ! re and im of j_{n2}(k_{in}r) h_{n1}'(k_{out}r):
+    ! re and im of j_{n2}(k_{in}r) h_{n1}'(k_{out}r):
 
                 b2r = c2r - qji2*qdy1
                 b2i = c2i + qjr2*qdy1
 
                 ddri = ddr(i)               !1/(k_{out}r)
-                ! re and im of [1/(k_{out}r)]*j_{n2}(k_{in}r) j_{n1}(k_{out}r)
+    ! re and im of [1/(k_{out}r)]*j_{n2}(k_{in}r) j_{n1}(k_{out}r)
 
                 c3r = ddri*c1r
                 c3i = ddri*c1i
-                ! re and im of [1/(k_{out}r)]*j_{n2}(k_{in}r) h_{n1}(k_{out}r):
+    ! re and im of [1/(k_{out}r)]*j_{n2}(k_{in}r) h_{n1}(k_{out}r):
 
                 b3r = ddri*b1r
                 b3i = ddri*b1i
-                ! re and im of j_{n2}'(k_{in}r) j_{n1}(k_{out}r):
+    ! re and im of j_{n2}'(k_{in}r) j_{n1}(k_{out}r):
 
                 c4r = qdjr2*qj1
                 c4i = qdji2*qj1
-                ! re and im of j_{n2}'(k_{in}r) h_{n1}(k_{out}r):
+    ! re and im of j_{n2}'(k_{in}r) h_{n1}(k_{out}r):
 
                 b4r = c4r - qdji2*qy1
                 b4i = c4i + qdjr2*qy1
