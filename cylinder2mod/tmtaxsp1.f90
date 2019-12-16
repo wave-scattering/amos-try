@@ -2602,22 +2602,21 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
     end do
 
     !  Assigning r^2(\theta)*weight product and Bessel function independent factors:
-    !  In Ru et al formulas:
-    !  s=n_2/n_1$ is the refractive index constrast and $x(\theta)=k_1 r(\theta)$ is the
-    !  {\em polar} angle dependent size parameter of an axially symmetric scatterer.
-    !  assigning r^2(\theta)*weight product:
+    !  The arrays ss, s have been determined in CONST as 1/(\sin^2\theta) and
+    !  1/(|\sin\theta|), respectively:
 
     do i = 1, ngss
         wr = w(i)*r(i)
-
         !c           if (dr(i).eq.0.d0) wr=0.d0   !temporarily only
-
         ds(i) = s(i)*qm*wr       !=dble(m)*w(i)*r^2(\theta)/(|\sin\theta|)
         dss(i) = ss(i)*qmm       !=dble(m)**2/(\sin^2\theta)
         rr(i) = wr               !r^2(\theta)*weight
     end do
 
     ! Before the n1, n2 (or l,l') loop:
+    !  In Ru et al formulas:
+    !  s=n_2/n_1$ is the refractive index constrast and $x(\theta)=k_1 r(\theta)$ is the
+    !  {\em polar} angle dependent size parameter of an axially symmetric scatterer.
 
     znf=cmplx_dp(pir,pii)/ppi       !in general complex ref. index contrast n_2/n_1;
     !the parameter 's' in Ru et al formulas
@@ -2653,7 +2652,6 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
             zl2=czero
             zl3=czero
             zl4=czero
-
 
     ! Gauss integration loop:
     ! Traditional integration transforms
