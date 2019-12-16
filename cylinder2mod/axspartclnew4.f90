@@ -29,7 +29,7 @@ program axspartcl1
     ! particle diel. constant= (2.10250000000000,0.000000000000000e+000)
     ! background dielectric constant zeps0= (1.00000000000000,0.000000000000000e+000)
     !
-    !==========================
+    ! ==========================
     !      room for improvement:
     !            1) it would be more resonable to replace rev by the
     !               size parameter k*rev
@@ -49,10 +49,10 @@ program axspartcl1
     ! parameters:
     !
     ! partial wave expansion is used, which is badly convergent
-    ! for large size parameters $x> 100$. in numerical applications, the
+    ! for large size parameters $x > 100$. in numerical applications, the
     ! series is to be cut off after
     !          lmax (lmx parameter here) \approx x+4x^{1/3}+2$.
-    ! in the case of lmx=50 this means that x <= 35.
+    ! in the case of lmx=50 this means that x  <=  35.
     ! if one wants to observe ripples, the cutoff for a given x has to
     ! be even larger
     !
@@ -98,7 +98,7 @@ program axspartcl1
     complex(dp) zeps0, cceps, cseps           !,zartan
     character(1) ync, yncv
     logical ynperfcon, ynperfconv, ynintens, ynoptth, ynbrug
-    !c      external zartan
+    !external zartan
 
     ! parameters:
     ! ::: number of the output unit for cross sections and scattering matrix
@@ -107,27 +107,27 @@ program axspartcl1
     parameter (nouti = 60)
     ! maximal number of spherical harmonics used. the floating number is
     ! specified below by the value of lmax parameter
-    !     parameter (lmx=100)
-    !
+    !parameter (lmx=100)
+
     ! if convergence test in the calculation of the scattering cross sections
     ! is to be performed, yncheck=.true., otherwise yncheck=.false. ! Moved to *.ini config
-!   parameter (yncheck=.false.)
-!   parameter (yncheck = .true.)
+    !parameter (yncheck=.false.)
+    !parameter (yncheck = .true.)
 
-    !
+
     ! if particle is coated, ync=y, otherwise ync=n
     parameter (ync = 'n')
-    !
+
     ! ynperfcon=.true. if core is a perfect conductor, otherwise
     ! ynperfcon=.false.
-    !
+
     parameter (ynperfcon = .false.)
-    !
+
     ! ynintens=.true. if the field intensity is to be calculated; otherwise
     ! ynintens=.false.
-    !
+
     parameter (ynintens = .false.)
-    !
+
     ! number of coatings
     parameter (lcs = 1)
     ! the coating layer to which material data are read in
@@ -165,9 +165,9 @@ program axspartcl1
     !   nmat=7             pt
     !   nmat=8             si
     !  nmat = 9           water
-    !
+
     parameter(nmat = 0)
-    !
+
     ! temporarily option for reading of the real data for the dielectric constant
     ! the number of the entries in a material data file to be read below
     ! data files for au,cu,al,pt should be ordered with the decreased wavelength
@@ -184,13 +184,13 @@ program axspartcl1
     !          sidat.dat              nfin=291
     !          sieps.dat              nfin=117
     !          measured_water_dispersion_t=24.txt       nfin = 3600
-    !
+
     parameter (nfin = 3600)
-    !
+
     ! ::: relative error allowed for the tcs. if the convergence
     !     within tol is not reached, program issues warning
     parameter (tol = 1.d-3)
-    !
+
     ! if ynbrug=.true., performs bruggeman approximation for zeps1. otherwise
     ! ynbrug=false.
     parameter (ynbrug = .false.)
@@ -211,36 +211,36 @@ program axspartcl1
     complex(dp) ceps1(nfin), zeps1, zeps0v, z1, z2
     complex(dp) zeps(lcs + 1)
     real(dp) global_eps_r, global_eps_i
-    !
+
     common /toampld/rat, rev, alpha, beta, ddelt
-    !
+
     ! transfers real(dp) rat,rev,alpha,beta,ddelt  from the main to ampldr
-    !
+
     common /totampld/thet0, thet, phi0, phi
-    !
+
     ! transfers real(dp) thet0,thet,phi0,phi from the main to ampldr
-    !
+
     common /toiampld/ncheck, naxsm, ndgs
-    !
+
     ! transfers integers ncheck,naxsm,ndgs from the main
     ! to ampldr
-    !
+
     common /toitmt/npp, ncheckp, naxsmp, ndgsp
     ! transfers integers np,ncheck,naxsm,ndgs from the main to tmtaxspv
-    !
+
     common /totmt/defpp, ratp, revp, alphae, betae, ddeltp
-    !
+
     ! transfers real(dp) defp,rat,rev,alphae,betae,ddelt from the main to tmtaxspv
-    !
+
     common /toltmt/ ynoptth
-    !
+
     ! transfers logical ynoptth from the main to tmtaxsp
-    !
+
     common /dielf/ zeps0v
     common /revf/ revf
-    !
+
     ! transfers zeps0,rev from the main to ampl
-    !
+
     common /tospherecr/ rmuf
     common /tospherech/ yncv
     common /tospherecl/ ynperfconv
@@ -259,14 +259,14 @@ program axspartcl1
 
     ! background dielectric constant
     !     parameter (zeps0=1.d0) !set in ini_parse
-    !
-    !
+
+
     ! from here to spherec
     !---------------------------------------------------------------
     ! convergence variable (has to be at least equal to 2):
-    !
+
     lmax = 25  !lmx
-    !
+
     !  fcc parameters:
 
     ! f=0.05  (--)
@@ -327,25 +327,25 @@ program axspartcl1
     rmf(lcs) = rmuf
 
     !ccccccccccccccccc    assignement of common variables ccccccccccc
-    !
+
     ! ynoptth=.true. if you want to check optical theorem
     ynoptth = .false.
-    !
+
     ynperfconv = ynperfcon
     yncv = ync
     zeps0v = zeps0
     ! preinitialization necessary since below rsnm,rev, and defp (all
     ! feeded in evanesc) are not always specified:
-    !
+
     !     rsnm=1.d0 ! should be set in *.ini file
     rev = 1.d0
     defp = 1.d0
-    !
+
     write(6, *)'chose particle shape'
     write(6, *)'only axially symmetric particle shapes allowed'
     write(6, *)'(the axis of axial symmetry is z-axis)'
     write(6, *)
-    !
+
     !--------/---------/---------/---------/---------/---------/---------/--
     write(6, *)'chebyshev particles: type a positive number equal to', &
             'the order of the chebyshev polynomial=the number of wrinkles', &
@@ -361,7 +361,7 @@ program axspartcl1
     write(6, *)'intensity around homogeneous/coated sphere: type -50'
 
     open(unit = 90, file = 'epswater.txt', status = 'unknown')
-    !
+
     np = mpar%np
     if (np == 0) then
         write(6, *) 'input the particle type:'
@@ -370,9 +370,9 @@ program axspartcl1
         write(6, *)'auto-select from *.ini file: ', np
     end if
     !z      np=-1                      !temporarily
-    !
+
     npp = np
-    !
+
     !     np
     !
     !     positive number     chebyshev particles
@@ -419,22 +419,22 @@ program axspartcl1
     !
     !--------/---------/---------/---------/---------/---------/---------/--
     open(unit = 10, file = 'test.txt')
-    !
-    if (np>0) then
-        !
+
+    if (np > 0) then
+
         write(6, *)'radius of the undeformed chebyshev particle in', &
                 'your units (in nm if dispersive data used)'
         read(5, *) rsnm
-        !
+
         write(6, *)'the amplitude of wrinkles on the sphere surface'
         read(5, *) defp
-        !
+
         write(6, *)'the equal-volume-sphere radius'
         read(5, *) rev
-        !
+
         rat = 1.d0
-        !
-    else if (np==-50) then
+
+    else if (np == -50) then
 
         if(.not.ynintens) then
             write(6, *)'np.eq.-50 option is only for intensity calculation!!!'
@@ -444,8 +444,8 @@ program axspartcl1
         write(6, *)'the (coated) sphere radius in your units'
         read(5, *) rsnm
         rev = rsnm
-        !
-    else if (np==-1) then
+
+    else if (np == -1) then
 
         write(6, *)'the half-length of the spheroid along', &
                 'the rotational axis z-axis in your units', &
@@ -457,39 +457,39 @@ program axspartcl1
                 'horizontal axis (in theta=pi/2 plane) in your units', &
                 '(in nm if dispersive data used)'
         read(5, *) rsnm
-        !z      rsnm=21.1d0
-        !
+        !rsnm = 21.1d0
+
         !     np=-1 - defp = the ratio of the horizontal to rotational axes. defp is
         !             larger than 1 for oblate spheroids and smaller than 1 for
         !             prolate spheroids.
-        !
+
         defp = rsnm/hlength              !always revolution axis length
-        !                                    !in the denominator
-        !
+        !                                !in the denominator
+
         rev = rsnm/defp**(1.d0/3.d0)     !=equal-volume-sphere radius
-        !                            !room for improvement here - it would be
-        !                                  !more resonable to replace rev
-        !                              !by the size parameter k*rev
-        !
-        if (lcs>1) then
+        !                                !room for improvement here - it would be
+        !                                !more resonable to replace rev
+        !                                !by the size parameter k*rev
+
+        if (lcs > 1) then
 
             write(6, *)'the ratio of the inner to outer spheroid half-length along the horizontal axis'
             read(5, *) revin
 
-            if (revin>=1) then
+            if (revin >= 1) then
                 write(6, *)'the ratio cannot be greater or equal 1'
                 stop
             end if
 
             revin = rev*revin
         end if               !lcs.gt.1
-        !
+
         rat = 1.d0
-        !
+
         !--------/---------/---------/---------/---------/---------/---------/--
-        !
+
     else if ((np == -2) .or. (np == -9)) then
-        !
+
         rl_max = mpar%rl_max
         if (rl_max < 0_dp) then
             write(6, *)'enter cylinder maximal r/l:'
@@ -507,7 +507,7 @@ program axspartcl1
         end if
 
         ndefp = mpar%ndefp
-        if (ndefp <= 0) then
+        if (ndefp  <=  0) then
             write(6, *)'enter amount of steps in length:'
             read(5, *) ndefp
         else
@@ -515,7 +515,7 @@ program axspartcl1
         end if
 
         rsnm = mpar%rsnm
-        if (rsnm <= 0_dp) then
+        if (rsnm  <=  0_dp) then
             write(6, *)'enter cylinder radius:'
             read(5, *) rsnm
         else
@@ -525,7 +525,7 @@ program axspartcl1
         rsnm = rsnm*2
         ! specify the shape:
         ! np=-2 - defp = the ratio of the cylinder diameter to its length.
-        !
+
         hlength_max = rsnm/rl_min/2.d0
         hlength_min = rsnm/rl_max/2.d0
         defp = rsnm/hlength_max
@@ -535,35 +535,35 @@ program axspartcl1
         rev = hlength_max*(3.d0*defp*defp/2.d0)**(1.d0/3.d0)  !=equal-volume-sphere radius
 
         rat = 1.d0
-        !
-    else if (np==-3) then
+
+    else if (np == -3) then
         !     np=-3 - no defp is specified
         write(6, *)'the length of in your units'
         read(5, *) rsnm
         rev = rsnm
-        !      write(6,*)'rev(rsnm) not yet determined for np=-3'
-        !      stop
-        !
+        !write(6,*)'rev(rsnm) not yet determined for np=-3'
+        !stop
+
         rat = 1.d0
-        !
-    else if ((np==-4).or.(np==-5))  then
+
+    else if ((np == -4).or.(np == -5))  then
         !     np=-4,-5 - defp is the height (along the axial symmetry axis)
         !                 of the resulting cut sphere
         write(6, *)'the radius of the original uncut sphere in your units'
         !--------/---------/---------/---------/---------/---------/---------/--
         read(5, *) rsnm
         rev = rsnm
-        !
+
         write(6, *)'the height of the cut sphere in your units'
         read(5, *) defp
         defp = defp/rsnm
-        !
+
         rat = 1.d0
-        !
-    else if (np==-6) then
-        !
+
+    else if (np == -6) then
+
         !     np=-6 -
-        !
+
         write(6, *)'the cone base diameter in your units'
         read(5, *) rsnm
 
@@ -574,40 +574,39 @@ program axspartcl1
         rev = (hlength*rsnm**2/4.d0)**(1.d0/3.d0)   !=equal-volume-sphere radius
         rat = 1.d0
         !
-    else if (np==-7) then
+    else if (np == -7) then
         !
         !     np=-7 -
         !
         write(6, *)'not ready yet!'
         stop
-        !c      write(6,*)'the length of in your units'
-        !c      read(5,*) rsnm
+        !write(6,*)'the length of in your units'
+        !read(5,*) rsnm
         !
-    end if                         ! end np if
+    end if ! end np if
     !***************************************
-    !
+
     defpp = defp
-    !
-    !
-    if (rat==1.) then
+
+    if (rat == 1.) then
         write(6, *)'particle size specified in terms of the equal-volume-sphere radius'
-    else if (rat/=1.) then
+    else if (rat /= 1.) then
         write(6, *)'particle size specified in terms of the equal-surface-area-sphere radius'
     end if
     !
     ! equivalent-(volume/surface-area)-sphere radius
     !
-    !c      write(6,*)'read equal-volume-sphere radius in nm'
-    !c      read(5,*) rev
+    !write(6,*)'read equal-volume-sphere radius in nm'
+    !read(5,*) rev
     !
-    !c      rev=300.d0                         !feeded as rev to rsp* routines
+    !rev=300.d0                         !feeded as rev to rsp* routines
     !
     axi = rev
     revf = rev
     !
     !  equivalent equal-(volume/surface-area)-sphere radius
     !
-    !c      rev=rat*axi                      !feeded as rev to rsp* routines
+    !rev=rat*axi                      !feeded as rev to rsp* routines
     !
 
     !  ncheck  -  .eq.0  then  ngss=2*ngauss, factor=1d0
@@ -618,8 +617,8 @@ program axspartcl1
     ncheck = 0
     !
     !     !ellipsoid(sphere), cylinder, and nanorod
-    if (np==-1.or.np==-2.or.np==-9) ncheck = 1
-    if (np>0.and.(-1)**np==1) ncheck = 1    !chebysh. particle
+    if (np == -1.or.np == -2.or.np == -9) ncheck = 1
+    if (np > 0.and.(-1)**np == 1) ncheck = 1    !chebysh. particle
     !
     ! if theta=pi/2 is not a scatterer mirror symmetry plane:
     !  naxsm   -  .eq.0 : gauss abscissas do not have +/- theta symmetry
@@ -627,7 +626,7 @@ program axspartcl1
 
     naxsm = 1
 
-    if (np<=-4) naxsm = 0
+    if (np <= -4) naxsm = 0
 
     !--------/---------/---------/---------/---------/---------/---------/--
     !
@@ -646,7 +645,7 @@ program axspartcl1
     beta = mpar%beta
     write(6, *)'auto-set alpha and beta', alpha, beta
 
-    if((alpha==0).and.(beta==0))&
+    if((alpha == 0).and.(beta == 0))&
             write(6, *)'laboratory frame coincides with particle frame'
     ! ddelt - the desired absolute accuracy of computing the
     ! expansion coefficients of a normalized scattering matrix.
@@ -687,30 +686,30 @@ program axspartcl1
     end if
     !
     !--------/---------/---------/---------/---------/---------/---------/--
-    !c      thet0=56.d0
-    !c      thet=65.d0
-    !c      phi0=114.d0
-    !c      phi=128.d0
+    !thet0=56.d0
+    !thet=65.d0
+    !phi0=114.d0
+    !phi=128.d0
     !
     ! test setup:
 
-    if ((thet0>180.).or.(thet>180.)) then
+    if ((thet0 > 180.).or.(thet > 180.)) then
         write(6, *)'theta angles has to be smaller than 180'
         stop
     end if
 
-    if ((thet0<0.).or.(thet<0.)) then
+    if ((thet0 < 0.).or.(thet < 0.)) then
         write(6, *)'theta angles has to be positive'
         stop
     end if
 
-    if ((phi0>360.).or.(phi>360.)) then
+    if ((phi0 > 360.).or.(phi > 360.)) then
         write(6, *)'phi angles has to be smaller than 360'
         stop
     end if
 
-    if ((np==-4).or.(np==-5)) then
-        if ((defp<=0).or.(defp>=2)) then
+    if ((np == -4).or.(np == -5)) then
+        if ((defp <= 0).or.(defp >= 2)) then
             write(6, *)'defp has to be >0 and <2'
             stop
         end if
@@ -731,13 +730,13 @@ program axspartcl1
     !  different ndgs-values are recommended.
     !
     !  check that ndgs*lamxd does not exceed npng1 value in subroutines
-    !  for a current values of lmaxd=50 and npng1=800 then ndgs<= 16!!!
+    !  for a current values of lmaxd=50 and npng1=800 then ndgs <=  16!!!
 
-    if ((np==-4).or.(np==-5)) then
+    if ((np == -4).or.(np == -5)) then
         ndgs = 16
-    else if (np==-6) then
+    else if (np == -6) then
         ndgs = 16
-    else if ((np==-1).and.(max(defp, 1.d0/defp)>1.5d0)) then !spheroids
+    else if ((np == -1).and.(max(defp, 1.d0/defp) > 1.5d0)) then !spheroids
         if (ynintens) then
             ndgs = min(40.d0, 14*max(defp, 1.d0/defp))
         else
@@ -762,23 +761,23 @@ program axspartcl1
 
     end if
     !
-    if (mpar%ichoice==1) then
+    if (mpar%ichoice == 1) then
         write(6, *) 'lapack routines are used for the matrix inversion'
-    else if (mpar%ichoice==2) then
+    else if (mpar%ichoice == 2) then
         write(6, *) 'zger and zsur (for the matrix inversion) are used'
     end if
     write(6, *)
     !
-    if (ncheck==0) then
+    if (ncheck == 0) then
         write(6, *) 'particle without theta=pi/2 mirror symmetry'
-    else if (ncheck==1) then
+    else if (ncheck == 1) then
         write(6, *) 'particle has  theta=pi/2 mirror symmetry'
     end if
     write(6, *)
     !
-    if (naxsm==0) then
+    if (naxsm == 0) then
         write(6, *) 'gauss abscissas not +/- theta symmetric'
-    else if (naxsm==1) then
+    else if (naxsm == 1) then
         write(6, *) 'gauss abscissas +/- theta symmetric'
     end if
     write(6, *)
@@ -787,16 +786,16 @@ program axspartcl1
     5454 format ('ichoice=', i1, '  ncheck=', i1)
     write(nout, *)'naxsm=', naxsm
 
-    if(np==-1.and.defp>=1d0) print 7000, defp
-    if(np==-1.and.defp<1d0) print 7001, defp
-    if(np>=0) print 7100, np, defp
-    if(np==-2.and.defp>=1d0) print 7150, defp
-    if(np==-2.and.defp<1d0) print 7151, defp
-    if(np==-3) print 7160
-    if(np==-4) print 7170, defp
+    if(np == -1.and.defp >= 1d0) print 7000, defp
+    if(np == -1.and.defp < 1d0) print 7001, defp
+    if(np >= 0) print 7100, np, defp
+    if(np == -2.and.defp >= 1d0) print 7150, defp
+    if(np == -2.and.defp < 1d0) print 7151, defp
+    if(np == -3) print 7160
+    if(np == -4) print 7170, defp
     print 7200, ddelt
-    if (dabs(rat - 1d0)<=1d-6) print 8003, axi
-    if (dabs(rat - 1d0)>1d-6) print 8004, axi
+    if (dabs(rat - 1d0) <= 1d-6) print 8003, axi
+    if (dabs(rat - 1d0) > 1d-6) print 8004, axi
 
     7000 format('oblate spheroids, a/b=', f11.7)
     7001 format('prolate spheroids, a/b=', f11.7)
@@ -812,29 +811,29 @@ program axspartcl1
     !--------/---------/---------/---------/---------/---------/---------/--
     ! checking set up:
     !
-    if((np>0).and.(dabs(defp)>=1.d0)) then
+    if((np > 0).and.(dabs(defp) >= 1.d0)) then
         write(6, *)'absolute value of defp has to be less than 1.!!!'
         stop
     end if
     !
-    if((np==-4).and.(defp>=2.d0*rev)) then
+    if((np == -4).and.(defp >= 2.d0*rev)) then
         write(6, *)'invalid parameters for a cut sphere!'
         write(6, *)'execution stopped!'
         write(6, *)'the defp has to be less than 2*(sphere radius) !!!'
         stop
     end if
     !
-    if((np==-1).and.(defp==1)) then
+    if((np == -1).and.(defp == 1)) then
         write(6, *)'use defp=1.000001 instead of defp=1'
     end if
     !
-    if (nmat>1) then
+    if (nmat > 1) then
         write(6, *)'real material data are to be provided'
         if (ynbrug) write(6, *)'bruggeman approx. used!'
         if (ynbrug) write(nout, *)'#bruggeman approximation performed'
     end if
     !
-    if ((ync=='y'.and.lcs==1).or.(ync=='n'.and.lcs/=1)) then
+    if ((ync == 'y'.and.lcs == 1).or.(ync == 'n'.and.lcs /= 1)) then
         write(6, *)'check compatibility of ync and lcs'
         stop
     end if
@@ -846,18 +845,18 @@ program axspartcl1
     !  n(silica)=1.45  <--->    zeps(1)=2.1025d0
     !  n(zns)=2.       <--->    zeps(1)=4.d0
     zeps(1) = cceps
-    if(lcs>1) zeps(lcs) = cseps
+    if(lcs > 1) zeps(lcs) = cseps
     zeps(lcs + 1) = zeps0
     !*****************************
     !
-    if (lcs>=2) then                  !coated particle
+    if (lcs >= 2) then                  !coated particle
         !
-        !c      write(6,*)'read equal-volume-core radius in nm'
-        !c      read(5,*) rff(1)
-        !c      rff(1)=204.9d0
-        !c      rff(1)=rff(1)/rs
+        !write(6,*)'read equal-volume-core radius in nm'
+        !read(5,*) rff(1)
+        !rff(1)=204.9d0
+        !rff(1)=rff(1)/rs
         !
-        if (np==-50) then
+        if (np == -50) then
             !
             write(6, *)'coated sphere core radii r(l) labelled from 1 for the', &
                     'inner core till lcs for the outer shell', &
@@ -872,7 +871,7 @@ program axspartcl1
                 !      rff(1)=0.75d0
                 rmf(ikl) = rff(ikl)*rmuf
 
-                if ((lcs>2).and.(ikl>=2)) then
+                if ((lcs > 2).and.(ikl >= 2)) then
                     write(6, *)'read in the lth-sphere layer diel. const. for l=', ikl
                     write(6, *)'(in case of dispersive component, give 1. )'
                     read (5, *) zeps(ikl)
@@ -907,7 +906,7 @@ program axspartcl1
     lambda = 2*pi*rsnm/x_min
     !v      lambda=633.d0                      !jap89_5776 for gold ellipsod
     !      lambda=354.d0                      !jap89_5776 for silver sphere
-    !c      lambda=500d0
+    !lambda=500d0
     !
     ! size parameter is customarily defined as the ratio of
     ! circumference of particle to the wavelength in the host medium
@@ -953,7 +952,7 @@ program axspartcl1
         enw = 2*pi*rsnm/x_max
         !      enw=500
         nstep = mpar%nstep
-        if (nstep <= 0) then
+        if (nstep  <=  0) then
             write(6, *)'enter amount of scanning steps:'
             read(5, *) nstep
         else
@@ -963,7 +962,7 @@ program axspartcl1
     end if
     !
     ! ::: number of steps on frequency interval:
-    if ((lambda==enw).or.(ynintens)) then
+    if ((lambda == enw).or.(ynintens)) then
         xstep = 0
         delo = 0.d0
     else
@@ -990,21 +989,21 @@ program axspartcl1
     write(nout, *)'#defp=', defp
     write(nout, *)'#material number =', nmat
     if (ynbrug) write(nout, *)'#bruggeman approximation performed'
-    if (ync =='n') then
+    if (ync == 'n') then
         write(nout, *)'#homogeneous particle'
-    else if (ync=='y') then
+    else if (ync == 'y') then
         write(nout, *)'#coated particle'
     end if
     write(nout, *)
     write(nout, *)'#host dielectric constant=', zeps(lcs + 1)
-    if (nmat>=1) write(nout, *)'#dispersive layer number=', ilcs
-    if ((lcs==1).and.(nmat==0))&
+    if (nmat >= 1) write(nout, *)'#dispersive layer number=', ilcs
+    if ((lcs == 1).and.(nmat == 0))&
             write(nout, *)'#sphere diel. const.=', zeps(1)
-    if (lcs>=2) then
+    if (lcs >= 2) then
         write(nout, *)'#core radius/sphere radius =', rff(1)
-        if ((ilcs/=1).or.(nmat==0))&
+        if ((ilcs /= 1).or.(nmat == 0))&
                 write(nout, *)'#sphere core diel. const.=', zeps(1)
-        if ((ilcs/=lcs).or.(nmat==0))&
+        if ((ilcs /= lcs).or.(nmat == 0))&
                 write(nout, *)'#coating diel. const.=', zeps(lcs)
         !--------/---------/---------/---------/---------/---------/---------/--
     end if
@@ -1023,21 +1022,21 @@ program axspartcl1
     write(nout + 1, *)'#defp=', defp
     write(nout + 1, *)'#material number =', nmat
     if (ynbrug) write(nout + 1, *)'#bruggeman approximation performed'
-    if (ync =='n') then
+    if (ync == 'n') then
         write(nout + 1, *)'#homogeneous particle'
-    else if (ync=='y') then
+    else if (ync == 'y') then
         write(nout + 1, *)'#coated particle'
     end if
     write(nout + 1, *)
     write(nout + 1, *)'#host dielectric constant=', zeps(lcs + 1)
-    if (nmat>=1) write(nout + 1, *)'#dispersive layer number=', ilcs
-    if ((lcs==1).and.(nmat==0))&
+    if (nmat >= 1) write(nout + 1, *)'#dispersive layer number=', ilcs
+    if ((lcs == 1).and.(nmat == 0))&
             write(nout + 1, *)'#sphere diel. const.=', zeps(1)
-    if (lcs>=2) then
+    if (lcs >= 2) then
         write(nout + 1, *)'#core radius/sphere radius =', rff(1)
-        if ((ilcs/=1).or.(nmat==0))&
+        if ((ilcs /= 1).or.(nmat == 0))&
                 write(nout + 1, *)'#sphere core diel. const.=', zeps(1)
-        if ((ilcs/=lcs).or.(nmat==0))&
+        if ((ilcs /= lcs).or.(nmat == 0))&
                 write(nout + 1, *)'#coating diel. const.=', zeps(lcs)
         !--------/---------/---------/---------/---------/---------/---------/--
     end if
@@ -1057,21 +1056,21 @@ program axspartcl1
     write(nout + 2, *)'#material number =', nmat
     if (ynbrug) write(nout + 2, *)'#bruggeman approximation performed'
 
-    if (ync =='n') then
+    if (ync == 'n') then
         write(nout + 2, *)'#homogeneous particle'
-    else if (ync=='y') then
+    else if (ync == 'y') then
         write(nout + 2, *)'#coated particle'
     end if
     write(nout + 2, *)
     write(nout + 2, *)'# host dielectric constant=', zeps(lcs + 1)
-    if (nmat>=1) write(nout + 2, *)'#dispersive layer number=', ilcs
-    if ((lcs==1).and.(nmat==0))&
+    if (nmat >= 1) write(nout + 2, *)'#dispersive layer number=', ilcs
+    if ((lcs == 1).and.(nmat == 0))&
             write(nout + 2, *)'#sphere diel. const.=', zeps(1)
-    if (lcs>=2) then
+    if (lcs >= 2) then
         write(nout + 2, *)'#core radius/sphere radius =', rff(1)
-        if ((ilcs/=1).or.(nmat==0))&
+        if ((ilcs /= 1).or.(nmat == 0))&
                 write(nout + 2, *)'#sphere core diel. const.=', zeps(1)
-        if ((ilcs/=lcs).or.(nmat==0))&
+        if ((ilcs /= lcs).or.(nmat == 0))&
                 write(nout + 2, *)'#coating diel. const.=', zeps(lcs)
         !--------/---------/---------/---------/---------/---------/---------/--
     end if
@@ -1091,21 +1090,21 @@ program axspartcl1
     write(nout + 3, *)'#defp=', defp
     write(nout + 3, *)'#material number =', nmat
     if (ynbrug) write(nout + 3, *)'#bruggeman approximation performed'
-    if (ync =='n') then
+    if (ync == 'n') then
         write(nout + 3, *)'#homogeneous particle'
-    else if (ync=='y') then
+    else if (ync == 'y') then
         write(nout + 3, *)'#coated particle'
     end if
     write(nout + 3, *)
     write(nout + 3, *)'#host dielectric constant=', zeps(lcs + 1)
-    if (nmat>=1) write(nout + 3, *)'#dispersive layer number=', ilcs
-    if ((lcs==1).and.(nmat==0))&
+    if (nmat >= 1) write(nout + 3, *)'#dispersive layer number=', ilcs
+    if ((lcs == 1).and.(nmat == 0))&
             write(nout + 3, *)'#sphere diel. const.=', zeps(1)
-    if (lcs>=2) then
+    if (lcs >= 2) then
         write(nout + 3, *)'#core radius/sphere radius =', rff(1)
-        if ((ilcs/=1).or.(nmat==0))&
+        if ((ilcs /= 1).or.(nmat == 0))&
                 write(nout + 3, *)'#sphere core diel. const.=', zeps(1)
-        if ((ilcs/=lcs).or.(nmat==0))&
+        if ((ilcs /= lcs).or.(nmat == 0))&
                 write(nout + 3, *)'#coating diel. const.=', zeps(lcs)
         !--------/---------/---------/---------/---------/---------/---------/--
     end if
@@ -1122,21 +1121,21 @@ program axspartcl1
     write(nout + 5, *)'#defp=', defp
     write(nout + 5, *)'#material number =', nmat
     if (ynbrug) write(nout + 5, *)'#bruggeman approximation performed'
-    if (ync =='n') then
+    if (ync == 'n') then
         write(nout + 5, *)'#homogeneous particle'
-    else if (ync=='y') then
+    else if (ync == 'y') then
         write(nout + 5, *)'#coated particle'
     end if
     write(nout + 5, *)
     write(nout + 5, *)'#host dielectric constant=', zeps(lcs + 1)
-    if (nmat>=1) write(nout + 5, *)'#dispersive layer number=', ilcs
-    if ((lcs==1).and.(nmat==0))&
+    if (nmat >= 1) write(nout + 5, *)'#dispersive layer number=', ilcs
+    if ((lcs == 1).and.(nmat == 0))&
             write(nout + 5, *)'#sphere diel. const.=', zeps(1)
-    if (lcs>=2) then
+    if (lcs >= 2) then
         write(nout + 5, *)'#core radius/sphere radius =', rff(1)
-        if ((ilcs/=1).or.(nmat==0))&
+        if ((ilcs /= 1).or.(nmat == 0))&
                 write(nout + 5, *)'#sphere core diel. const.=', zeps(1)
-        if ((ilcs/=lcs).or.(nmat==0))&
+        if ((ilcs /= lcs).or.(nmat == 0))&
                 write(nout + 5, *)'#coating diel. const.=', zeps(lcs)
         !--------/---------/---------/---------/---------/---------/---------/--
     end if
@@ -1153,21 +1152,21 @@ program axspartcl1
     write(nout + 6, *)'#in the number nd=ndgs*lmax of gip points, ndgs=', ndgs
     write(nout + 6, *)'#defp=', defp
     write(nout + 6, *)'#material number =', nmat
-    if (ync =='n') then
+    if (ync == 'n') then
         write(nout + 6, *)'#homogeneous particle'
-    else if (ync=='y') then
+    else if (ync == 'y') then
         write(nout + 6, *)'#coated particle'
     end if
     write(nout + 6, *)
     write(nout + 6, *)'#host dielectric constant=', zeps(lcs + 1)
-    if (nmat>=1) write(nout + 6, *)'#dispersive layer number=', ilcs
-    if ((lcs==1).and.(nmat==0))&
+    if (nmat >= 1) write(nout + 6, *)'#dispersive layer number=', ilcs
+    if ((lcs == 1).and.(nmat == 0))&
             write(nout + 6, *)'#sphere diel. const.=', zeps(1)
-    if (lcs>=2) then
+    if (lcs >= 2) then
         write(nout + 6, *)'#core radius/sphere radius =', rff(1)
-        if ((ilcs/=1).or.(nmat==0))&
+        if ((ilcs /= 1).or.(nmat == 0))&
                 write(nout + 6, *)'#sphere core diel. const.=', zeps(1)
-        if ((ilcs/=lcs).or.(nmat==0))&
+        if ((ilcs /= lcs).or.(nmat == 0))&
                 write(nout + 6, *)'#coating diel. const.=', zeps(lcs)
         !--------/---------/---------/---------/---------/---------/---------/--
     end if
@@ -1184,21 +1183,21 @@ program axspartcl1
     write(nout + 7, *)'#defp=', defp
     write(nout + 7, *)'#material number =', nmat
     if (ynbrug) write(nout + 7, *)'#bruggeman approximation performed'
-    if (ync =='n') then
+    if (ync == 'n') then
         write(nout + 7, *)'#homogeneous particle'
-    else if (ync=='y') then
+    else if (ync == 'y') then
         write(nout + 7, *)'#coated particle'
     end if
     write(nout + 7, *)
     write(nout + 7, *)'#host dielectric constant=', zeps(lcs + 1)
-    if (nmat>=1) write(nout + 7, *)'#dispersive layer number=', ilcs
-    if ((lcs==1).and.(nmat==0))&
+    if (nmat >= 1) write(nout + 7, *)'#dispersive layer number=', ilcs
+    if ((lcs == 1).and.(nmat == 0))&
             write(nout + 7, *)'#sphere diel. const.=', zeps(1)
-    if (lcs>=2) then
+    if (lcs >= 2) then
         write(nout + 7, *)'#core radius/sphere radius =', rff(1)
-        if ((ilcs/=1).or.(nmat==0))&
+        if ((ilcs /= 1).or.(nmat == 0))&
                 write(nout + 7, *)'#sphere core diel. const.=', zeps(1)
-        if ((ilcs/=lcs).or.(nmat==0))&
+        if ((ilcs /= lcs).or.(nmat == 0))&
                 write(nout + 7, *)'#coating diel. const.=', zeps(lcs)
         !--------/---------/---------/---------/---------/---------/---------/--
     end if
@@ -1251,14 +1250,14 @@ program axspartcl1
     if (ynbrug) write(nout + 13, *)'#bruggeman approximation performed'
     write(nout + 13, 1005) thet0, thet, phi0, phi, alpha, beta
     write(nout + 13, *)'#host dielectric constant=', zeps(lcs + 1)
-    if (nmat>=1) write(nout, *)'#dispersive layer number=', ilcs
-    if ((lcs==1).and.(nmat==0))&
+    if (nmat >= 1) write(nout, *)'#dispersive layer number=', ilcs
+    if ((lcs == 1).and.(nmat == 0))&
             write(nout + 13, *)'#sphere diel. const.=', zeps(1)
-    if (lcs>=2) then
+    if (lcs >= 2) then
         write(nout + 13, *)'#core radius/sphere radius =', rff(1)
-        if ((ilcs/=1).or.(nmat==0))&
+        if ((ilcs /= 1).or.(nmat == 0))&
                 write(nout + 13, *)'#sphere core diel. const.=', zeps(1)
-        if ((ilcs/=lcs).or.(nmat==0))&
+        if ((ilcs /= lcs).or.(nmat == 0))&
                 write(nout + 13, *)'#coating diel. const.=', zeps(lcs)
         !--------/---------/---------/---------/---------/---------/---------/--
     end if
@@ -1281,14 +1280,14 @@ program axspartcl1
     if (ynbrug) write(nout + 14, *)'#bruggeman approximation performed'
     write(nout + 14, 1005) thet0, thet, phi0, phi, alpha, beta
     write(nout + 14, *)'#host dielectric constant=', zeps(lcs + 1)
-    if (nmat>=1) write(nout, *)'#dispersive layer number=', ilcs
-    if ((lcs==1).and.(nmat==0))&
+    if (nmat >= 1) write(nout, *)'#dispersive layer number=', ilcs
+    if ((lcs == 1).and.(nmat == 0))&
             write(nout + 14, *)'#sphere diel. const.=', zeps(1)
-    if (lcs>=2) then
+    if (lcs >= 2) then
         write(nout + 14, *)'#core radius/sphere radius =', rff(1)
-        if ((ilcs/=1).or.(nmat==0))&
+        if ((ilcs /= 1).or.(nmat == 0))&
                 write(nout + 14, *)'#sphere core diel. const.=', zeps(1)
-        if ((ilcs/=lcs).or.(nmat==0))&
+        if ((ilcs /= lcs).or.(nmat == 0))&
                 write(nout + 14, *)'#coating diel. const.=', zeps(lcs)
         !--------/---------/---------/---------/---------/---------/---------/--
     end if
@@ -1333,7 +1332,7 @@ program axspartcl1
         enddo
         close(30)
 
-        !c      else if (nmat.eq.4) then
+        !else if (nmat.eq.4) then
 
     case (5) ! copper data
 
@@ -1425,7 +1424,7 @@ program axspartcl1
             !xs=rmuf*omega*dble(sqrt(zeps0))  !equiv. size parameter
 
             ! it is neither dispersionless dielectric nor ideal metal
-            if ((nmat/=0).and.(.not.ynperfcon)) then
+            if ((nmat /= 0).and.(.not.ynperfcon)) then
                 ! in case of a dispersion, epssph is modified.
                 ! for ideal drude metal
                 !     plasma=2.d0*pi*sphere radius in nm/(lambda_z in nm*rmuf)
@@ -1457,25 +1456,25 @@ program axspartcl1
                     plasma = reepsz*7.2d0/3.8291d0
                     ! security trap - remainder (not optimized!)
                     omxf = omega/reepsz
-                    if (omxf>omf(1)) then
+                    if (omxf > omf(1)) then
                         write(6, *)'calculation of has to stop with'
                         write(6, *)' omf(1)'
                         write(6, *)' omxf=', omxf
                         stop
                     end if
 
-                    if (omxf<omf(nfin)) then
+                    if (omxf < omf(nfin)) then
                         omxp = plasma/omega
                         zeps1 = 1.d0 - omxp**2/(1.d0 + ci*plasma/(144.d0*omega))
                         ! damping coefficient for silver is plasma/144 where plasma is different from
                         ! the re eps zero crossing at 3.8291 ev according to palik!!!
-                    else if (omxf==omf(1)) then
+                    else if (omxf == omf(1)) then
                         zeps1 = ceps1(1)
                     else
                         do ieps = 2, nfin
                             ! data file ordered with the increased wavelength
                             ! omxf increases in the loop and is oriented opposite to the data file
-                            if (omxf>omf(ieps)) then     ! linear interpolation
+                            if (omxf > omf(ieps)) then     ! linear interpolation
                                 zeps1 = ceps1(ieps) + (omxf - omf(ieps))*(ceps1(ieps - 1) - ceps1(ieps))&
                                        /(omf(ieps - 1) - omf(ieps))
                                 exit
@@ -1490,19 +1489,19 @@ program axspartcl1
                     ! data file ordered with the decreased wavelength
                     ! omega increases in the loop and is oriented along the data file
                     !
-                    if ((omega<omf(1)).or.(omega>omf(nfin))) then
-                        !c       write(6,*)'material data not available for this wavelength'
-                        !c       stop
+                    if ((omega < omf(1)).or.(omega > omf(nfin))) then
+                        ! write(6,*)'material data not available for this wavelength'
+                        ! stop
 
                         call sordalc(nmat, lambda, zeps1)
 
                     end if
                     !
-                    if (omega==omf(nfin)) then
+                    if (omega == omf(nfin)) then
                         zeps1 = ceps1(nfin)
                     else
                         do ieps = 1, nfin - 1
-                            if (omega<omf(ieps + 1)) then     ! linear interpolation
+                            if (omega < omf(ieps + 1)) then     ! linear interpolation
                                 zeps1 = ceps1(ieps) + (omega - omf(ieps))*(ceps1(ieps + 1) - ceps1(ieps))&
                                        /(omf(ieps + 1) - omf(ieps))
                                 exit
@@ -1515,17 +1514,17 @@ program axspartcl1
                     ! data file ordered with the decreased wavelength
                     ! omega increases in the loop and is oriented along the data file
                     !
-                    if ((omega<omf(1)).or.(omega>omf(nfin))) then
+                    if ((omega < omf(1)).or.(omega > omf(nfin))) then
                         write(6, *)'material data not available for this wavelength'
                         stop
                         !
                     end if
                     !
-                    if (omega==omf(nfin)) then
+                    if (omega == omf(nfin)) then
                         zeps1 = ceps1(nfin)
                     else
                         do ieps = 1, nfin - 1
-                            if (omega<omf(ieps + 1)) then     ! linear interpolation
+                            if (omega < omf(ieps + 1)) then     ! linear interpolation
                                 zeps1 = ceps1(ieps) + (omega - omf(ieps))*(ceps1(ieps + 1) - ceps1(ieps))&
                                        /(omf(ieps + 1) - omf(ieps))
                                 exit
@@ -1538,17 +1537,17 @@ program axspartcl1
                     ! data file ordered with the decreased wavelength
                     ! omega increases in the loop and is oriented along the data file
                     !
-                    if ((omega<omf(1)).or.(omega>omf(nfin))) then
+                    if ((omega < omf(1)).or.(omega > omf(nfin))) then
                         write(6, *)'material data not available for this wavelength'
                         stop
                         !
                     end if
                     !
-                    if (omega==omf(nfin)) then
+                    if (omega == omf(nfin)) then
                         zeps1 = ceps1(nfin)
                     else
                         do ieps = 1, nfin - 1
-                            if (omega<omf(ieps + 1)) then     ! linear interpolation
+                            if (omega < omf(ieps + 1)) then     ! linear interpolation
                                 zeps1 = ceps1(ieps) + (omega - omf(ieps))*(ceps1(ieps + 1) - ceps1(ieps))&
                                        /(omf(ieps + 1) - omf(ieps))
                                 exit
@@ -1566,7 +1565,7 @@ program axspartcl1
                     z1 = (3.d0*ff - 1.d0)*zeps1 + (2.d0 - 3.d0*ff)*zeps0
                     z2 = sqrt(z1*z1 + 8.d0*zeps1*zeps0)
                     !
-                    if (aimag(z2)>=0.0) then
+                    if (aimag(z2) >= 0.0) then
                         zeps1 = (z1 + z2)/4.d0
                     else
                         zeps1 = (z1 - z2)/4.d0
@@ -1577,20 +1576,20 @@ program axspartcl1
                 !______________________________________
             end if
 
-            !c      write(6,*)'lambda in axspartcl=', lambda
+            !write(6,*)'lambda in axspartcl=', lambda
 
             if (ynintens) goto 500
             !
-            if ((np==-1).and.(lcs>1)) then
+            if ((np == -1).and.(lcs > 1)) then
 
                 revinl = revin*2.d0*pi*sqrt(zeps0)/lambda
 
                 revl = rev*2.d0*pi*sqrt(zeps0)/lambda
 
                 !test
-                !c      defpp=0.5
-                !c      revinl=0.5
-                !c      revl=10.d0
+                !defpp=0.5
+                !revinl=0.5
+                !revl=10.d0
                 !test
                 if (mpar%yncheck /= 0) then
                     ide = 2
@@ -1616,12 +1615,12 @@ program axspartcl1
             end if
             !
             !--------/---------/---------/---------/---------/---------/---------/--
-            !c      if(nstep.gt.10) goto 200
-            !      write(6,*) 'istep=', istep
-            !c      write(6,*) 'lambda=',lambda
-            !c      write(6,*)
-            !c      write(6,*)'scattering coefficient='
-            !c      write(6,*)'tsc=', tsc
+            !if(nstep.gt.10) goto 200
+            !write(6,*) 'istep=', istep
+            !write(6,*) 'lambda=',lambda
+            !write(6,*)
+            !write(6,*)'scattering coefficient='
+            !write(6,*)'tsc=', tsc
 
         end do
     end do
@@ -1641,20 +1640,20 @@ program axspartcl1
     close(10)
     close(90)
     ! <<<
-    if (ync =='n') then
+    if (ync == 'n') then
         write(6, *)'homogeneous particle'
-    else if (ync=='y') then
+    else if (ync == 'y') then
         write(6, *)'coated particle'
     end if
     !
     write(6, *)'particle parameters:'
     write(6, *)
     write(6, *)'equivalent sphere radius =', rev
-    if (ync=='n') write(6, *)'particle diel. constant=', zeps(1)
+    if (ync == 'n') write(6, *)'particle diel. constant=', zeps(1)
     write(6, *)'background dielectric constant zeps0=', zeps0
-    if (ync=='y') write(6, *)'core diel. constant=', zeps(1)
-    if (ync=='y') write(6, *)'coating diel. constant=', zeps(lcs)
-    if (ync=='y') write(6, *)'core radius/particle radius =', rff(1)
+    if (ync == 'y') write(6, *)'core diel. constant=', zeps(1)
+    if (ync == 'y') write(6, *)'coating diel. constant=', zeps(lcs)
+    if (ync == 'y') write(6, *)'core radius/particle radius =', rff(1)
     write(6, *)
     write(6, *)'oa scattering cs versus wavelength in axs-scs.dat'
     write(6, *)'oa extinction versus wavelength in axs-oavext.dat'
@@ -1684,19 +1683,19 @@ program axspartcl1
     write(nouti, *)'#in the number nd=ndgs*lmax of gip points, ndgs=', ndgs
     write(nouti, *)'#defp=', defp
     write(nouti, *)'#material number =', nmat
-    if (ync =='n') then
+    if (ync == 'n') then
         write(nouti, *)'#homogeneous particle'
-    else if (ync=='y') then
+    else if (ync == 'y') then
         write(nouti, *)'#coated particle'
     end if
     write(nouti, *)
     write(nouti, *)'#host dielectric constant=', zeps(lcs + 1)
-    if (ync=='n')&
+    if (ync == 'n')&
             write(nouti, *)'#particle diel. constant=', zeps(1)
-    if (ync=='y')&
+    if (ync == 'y')&
             write(nouti, *)'#coating diel. constant=', zeps(lcs)
     !--------/---------/---------/---------/---------/---------/---------/--
-    if (ync=='y')&
+    if (ync == 'y')&
             write(nouti, *)'#core radius/particle radius =', rff(1)
     write(nouti, *)'#phi,cos(theta),r(theta), and |e| in columns'
     write(nouti, *)
@@ -1711,19 +1710,19 @@ program axspartcl1
     write(nouti + 1, *)'#in the number nd=ndgs*lmax of gip points, ndgs=', ndgs
     write(nouti + 1, *)'#defp=', defp
     write(nouti + 1, *)'#material number =', nmat
-    if (ync =='n') then
+    if (ync == 'n') then
         write(nouti + 1, *)'#homogeneous particle'
-    else if (ync=='y') then
+    else if (ync == 'y') then
         write(nouti + 1, *)'#coated particle'
     end if
     write(nouti + 1, *)
     write(nouti + 1, *)'#host dielectric constant=', zeps(lcs + 1)
-    if (ync=='n')&
+    if (ync == 'n')&
             write(nouti + 1, *)'#particle diel. constant=', zeps(1)
-    if (ync=='y')&
+    if (ync == 'y')&
             write(nouti + 1, *)'#coating diel. constant=', zeps(lcs)
     !--------/---------/---------/---------/---------/---------/---------/--
-    if (ync=='y')&
+    if (ync == 'y')&
             write(nouti + 1, *)'#core radius/particle radius =', rff(1)
     write(nouti + 1, *)'#phi,cos(theta),r(theta), e_r,e_theta,e_phi in columns'
     write(nouti + 1, *)
@@ -1738,19 +1737,19 @@ program axspartcl1
     write(nouti + 2, *)'#in the number nd=ndgs*lmax of gip points, ndgs=', ndgs
     write(nouti + 2, *)'#defp=', defp
     write(nouti + 2, *)'#material number =', nmat
-    if (ync =='n') then
+    if (ync == 'n') then
         write(nouti + 2, *)'#homogeneous particle'
-    else if (ync=='y') then
+    else if (ync == 'y') then
         write(nouti + 2, *)'#coated particle'
     end if
     write(nouti + 2, *)
     write(nouti + 2, *)'#host dielectric constant=', zeps(lcs + 1)
-    if (ync=='n')&
+    if (ync == 'n')&
             write(nouti + 2, *)'#particle diel. constant=', zeps(1)
-    if (ync=='y')&
+    if (ync == 'y')&
             write(nouti + 2, *)'#coating diel. constant=', zeps(lcs)
     !--------/---------/---------/---------/---------/---------/---------/--
-    if (ync=='y')&
+    if (ync == 'y')&
             write(nouti + 2, *)'#core radius/particle radius =', rff(1)
     write(nouti + 2, *)'#phi,cos(theta),r(theta), e_r,e_theta,e_phi in columns'
     write(nouti + 2, *)
@@ -1765,11 +1764,11 @@ program axspartcl1
     write(6, *)'particle parameters:'
     write(6, *)
     write(6, *)'equivalent sphere radius =', rev
-    if (ync=='n') write(6, *)'particle diel. constant=', zeps(1)
+    if (ync == 'n') write(6, *)'particle diel. constant=', zeps(1)
     write(6, *)'background dielectric constant zeps0=', zeps0
-    if (ync=='y') write(6, *)'core diel. constant=', zeps(1)
-    if (ync=='y') write(6, *)'coating diel. constant=', zeps(lcs)
-    if (ync=='y') write(6, *)'core radius/particle radius =', &
+    if (ync == 'y') write(6, *)'core diel. constant=', zeps(1)
+    if (ync == 'y') write(6, *)'coating diel. constant=', zeps(lcs)
+    if (ync == 'y') write(6, *)'core radius/particle radius =', &
             rff(1)
     write(6, *)
     write(6, *)'total |e|**2 in intnsty.dat'
@@ -1793,7 +1792,7 @@ contains
         ! warning in module ampldr in file ampldr.f: variables set but never used:
         !    nggg set at line 493 file ampldr.f
         !--------/---------/---------/---------/---------/---------/---------/--
-        ! mpar%yncheck== 1 if you want to check gauss integrations
+        ! mpar%yncheck ==  1 if you want to check gauss integrations
         ! convergence; otherwise mpar%yncheck=0
         ! nmax - angular momentum cut off
         ! lambda - the vacuum wavelength
@@ -1851,6 +1850,7 @@ contains
         !  phi0 - azimuth angle of the incident beam in degrees
         !  phi - azimuth angle of the scattered beam in degrees
         !--------/---------/---------/---------/---------/---------/---------/--
+
         implicit none
         integer nout, naxsm
         integer nmax, np, inm1, ixxx, m, m1, n, n1, n11, n2, n22, ncheck, &
@@ -1914,7 +1914,7 @@ contains
         a = rev
         lam = lambda/sqrt(zeps0)          !wavelength in the ambient
 
-        !c      write(6,*)'lam,lambda in ampl=', lam, lambda
+        !write(6,*)'lam,lambda in ampl=', lam, lambda
         !
         ! the real part of the refractive index contrast
         !
@@ -1959,15 +1959,15 @@ contains
 
         xev = 2d0*p*a/lam
         ixxx = xev + 4.05d0*xev**0.333333d0     !wiscombe conv. criterion for nmax
-        if (xev>1.) then
+        if (xev > 1.) then
             inm1 = max0(3, ixxx)
         else
             inm1 = 2                 !the bessel package routine ryb
             !                        !requires nmax to be at least 2
         end if
         !
-        if (inm1>=npn1) print 7333, npn1
-        if (inm1>=npn1) stop
+        if (inm1 >= npn1) print 7333, npn1
+        if (inm1 >= npn1) stop
         7333 format('convergence is not obtained for npn1=', i3, &
                 '.  execution terminated')
         !_______________________________________________________________
@@ -1995,8 +1995,8 @@ contains
                 nmax = nma
                 ngauss = nmax*ndgs    !the number of the gauss integration points
 
-                if (ngauss>npng1) print 7340, ngauss
-                if (ngauss>npng1) stop
+                if (ngauss > npng1) print 7340, ngauss
+                if (ngauss > npng1) stop
 
                 7340      format('ngauss =', i3, ' i.e. is greater than npng1.', &
                         '  execution terminated')
@@ -2036,14 +2036,14 @@ contains
                     qext = qext + (tr1nn + tr1nn1)*dn1
                 end do
                 !>>> for debugging:
-                !c      open(nout+1,file='tr1diag.dat')
-                !c      open(nout+2,file='ti1diag.dat')
-                !c              do n=1,2*nmax
-                !c                  write(nout+1,*) tr1(n,n)
-                !c                  write(nout+2,*) ti1(n,n)
-                !c              enddo
-                !c      close(nout+1)
-                !c      close(nout+2)
+                !open(nout+1,file='tr1diag.dat')
+                !open(nout+2,file='ti1diag.dat')
+                !        do n=1,2*nmax
+                !            write(nout+1,*) tr1(n,n)
+                !            write(nout+2,*) ti1(n,n)
+                !        enddo
+                !close(nout+1)
+                !close(nout+2)
                 !<<<
                 write(6, *)'nmax=', nmax
                 write(6, *)'ngauss=', ngauss
@@ -2059,9 +2059,9 @@ contains
 
                 !        print 7334, nmax,dsca,dext
 
-                if(dsca<=ddelta.and.dext<=ddelta) exit
-                if (nma==npn1) print 7333, npn1
-                if (nma==npn1) stop
+                if(dsca <= ddelta.and.dext <= ddelta) exit
+                if (nma == npn1) print 7333, npn1
+                if (nma == npn1) stop
 
                 !successful l-convergence test exit&
             end do
@@ -2075,30 +2075,30 @@ contains
 
             nnnggg = ngauss + 1
 
-            if (ngauss==npng1) print 7336
+            if (ngauss == npng1) print 7336
             7336    format('warning: ngauss=npng1')
 
-            if (ngauss/=npng1) then
+            if (ngauss /= npng1) then
                 do ngaus = nnnggg, npng1
-                    !
-                    if (ngaus>300.and.ngaus<2595) cycle
-                    if (ngaus==npng1) print 7336
-                    !
+
+                    if (ngaus > 300.and.ngaus < 2595) cycle
+                    if (ngaus == npng1) print 7336
+
                     ngauss = ngaus
-                    !c         nggg=2*ngauss
-                    !
+                    !   nggg=2*ngauss
+
                     ! gif division points and weights + other numerical constants
-                    !
+
                     call const(ngauss, nmax, x, w, an, ann, s, ss, np, eps, rsnm, ht)     !in ampldr
-                    !
+
                     ! specify particle shape:
-                    !
+
                     call vary(lam, mrr, mri, a, eps, &
                             rsnm, ht, np, ngauss, x, p, &
                             ppi, pir, pii, r, dr, ddr, drr, dri, nmax)
-                    !
+
                     ! determine m=m'=0 elements of the t matrix
-                    !
+
                     if (mpar%yn_adaptive == 0) then
                         call tmatr0 (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
                                 ddr, drr, dri, nmax, ncheck, naxsm)
@@ -2106,7 +2106,7 @@ contains
                         call tmatr0_adapt (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
                                 ddr, drr, dri, nmax, ncheck, naxsm)
                     endif
-                    !
+
                     qext = 0d0
                     qsca = 0d0
 
@@ -2137,7 +2137,7 @@ contains
                     write(6, *)'qext1=', qext1
                     write(6, *)'qext=', qext
 
-                    if(dsca<=ddelta.and.dext<=ddelta) exit
+                    if(dsca <= ddelta.and.dext <= ddelta) exit
                     !<<<
                     qext1 = qext
                     qsca1 = qsca
@@ -2146,36 +2146,36 @@ contains
                 ! %%%%%%%%%%%%%%%%%% successful ngauss-convergence test %%%%%%%%%%%%%%%
             end if
         else if (mpar%yncheck == 0) then
-                ! gif division points and weights + other numerical constants
-                !
-                call const(ngauss, nmax, x, w, an, ann, s, ss, np, eps, rsnm, ht)     !in ampldr
-                !
-                ! specify particle shape:
-                !
-                call vary(lam, mrr, mri, a, eps, &
-                        rsnm, ht, np, ngauss, x, p, &
-                        ppi, pir, pii, r, dr, ddr, drr, dri, nmax)
-                !
-                ! determine m=m'=0 elements of the t matrix
-                !
-                if (mpar%yn_adaptive == 0) then
-                    call tmatr0 (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
-                            ddr, drr, dri, nmax, ncheck, naxsm)
-                else
-                    call tmatr0_adapt (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
-                            ddr, drr, dri, nmax, ncheck, naxsm)
-                endif
-                !
-                !<<<
-                !
+            ! gif division points and weights + other numerical constants
+
+            call const(ngauss, nmax, x, w, an, ann, s, ss, np, eps, rsnm, ht)     !in ampldr
+
+            ! specify particle shape:
+
+            call vary(lam, mrr, mri, a, eps, &
+                    rsnm, ht, np, ngauss, x, p, &
+                    ppi, pir, pii, r, dr, ddr, drr, dri, nmax)
+
+            ! determine m=m'=0 elements of the t matrix
+
+            if (mpar%yn_adaptive == 0) then
+                call tmatr0 (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
+                        ddr, drr, dri, nmax, ncheck, naxsm)
+            else
+                call tmatr0_adapt (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
+                        ddr, drr, dri, nmax, ncheck, naxsm)
+            endif
+
+            !<<<
+
         end if !yncheck
 
         write(6, *)
         write(6, *)'nmax=', nmax
         write(6, *)'ngauss=', ngauss
         write(6, *)
-        !c      write(nout,*)'nmax=',nmax
-        !c      write(nout,*)'ngauss=',ngauss
+        !write(nout,*)'nmax=',nmax
+        !write(nout,*)'ngauss=',ngauss
         !<<<
         !************   calculation of scattering cross sections   *********
         !initialization:
@@ -2189,10 +2189,10 @@ contains
 
             qext = qext + tr1(n, n)
 
-            !c         if ((n.le.5).or.(((n-nmax).le.5).and.((n-nmax).gt.0))) then
-            !c         xx=-dble(tr1(n,n))       ! sin^2\eta_l
-            !c         write(nout+15,*) 'n, sin^2\eta_l', n, xx
-            !c         end if
+            !if ((n.le.5).or.(((n-nmax).le.5).and.((n-nmax).gt.0))) then
+            !    xx=-dble(tr1(n,n))       ! sin^2\eta_l
+            !    write(nout+15,*) 'n, sin^2\eta_l', n, xx
+            !end if
 
         end do
         ! given rt1 and it1 matrices from tmatr0 routine,
@@ -2219,7 +2219,7 @@ contains
                 rt22(1, n1, n2) = zz7
                 zz8 = ti1(nn1, nn2)
                 it22(1, n1, n2) = zz8
-                !
+
                 qsca = qsca + zz1*zz1 + zz2*zz2 + zz3*zz3 + zz4*zz4&
                         + zz5*zz5 + zz6*zz6 + zz7*zz7 + zz8*zz8
             end do
@@ -2227,32 +2227,30 @@ contains
         !________________
         !<<<
 
-        if (abs(qsca)>(1.0001d0*abs(qext))) then
+        if (abs(qsca) > (1.0001d0*abs(qext))) then
             write(6, *)'m=', 0
             write(6, *)'qsca=', qsca
             write(6, *)'qext=', qext
-            write(6, *)&
-                    'warning: abs(qsca).gt.abs(qext)!!!'
+            write(6, *)'warning: abs(qsca).gt.abs(qext)!!!'
             !     stop
         end if
 
-        if (qext>1.d-7) then
-            write(6, *)&
-                    'warning: partial sum qext has to be negative!'
-            !      stop
+        if (qext > 1.d-7) then
+            write(6, *)'warning: partial sum qext has to be negative!'
+            !stop
         end if
 
 
-        !c         write(nout,*)'m=',m
-        !c         write(nout,*)'qsca=',qsca
-        !c         write(nout,*)'qsc=',qsc
-        !c         write(nout,*)'qext=',qext
-        !c         write(nout,*)'qxt=',qxt
+        !write(nout,*)'m=',m
+        !write(nout,*)'qsca=',qsca
+        !write(nout,*)'qsc=',qsc
+        !write(nout,*)'qext=',qext
+        !write(nout,*)'qxt=',qxt
         !<<<
         !   >>>  determination of qext and qsca contributions for m >< 0
 
         do m = 1, nmax
-            !
+
             !         call tmatr(m,ngauss,x,w,an,ann,s,ss,ppi,pir,pii,r,dr,
             !     &               ddr,drr,dri,nmax,ncheck,naxsm)
             if (mpar%yn_adaptive == 0) then
@@ -2263,18 +2261,18 @@ contains
                         ddr, drr, dri, nmax, ncheck, naxsm)
             endif
 
-!            call tmtr(m, ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, drr, &
-!                    dri, nmax, ncheck, naxsm)
-            !
+            !            call tmtr(m, ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, drr, &
+            !                    dri, nmax, ncheck, naxsm)
+
             ! <<< returns  m=m'>0 elements of the t matrix
-            !
+
             nm = nmax - m + 1
             m1 = m + 1
             qsc = 0d0
             ! given rt1 and it1 matrices from tmatr routine,
             ! assigning of rt^{ij} and it^{ij} matrix entries to be
             ! used later by ampl routine.
-            !
+
             do n2 = 1, nm              !summation over orbital numbers
                 ! conversion of the n22 index of rt1 and it1 matrices
                 ! to the index nn2 of rt^{ij} and it^{ij} matrices
@@ -2305,10 +2303,10 @@ contains
                     rt22(m1, nn1, nn2) = zz7
                     zz8 = ti1(n11, n22)
                     it22(m1, nn1, nn2) = zz8
-                    !
+
                     qsc = qsc + (zz1*zz1 + zz2*zz2 + zz3*zz3 + zz4*zz4&
                             + zz5*zz5 + zz6*zz6 + zz7*zz7 + zz8*zz8)*2d0
-                    !
+
                     ! multiplication by 2d0 here accounts for +/-m symmetry of resulting
                     ! expressions
                 end do
@@ -2330,7 +2328,7 @@ contains
             qext = qext + qxt
             !<<<
 
-            if (abs(qsc)>(1.0001d0*abs(qxt))) then
+            if (abs(qsc) > (1.0001d0*abs(qxt))) then
                 write(6, *)'m=', m
                 write(6, *)'qsca=', qsca
                 write(6, *)'qsc=', qsc
@@ -2341,7 +2339,7 @@ contains
                 !     stop
             end if
 
-            if (qxt>=1d-7) then
+            if (qxt >= 1d-7) then
                 write(6, *)&
                         'warning: partial sum qxt has to be negative!'
                 !      stop
@@ -2352,7 +2350,7 @@ contains
             !write(nout,*)'qsc=',qsc
             !write(nout,*)'qext=',qext
             !write(nout,*)'qxt=',qxt
-            !
+
             !print 7800,m,dabs(qxt),qsc,nmax
             !7800 format(' m=',i3,'  qxt=',d12.6,'  qsc=',d12.6, '  nmax=',i3)
 
@@ -2367,7 +2365,7 @@ contains
         qabs = -qext - qsca       !absorption
         walb = -qsca/qext       !albedo
 
-        if (abs(walb)>1d0 + ddelta) then
+        if (abs(walb) > 1d0 + ddelta) then
             print 9111
             9111 format ('warning: the albedo walb is greater than 1')
             write(6, *)'walb=', walb
@@ -2382,7 +2380,7 @@ contains
         ! (cf eq.(2.135-8) of newton�s book)
         ! at the moment, the prefactor (2/xev**2) is still missing.
         ! (lambda here is the wavelength in the exterior ambient medium)
-        !c      write(6,*)'lam in ampl=', lam
+        !write(6,*)'lam in ampl=', lam
         !         fac=lam**2/(2.d0*p**2*rev**2)     !=2/xs**2
         fac = 2.d0/xev**2
         write(nout, *)    lambda, fac*qsca
@@ -2399,10 +2397,10 @@ contains
         !_________________________________________________________
         !  computation of the amplitude and phase matrices
         !  amplitude matrix [eqs. (2)-(4) of ref. 6]
-        !
+
         call ampl (nmax, lam, thet0, thet, phi0, phi, alpha, beta, &
                 s11, s12, s21, s22)
-        !
+
         !  phase matrix [eqs. (13)-(29) of ref. 6]
         z11 = 0.5d0*(s11*conjg(s11) + s12*conjg(s12)&
                 + s21*conjg(s21) + s22*conjg(s22))
@@ -2447,7 +2445,7 @@ contains
         !--------/---------/---------/---------/---------/---------/---------/--
         ! >>> nmax,dlam,tl,tl1,pl,pl1,alpha,beta
         ! <<< vv,vh,hv,hh
-        !=================
+        ! == == == == == == == == =
         !
         !    given t matrix in common block it calculates the amplitude matrix
         !
@@ -2474,14 +2472,13 @@ contains
         !         laboratory reference frame (refs. 6 and 7).
         !   vv,vh,hv,hh ... amplitude scattering matrix elements s11,s12,s21,s22
         !--------/---------/---------/---------/---------/---------/---------/--
-        !implicit real(dp) (a-b, d-h, o-z)
-        !implicit complex(dp) (c)
+
         implicit none
         integer nout
         integer nmax, i, j, k, m, m1, n, nmin, nn
         ! number of the output unit
         parameter (nout = 35)
-        !include 'ampld.par.f'
+
         real(dp) rev, eps, hlength, x, y
         real(dp) tl, tl1, pl, pl1, alpha, beta, &
                 alph, bet, d, d11, d12, d21, d22, &
@@ -2516,12 +2513,12 @@ contains
         ! checking the initial set of angles tl,tl1,pl,pl1,alpha,beta
         ! for allowability
 
-        if (alpha<0d0.or.alpha>360d0.or.&
-                beta<0d0.or.beta>180d0.or.&
-                tl<0d0.or.tl>180d0.or.&
-                tl1<0d0.or.tl1>180d0.or.&
-                pl<0d0.or.pl>360d0.or.&
-                pl1<0d0.or.pl1>360d0) then
+        if (alpha < 0d0.or.alpha > 360d0.or.&
+                beta < 0d0.or.beta > 180d0.or.&
+                tl < 0d0.or.tl > 180d0.or.&
+                tl1 < 0d0.or.tl1 > 180d0.or.&
+                pl < 0d0.or.pl > 360d0.or.&
+                pl1 < 0d0.or.pl1 > 360d0) then
             write(nout, 2000)
             stop
         else
@@ -2546,21 +2543,21 @@ contains
         lambda = dlam*sqrt(zeps0)         !vacuum wavelength
 
         eps = 1d-7
-        if (thetl<pin2) thetl = thetl + eps
-        if (thetl>pin2) thetl = thetl - eps
-        if (thetl1<pin2) thetl1 = thetl1 + eps
-        if (thetl1>pin2) thetl1 = thetl1 - eps
-        if (phil<pin) phil = phil + eps
-        if (phil>pin) phil = phil - eps
-        if (phil1<pin) phil1 = phil1 + eps
-        if (phil1>pin) phil1 = phil1 - eps
-        if (bet<=pin2.and.pin2 - bet<=eps) bet = bet - eps
-        if (bet>pin2.and.bet - pin2<=eps) bet = bet + eps
+        if (thetl < pin2) thetl = thetl + eps
+        if (thetl > pin2) thetl = thetl - eps
+        if (thetl1 < pin2) thetl1 = thetl1 + eps
+        if (thetl1 > pin2) thetl1 = thetl1 - eps
+        if (phil < pin) phil = phil + eps
+        if (phil > pin) phil = phil - eps
+        if (phil1 < pin) phil1 = phil1 + eps
+        if (phil1 > pin) phil1 = phil1 - eps
+        if (bet <= pin2.and.pin2 - bet <= eps) bet = bet - eps
+        if (bet > pin2.and.bet - pin2 <= eps) bet = bet + eps
 
         !   given tl,tl1,pl,pl1 in laboratory frame
         !   compute thetp, phip, thetp1, and phip1 in particle frame
         !   (see eqs. (9), (20), and (21))
-        !
+
         ! incident beam:
 
         cb = dcos(bet)
@@ -2576,9 +2573,9 @@ contains
         spp = st*sp                      !eq. (21)
         phip = datan(spp/cpp)
 
-        if (phip>0d0.and.sp<0d0) phip = phip + pin
-        if (phip<0d0.and.sp>0d0) phip = phip + pin
-        if (phip<0d0) phip = phip + 2d0*pin
+        if (phip > 0d0.and.sp < 0d0) phip = phip + pin
+        if (phip < 0d0.and.sp > 0d0) phip = phip + pin
+        if (phip < 0d0) phip = phip + 2d0*pin
 
         ! scattered beam:
 
@@ -2593,9 +2590,9 @@ contains
         spp1 = st1*sp1                    !eq. (21)
         phip1 = datan(spp1/cpp1)
 
-        if (phip1>0d0.and.sp1<0d0) phip1 = phip1 + pin
-        if (phip1<0d0.and.sp1>0d0) phip1 = phip1 + pin
-        if (phip1<0d0) phip1 = phip1 + 2d0*pin
+        if (phip1 > 0d0.and.sp1 < 0d0) phip1 = phip1 + pin
+        if (phip1 < 0d0.and.sp1 > 0d0) phip1 = phip1 + pin
+        if (phip1 < 0d0) phip1 = phip1 + 2d0*pin
 
         !____________compute matrix beta, eq. (22) of {mis39}
 
@@ -2704,7 +2701,7 @@ contains
                 r1(i, j) = x
             enddo
         enddo
-        !====
+        ! == == 
         ! r for scattered beam determined, now cramers rule:
 
         d = 1d0/(r1(1, 1)*r1(2, 2) - r1(1, 2)*r1(2, 1))
@@ -2715,9 +2712,9 @@ contains
         r1(2, 2) = x*d
 
         !____________matrices r and r^(-1) determined
-        !=========================================================
+        ! == == == == == == == == == == == == == == == == == == == == == == == == == == == == =
         !      the amplitude matrix in particle frame
-        !
+
         !     ci=(0d0,1d0)
 
         ! >>> alpha numerical prefactors without phi-angles
@@ -2748,15 +2745,15 @@ contains
         do m = 0, nmax
             m1 = m + 1
             nmin = max(m, 1)
-            !
+
             ! specify pi- and tau- scattering functions:
 
             call vigampl (dcth, nmax, m, dv1, dv2)
             call vigampl (dcth0, nmax, m, dv01, dv02)
-            !
+
             fc = 2d0*dcos(m*ph)    !takes into account +/- m contribution
             fs = 2d0*dsin(m*ph)
-            !
+
             do nn = nmin, nmax
 
                 dv1nn = dv01(nn)           !\pi-functions
@@ -2769,7 +2766,7 @@ contains
                     ct11 = cmplx_dp(tr11(m1, n, nn), ti11(m1, n, nn))
                     ct22 = cmplx_dp(tr22(m1, n, nn), ti22(m1, n, nn))
 
-                    if (m==0) then     !t^{21}=t^{12}=0 in particle frame
+                    if (m == 0) then     !t^{21}=t^{12}=0 in particle frame
 
                         cn = cal(n, nn)*dv2n*dv2nn
 
@@ -2782,7 +2779,7 @@ contains
                         ct21 = cmplx_dp(tr21(m1, n, nn), ti21(m1, n, nn))
                         ! complete \alpha-factors (eq. (28)) taking
                         ! into account w.r.t. summation over +/- m in particle frame:
-                        !
+
                         !     t^{11}_{-mnn'} = t^{11}_{mnn'}; t^{22}_{-mnn'} = t^{22}_{mnn'}
                         !  t^{12}_{-mnn'} = - t^{12}_{mnn'}; t^{21}_{-mnn'} = - t^{21}_{mnn'}
 
@@ -2820,7 +2817,7 @@ contains
         hh = hh/dk
 
         !   amplitude scattering matrix elements s11,s12,s21,s22 determined
-        !==================================================================
+        ! == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == 
         ! transformation of the amplitude matrix from particle to
         ! laboratory frame:
 
@@ -2862,7 +2859,7 @@ contains
                 cext               !=2.d0*pin*aimag(vv+hh)/k_1
 
         write(10, *) lambda, cext1, cext2
-        !c      fac=lambda**2/(2.d0*pin**2*rev**2)     !=2/xs**2
+        !fac=lambda**2/(2.d0*pin**2*rev**2)     !=2/xs**2
         fac = 1.d0/(pin*rev**2)   !an effective geom. cross section
 
         write(nout + 3, 1107)lambda, fac*cext, fac*cext1, fac*cext2
@@ -2890,7 +2887,7 @@ contains
         !--------/---------/---------/---------/---------/---------/---------/--
         ! >>> m,ngauss,x,w,an,ann,s,ss,ppi,pir,pii,r,dr,ddr,drr,dri,nmax,ncheck
         ! <<< common blocks /tmat99/, /ct/ (for main),  and /ctt/ (for tt)
-        !=====================
+        ! == == == == == == == == == == =
         !
         !  determines the t-matrix of an axially symmetric scatterer
         !                           for m.gt.0
@@ -2928,7 +2925,7 @@ contains
         !  separately for the real and imaginary parts of the integrand.
         !
         !--------/---------/---------/---------/---------/---------/---------/--
-        !include 'ampld.par.f'
+
         implicit none
         integer m, ngauss, nmax, ncheck, naxsm, i, i1, i2, k1, k2, kk1, &
                 kk2, mm1, n, n1, n2, ng, ngss, nm, nnmax
@@ -2990,32 +2987,32 @@ contains
         ng = 2*ngauss
         nm = nmax + nmax
         factor = 1d0
-        !
-        if (ncheck==1) then          !theta=pi/2 is scatterer mirror symmetry plane
+
+        if (ncheck == 1) then          !theta=pi/2 is scatterer mirror symmetry plane
             ngss = ngauss
             factor = 2d0
-        else if (ncheck==0) then     !theta=pi/2 is not a scatterer mirror symmetry plane
+        else if (ncheck == 0) then     !theta=pi/2 is not a scatterer mirror symmetry plane
             ngss = ng
         endif
-        !
+
         si = 1d0
         do n = 1, nm                 !nm=2*nmax
             si = -si
             sig(n) = si              !=(-1)**n
         end do
-        !
+
         ! assigning wigner d-matrices:
 
         do i = 1, ngauss
 
             i1 = ngauss - i + 1
             i2 = ngauss + i
-            !
+
             call vigf(x(i1), nmax, m, dv1, dv2, ddv1)
             !--------/---------/---------/---------/---------/---------/---------/--
             ! >>> x,nmax,m (only nonnegative)
             ! <<< dv1,dv2,ddv1
-            ! =============
+            ! == == == == == == =
             !
             !     x=cos(theta), where theta is the polar angle
             !     nmax ... floating  angular momentum cutoff
@@ -3048,7 +3045,7 @@ contains
                 d2(i1, n) = dd2
                 d3(i1, n) = dd3
 
-                if (naxsm==1) then         !gauss abscissas chosen +/- symmetric
+                if (naxsm == 1) then         !gauss abscissas chosen +/- symmetric
 
                     ! using (4.2.4) and (4.2.6) of {ed},
                     !           d_{0m}^{(l)}(\pi-\theta) = (-1)^{l+m} d_{0m}^{(l)}(\theta)
@@ -3062,7 +3059,7 @@ contains
                 end if
             enddo
 
-            if (naxsm==0) then        !gauss abscissas not chosen +/- symmetric
+            if (naxsm == 0) then        !gauss abscissas not chosen +/- symmetric
 
                 call vigf(x(i2), nmax, m, dv1, dv2, ddv1)
 
@@ -3083,7 +3080,7 @@ contains
         do i = 1, ngss
             wr = w(i)*r(i)
 
-            !c          if (dr(i).eq.0.d0) wr=0.d0   !temporarily only
+            ! if (dr(i).eq.0.d0) wr=0.d0   !temporarily only
 
             rr(i) = wr            !w(i)*r^2(\theta)
         end do
@@ -3175,7 +3172,7 @@ contains
                     c4r = qdjr2*qj1
                     c4i = qdji2*qj1
                     ! re and im of [k_{in}r j_{n2}(k_{in}r)]'/(k_{in}r)
-                    !                         * h_{n1}(k_{out}r):
+                    !                        *h_{n1}(k_{out}r):
 
                     b4r = c4r - qdji2*qy1
                     b4i = c4i + qdjr2*qy1
@@ -3219,7 +3216,7 @@ contains
                     uri = dr(i)
                     rri = rr(i)
 
-                    if (ncheck==1.and.si>0d0) goto 150
+                    if (ncheck == 1.and.si > 0d0) goto 150
                     ! w(i)*r^2(i)*(pi(n1)*tau(n2)+tau(n1)*pi(n2):
 
                     e1 = rr(i)*aa1             ! <-- aa1
@@ -3229,7 +3226,7 @@ contains
                     gr11 = gr11 + e1*c1r
                     gi11 = gi11 + e1*c1i
 
-                    if (ncheck==1) goto 160
+                    if (ncheck == 1) goto 160
 
                     150 continue
                     ! w(i)*r^2(\theta)*[pi(n1)*pi(n2)+tau(n1)*tau(n2)]
@@ -3257,7 +3254,7 @@ contains
                     gr21 = gr21 + f1*c4r + f2*c5r
                     gi21 = gi21 + f1*c4i + f2*c5i
 
-                    if (ncheck==1) cycle
+                    if (ncheck == 1) cycle
 
                     160  continue
                     ! w(i)*r^2(\theta)*[dr/(d\theta)]*pi(n1)*d(n2):
@@ -3364,9 +3361,9 @@ contains
                 rgqi(n1, n2) = trgqi(n1, n2)
             end do
         end do
-        !
+
         call tt(nm)
-        !
+
         return
     end
 
