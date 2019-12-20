@@ -1977,6 +1977,8 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
                 zq12(n1, n2) = A(n1)*A(n2)*(znf**2 - cone)*zk1/znf
                 zq21(n1, n2) = -A(n1)*A(n2)*(znf**2 - cone)*zk2/znf
 
+!Original MTL part continues here:
+
                 !write(nout+3,*)'n1=',n1,'   n2=',n2
                 !write(nout+3,*)'ar12=', ar12
                 !write(nout+3,*)'ai12=', ai12
@@ -2688,9 +2690,9 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
                 qdjr2 = cbess%djr(i, n2)
                 qdji2 = cbess%dji(i, n2)
 
-                !--------/---------/---------/---------/---------/---------/---------/--
-                !Assigning integrads by eqs 2-7 of Ru2012
-                !Bessel function part:
+        !--------/---------/---------/---------/---------/---------/---------/--
+        !Assigning integrads by eqs 2-7 of Ru2012
+        !Bessel function part:
                 !Amend for the Riccati-Bessel functions of Ru et al.
                 !The Riccati-Bessel functions \xi_l(z)=zh_l(z) (\psi_l(z)=zj_l(z)) are the functions of
                 !the exterior (interior) argument there.
@@ -2751,9 +2753,9 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
 
                         zk1i = qm*dv1(n1)*dv1(n2)*drd*zxidpsi/qs
                         zk2i = qm*dv1(n1)*dv1(n2)*drd*zdxipsi/qs
-                        ! qs=dsqrt(1.d0-x(i)**2) is \sin\theta for missing in the integration measure;
-                        ! By dividing by qs, the integrand will, as before, be integrated with the measure
-                        ! d(\cos\theta) for which the GIF weights are supplied
+    ! qs=dsqrt(1.d0-x(i)**2) is \sin\theta for missing in the integration measure;
+    ! By dividing by qs, the integrand will, as before, be integrated with the measure
+    ! d(\cos\theta) for which the GIF weights are supplied
 
                         zl1i = czero
                         zl2i = czero
@@ -2772,11 +2774,11 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
                             - dble(n1*(n1 + 1))*dv1(n1)*zxidpsi)
                     zl4i = dv1(n1)*(znf*dv2(n2)*drd*zdxidpsi &
                             - dble(n2*(n2 + 1))*dv1(n2)*zdxipsi)
-                    !--------/---------/---------/---------/---------/---------/---------/--
+                !--------/---------/---------/---------/---------/---------/---------/--
 
                 end if
 
-                ! Integrate Ru et al integrals:
+    ! Integrate Ru et al integrals:
                 zk1 = zk1 + zk1i*w(i)
                 zk2 = zk2 + zk2i*w(i)
                 zl1 = zl1 + zl1i*w(i)
@@ -2886,7 +2888,7 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
 
                     cycle
                 end if
-                ! [dble(m)*w(i)*r^2(i)/(|\sin\theta|)]*(d1n1*d2n2+d2n1*d1n2):
+        ! [dble(m)*w(i)*r^2(i)/(|\sin\theta|)]*(d1n1*d2n2+d2n1*d1n2):
                 e1 = dsi*aa1
 
                 ar11 = ar11 + e1*b1r
@@ -2904,6 +2906,40 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
                 gr22 = gr22 + e1*c6r + e2*c7r + e3*c8r
                 gi22 = gi22 + e1*c6i + e2*c7i + e3*c8i
             end do  ! end of Gauss integration
+
+
+        ! Taking into account the "factor":
+        ! factor=1 or 2 depending on ncheck==0 or ncheck==1
+
+            if (factor==2) then
+                zk1 = zk1*factor
+                zk2 = zk2*factor
+                zl1 = zl1*factor
+                zl2 = zl2*factor
+                zl3 = zl3*factor
+                zl4 = zl4*factor
+            end if
+
+        !After performing surface integrals, forming the Q-matrices
+        !by eqs 12-17 of Ru2012
+
+            if (n1/=n2) then
+                zq11(n1, n2) = ci*A(n1)*A(n2)*(znf**2 - cone)*&
+                        (n1*(n1 + 1)*zl2 - n2*(n2 + 1)*zl1)/((n1*(n1 + 1) - n2*(n2 + 1))*znf)
+                zq22(n1, n2) = ci*A(n1)*A(n2)*(znf**2 - cone)*&
+                        (zl3 + znf*(n1*(n1 + 1))*(zl2 - zl1))/((n1*(n1 + 1) - n2*(n2 + 1))*znf)
+            else
+                zq11(n1, n2) = -ci*A(n1)*A(n2)*(-znf*zl1 + zl3 + (zl2 - zl4)/znf)
+                zq22(n1, n2) = -ci*A(n1)*A(n2)*(-zl1 + zl2 - zl4 + zl3/znf)
+            end if
+
+            zq12(n1, n2) = A(n1)*A(n2)*(znf**2 - cone)*zk1/znf
+            zq21(n1, n2) = -A(n1)*A(n2)*(znf**2 - cone)*zk2/znf
+
+! todo: a switch can be implemented here to run the code
+! either by following Ru et al integration or
+! following the original MTL path
+! Original part continues here
 
             an12 = ann(n1, n2)*factor
 
