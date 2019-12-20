@@ -447,14 +447,14 @@ program axspartcl1
 
     else if (np == -1) then
 
-        write(6, *)'the half-length of the spheroid along', &
-                'the rotational axis z-axis in your units', &
+        write(6, *)'the half-length of the spheroid along ', &
+                'the rotational axis z-axis in your units ', &
                 '(in nm if dispersive data used)'
         read(5, *) hlength
         !z      hlength=63.3d0
 
-        write(6, *)'the half-length of the spheroid along the', &
-                'horizontal axis (in theta=pi/2 plane) in your units', &
+        write(6, *)'the half-length of the spheroid along the ', &
+                'horizontal axis (in theta=pi/2 plane) in your units ', &
                 '(in nm if dispersive data used)'
         read(5, *) rsnm
         !rsnm = 21.1d0
