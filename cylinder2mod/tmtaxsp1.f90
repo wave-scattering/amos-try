@@ -1968,7 +1968,7 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
                     zq11(n1, n2) = ci*A(n1)*A(n2)*(znf**2 - cone)*&
                             (n1*(n1 + 1)*zl2 - n2*(n2 + 1)*zl1)/((n1*(n1 + 1) - n2*(n2 + 1))*znf)
                     zq22(n1, n2) = ci*A(n1)*A(n2)*(znf**2 - cone)*&
-                            (zl3 + znf*(n1*(n1 + 1))*(zl2 - zl1))/((n1*(n1 + 1) - n2*(n2 + 1))*znf)
+                            (zl3 + znf*(n1*(n1 + 1))*(zl2 - zl1)/((n1*(n1 + 1) - n2*(n2 + 1))))/znf
                 else
                     zq11(n1, n2) = -ci*A(n1)*A(n2)*(-znf*zl1 + zl3 + (zl2 - zl4)/znf)
                     zq22(n1, n2) = -ci*A(n1)*A(n2)*(-zl1 + zl2 - zl4 + zl3/znf)
@@ -2927,7 +2927,7 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
                 zq11(n1, n2) = ci*A(n1)*A(n2)*(znf**2 - cone)*&
                         (n1*(n1 + 1)*zl2 - n2*(n2 + 1)*zl1)/((n1*(n1 + 1) - n2*(n2 + 1))*znf)
                 zq22(n1, n2) = ci*A(n1)*A(n2)*(znf**2 - cone)*&
-                        (zl3 + znf*(n1*(n1 + 1))*(zl2 - zl1))/((n1*(n1 + 1) - n2*(n2 + 1))*znf)
+                        (zl3 + znf*(n1*(n1 + 1))*(zl2 - zl1)/((n1*(n1 + 1) - n2*(n2 + 1))))/znf
             else
                 zq11(n1, n2) = -ci*A(n1)*A(n2)*(-znf*zl1 + zl3 + (zl2 - zl4)/znf)
                 zq22(n1, n2) = -ci*A(n1)*A(n2)*(-zl1 + zl2 - zl4 + zl3/znf)
