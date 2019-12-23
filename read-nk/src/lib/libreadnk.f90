@@ -47,7 +47,10 @@ contains
         !        write(*,*) '==========================='
         !        write(*,*) 'Reading from file', fname
         open(unit=read_unit, file=fname, iostat=iostat)
-        if ( iostat /= 0 ) stop "Error opening file"//fname
+        if ( iostat /= 0 ) then
+            write(*,*) "Error opening data *.yml data file"//fname
+            stop 1
+        end if
 
         n = 0
         key = 0
