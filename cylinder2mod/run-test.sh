@@ -12,5 +12,6 @@ cd cylinder2mod
 rm -rf *.dat
 ./cylinder2mod
 ./plot-ext.py
+cp *.pdf $ROOT_DIR
 cd $ROOT_DIR
 rm -rf test
