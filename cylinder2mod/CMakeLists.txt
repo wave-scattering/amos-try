@@ -59,11 +59,12 @@ target_link_libraries(${PROJECTNAME}
         ${LAPACK_LIBRARIES}
         )
 
-#add_custom_command(
-#        TARGET ${PROJECTNAME} POST_BUILD
-#        COMMAND ${CMAKE_COMMAND} -E copy
-#        ${CMAKE_SOURCE_DIR}/cylinder2mod/default.ini
-#        ${CMAKE_CURRENT_BINARY_DIR}/fort.10)
+add_custom_command(
+        TARGET ${PROJECTNAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_SOURCE_DIR}/cylinder2mod/default.ini
+        ${CMAKE_CURRENT_BINARY_DIR}/default.ini
+)
 
 
 
