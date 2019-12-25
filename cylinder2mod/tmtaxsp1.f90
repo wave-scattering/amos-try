@@ -2670,70 +2670,71 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
                 aa1 = a12 + a21            != d1n1*d2n2+d2n1*d1n2
                 aa2 = a11*dss(i) + a22     !=(d1n1*d1n2)*dble(m)**2/(\sin^2\theta)
                 ! +d2n1*d2n2
-                ! Spherical Bessel functions:
-                ! Since refractive index is allowed to be complex in general,
-                ! the Bessel function j_l(k_in*r) is complex. The code below
-                ! performs a separation of the complex integrand in Waterman's
-                ! surface integral into its respective real and imaginary
-                ! parts.
 
-                ! Bessel functions of the exterior argument:
+! Spherical Bessel functions:
+! Since refractive index is allowed to be complex in general,
+! the Bessel function j_l(k_in*r) is complex. The code below
+! performs a separation of the complex integrand in Waterman's
+! surface integral into its respective real and imaginary
+! parts.
+
+! Bessel functions of the exterior argument:
 
                 qj1 = cbess%j(i, n1)
                 qy1 = cbess%y(i, n1)
                 qdj1 = cbess%dj(i, n1)
                 qdy1 = cbess%dy(i, n1)
 
-                ! Bessel functions of the interior argument:
+! Bessel functions of the interior argument:
                 qjr2 = cbess%jr(i, n2)
                 qji2 = cbess%ji(i, n2)
                 qdjr2 = cbess%djr(i, n2)
                 qdji2 = cbess%dji(i, n2)
 
-        !--------/---------/---------/---------/---------/---------/---------/--
-        !Assigning integrads by eqs 2-7 of Ru2012
-        !Bessel function part:
-                !Amend for the Riccati-Bessel functions of Ru et al.
-                !The Riccati-Bessel functions \xi_l(z)=zh_l(z) (\psi_l(z)=zj_l(z)) are the functions of
-                !the exterior (interior) argument there.
-                ! \xi or d\xi carry always the subscript n (=n1 here) and
-                ! \psi or d\psi carry always the subscript k (=n2 here)
-                !The latter allows one to initiate their complex valued products.
-                !  PI=P*2D0/LAM                 !wave vector k=2\pi/\ld in the host medium
-                !  PPI=PI*PI                    !k^2
-                !  PIR=PPI*MRR                  !k^2*mrr
-                !  PII=PPI*MRI                  !k^2*mri
-                !  R(I):=r^2(\theta)
+!--------/---------/---------/---------/---------/---------/---------/--
+!Assigning integrads by eqs 2-7 of Ru2012
+!Bessel function part:
+!Amend for the Riccati-Bessel functions of Ru et al.
+!The Riccati-Bessel functions \xi_l(z)=zh_l(z) (\psi_l(z)=zj_l(z)) are the functions of
+!the exterior (interior) argument there.
+! \xi or d\xi carry always the subscript n (=n1 here) and
+! \psi or d\psi carry always the subscript k (=n2 here)
+!The latter allows one to initiate their complex valued products.
+!  PI=P*2D0/LAM                 !wave vector k=2\pi/\ld in the host medium
+!  PPI=PI*PI                    !k^2
+!  PIR=PPI*MRR                  !k^2*mrr
+!  PII=PPI*MRI                  !k^2*mri
+!  R(I):=r^2(\theta)
 
-                xkr = sqrt(ppi*r(i))        !k_out*r(\theta)
+        xkr = sqrt(ppi*r(i))        !k_out*r(\theta)
 
-                zxipsi = cmplx_dp(pir, pii)*cmplx_dp(qj1, qy1)*cmplx_dp(qjr2, qji2)*r(i)
+        zxipsi = cmplx_dp(pir, pii)*cmplx_dp(qj1, qy1)*cmplx_dp(qjr2, qji2)*r(i)
 
-                zxidpsi = xkr*cmplx_dp(qj1, qy1)*cmplx_dp(qjr2, qji2) + &
-                        cmplx_dp(pir, pii)*cmplx_dp(qj1, qy1)*cmplx_dp(qdjr2, qdji2)*r(i)
+        zxidpsi = xkr*cmplx_dp(qj1, qy1)*cmplx_dp(qjr2, qji2) + &
+                cmplx_dp(pir, pii)*cmplx_dp(qj1, qy1)*cmplx_dp(qdjr2, qdji2)*r(i)
 
-                zdxipsi = znf*xkr*cmplx_dp(qj1, qy1)*cmplx_dp(qjr2, qji2) + &
-                        cmplx_dp(pir, pii)*cmplx_dp(qdj1, qdy1)*cmplx_dp(qjr2, qji2)*r(i)
+        zdxipsi = znf*xkr*cmplx_dp(qj1, qy1)*cmplx_dp(qjr2, qji2) + &
+                cmplx_dp(pir, pii)*cmplx_dp(qdj1, qdy1)*cmplx_dp(qjr2, qji2)*r(i)
 
-                zdxidpsi = cmplx_dp(qj1, qy1)*cmplx_dp(qjr2, qji2) + &
-                        znf*xkr*cmplx_dp(pir, pii)*cmplx_dp(qj1, qy1)*cmplx_dp(qdjr2, qdji2) + &
-                        xkr*cmplx_dp(pir, pii)*cmplx_dp(qdj1, qdy1)*cmplx_dp(qjr2, qji2) + &
-                        cmplx_dp(pir, pii)*cmplx_dp(qdj1, qdy1)*cmplx_dp(qdjr2, qdji2)*r(i)
-                !--------/---------/---------/---------/---------/---------/---------/--
-                ! Gauss integration weigths and variables are in the variable '\cos\theta'.
-                ! Amend for that on the routine input at the present code of Ref. \ct{MTL}:
-                ! r(i) contains $r^2(\theta)$ instead of $r(\theta)$ and
-                ! dr(i) contains $r'(\theta)/r(\theta)$ instead of $r'(\theta)$.
+        zdxidpsi = cmplx_dp(qj1, qy1)*cmplx_dp(qjr2, qji2) + &
+                znf*xkr*cmplx_dp(qj1, qy1)*cmplx_dp(qdjr2, qdji2) + &
+                xkr*cmplx_dp(qdj1, qdy1)*cmplx_dp(qjr2, qji2) + &
+                cmplx_dp(pir, pii)*cmplx_dp(qdj1, qdy1)*cmplx_dp(qdjr2, qdji2)*r(i)
+!--------/---------/---------/---------/---------/---------/---------/--
+! Gauss integration weigths and variables are in the variable '\cos\theta'.
+! Amend for that on the routine input at the present code of Ref. \ct{MTL}:
+! r(i) contains $r^2(\theta)$ instead of $r(\theta)$ and
+! dr(i) contains $r'(\theta)/r(\theta)$ instead of $r'(\theta)$.
 
                 qs = dsqrt(1.d0 - x(i)**2)          !\sin\theta
-                vv = sqrt(r(i))                   !r(\theta)
-                drd = vv*dr(i)*sqrt(ppi)          !x_\theta=k_out*r'(\theta) of Ru et al
+                vv = sqrt(r(i))                     !r(\theta)
+                drd = vv*dr(i)*sqrt(ppi)            !x_\theta=k_out*r'(\theta) of Ru et al
 
-                ! Amend for the Riccati-Bessel functions of Ru et al
-                ! on using that they only contain combinations of
-                ! \xi or d\xi with the subscript n (=n1 here) and
-                ! \psi or d\psi with the subscript k (=n2 here)
-                ! Assigning integrads by eqs 2-7 of Ru2012:
+! Amend for the Riccati-Bessel functions of Ru et al
+! on using that they only contain combinations of
+! \xi or d\xi with the subscript n (=n1 here) and
+! \psi or d\psi with the subscript k (=n2 here)
+! Assigning integrads by eqs 2-7 of Ru2012:
 
                 if (ncheck==1) then         !theta=pi/2 is scatterer mirror symmetry plane
                     !eqs 18-19 of Ru2012
