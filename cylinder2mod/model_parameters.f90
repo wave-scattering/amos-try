@@ -65,8 +65,16 @@ contains
         call fini%get(section_name = 'general', option_name = 'particle_type', &
                 val = string, error = error)
         mpar%np = 0
+        if ((trim(string)=='spheroid').or.(trim(string)=='-1')) mpar%np = -1
         if ((trim(string)=='cylinder').or.(trim(string)=='-2')) mpar%np = -2
+        if ((trim(string)=='droplet').or.(trim(string)=='-3')) mpar%np = -3
+        if ((trim(string)=='sphere_cut_on_top').or.(trim(string)=='-4')) mpar%np = -4
+        if ((trim(string)=='sphere_cut_on_bottom').or.(trim(string)=='-5')) mpar%np = -5
+        if ((trim(string)=='cone').or.(trim(string)=='-6')) mpar%np = -6
+        if ((trim(string)=='cone_on_cylinder').or.(trim(string)=='-7')) mpar%np = -7
+        if ((trim(string)=='coated_sphere').or.(trim(string)=='-50')) mpar%np = -50
         if ((trim(string)=='nanorod').or.(trim(string)=='-9')) mpar%np = -9
+!        if ((trim(string)=='chebyshev').or.(trim(string)=='- ')) mpar%np = -
 
         call fini%get(section_name = 'general', option_name = 'adaptive_integration', &
                 val = num, error = error)
