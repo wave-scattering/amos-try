@@ -157,7 +157,7 @@ subroutine tmtaxsp(nmax, rap, zeps1, tmt)
     if (dabs(rat - 1d0) > 1d-8) then
         select case (np)
         case(0:)
-            rat = radii_ratio_chebyshev(np)
+!            rat = radii_ratio_chebyshev(np)
         case (-1) ! oblate/prolate spheroids
             rat = radii_ratio_spheroid()
         case (-2) ! oblate/prolate cylinder
@@ -2615,7 +2615,7 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
     ! Before the n1, n2 (or l,l') loop:
     !  In Ru et al formulas:
     !  s=n_2/n_1$ is the refractive index constrast and $x(\theta)=k_1 r(\theta)$ is the
-    !  {\em polar} angle dependent size parameter of an axially symmetric scatterer.
+    !  polar angle dependent size parameter of an axially symmetric scatterer.
 
     znf = cmplx_dp(pir, pii)/ppi       !in general complex ref. index contrast n_2/n_1;
     !the parameter 's' in Ru et al formulas
@@ -2625,7 +2625,7 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
 
         do n2 = mm1, nmax
             an2 = an(n2)
-            !Init:
+    !Init:
             ar11 = 0d0
             ar12 = 0d0
             ar21 = 0d0
@@ -2644,7 +2644,7 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
             gi22 = 0d0
             si = sig(n1 + n2)
 
-            ! Init of Ru et al integrals:
+    ! Init of Ru et al integrals:
             zk1 = czero
             zk2 = czero
             zl1 = czero
@@ -2657,8 +2657,8 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
     ! \int_0^\pi X* \sin\theta d\theta --> \int_{-1}^1 X* d(\cos\theta)
     ! and generates weights for the independent variable "\cos\theta"
 
-            do i = 1, ngss    !=ngauss   if ncheck.eq.1
-                !=2*ngauss if ncheck.eq.0
+            do i = 1, ngss       !=ngauss   if ncheck.eq.1
+                                 !=2*ngauss if ncheck.eq.0
                 d1n1 = d1(i, n1)
                 d2n1 = d2(i, n1)
                 d1n2 = d1(i, n2)
@@ -2725,6 +2725,7 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
 ! Amend for that on the routine input at the present code of Ref. \ct{MTL}:
 ! r(i) contains $r^2(\theta)$ instead of $r(\theta)$ and
 ! dr(i) contains $r'(\theta)/r(\theta)$ instead of $r'(\theta)$.
+!ds(i) = s(i)*qm*wr       !=dble(m)*w(i)*r^2(\theta)/(|\sin\theta|)
 
                 qs = dsqrt(1.d0 - x(i)**2)          !\sin\theta
                 vv = sqrt(r(i))                     !r(\theta)
@@ -2743,7 +2744,7 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
                         zk1i = czero
                         zk2i = czero
 
-                        zl1i = dv1(n2)*dv2(n1)*drd*zxipsi
+                        zl1i = dv2(n1)*dv1(n2)*drd*zxipsi
                         zl2i = dv1(n1)*dv2(n2)*drd*zxipsi
                         zl3i = dv1(n2)*(dv2(n1)*drd*zdxidpsi &
                                 - dble(n1*(n1 + 1))*dv1(n1)*zxidpsi)
@@ -2769,13 +2770,13 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
 
                     zk1i = qm*dv1(n1)*dv1(n2)*drd*zxidpsi/qs
                     zk2i = qm*dv1(n1)*dv1(n2)*drd*zdxipsi/qs
-                    zl1i = dv1(n2)*dv2(n1)*drd*zxipsi
+                    zl1i = dv2(n1)*dv1(n2)*drd*zxipsi
                     zl2i = dv1(n1)*dv2(n2)*drd*zxipsi
                     zl3i = dv1(n2)*(dv2(n1)*drd*zdxidpsi &
                             - dble(n1*(n1 + 1))*dv1(n1)*zxidpsi)
                     zl4i = dv1(n1)*(znf*dv2(n2)*drd*zdxidpsi &
                             - dble(n2*(n2 + 1))*dv1(n2)*zdxipsi)
-                !--------/---------/---------/---------/---------/---------/---------/--
+    !--------/---------/---------/---------/---------/---------/---------/--
 
                 end if
 
@@ -2787,41 +2788,41 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
                 zl3 = zl3 + zl3i*w(i)
                 zl4 = zl4 + zl4i*w(i)
 
-                ! todo: a switch can be implemented here to run the code
-                ! either by following Ru et al integration or
-                ! following the original MTL path
+    ! todo: a switch can be implemented here to run the code
+    ! either by following Ru et al integration or
+    ! following the original MTL path
 
-                ! re and im of j_{n2}(k_{in}r) j_{n1}(k_{out}r):
+        ! re and im of j_{n2}(k_{in}r) j_{n1}(k_{out}r):
                 c1r = qjr2*qj1
                 c1i = qji2*qj1
-                ! re and im of j_{n2}(k_{in}r) h_{n1}(k_{out}r):
 
+        ! re and im of j_{n2}(k_{in}r) h_{n1}(k_{out}r):
                 b1r = c1r - qji2*qy1
                 b1i = c1i + qjr2*qy1
-                ! re and im of j_{n2}(k_{in}r) j_{n1}'(k_{out}r):
 
+        ! re and im of j_{n2}(k_{in}r) j_{n1}'(k_{out}r):
                 c2r = qjr2*qdj1
                 c2i = qji2*qdj1
-                ! re and im of j_{n2}(k_{in}r) h_{n1}'(k_{out}r):
 
+        ! re and im of j_{n2}(k_{in}r) h_{n1}'(k_{out}r):
                 b2r = c2r - qji2*qdy1
                 b2i = c2i + qjr2*qdy1
 
                 ddri = ddr(i)               !1/(k_{out}r)
-                ! re and im of [1/(k_{out}r)]*j_{n2}(k_{in}r) j_{n1}(k_{out}r)
 
+                ! re and im of [1/(k_{out}r)]*j_{n2}(k_{in}r) j_{n1}(k_{out}r)
                 c3r = ddri*c1r
                 c3i = ddri*c1i
-                ! re and im of [1/(k_{out}r)]*j_{n2}(k_{in}r) h_{n1}(k_{out}r):
 
+                ! re and im of [1/(k_{out}r)]*j_{n2}(k_{in}r) h_{n1}(k_{out}r):
                 b3r = ddri*b1r
                 b3i = ddri*b1i
-                ! re and im of j_{n2}'(k_{in}r) j_{n1}(k_{out}r):
 
+                ! re and im of j_{n2}'(k_{in}r) j_{n1}(k_{out}r):
                 c4r = qdjr2*qj1
                 c4i = qdji2*qj1
-                ! re and im of j_{n2}'(k_{in}r) h_{n1}(k_{out}r):
 
+                ! re and im of j_{n2}'(k_{in}r) h_{n1}(k_{out}r):
                 b4r = c4r - qdji2*qy1
                 b4i = c4i + qdjr2*qy1
 
@@ -2859,7 +2860,8 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
 
                 b8r = b2r*drri - b2i*drii
                 b8i = b2i*drri + b2r*drii
-                ! %%%%%%%%%  forming integrands of j-matrices (j^{11}=j^{22}=0 for m=0):
+
+    ! %%%%%%%%%  forming integrands of j-matrices (j^{11}=j^{22}=0 for m=0):
 
                 uri = dr(i)
                 dsi = ds(i)
@@ -2906,6 +2908,7 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
 
                 gr22 = gr22 + e1*c6r + e2*c7r + e3*c8r
                 gi22 = gi22 + e1*c6i + e2*c7i + e3*c8i
+
             end do  ! end of Gauss integration
 
 
@@ -2928,7 +2931,7 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
                 zq11(n1, n2) = ci*A(n1)*A(n2)*(znf**2 - cone)*&
                         (n1*(n1 + 1)*zl2 - n2*(n2 + 1)*zl1)/((n1*(n1 + 1) - n2*(n2 + 1))*znf)
                 zq22(n1, n2) = ci*A(n1)*A(n2)*(znf**2 - cone)*&
-                        (zl3 + znf*(n1*(n1 + 1))*(zl2 - zl1)/((n1*(n1 + 1) - n2*(n2 + 1))))/znf
+                        (zl3 + znf*n1*(n1 + 1)*(zl2 - zl1)/(n1*(n1 + 1) - n2*(n2 + 1)))/znf
             else
                 zq11(n1, n2) = -ci*A(n1)*A(n2)*(-znf*zl1 + zl3 + (zl2 - zl4)/znf)
                 zq22(n1, n2) = -ci*A(n1)*A(n2)*(-zl1 + zl2 - zl4 + zl3/znf)

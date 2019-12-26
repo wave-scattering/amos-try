@@ -3001,7 +3001,7 @@ contains
             sig(n) = si              !=(-1)**n
         end do
 
-        ! assigning wigner d-matrices:
+    ! assigning Wigner d-matrices:
 
         do i = 1, ngauss
 
