@@ -2011,7 +2011,7 @@ contains
                 !
                 ! determine m=m'=0 elements of the t matrix
                 !
-                if (mpar%yn_adaptive == 0) then
+                if (mpar%integration_type == 0) then
                     call tmatr0 (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
                             ddr, drr, dri, nmax, ncheck, naxsm)
                 else
@@ -2099,7 +2099,7 @@ contains
 
                     ! determine m=m'=0 elements of the t matrix
 
-                    if (mpar%yn_adaptive == 0) then
+                    if (mpar%integration_type == 0) then
                         call tmatr0 (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
                                 ddr, drr, dri, nmax, ncheck, naxsm)
                     else
@@ -2158,7 +2158,7 @@ contains
 
             ! determine m=m'=0 elements of the t matrix
 
-            if (mpar%yn_adaptive == 0) then
+            if (mpar%integration_type == 0) then
                 call tmatr0 (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
                         ddr, drr, dri, nmax, ncheck, naxsm)
             else
@@ -2253,7 +2253,7 @@ contains
 
             !         call tmatr(m,ngauss,x,w,an,ann,s,ss,ppi,pir,pii,r,dr,
             !     &               ddr,drr,dri,nmax,ncheck,naxsm)
-            if (mpar%yn_adaptive == 0) then
+            if (mpar%integration_type == 0) then
                 call tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, &
                         ddr, drr, dri, nmax, ncheck, naxsm)
             else

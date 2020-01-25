@@ -22,8 +22,10 @@ module model_parameters
         !Select the solver between Lapack or custom routines (ichoice = 1 or 2)
         integer, public :: ichoice
 
-        ! choice of integration: 0 - fixed Gaussian-Legendre, 1 - adaptive from quadpack
-        integer, public :: yn_adaptive
+        ! choice of integration: 0 - fixed Gaussian-Legendre with original Mishchenko algorithm,
+        !                        1 - adaptive from quadpack with original Mishchenko algorithm,
+        !                        2 - fixed Gaussian-Legendre with Le Ru algorithm
+        integer, public :: integration_type
 
         ! choice of implementation of Bessel functions: 0 - backward recurrence, 1 - Amos library
         integer, public :: use_amos
@@ -76,10 +78,10 @@ contains
         if ((trim(string)=='nanorod').or.(trim(string)=='-9')) mpar%np = -9
 !        if ((trim(string)=='chebyshev').or.(trim(string)=='- ')) mpar%np = -
 
-        call fini%get(section_name = 'general', option_name = 'adaptive_integration', &
+        call fini%get(section_name = 'general', option_name = 'integration_type', &
                 val = num, error = error)
-        mpar%yn_adaptive = 0
-        if (error==0) mpar%yn_adaptive = num
+        mpar%integration_type = 0
+        if (error==0) mpar%integration_type = num
 
         call fini%get(section_name = 'general', option_name = 'use_amos', &
                 val = num, error = error)
