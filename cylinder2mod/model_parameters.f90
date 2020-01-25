@@ -33,6 +33,9 @@ module model_parameters
         ! choice to check the convergence: 0 - do not check, 1 - check
         integer, public :: yncheck
 
+        !spheroid options
+        real(dp) :: spheroid_a, spheroid_c
+
     end type model_parameters_type
     type(model_parameters_type), public :: mpar
 
@@ -92,7 +95,17 @@ contains
                 val = num, error = error)
         mpar%yncheck = 1
         if (error==0) mpar%yncheck = num
-        
+
+        call fini%get(section_name = 'spheroid', option_name = 'c', &
+                val = double, error = error)
+        mpar%rl_min = 0_dp
+        if (error==0) mpar%spheroid_c = double
+
+        call fini%get(section_name = 'spheroid', option_name = 'a', &
+                val = double, error = error)
+        mpar%rl_min = 0_dp
+        if (error==0) mpar%spheroid_a = double
+
         call fini%get(section_name = 'nanorod', &
                 option_name = 'nanorod_cap_hr', val = double, error = error)
         mpar%nanorod_cap_hr = 1_dp ! default is round cap

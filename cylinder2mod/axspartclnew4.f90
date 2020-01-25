@@ -447,16 +447,18 @@ program axspartcl1
 
     else if (np == -1) then
 
+        hlength = mpar%spheroid_c
         write(6, *)'the half-length of the spheroid along ', &
                 'the rotational axis z-axis in your units ', &
                 '(in nm if dispersive data used)'
-        read(5, *) hlength
+        write(6, *) 'auto-select from *.ini file', hlength
         !z      hlength=63.3d0
 
+        rsnm = mpar%spheroid_a
         write(6, *)'the half-length of the spheroid along the ', &
                 'horizontal axis (in theta=pi/2 plane) in your units ', &
                 '(in nm if dispersive data used)'
-        read(5, *) rsnm
+        write(6, *) 'auto-select from *.ini file', rsnm
         !rsnm = 21.1d0
 
         !     np=-1 - defp = the ratio of the horizontal to rotational axes. defp is
