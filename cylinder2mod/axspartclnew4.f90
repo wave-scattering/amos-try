@@ -340,6 +340,7 @@ program axspartcl1
     !     rsnm=1.d0 ! should be set in *.ini file
     rev = 1.d0
     defp = 1.d0
+    ndefp = 1
 
     write(6, *)'chose particle shape'
     write(6, *)'only axially symmetric particle shapes allowed'
@@ -447,11 +448,13 @@ program axspartcl1
 
     else if (np == -1) then
 
-        hlength = mpar%spheroid_c
-        write(6, *)'the half-length of the spheroid along ', &
+        hlength_min = mpar%spheroid_c_min
+        hlength_max = mpar%spheroid_c_max
+        hlength = hlength_min
+        write(6, *)'range of the half-length of the spheroid along ', &
                 'the rotational axis z-axis in your units ', &
                 '(in nm if dispersive data used)'
-        write(6, *) 'auto-select from *.ini file', hlength
+        write(6, *) 'auto-select from *.ini file', hlength_min, hlength_max
         !z      hlength=63.3d0
 
         rsnm = mpar%spheroid_a
@@ -508,13 +511,6 @@ program axspartcl1
             write(6, *)'auto-set cylinder minimal r/l from *.ini', rl_min
         end if
 
-        ndefp = mpar%ndefp
-        if (ndefp  <=  0) then
-            write(6, *)'enter amount of steps in length:'
-            read(5, *) ndefp
-        else
-            write(6, *)'auto-set amount of steps in length from *.ini', ndefp
-        end if
 
         rsnm = mpar%rsnm
         if (rsnm  <=  0_dp) then
@@ -588,6 +584,14 @@ program axspartcl1
     end if ! end np if
     !***************************************
 
+    ndefp = mpar%ndefp
+    if (ndefp  <=  0) then
+        write(6, *)'enter amount of steps in length:'
+        read(5, *) ndefp
+    else
+        write(6, *)'auto-set amount of steps in length from *.ini', ndefp
+    end if
+
     defpp = defp
 
     if (rat == 1.) then
@@ -628,7 +632,7 @@ program axspartcl1
 
     naxsm = 1
 
-    if (np <= -4) naxsm = 0
+    if (np <= -4) naxsm = 0  ! TODO: consider cylinder case
 
     !--------/---------/---------/---------/---------/---------/---------/--
     !

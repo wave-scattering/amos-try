@@ -34,7 +34,7 @@ module model_parameters
         integer, public :: yncheck
 
         !spheroid options
-        real(dp) :: spheroid_a, spheroid_c
+        real(dp) :: spheroid_a, spheroid_c_min, spheroid_c_max
 
     end type model_parameters_type
     type(model_parameters_type), public :: mpar
@@ -96,11 +96,22 @@ contains
         mpar%yncheck = 1
         if (error==0) mpar%yncheck = num
 
-        call fini%get(section_name = 'spheroid', option_name = 'c', &
-                val = double, error = error)
-        mpar%rl_min = 0_dp
-        if (error==0) mpar%spheroid_c = double
+        call fini%get(section_name = 'general', option_name = 'aspect_steps', &
+                val = num, error = error)
+        mpar%ndefp = 1
+        if (error==0) mpar%ndefp = num
 
+        call fini%get(section_name = 'spheroid', option_name = 'c_min', &
+                val = double, error = error)
+        mpar%spheroid_c_min = 0_dp
+        if (error==0) mpar%spheroid_c_min = double
+
+        call fini%get(section_name = 'spheroid', option_name = 'c_max', &
+                val = double, error = error)
+        mpar%spheroid_c_max = 0_dp
+        if (error==0) mpar%spheroid_c_max = double
+
+        
         call fini%get(section_name = 'spheroid', option_name = 'a', &
                 val = double, error = error)
         mpar%rl_min = 0_dp
@@ -121,10 +132,6 @@ contains
         mpar%rl_max = -1_dp
         if (error==0) mpar%rl_max = double
 
-        call fini%get(section_name = 'cylinder', option_name = 'rl_steps', &
-                val = num, error = error)
-        mpar%ndefp = 0
-        if (error==0) mpar%ndefp = num
 
         call fini%get(section_name = 'cylinder', option_name = 'radius', &
                 val = double, error = error)
