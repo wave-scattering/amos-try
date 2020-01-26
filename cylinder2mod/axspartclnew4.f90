@@ -2020,8 +2020,11 @@ contains
                 if (mpar%integration_type == 0) then
                     call tmatr0 (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
                             ddr, drr, dri, nmax, ncheck, naxsm)
-                else
+                else if (mpar%integration_type == 1) then
                     call tmatr0_adapt (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
+                            ddr, drr, dri, nmax, ncheck, naxsm)
+                else
+                    call tmatr0_leru (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
                             ddr, drr, dri, nmax, ncheck, naxsm)
                 endif
                 !
@@ -2108,8 +2111,11 @@ contains
                     if (mpar%integration_type == 0) then
                         call tmatr0 (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
                                 ddr, drr, dri, nmax, ncheck, naxsm)
-                    else
+                    else if (mpar%integration_type == 1) then
                         call tmatr0_adapt (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
+                                ddr, drr, dri, nmax, ncheck, naxsm)
+                    else
+                        call tmatr0_leru (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
                                 ddr, drr, dri, nmax, ncheck, naxsm)
                     endif
 
@@ -2167,8 +2173,11 @@ contains
             if (mpar%integration_type == 0) then
                 call tmatr0 (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
                         ddr, drr, dri, nmax, ncheck, naxsm)
-            else
+            else if (mpar%integration_type == 1) then
                 call tmatr0_adapt (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
+                        ddr, drr, dri, nmax, ncheck, naxsm)
+            else
+                call tmatr0_leru (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
                         ddr, drr, dri, nmax, ncheck, naxsm)
             endif
 
@@ -2262,8 +2271,11 @@ contains
             if (mpar%integration_type == 0) then
                 call tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, &
                         ddr, drr, dri, nmax, ncheck, naxsm)
+            else if (mpar%integration_type == 1) then
+                call tmatr_adapt (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
+                        ddr, drr, dri, nmax, ncheck, naxsm)
             else
-                call tmatr_adapt(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, &
+                call tmatr_leru (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
                         ddr, drr, dri, nmax, ncheck, naxsm)
             endif
 
