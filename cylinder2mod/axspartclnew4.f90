@@ -340,6 +340,7 @@ program axspartcl1
     !     rsnm=1.d0 ! should be set in *.ini file
     rev = 1.d0
     defp = 1.d0
+    ndefp = 1
 
     write(6, *)'chose particle shape'
     write(6, *)'only axially symmetric particle shapes allowed'
@@ -447,16 +448,20 @@ program axspartcl1
 
     else if (np == -1) then
 
-        write(6, *)'the half-length of the spheroid along ', &
+        hlength_min = mpar%spheroid_c_min
+        hlength_max = mpar%spheroid_c_max
+        hlength = hlength_min
+        write(6, *)'range of the half-length of the spheroid along ', &
                 'the rotational axis z-axis in your units ', &
                 '(in nm if dispersive data used)'
-        read(5, *) hlength
+        write(6, *) 'auto-select from *.ini file', hlength_min, hlength_max
         !z      hlength=63.3d0
 
+        rsnm = mpar%spheroid_a
         write(6, *)'the half-length of the spheroid along the ', &
                 'horizontal axis (in theta=pi/2 plane) in your units ', &
                 '(in nm if dispersive data used)'
-        read(5, *) rsnm
+        write(6, *) 'auto-select from *.ini file', rsnm
         !rsnm = 21.1d0
 
         !     np=-1 - defp = the ratio of the horizontal to rotational axes. defp is
@@ -506,13 +511,6 @@ program axspartcl1
             write(6, *)'auto-set cylinder minimal r/l from *.ini', rl_min
         end if
 
-        ndefp = mpar%ndefp
-        if (ndefp  <=  0) then
-            write(6, *)'enter amount of steps in length:'
-            read(5, *) ndefp
-        else
-            write(6, *)'auto-set amount of steps in length from *.ini', ndefp
-        end if
 
         rsnm = mpar%rsnm
         if (rsnm  <=  0_dp) then
@@ -586,6 +584,14 @@ program axspartcl1
     end if ! end np if
     !***************************************
 
+    ndefp = mpar%ndefp
+    if (ndefp  <=  0) then
+        write(6, *)'enter amount of steps in length:'
+        read(5, *) ndefp
+    else
+        write(6, *)'auto-set amount of steps in length from *.ini', ndefp
+    end if
+
     defpp = defp
 
     if (rat == 1.) then
@@ -626,7 +632,7 @@ program axspartcl1
 
     naxsm = 1
 
-    if (np <= -4) naxsm = 0
+    if (np <= -4) naxsm = 0  ! TODO: consider cylinder case
 
     !--------/---------/---------/---------/---------/---------/---------/--
     !
@@ -2011,11 +2017,14 @@ contains
                 !
                 ! determine m=m'=0 elements of the t matrix
                 !
-                if (mpar%yn_adaptive == 0) then
+                if (mpar%integration_type == 0) then
                     call tmatr0 (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
                             ddr, drr, dri, nmax, ncheck, naxsm)
-                else
+                else if (mpar%integration_type == 1) then
                     call tmatr0_adapt (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
+                            ddr, drr, dri, nmax, ncheck, naxsm)
+                else
+                    call tmatr0_leru (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
                             ddr, drr, dri, nmax, ncheck, naxsm)
                 endif
                 !
@@ -2099,11 +2108,14 @@ contains
 
                     ! determine m=m'=0 elements of the t matrix
 
-                    if (mpar%yn_adaptive == 0) then
+                    if (mpar%integration_type == 0) then
                         call tmatr0 (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
                                 ddr, drr, dri, nmax, ncheck, naxsm)
-                    else
+                    else if (mpar%integration_type == 1) then
                         call tmatr0_adapt (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
+                                ddr, drr, dri, nmax, ncheck, naxsm)
+                    else
+                        call tmatr0_leru (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
                                 ddr, drr, dri, nmax, ncheck, naxsm)
                     endif
 
@@ -2158,11 +2170,14 @@ contains
 
             ! determine m=m'=0 elements of the t matrix
 
-            if (mpar%yn_adaptive == 0) then
+            if (mpar%integration_type == 0) then
                 call tmatr0 (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
                         ddr, drr, dri, nmax, ncheck, naxsm)
-            else
+            else if (mpar%integration_type == 1) then
                 call tmatr0_adapt (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
+                        ddr, drr, dri, nmax, ncheck, naxsm)
+            else
+                call tmatr0_leru (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
                         ddr, drr, dri, nmax, ncheck, naxsm)
             endif
 
@@ -2253,11 +2268,14 @@ contains
 
             !         call tmatr(m,ngauss,x,w,an,ann,s,ss,ppi,pir,pii,r,dr,
             !     &               ddr,drr,dri,nmax,ncheck,naxsm)
-            if (mpar%yn_adaptive == 0) then
+            if (mpar%integration_type == 0) then
                 call tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, &
                         ddr, drr, dri, nmax, ncheck, naxsm)
+            else if (mpar%integration_type == 1) then
+                call tmatr_adapt (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
+                        ddr, drr, dri, nmax, ncheck, naxsm)
             else
-                call tmatr_adapt(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, &
+                call tmatr_leru (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
                         ddr, drr, dri, nmax, ncheck, naxsm)
             endif
 

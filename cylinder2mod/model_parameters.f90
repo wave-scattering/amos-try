@@ -22,14 +22,19 @@ module model_parameters
         !Select the solver between Lapack or custom routines (ichoice = 1 or 2)
         integer, public :: ichoice
 
-        ! choice of integration: 0 - fixed Gaussian-Legendre, 1 - adaptive from quadpack
-        integer, public :: yn_adaptive
+        ! choice of integration: 0 - fixed Gaussian-Legendre with original Mishchenko algorithm,
+        !                        1 - adaptive from quadpack with original Mishchenko algorithm,
+        !                        2 - fixed Gaussian-Legendre with Le Ru algorithm
+        integer, public :: integration_type
 
         ! choice of implementation of Bessel functions: 0 - backward recurrence, 1 - Amos library
         integer, public :: use_amos
         
         ! choice to check the convergence: 0 - do not check, 1 - check
         integer, public :: yncheck
+
+        !spheroid options
+        real(dp) :: spheroid_a, spheroid_c_min, spheroid_c_max
 
     end type model_parameters_type
     type(model_parameters_type), public :: mpar
@@ -76,10 +81,10 @@ contains
         if ((trim(string)=='nanorod').or.(trim(string)=='-9')) mpar%np = -9
 !        if ((trim(string)=='chebyshev').or.(trim(string)=='- ')) mpar%np = -
 
-        call fini%get(section_name = 'general', option_name = 'adaptive_integration', &
+        call fini%get(section_name = 'general', option_name = 'integration_type', &
                 val = num, error = error)
-        mpar%yn_adaptive = 0
-        if (error==0) mpar%yn_adaptive = num
+        mpar%integration_type = 0
+        if (error==0) mpar%integration_type = num
 
         call fini%get(section_name = 'general', option_name = 'use_amos', &
                 val = num, error = error)
@@ -90,7 +95,28 @@ contains
                 val = num, error = error)
         mpar%yncheck = 1
         if (error==0) mpar%yncheck = num
+
+        call fini%get(section_name = 'general', option_name = 'aspect_steps', &
+                val = num, error = error)
+        mpar%ndefp = 1
+        if (error==0) mpar%ndefp = num
+
+        call fini%get(section_name = 'spheroid', option_name = 'c_min', &
+                val = double, error = error)
+        mpar%spheroid_c_min = 0_dp
+        if (error==0) mpar%spheroid_c_min = double
+
+        call fini%get(section_name = 'spheroid', option_name = 'c_max', &
+                val = double, error = error)
+        mpar%spheroid_c_max = 0_dp
+        if (error==0) mpar%spheroid_c_max = double
+
         
+        call fini%get(section_name = 'spheroid', option_name = 'a', &
+                val = double, error = error)
+        mpar%rl_min = 0_dp
+        if (error==0) mpar%spheroid_a = double
+
         call fini%get(section_name = 'nanorod', &
                 option_name = 'nanorod_cap_hr', val = double, error = error)
         mpar%nanorod_cap_hr = 1_dp ! default is round cap
@@ -106,10 +132,6 @@ contains
         mpar%rl_max = -1_dp
         if (error==0) mpar%rl_max = double
 
-        call fini%get(section_name = 'cylinder', option_name = 'rl_steps', &
-                val = num, error = error)
-        mpar%ndefp = 0
-        if (error==0) mpar%ndefp = num
 
         call fini%get(section_name = 'cylinder', option_name = 'radius', &
                 val = double, error = error)
