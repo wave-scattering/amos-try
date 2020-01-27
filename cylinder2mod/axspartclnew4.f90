@@ -979,7 +979,7 @@ program axspartcl1
         delo = enw/dble(nstep - 1)
     end if
     !
-    !--------/---------/---------/---------/---------/---------/---------/--
+!--------/---------/---------/---------/---------/---------/---------/--
     !                  --------------------------------
     ! output initial statements
 
@@ -1011,7 +1011,7 @@ program axspartcl1
                 write(nout, *)'#sphere core diel. const.=', zeps(1)
         if ((ilcs /= lcs).or.(nmat == 0))&
                 write(nout, *)'#coating diel. const.=', zeps(lcs)
-        !--------/---------/---------/---------/---------/---------/---------/--
+!--------/---------/---------/---------/---------/---------/---------/--
     end if
     write(nout, *)'#vacuum lambda_0 and sg_sc in columns'
     write(nout, *)
