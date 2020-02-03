@@ -2139,8 +2139,8 @@ subroutine tmatr0_leru(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
                     ! dr(i) contains $r'(\theta)/r(\theta)$ instead of $r'(\theta)$.
 
                     qs = dsqrt(1.d0 - x(i)**2)          !\sin\theta
-                    vv = sqrt(r(i))                   !r(\theta)
-                    drd = vv*dr(i)*sqrt(ppi)          !x_\theta=k_out*r'(\theta) of Ru et al
+                    vv = sqrt(r(i))
+                    drd = vv*dr(i)*sqrt(ppi)            !x_\theta=k_out*r'(\theta) of Ru et al
 
                     ! Amend for the Riccati-Bessel functions of Ru et al
                     ! on using that they only contain combinations of
@@ -2280,7 +2280,7 @@ subroutine tmatr0_leru(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
                 ! Taking into account the "factor":
                 ! factor=1 or 2 depending on ncheck==0 or ncheck==1
 
-                if (factor==2) then
+                if (abs(factor-2d0)<=1.d-10) then
                     zk1 = zk1*factor
                     zk2 = zk2*factor
                     zl1 = zl1*factor
@@ -3233,8 +3233,8 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr
     real(dp) :: drd, qs, vv, xkr, a(nmax)
     complex(dp) :: znf, zxipsi, zxidpsi, zdxipsi, zdxidpsi, &
             zk1, zk2, zl1, zl2, zl3, zl4, zk1i, zk2i, zl1i, zl2i, zl3i, zl4i
-    complex(dp) zq11(NPN2, NPN2), zq12(NPN2, NPN2), zq21(NPN2, NPN2), &
-            zq22(NPN2, NPN2)
+    complex(dp) zq11(npn1, npn1), zq12(npn1, npn1), zq21(npn1, npn1), &
+            zq22(npn1, npn1)
     !________
     common /tmat99/&
             r11, r12, r21, r22, i11, i12, i21, i22, rg11, rg12, rg21, rg22, &
@@ -3325,9 +3325,9 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr
     !  polar angle dependent size parameter of an axially symmetric scatterer.
 
     znf = cmplx_dp(pir, pii)/ppi       !in general complex ref. index contrast n_2/n_1;
-    !the parameter 's' in Ru et al formulas
+                                       !the parameter 's' in Ru et al formulas
 
-    do n1 = mm1, nmax
+    do n1 = mm1, nmax      !mm1 = m
         an1 = an(n1)
 
         do n2 = mm1, nmax
@@ -3432,7 +3432,7 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr
 ! Amend for that on the routine input at the present code of Ref. \ct{MTL}:
 ! r(i) contains $r^2(\theta)$ instead of $r(\theta)$ and
 ! dr(i) contains $r'(\theta)/r(\theta)$ instead of $r'(\theta)$.
-!ds(i) = s(i)*qm*wr       !=dble(m)*w(i)*r^2(\theta)/(|\sin\theta|)
+! ds(i) = s(i)*qm*wr       !=dble(m)*w(i)*r^2(\theta)/(|\sin\theta|)
 
                 qs = dsqrt(1.d0 - x(i)**2)          !\sin\theta
                 vv = sqrt(r(i))                     !r(\theta)
@@ -3568,7 +3568,7 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr
                 b8r = b2r*drri - b2i*drii
                 b8i = b2i*drri + b2r*drii
 
-    ! %%%%%%%%%  forming integrands of j-matrices (j^{11}=j^{22}=0 for m=0):
+! %%%%%%%%%  forming integrands of j-matrices (j^{11}=j^{22}=0 for m=0):
 
                 uri = dr(i)
                 dsi = ds(i)
@@ -3618,11 +3618,10 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr
 
             end do  ! end of Gauss integration
 
-
         ! Taking into account the "factor":
         ! factor=1 or 2 depending on ncheck==0 or ncheck==1
 
-            if (factor==2) then
+            if (abs(factor-2d0)<=1.d-10) then
                 zk1 = zk1*factor
                 zk2 = zk2*factor
                 zl1 = zl1*factor
@@ -3678,7 +3677,7 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr
     tpii = pii                 !im [1/k_{in}^2]
     tppi = ppi                 !1/k_{out}^2
 
-    nm = nmax - mm1 + 1
+    nm = nmax - mm1 + 1         !mm1 = m
     do n1 = mm1, nmax
         k1 = n1 - mm1 + 1
         kk1 = k1 + nm
@@ -3749,11 +3748,11 @@ end
 subroutine tt(nmax)
     !=================
     !  nmax=nmax-m+1 here, where nmax is the angular momentum cutoff in main
-    !  ncheck -
+    !  ncheck
     !
     !   calculation of the matrix    t = - rg(q)*(q**(-1))
     !
-    !   input  in common /ctt/
+    !   input in common /ctt/
     !   output in common /ct/
     !
     !--------/---------/---------/---------/---------/---------/---------/--
@@ -3784,8 +3783,8 @@ subroutine tt(nmax)
     enddo
 
     if (mpar%ichoice==2) then    ! nag or not nag decision tree
-        !*******************************************************************
-        !  gaussian elimination             !nag library not used
+!*******************************************************************
+!  gaussian elimination             !nag library not used
         call zger(zq, ipiv, emach)  !gauss elimination of zq to
 
         !a lower diagonal matrix
@@ -3805,8 +3804,8 @@ subroutine tt(nmax)
 
         deallocate(zq, ipiv, zx, zw)
     else
-        !*******************************************************************
-        !     matrix inversion from lapack
+!*******************************************************************
+!     matrix inversion from lapack
 
         do i = 1, nnmax
             do j = 1, nnmax
@@ -3843,12 +3842,5 @@ subroutine tt(nmax)
 
     return
 end
-
 !********************************************************************
-!********************************************************************
-
-
-!********************************************************************
-
-
 ! (c) copr. 03/2003  alexander moroz
