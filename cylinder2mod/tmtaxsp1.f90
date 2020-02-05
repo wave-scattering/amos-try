@@ -301,10 +301,10 @@ subroutine tmtaxsp(nmax, rap, zeps1, tmt)
             call tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, &
                     ddr, drr, dri, nmax, ncheck, naxsm)
         else if (mpar%integration_type == 1) then
-            call tmatr_adapt (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
+            call tmatr_adapt (m, ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
                     ddr, drr, dri, nmax, ncheck, naxsm)
         else
-            call tmatr_leru (ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
+            call tmatr_leru (m, ngauss, x, w, an, ann, ppi, pir, pii, r, dr, &
                     ddr, drr, dri, nmax, ncheck, naxsm)
         endif
         !
