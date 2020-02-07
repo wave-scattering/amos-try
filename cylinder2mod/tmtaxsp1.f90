@@ -2597,9 +2597,9 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
                 a21 = d2n1*d1n2
                 a22 = d2n1*d2n2
                 aa1 = a12 + a21            != d1n1*d2n2+d2n1*d1n2
-                aa2 = a11*dss(i) + a22   !=(d1n1*d1n2)*dble(m)**2/(\sin^2\theta)
+                aa2 = a11*dss(i) + a22     !=(d1n1*d1n2)*dble(m)**2/(\sin^2\theta)
                 !                          ! +d2n1*d2n2
-                ! vector spherical harmonics:
+                !  Bessel functions:
                 !  since refractive index is allowed to be complex in general,
                 !  the bessel function j_l(k_in*r) is complex. the code below
                 !  performs a separation of the complex integrand in waterman's
@@ -3130,8 +3130,8 @@ end
 
 !**********************************************************************
 
-subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
-        drr, dri, nmax, ncheck, naxsm)
+subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii,  &
+        r, dr, ddr, drr, dri, nmax, ncheck, naxsm)
     !--------/---------/---------/---------/---------/---------/---------/--
     ! >>> ngauss,x,w,an,ann,s,ss,ppi,pir,pii,r,dr,ddr,drr,dri,nmax,ncheck
     ! <<< common blocks /tmat99/, /ct/ (for main),  and /ctt/ (for tt)
@@ -3319,7 +3319,7 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr
         rr(i) = wr               !r^2(\theta)*weight
     end do
 
-    ! Before the n1, n2 (or l,l') loop:
+    !  Before the n1, n2 (or l,l') loop:
     !  In Ru et al formulas:
     !  s=n_2/n_1$ is the refractive index constrast and $x(\theta)=k_1 r(\theta)$ is the
     !  polar angle dependent size parameter of an axially symmetric scatterer.
@@ -3462,7 +3462,7 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr
 
                         zk1i = qm*dv1(n1)*dv1(n2)*drd*zxidpsi/qs
                         zk2i = qm*dv1(n1)*dv1(n2)*drd*zdxipsi/qs
-    ! qs=dsqrt(1.d0-x(i)**2) is \sin\theta for missing in the integration measure;
+    ! qs=dsqrt(1.d0-x(i)**2) is \sin\theta;
     ! By dividing by qs, the integrand will, as before, be integrated with the measure
     ! d(\cos\theta) for which the GIF weights are supplied
 
