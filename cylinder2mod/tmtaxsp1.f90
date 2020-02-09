@@ -3330,10 +3330,10 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii,  &
         A(n) = sqrt(dble(2*n + 1)/(2*n*(n + 1)))
     enddo
 
-    do n1 = mm1, nmax      !mm1 = m
+    do n1 = mm1, nmax          !mm1 = m
         an1 = an(n1)
 
-        do n2 = mm1, nmax
+        do n2 = mm1, nmax      !mm1 = m
             an2 = an(n2)
     !Init:
             ar11 = 0d0
@@ -3599,7 +3599,7 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii,  &
                     gr21 = gr21 + f1*c4r + f2*c5r
                     gi21 = gi21 + f1*c4i + f2*c5i
 
-                    cycle
+                    cycle         !causes the loop to skip the remainder of its body
                 end if
         ! [dble(m)*w(i)*r^2(i)/(|\sin\theta|)]*(d1n1*d2n2+d2n1*d1n2):
                 e1 = dsi*aa1
@@ -3673,8 +3673,8 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii,  &
             ig12(n1, n2) = gi12*an12
             ig21(n1, n2) = gi21*an12
             ig22(n1, n2) = gi22*an12
-        end do
-    end do
+        end do              !over n2
+    end do                  !over n1
 
     tpir = pir                 !re [1/k_{in}^2]
     tpii = pii                 !im [1/k_{in}^2]
@@ -3682,8 +3682,8 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii,  &
 
     nm = nmax - mm1 + 1         !mm1 = m
     do n1 = mm1, nmax
-        k1 = n1 - mm1 + 1
-        kk1 = k1 + nm
+        k1 = n1 - mm1 + 1       !k1 set to run from k1=1 for any mm1=m
+        kk1 = k1 + nm           !kk1 set to run from kk1=nmax-mm1+2 for any mm1=m
 
         do n2 = mm1, nmax
             k2 = n2 - mm1 + 1
