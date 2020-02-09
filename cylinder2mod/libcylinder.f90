@@ -27,12 +27,6 @@ contains
         real(dp), intent(in) :: re, im
         cmplx_dp = cmplx(re, im, kind = dp)
     end function cmplx_dp
-    !=======================================================================
-    !=======================================================================
-    !=======================================================================
-
-    !=======================================================================
-    !=======================================================================
 
     !=======================================================================
     subroutine rsp_spheroid(x, r, dr)
@@ -45,7 +39,7 @@ contains
         !   calculation of the functions
         !              r(i)=r(y)**2 and dr(i)=((d/dy)r(y))/r(y)
         !   for an oblate/prolate spheroids droplet specified by the parameters
-        !   rev and  eps at ngauss gauss integration formula (gif) division points
+        !   rev and eps at ngauss gauss integration formula (gif) division points
         !   in the integral over theta. here y=acos(x)=theta.
         !
         !      r(\theta,\phi)=a\left[\sin^2\theta + (a^2/b^2)\cos^2\theta]^{-1/2}
