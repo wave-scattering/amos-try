@@ -71,7 +71,7 @@ contains
 
         ! Assign model parameters
         rev = mpar%rev
-        eps = mpar%eps
+        eps = mpar%defp
 
         ! Set ng and ngauss
         ng = size(x)
@@ -137,7 +137,7 @@ contains
 
         ! Assign model parameters
         rev = mpar%rev
-        eps = mpar%eps
+        eps = mpar%defp
 
         ! Set ng and ngauss
         ng = size(x)
@@ -217,7 +217,7 @@ contains
 
         ! Assign model parameters
         rev = mpar%rev
-        eps = mpar%eps
+        eps = mpar%defp
         epse = mpar%nanorod_cap_hr
 
         ! Set ng and ngauss
@@ -316,7 +316,7 @@ contains
 
         ! Assign model parameters
         rev = mpar%rev
-        eps = mpar%eps
+        eps = mpar%defp
 
         ! Set ng
         ng = size(x)
@@ -418,7 +418,7 @@ contains
         real(dp) :: e, r
 
         ! Assign model parameters
-        eps = mpar%eps
+        eps = mpar%defp
 
         if (eps < 1d0) then ! Prolate spheroid
             e = dsqrt(1d0 - eps*eps)
@@ -447,7 +447,7 @@ contains
         real(dp) :: eps, rat
 
         ! Assign model parameters
-        eps = mpar%eps
+        eps = mpar%defp
 
         rat = (1.5d0/eps)**(1d0/3d0)/ &
                 dsqrt((eps + 2d0)/(2d0*eps))
@@ -468,7 +468,7 @@ contains
         real(dp) :: e, rv, rs
 
         ! Assign model parameters
-        eps = mpar%eps
+        eps = mpar%defp
         epse = mpar%nanorod_cap_hr
 
         ! TODO: replace with computation of the nanorod surface
@@ -513,7 +513,7 @@ contains
         real(dp) :: x(ng), w(ng)
 
         ! Assign model parameters
-        eps = mpar%eps
+        eps = mpar%defp
 
         dn = dble(n)
         en = eps*dn

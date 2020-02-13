@@ -42,7 +42,7 @@ contains
         !
         !  Singularity points:
         !
-        points(1) = 1.0_dp/dsqrt(mpar%eps**2 +1.0_dp)
+        points(1) = 1.0_dp/dsqrt(mpar%defp**2 +1.0_dp)
         write(*,*) 'Points = ', points
 
         call dqagp ( fun, a, b, npts2, points, epsabs, epsrel, result, abserr, &
