@@ -16,7 +16,7 @@ module model_parameters
                 alpha, beta, thet, thet0, phi, phi0
         integer :: np, nstep, ndefp
         complex(dp) :: cceps, zeps0
-        real(dp) :: eps  ! deformation parameter as entered to ampldr(...)
+        real(dp) :: defp  ! aka eps in shape related routines, a deformation parameter as entered to ampldr(...)
         real(dp) :: rev  ! equivalent sphere radius as entered to ampldr(...)
 
         !Select the solver between Lapack or custom routines (ichoice = 1 or 2)
@@ -53,7 +53,17 @@ module model_parameters
 
 contains
 
+    subroutine evaluate_sphere_equivalent_radius()
+        real(dp) :: hlength
+
+        hlength = mpar%rsnm/mpar%defp
+        ! TODO: the result should depend on mpar%np!
+        mpar%rev = hlength*(3.d0*mpar%defp*mpar%defp/2.d0)**(1.d0/3.d0)
+
+    end subroutine evaluate_sphere_equivalent_radius
     !--------/---------/---------/---------/---------/---------/---------/--
+
+
     subroutine ini_parse()
         !        character(len = :), allocatable :: items(:, :) !< items pairs.
         integer :: error

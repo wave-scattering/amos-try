@@ -723,9 +723,7 @@ program axspartcl1
 
     !--------/---------/---------/---------/---------/---------/---------/--
     !
-    ! if nag library is available, set mpar%ichoice=1, otherwise mpar%ichoice=2
 
-    mpar%ichoice = 2
     !  controlling the number nd=ndgs*nmax of division points in
     !  computing integrals over the particle surface (ref. 5).
     !  for compact particles, the
@@ -767,6 +765,7 @@ program axspartcl1
 
     end if
     !
+    mpar%ichoice = 2
     if (mpar%ichoice == 1) then
         write(6, *) 'lapack routines are used for the matrix inversion'
     else if (mpar%ichoice == 2) then
@@ -1315,8 +1314,8 @@ program axspartcl1
     !                       material constant reading:
     !
     select case (nmat)
-    case (1) !no reading of material data
-    case (2) ! silver data
+        case (1) !no reading of material data
+        case (2) ! silver data
 
         open(unit = 30, file = 'agc.dat')
         rewind(30)
@@ -1325,7 +1324,7 @@ program axspartcl1
         enddo
         close(30)
 
-    case (3) ! gold data
+        case (3) ! gold data
 
         !      open(unit=30,file='au293knew.dat')       !gold data for different t
         open(unit = 30, file = 'audat.dat')          !gold data in nm
@@ -1338,9 +1337,9 @@ program axspartcl1
         enddo
         close(30)
 
-        !else if (nmat.eq.4) then
+            !else if (nmat.eq.4) then
 
-    case (5) ! copper data
+        case (5) ! copper data
 
         open(unit = 30, file = 'cudat.dat')          !copper data in nm
         write(6, *)'copper particles'
@@ -1351,7 +1350,7 @@ program axspartcl1
         enddo
         close(30)
 
-    case (6) ! aluminium data
+        case (6) ! aluminium data
 
         open(unit = 30, file = 'aldat.dat')          !aluminium data in nm
         write(6, *)'aluminum particles'
@@ -1362,7 +1361,7 @@ program axspartcl1
         enddo
         close(30)
 
-    case (7) ! platinum data
+        case (7) ! platinum data
 
         open(unit = 30, file = 'ptdat.dat')          !platinum data in nm
         write(6, *)'platinum particles'
@@ -1373,7 +1372,7 @@ program axspartcl1
         enddo
         close(30)
 
-    case (8) ! silicon data
+        case (8) ! silicon data
 
         !     open(unit=30,file='sieps.dat')  !silicon data in nm
         open(unit = 30, file = 'sidat.dat')   !silicon data in nm for larger interval
@@ -1389,7 +1388,7 @@ program axspartcl1
         enddo
         close(30)
 
-    case (9) ! water data
+        case (9) ! water data
 
         open(unit = 30, file = 'measured_water_dispersion_t=24.txt')   !water in ghz
         write(6, *)'water particles'
@@ -1913,8 +1912,9 @@ contains
         !
         !****************************************************************
         !
-        mpar%eps = eps
-        mpar%rev = rev
+        mpar%defp = eps
+        call evaluate_sphere_equivalent_radius
+        rev =mpar%rev
         p = dacos(-1d0)                   !local pi constant
         !
         a = rev
