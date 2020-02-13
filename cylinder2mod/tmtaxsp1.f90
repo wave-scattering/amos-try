@@ -573,17 +573,17 @@ subroutine const(ngauss, nmax, x, w, an, ann, s, ss, np, eps)
     !--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
     implicit none
-
-    integer ngauss, nmax, np, ng, ng1, ng2, nn
+    integer, intent(in):: ngauss, nmax, np
+    integer ng, ng1, ng2, nn
     integer neps, jg, i, j, n, n1
-    real(dp) eps, d, ddd, xx, y
+    real(dp), intent(in):: eps
+    real(dp) d, ddd, xx, y
     real(dp) ee, ee1, cc, si, xi1, xi2, xav
     real(dp) xtheta, theta0, rx
-    real(dp) x(npng2), w(npng2), x1(npng2), w1(npng2), &
-            x2(npng2), w2(npng2), &
-            s(npng2), ss(npng2), &
-            an(npn1), ann(npn1, npn1), dd(npn1)
-
+    real(dp), intent(out):: x(npng2), w(npng2),&
+            an(npn1), ann(npn1, npn1),s(npng2), ss(npng2)
+    real(dp) x1(npng2), w1(npng2), &
+            x2(npng2), w2(npng2), dd(npn1)
     common/revval/ rx
 
     !data pi/3.141592653589793d0/
@@ -846,16 +846,17 @@ subroutine vary(lam, mrr, mri, a, eps, &
     !  ddr=\lambda/[2*\pi*r(\theta)]
     !  drr=(mrr/(mrr**2+mri**2))*(\lambda/[2*\pi*r(\theta)])
     !  dri=-(mri/(mrr**2+mri**2))*(\lambda/[2*\pi*r(\theta)])
-    !--------/---------/---------/---------/---------/---------/---------/--
+!--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
     implicit none
     integer np, ng, ngauss, nmax, nnmax1, nnmax2, i
     real(dp) a, eps
-    real(dp) p, ppi, pir, pii, pri, prr, ta, tb
-    real(dp) rsnm, ht, wv, v, v1, v2, vv
-    real(dp)  x(npng2), r(npng2), dr(npng2), mrr, mri, lam, &
-            z(npng2), zr(npng2), zi(npng2), &
-            ddr(npng2), drr(npng2), dri(npng2)
+    real(dp), intent(out):: ppi, pir, pii
+    real(dp) p, pri, prr, ta, tb,rsnm, ht, wv, v, v1, v2, vv
+    real(dp), intent(out):: r(npng2), dr(npng2), ddr(npng2),&
+            drr(npng2), dri(npng2)
+    real(dp)  x(npng2), mrr, mri, lam, &
+            z(npng2), zr(npng2), zi(npng2)
 
     ng = ngauss*2
     ht = 0d0
@@ -1324,7 +1325,7 @@ subroutine tmatr0(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
         sig(n) = si              !=(-1)**n
     end do
     !
-    ! assigning wigner d-matrices - assuming mirror symmetry
+    ! assigning Wigner d-matrices - assuming mirror symmetry
     ! in the \theta=\pi/2 plane:
     do i = 1, ngauss
         i1 = ngauss - i + 1
@@ -1651,7 +1652,7 @@ subroutine tmatr0_adapt(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
         sig(n) = si              !=(-1)**n
     end do
 
-    ! Assigning wigner d-matrices - assuming mirror symmetry
+    ! Assigning Wigner d-matrices - assuming mirror symmetry
     ! in the \theta=\pi/2 plane:
 
     do i = 1, ngauss
@@ -1954,7 +1955,7 @@ subroutine tmatr0_leru(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
     !c      common /ct/ tr1,ti1                       !output from tt routine
     common /ctt/ qr, qi, rgqr, rgqi              !input for tt routine
     !
-    mm1 = 1
+    mm1 = 1     !even if m=0 one has still mm1=1
     nnmax = nmax + nmax
     ng = 2*ngauss
     ngss = ng
@@ -2597,9 +2598,9 @@ subroutine tmatr(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
                 a21 = d2n1*d1n2
                 a22 = d2n1*d2n2
                 aa1 = a12 + a21            != d1n1*d2n2+d2n1*d1n2
-                aa2 = a11*dss(i) + a22   !=(d1n1*d1n2)*dble(m)**2/(\sin^2\theta)
+                aa2 = a11*dss(i) + a22     !=(d1n1*d1n2)*dble(m)**2/(\sin^2\theta)
                 !                          ! +d2n1*d2n2
-                ! vector spherical harmonics:
+                !  Bessel functions:
                 !  since refractive index is allowed to be complex in general,
                 !  the bessel function j_l(k_in*r) is complex. the code below
                 !  performs a separation of the complex integrand in waterman's
@@ -3130,8 +3131,8 @@ end
 
 !**********************************************************************
 
-subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr, &
-        drr, dri, nmax, ncheck, naxsm)
+subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii,  &
+        r, dr, ddr, drr, dri, nmax, ncheck, naxsm)
     !--------/---------/---------/---------/---------/---------/---------/--
     ! >>> ngauss,x,w,an,ann,s,ss,ppi,pir,pii,r,dr,ddr,drr,dri,nmax,ncheck
     ! <<< common blocks /tmat99/, /ct/ (for main),  and /ctt/ (for tt)
@@ -3242,7 +3243,7 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr
     !c      common /ct/ tr1,ti1                      !output from tt routine
     common /ctt/ qr, qi, rgqr, rgqi             !input for tt routine
     !________
-    mm1 = m
+    mm1 = m                !in tmatr0 routine mm1=1 for m=0
     qm = dble(m)
     qmm = qm*qm
     ng = 2*ngauss
@@ -3261,9 +3262,8 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr
         si = -si
         sig(n) = si              !=(-1)**n
     end do
-    !
-    ! assigning wigner d-matrices - assuming mirror symmetry
-    ! in the \theta=\pi/2 plane:
+
+! Assigning Wigner d-matrices for in total 2*ngauss points
 
     do i = 1, ngauss
 
@@ -3278,21 +3278,20 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr
             dd2 = dv2(n)
             d1(i1, n) = dd1
             d2(i1, n) = dd2
-            A(n) = sqrt(dble(2*n + 1)/(2*n*(n + 1)))
 
             if (naxsm==1) then         !gauss abscissas chosen +/- symmetric
                 ! using (4.2.4) and (4.2.6) of {ed},
                 !           d_{0m}^{(l)}(\pi-\theta) = (-1)^{l+m} d_{0m}^{(l)}(\theta)
 
                 si = sig(n + m)                  !=(-1)**(n+m)
-                !                                          !exactly what follows from {ed}
+                                                 !exactly what follows from {ed}
                 d1(i2, n) = dd1*si
                 d2(i2, n) = -dd2*si
 
             end if
         enddo
         !
-        if (naxsm==0) then        !gauss abscissas not chosen +/- symmetric
+        if (naxsm==0) then                !gauss abscissas not chosen +/- symmetric
             !
             call vig (x(i2), nmax, m, dv1, dv2)
             !
@@ -3305,21 +3304,21 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr
 
         end if
 
-    end do
+    end do   !over to ngauss
 
     !  Assigning r^2(\theta)*weight product and Bessel function independent factors:
     !  The arrays ss, s have been determined in CONST as 1/(\sin^2\theta) and
     !  1/(|\sin\theta|), respectively:
 
     do i = 1, ngss
-        wr = w(i)*r(i)
+        wr = w(i)*r(i)           !r^2(\theta)*weight
         !c           if (dr(i).eq.0.d0) wr=0.d0   !temporarily only
         ds(i) = s(i)*qm*wr       !=dble(m)*w(i)*r^2(\theta)/(|\sin\theta|)
         dss(i) = ss(i)*qmm       !=dble(m)**2/(\sin^2\theta)
         rr(i) = wr               !r^2(\theta)*weight
     end do
 
-    ! Before the n1, n2 (or l,l') loop:
+    !  Before the n1, n2 (or l,l') loop:
     !  In Ru et al formulas:
     !  s=n_2/n_1$ is the refractive index constrast and $x(\theta)=k_1 r(\theta)$ is the
     !  polar angle dependent size parameter of an axially symmetric scatterer.
@@ -3327,10 +3326,14 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr
     znf = cmplx_dp(pir, pii)/ppi       !in general complex ref. index contrast n_2/n_1;
                                        !the parameter 's' in Ru et al formulas
 
-    do n1 = mm1, nmax      !mm1 = m
+    do n=mm1,nmax
+        A(n) = sqrt(dble(2*n + 1)/(2*n*(n + 1)))
+    enddo
+
+    do n1 = mm1, nmax          !mm1 = m
         an1 = an(n1)
 
-        do n2 = mm1, nmax
+        do n2 = mm1, nmax      !mm1 = m
             an2 = an(n2)
     !Init:
             ar11 = 0d0
@@ -3376,7 +3379,7 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr
                 a22 = d2n1*d2n2
                 aa1 = a12 + a21            != d1n1*d2n2+d2n1*d1n2
                 aa2 = a11*dss(i) + a22     !=(d1n1*d1n2)*dble(m)**2/(\sin^2\theta)
-                ! +d2n1*d2n2
+                                           ! +d2n1*d2n2
 
 ! Spherical Bessel functions:
 ! Since refractive index is allowed to be complex in general,
@@ -3385,14 +3388,14 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr
 ! surface integral into its respective real and imaginary
 ! parts.
 
-! Bessel functions of the exterior argument:
+! Bessel functions of the real exterior argument:
 
                 qj1 = cbess%j(i, n1)
                 qy1 = cbess%y(i, n1)
                 qdj1 = cbess%dj(i, n1)
                 qdy1 = cbess%dy(i, n1)
 
-! Bessel functions of the interior argument:
+! Bessel functions of the, in principle complex, interior argument:
                 qjr2 = cbess%jr(i, n2)
                 qji2 = cbess%ji(i, n2)
                 qdjr2 = cbess%djr(i, n2)
@@ -3445,7 +3448,7 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr
 ! Assigning integrads by eqs 2-7 of Ru2012:
 
                 if (ncheck==1) then         !theta=pi/2 is scatterer mirror symmetry plane
-                    !eqs 18-19 of Ru2012
+                                            !eqs 18-19 of Ru2012
                     if (mod(n1 + n2, 2)==0) then     !n1+n2 even
 
                         zk1i = czero
@@ -3462,7 +3465,7 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr
 
                         zk1i = qm*dv1(n1)*dv1(n2)*drd*zxidpsi/qs
                         zk2i = qm*dv1(n1)*dv1(n2)*drd*zdxipsi/qs
-    ! qs=dsqrt(1.d0-x(i)**2) is \sin\theta for missing in the integration measure;
+    ! qs=dsqrt(1.d0-x(i)**2) is \sin\theta;
     ! By dividing by qs, the integrand will, as before, be integrated with the measure
     ! d(\cos\theta) for which the GIF weights are supplied
 
@@ -3596,7 +3599,7 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr
                     gr21 = gr21 + f1*c4r + f2*c5r
                     gi21 = gi21 + f1*c4i + f2*c5i
 
-                    cycle
+                    cycle         !causes the loop to skip the remainder of its body
                 end if
         ! [dble(m)*w(i)*r^2(i)/(|\sin\theta|)]*(d1n1*d2n2+d2n1*d1n2):
                 e1 = dsi*aa1
@@ -3670,8 +3673,8 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr
             ig12(n1, n2) = gi12*an12
             ig21(n1, n2) = gi21*an12
             ig22(n1, n2) = gi22*an12
-        end do
-    end do
+        end do              !over n2
+    end do                  !over n1
 
     tpir = pir                 !re [1/k_{in}^2]
     tpii = pii                 !im [1/k_{in}^2]
@@ -3679,8 +3682,8 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii, r, dr, ddr
 
     nm = nmax - mm1 + 1         !mm1 = m
     do n1 = mm1, nmax
-        k1 = n1 - mm1 + 1
-        kk1 = k1 + nm
+        k1 = n1 - mm1 + 1       !k1 set to run from k1=1 for any mm1=m
+        kk1 = k1 + nm           !kk1 set to run from kk1=nmax-mm1+2 for any mm1=m
 
         do n2 = mm1, nmax
             k2 = n2 - mm1 + 1
