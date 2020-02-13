@@ -56,9 +56,22 @@ contains
     subroutine evaluate_sphere_equivalent_radius()
         real(dp) :: hlength
 
-        hlength = mpar%rsnm/mpar%defp
-        ! TODO: the result should depend on mpar%np!
-        mpar%rev = hlength*(3.d0*mpar%defp*mpar%defp/2.d0)**(1.d0/3.d0)
+        select case(mpar%np)
+        case (-1) ! oblate/prolate spheroids
+            mpar%rev = mpar%rsnm/mpar%defp**(1.d0/3.d0)     !=equal-volume-sphere radius
+        case (-2) ! oblate/prolate cylinder
+            hlength = mpar%rsnm/mpar%defp
+            mpar%rev = hlength*(3.d0*mpar%defp*mpar%defp/2.d0)**(1.d0/3.d0)
+        case (-9) ! nanorod
+            !TODO: using cylinder estimate at the moment
+            hlength = mpar%rsnm/mpar%defp
+            mpar%rev = hlength*(3.d0*mpar%defp*mpar%defp/2.d0)**(1.d0/3.d0)
+        case default
+            stop 'not supported'
+        end select
+!        hlength = mpar%rsnm/mpar%defp
+!        ! TODO: the result should depend on mpar%np!
+!        mpar%rev = hlength*(3.d0*mpar%defp*mpar%defp/2.d0)**(1.d0/3.d0)
 
     end subroutine evaluate_sphere_equivalent_radius
     !--------/---------/---------/---------/---------/---------/---------/--
