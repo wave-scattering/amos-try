@@ -458,6 +458,7 @@ program axspartcl1
         !z      hlength=63.3d0
 
         rsnm = mpar%spheroid_a
+        mpar%rsnm = rsnm  !TODO: remove duplicated assignments
         write(6, *)'the half-length of the spheroid along the ', &
                 'horizontal axis (in theta=pi/2 plane) in your units ', &
                 '(in nm if dispersive data used)'
@@ -470,6 +471,7 @@ program axspartcl1
 
         defp = rsnm/hlength              !always revolution axis length
         !                                !in the denominator
+        mpar%defp = defp !TODO: remove duplicated assignments
 
         rev = rsnm/defp**(1.d0/3.d0)     !=equal-volume-sphere radius
         !                                !room for improvement here - it would be
@@ -1411,6 +1413,7 @@ program axspartcl1
 
         defp = rsnm/hlength_max + (rsnm/hlength_min - rsnm/hlength_max)*&
                 dble(itter - 1)/dble(ndefp - 1)
+        mpar%defp = defp
         defpp = defp
         hlength = rsnm/defp
         rev = hlength*(3.d0*defp*defp/2.d0)**(1.d0/3.d0)
