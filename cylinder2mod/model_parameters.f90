@@ -69,9 +69,6 @@ contains
         case default
             stop 'not supported'
         end select
-!        hlength = mpar%rsnm/mpar%defp
-!        ! TODO: the result should depend on mpar%np!
-!        mpar%rev = hlength*(3.d0*mpar%defp*mpar%defp/2.d0)**(1.d0/3.d0)
 
     end subroutine evaluate_sphere_equivalent_radius
     !--------/---------/---------/---------/---------/---------/---------/--
