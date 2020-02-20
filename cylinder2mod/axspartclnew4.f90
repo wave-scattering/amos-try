@@ -724,8 +724,6 @@ program axspartcl1
     end if
 
     !--------/---------/---------/---------/---------/---------/---------/--
-    !
-
     !  controlling the number nd=ndgs*nmax of division points in
     !  computing integrals over the particle surface (ref. 5).
     !  for compact particles, the
@@ -912,7 +910,7 @@ program axspartcl1
 
     lambda = 2*pi*rsnm/x_min
     !v      lambda=633.d0                      !jap89_5776 for gold ellipsod
-    !      lambda=354.d0                      !jap89_5776 for silver sphere
+    !      lambda=354.d0                       !jap89_5776 for silver sphere
     !lambda=500d0
     !
     ! size parameter is customarily defined as the ratio of
@@ -981,8 +979,7 @@ program axspartcl1
     end if
     !
 !--------/---------/---------/---------/---------/---------/---------/--
-    !                  --------------------------------
-    ! output initial statements
+! output initial statements
 
     open(unit = nout, file = 'axs-scs.dat')
     rewind(nout)
@@ -1794,9 +1791,7 @@ contains
 
     !**********************************************************************
 
-    subroutine ampldr(nmax, np, eps, &
-            rsnm, ht, lambda, zeps1, zeps0)
-
+    subroutine ampldr(nmax, np, eps,rsnm, ht, lambda, zeps1, zeps0)
         ! warning in module ampldr in file ampldr.f: variables set but never used:
         !    nggg set at line 493 file ampldr.f
         !--------/---------/---------/---------/---------/---------/---------/--
