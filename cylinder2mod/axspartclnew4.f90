@@ -3384,5 +3384,3 @@ contains
     end
 
 end program
-! (c) copr. 09/1998  Alexander Moroz
-! (c) copr. 10/2005  Alexander Moroz
