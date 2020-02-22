@@ -1,0 +1,5 @@
+- v1.0 There was an error in line  46 of rvhGetFullMatrix.m, as a result only half of the full matrix was returned (the rest was zeros)
+This has been corrected in v1.01.
+Thanks to Dominik Theobald for spotting the problem!
+
+- Current version: v1.01
