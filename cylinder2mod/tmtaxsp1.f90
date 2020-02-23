@@ -1947,11 +1947,11 @@ subroutine tmatr0_leru(ngauss, x, w, an, ann, ppi, pir, pii, r, dr, ddr, &
     !Ru_patch:
     !real(dp)complex(dp)
     !integer m    m\equiv 0 in tmatr0
-    real(dp) :: a11,drd, qs, vv, xkr, A(nmax)
+    real(dp) :: a11,drd, qs, xkr, A(nmax)
     complex(dp) :: znf, zxipsi, zxidpsi, zdxipsi, zdxidpsi, &
             zl1, zl2, zl3, zl4, zl1i, zl2i, zl3i, zl4i
-    complex(dp) zq11(NPN2, NPN2), zq12(NPN2, NPN2), zq21(NPN2, NPN2), &
-            zq22(NPN2, NPN2)
+    complex(dp) zq11(npn1, npn1), zq12(npn1, npn1), zq21(npn1, npn1), &
+            zq22(npn1, npn1)
     !
     common /tmat99/&
             r11, r12, r21, r22, i11, i12, i21, i22, rg11, rg12, rg21, rg22, &
