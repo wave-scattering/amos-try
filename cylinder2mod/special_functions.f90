@@ -27,7 +27,6 @@ module special_functions
 
 contains
     !=======================================================================
-    !=======================================================================
     subroutine cbesscjcdj(x, n, nmax, jr, ji, djr, dji)
         real(dp) x, xx, xr, xi, jr, ji, djr, dji
         integer nmax, n

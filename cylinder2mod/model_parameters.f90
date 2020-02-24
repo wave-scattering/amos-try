@@ -19,12 +19,12 @@ module model_parameters
         real(dp) :: defp  ! aka eps in shape related routines, a deformation parameter as entered to ampldr(...)
         real(dp) :: rev  ! equivalent sphere radius as entered to ampldr(...)
 
-        !Select the solver between Lapack or custom routines (ichoice = 1 or 2)
+!Select the solver between Lapack or custom routines (ichoice = 1 or 2)
         integer, public :: ichoice
 
-        ! choice of integration: 0 - fixed Gaussian-Legendre with original Mishchenko algorithm,
-        !                        1 - adaptive from quadpack with original Mishchenko algorithm,
-        !                        2 - fixed Gaussian-Legendre with Le Ru algorithm
+! choice of integration: 0 - fixed Gaussian-Legendre with original Mishchenko algorithm,
+!                        1 - adaptive from quadpack with original Mishchenko algorithm,
+!                        2 - fixed Gaussian-Legendre with Le Ru algorithm
         integer, public :: integration_type
 
         ! choice of implementation of Bessel functions: 0 - backward recurrence, 1 - Amos library

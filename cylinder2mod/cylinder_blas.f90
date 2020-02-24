@@ -8,19 +8,19 @@ module cylinder_blas
     !use errfun, only : wpop
 
     implicit none
-    ! This subroutines are not used in the main code at the moment,
-    ! so they are private in the module and commented out
-    ! private solve, zge, zsu, inv1, invert, decomp, prod
+! This subroutines are not used in the main code at the moment,
+! so they are private in the module and commented out
+! private solve, zge, zsu, inv1, invert, decomp, prod
 
 
 contains
 
 !=======================================================================
     subroutine zsur(a, int, x, emach) !TODO add intent specs
-        !     ------------------------------------------------------------------
-        !     zsur is  a standard back-substitution  subroutine  using the
-        !     output of zge to calculate x times a-inverse, returned in x
-        !     ------------------------------------------------------------------
+!     ------------------------------------------------------------------
+!     zsur is  a standard back-substitution  subroutine  using the
+!     output of zge to calculate x times a-inverse, returned in x
+!     ------------------------------------------------------------------
         implicit none
         integer n
         real(dp) emach
@@ -69,14 +69,14 @@ contains
 
 !=======================================================================
     subroutine zger(a, int, emach)
-        !     ------------------------------------------------------------------
-        !     zge is a standard subroutine to perform gaussian elimination on
-        !     a nc*nc matrix 'a' prior  to inversion, details stored in 'int'
-        !                   makes an lower diagonal matrix
-        !     this routine does not bother about elements directly above
-        !     the matrix diagonal as they are not used explicitly in an
-        !     accomapanying zse routine
-        !     ------------------------------------------------------------------
+!     ------------------------------------------------------------------
+!     zge is a standard subroutine to perform gaussian elimination on
+!     a nc*nc matrix 'a' prior  to inversion, details stored in 'int'
+!                   makes an lower diagonal matrix
+!     this routine does not bother about elements directly above
+!     the matrix diagonal as they are not used explicitly in an
+!     accomapanying zse routine
+!     ------------------------------------------------------------------
         integer n
         real(dp), intent(in) :: emach
         integer, intent(out) :: int(:)
@@ -117,9 +117,9 @@ contains
             end if
 
             if((abs(yr) - emach)<=0) exit
-            !     ! gaussian elemination of matrix elements above the matrix diagonal.
-            !     ! subtraction of (a(i,j)/a(i,i)) multiple of the ith column from the jth column
-            !     ! in the sub-matrix beginning with the (i+1,i+1) diag. element
+! gaussian elemination of matrix elements above the matrix diagonal.
+! subtraction of (a(i,j)/a(i,i)) multiple of the ith column from the jth column
+! in the sub-matrix beginning with the (i+1,i+1) diag. element
             do j = ii, n
                 if((abs(a(i, j)) - emach)>0) then
                     a(i, j) = a(i, j)/yr
@@ -502,6 +502,6 @@ contains
     !        return
     !    end subroutine
     !
-    !    !=======================================================================
+!=======================================================================
 
 end module cylinder_blas
