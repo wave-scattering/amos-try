@@ -3755,23 +3755,22 @@ end
 !**********************************************************************
 
 subroutine tt(nmax)
-    !=================
-    !  nmax=nmax-m+1 here, where nmax is the angular momentum cutoff in main
-    !  ncheck
-    !
-    !   calculation of the matrix    t = - rg(q)*(q**(-1))
-    !
-    !   input in commons /ctt/ and  /ztt/
-    !   output in common /ct/
-    !
-    !--------/---------/---------/---------/---------/---------/---------/--
+!=================
+!  nmax=nmax-m+1 here, where nmax is the angular momentum cutoff in main
+!  ncheck
+!
+!   calculation of the matrix    t = - rg(q)*(q**(-1))
+!
+!   input in commons /ctt/ and  /ztt/
+!   output in common /ct/
+!
+!--------/---------/---------/---------/---------/---------/---------/--
     use libcylinder
-
     implicit none
-    integer nnmax, nmax, nm, i, info, j, k
-    integer, allocatable :: ipiv(:)
 ! npn1, npn2 have been declared as public integers
-
+    integer nnmax, nmax, nm, i, info, j, k
+    integer, allocatable :: ipiv(:)     !an allocatable array is assigned memory storage
+                                        !during execution
     real(dp) ai, ar, ari, arr, ti, tr
     real(dp)  qr(npn2, npn2), qi(npn2, npn2), emach, &
             rgqr(npn2, npn2), rgqi(npn2, npn2)
@@ -3788,59 +3787,66 @@ subroutine tt(nmax)
     !
     nnmax = 2*nmax
     allocate(zq(1:nnmax, 1:nnmax), ipiv(1:nnmax), &
-            zx(1:nnmax), zw(1:nnmax))
-
-    k=2
+            zx(1:nnmax), zw(1:nnmax))       !the actual bounds for the allocatable arrays
+                                            !determined
+    k=1
+!>>>
     if (k==1) then
-    do i = 1, nmax
-        do j = 1, nmax
-            zq(i, j) = zq11(i,j)
-            zq(i, nmax+j) = zq12(i,j)
-            zq(nmax+i, j) = zq21(i,j)
-            zq(nmax+i, nmax+j) = zq22(i,j)
-        end do
-    end do
-
-    else
-
-    do i = 1, nnmax
-        do j = 1, nnmax
-            zq(i, j) = cmplx_dp(qr(i, j), qi(i, j))
-        enddo
-    enddo
-
-    end if
-
-    if (mpar%ichoice==2) then    ! nag or not nag decision tree
-!*******************************************************************
-!  gaussian elimination             !nag library not used
-        call zger(zq, ipiv, emach)  !gauss elimination of zq to
-
-        !a lower diagonal matrix
-        do i = 1, nnmax
-            do k = 1, nnmax    !initialization of the right-hand side zb
-                !(a row vector) of the matrix equation zx*zq=zb
-                zx(k) = cmplx_dp(rgqr(i, k), rgqi(i, k))
-            enddo
-            !solving zx*zq=zb by backsubstition (zx overwritten on exit)
-            call zsur(zq, ipiv, zx, emach)
-            do k = 1, nnmax
-                ! assign t-matrix elements = - rg(q)*(q**(-1))
-                tr1(i, k) = -dble(zx(k))
-                ti1(i, k) = -aimag(zx(k))
-            enddo
+        do i = 1, nmax
+            do j = 1, nmax
+                zq(i, j) = zq11(i,j)
+                zq(i, nmax+j) = zq12(i,j)
+                zq(nmax+i, j) = zq21(i,j)
+                zq(nmax+i, nmax+j) = zq22(i,j)
+            end do
         end do
 
-        deallocate(zq, ipiv, zx, zw)
     else
-!*******************************************************************
-!     matrix inversion from lapack
 
         do i = 1, nnmax
             do j = 1, nnmax
                 zq(i, j) = cmplx_dp(qr(i, j), qi(i, j))
             enddo
         enddo
+
+    end if
+!<<<
+!
+!Select Gaussian elimination:
+!mpar%ichoice == 1 .... lapack routines for the matrix inversion
+!mpar%ichoice == 2 ...  Pendry's zger and zsur are used
+
+    if (mpar%ichoice==2) then       ! gaussian elimination; nag library not used
+
+        call zger(zq, ipiv, emach)  !gauss elimination of zq to a
+                                    !lower diagonal matrix
+        do i = 1, nnmax
+            do k = 1, nnmax    !initialization of the right-hand side zb
+                               !(a row vector) of the matrix equation zx*zq=zb
+                zx(k) = cmplx_dp(rgqr(i, k), rgqi(i, k))
+            enddo
+
+!solving zx*zq=zb by backsubstition (zx overwritten on exit)
+            call zsur(zq, ipiv, zx, emach)
+
+            do k = 1, nnmax
+
+                ! assign t-matrix elements = - rg(q)*(q**(-1))
+                tr1(i, k) = -dble(zx(k))
+                ti1(i, k) = -aimag(zx(k))
+            enddo
+        end do
+
+        deallocate(zq, ipiv, zx, zw)    !release arrays from memory
+
+    else                 !matrix inversion from lapack
+
+!        do i = 1, nnmax
+!            do j = 1, nnmax
+!                zq(i, j) = cmplx_dp(qr(i, j), qi(i, j))
+!            enddo
+!        enddo
+
         info = 0
         !     call zgetrf_wrap(zq, ipiv)
         call zgetrf(nnmax, nnmax, zq, nnmax, ipiv, info)
@@ -3849,8 +3855,8 @@ subroutine tt(nmax)
         if (info/=0) write (6, 1100) info
 
         1100      format ('warning:  info=', i2)
-        ! calculate t-matrix = - rg(q)*(q**(-1))
-        !
+
+! calculate t-matrix = - rg(q)*(q**(-1))
         do i = 1, nnmax
             do j = 1, nnmax
                 tr = 0d0
@@ -3871,5 +3877,3 @@ subroutine tt(nmax)
 
     return
 end
-!********************************************************************
-! (c) copr. 03/2003  alexander moroz

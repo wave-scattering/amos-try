@@ -265,7 +265,7 @@ program axspartcl1
     !---------------------------------------------------------------
     ! convergence variable (has to be at least equal to 2):
 
-    lmax = 25  !lmx
+    lmax = 30  !lmx
 
     !  fcc parameters:
 
@@ -337,7 +337,7 @@ program axspartcl1
     ! preinitialization necessary since below rsnm,rev, and defp (all
     ! feeded in evanesc) are not always specified:
 
-    !     rsnm=1.d0 ! should be set in *.ini file
+!rsnm now set in *.ini file
     rev = 1.d0
     defp = 1.d0
     ndefp = 1
