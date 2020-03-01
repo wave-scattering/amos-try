@@ -3142,7 +3142,8 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii,  &
     !                           for m > 0
     !
     !  m      - azimuthal number
-    !  ngauss - the number of gif division points
+    !  ngauss - the number of gif division points for (0,\pi/2)
+    !           integration interval
     !  x=\cos\theta  - gif division points
     !  w - gif weights
     !  an(n)=n*(n+1)
@@ -3264,25 +3265,30 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii,  &
         sig(n) = si              !=(-1)**n
     end do
 
-! Assigning Wigner d-matrices for in total 2*ngauss points
+! Assigning arrays of the Wigner d- and tau-functions
+! for each of the 2*ngauss integration points
+! ngauss accounts for the integration points between 0 and \pi/2
 
     do i = 1, ngauss
 
         i1 = ngauss - i + 1
         i2 = ngauss + i
-        !
+!The indices i1 and i2 are assigned in order to make use
+! of \theta vs \pi-\theta symmetry relations of the
+! d- and tau-functions whenever applicable
+
         call vig (x(i1), nmax, m, dv1, dv2)
-        !
+
         do n = 1, nmax
 
             dd1 = dv1(n)
             dd2 = dv2(n)
-            d1(i1, n) = dd1
-            d2(i1, n) = dd2
+            d1(i1, n) = dd1         !Wigner d-function assigned
+            d2(i1, n) = dd2         !tau-function assigned
 
             if (naxsm==1) then         !gauss abscissas chosen +/- symmetric
-                ! using (4.2.4) and (4.2.6) of {ed},
-                !           d_{0m}^{(l)}(\pi-\theta) = (-1)^{l+m} d_{0m}^{(l)}(\theta)
+! using (4.2.4) and (4.2.6) of {ed},
+!           d_{0m}^{(l)}(\pi-\theta) = (-1)^{l+m} d_{0m}^{(l)}(\theta)
 
                 si = sig(n + m)                  !=(-1)**(n+m)
                                                  !exactly what follows from {ed}
@@ -3293,9 +3299,9 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii,  &
         enddo
         !
         if (naxsm==0) then                !gauss abscissas not chosen +/- symmetric
-            !
+
             call vig (x(i2), nmax, m, dv1, dv2)
-            !
+
             do n = 1, nmax
                 dd1 = dv1(n)
                 dd2 = dv2(n)
@@ -3313,7 +3319,7 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii,  &
 
     do i = 1, ngss
         wr = w(i)*r(i)           !r^2(\theta)*weight
-        !c           if (dr(i).eq.0.d0) wr=0.d0   !temporarily only
+!   if (dr(i).eq.0.d0) wr=0.d0   !temporarily only
         ds(i) = s(i)*qm*wr       !=dble(m)*w(i)*r^2(\theta)/(|\sin\theta|)
         dss(i) = ss(i)*qmm       !=dble(m)**2/(\sin^2\theta)
         rr(i) = wr               !r^2(\theta)*weight
@@ -3364,16 +3370,16 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii,  &
             zl4 = czero
 
 ! Gauss integration loop:
-! Traditional integration transform:
+! Traditional integration transformed as
 ! \int_0^\pi X* \sin\theta d\theta --> \int_{-1}^1 X* d(\cos\theta)
-! and generates weights for the independent variable "\cos\theta"
+! Assigning bilinear products of Wigner d- and tau-functions:
 
             do i = 1, ngss       !=ngauss   if ncheck.eq.1
                                  !=2*ngauss if ncheck.eq.0
-                d1n1 = d1(i, n1)
-                d2n1 = d2(i, n1)
-                d1n2 = d1(i, n2)
-                d2n2 = d2(i, n2)
+                d1n1 = d1(i, n1)         !Wigner d-function assigned
+                d2n1 = d2(i, n1)         !tau-function assigned
+                d1n2 = d1(i, n2)         !Wigner d-function assigned
+                d2n2 = d2(i, n2)         !tau-function assigned
 
 !aij store important products d_n.d_{n'}, d_n.\tau_{n'}, \tau_n.d_{n'},...
 !necessary for forming the integrands of Q-matrices. In Le Ru patch
@@ -3492,11 +3498,9 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii,  &
                             - dble(n1*(n1 + 1))*a11*zxidpsi
                     zl4i = a12*znf*drd*zdxidpsi &
                             - dble(n2*(n2 + 1))*a11*zdxipsi
-    !--------/---------/---------/---------/---------/---------/---------/--
-
                 end if
 
-    ! Integrate Ru et al integrals:
+! Integrate Ru et al integrals:
                 zk1 = zk1 + zk1i*w(i)
                 zk2 = zk2 + zk2i*w(i)
                 zl1 = zl1 + zl1i*w(i)
@@ -3504,10 +3508,10 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii,  &
                 zl3 = zl3 + zl3i*w(i)
                 zl4 = zl4 + zl4i*w(i)
 
-    ! todo: a switch can be implemented here to run the code
-    ! either by following Ru et al integration or
-    ! following the original MTL path
-
+! todo: a switch can be implemented here to run the code
+! either by following Ru et al integration or
+! following the original MTL path
+!--------/---------/---------/---------/---------/---------/---------/--
         ! re and im of j_{n2}(k_{in}r) j_{n1}(k_{out}r):
                 c1r = qjr2*qj1
                 c1i = qji2*qj1
@@ -3607,7 +3611,7 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii,  &
 
                     cycle         !causes the loop to skip the remainder of its body
                 end if
-        ! [dble(m)*w(i)*r^2(i)/(|\sin\theta|)]*(d1n1*d2n2+d2n1*d1n2):
+! [dble(m)*w(i)*r^2(i)/(|\sin\theta|)]*(d1n1*d2n2+d2n1*d1n2):
                 e1 = dsi*aa1
 
                 ar11 = ar11 + e1*b1r
@@ -3627,8 +3631,8 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii,  &
 
             end do  ! end of Gauss integration
 
-        ! Taking into account the "factor":
-        ! factor=1 or 2 depending on ncheck==0 or ncheck==1
+! Taking into account the "factor":
+! factor=1 or 2 depending on ncheck==0 or ncheck==1
 
             if (abs(factor-2d0)<=1.d-10) then
                 zk1 = zk1*factor
