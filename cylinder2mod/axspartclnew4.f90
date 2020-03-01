@@ -765,7 +765,7 @@ program axspartcl1
 
     end if
     !
-    mpar%ichoice = 2
+    mpar%ichoice = 1
     if (mpar%ichoice == 1) then
         write(6, *) 'lapack routines are used for the matrix inversion'
     else if (mpar%ichoice == 2) then
