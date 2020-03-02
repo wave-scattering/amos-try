@@ -3463,7 +3463,7 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii,  &
                 if (ncheck==1) then         !theta=pi/2 is scatterer mirror symmetry plane
                                             !eqs 18-19 of Ru2012
                     if (mod(n1 + n2, 2)==0) then     !n1+n2 even
-
+! Identity of Eq. 18 of Ru2012:
                         zk1i = czero
                         zk2i = czero
 
@@ -3480,7 +3480,7 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii,  &
 ! qs=dsqrt(1.d0-x(i)**2) is \sin\theta;
 ! By dividing by qs, the integrand will, as before, be integrated with the measure
 ! d(\cos\theta) for which the GIF weights are supplied
-
+! Identity of Eq. 19 of Ru2012:
                         zl1i = czero
                         zl2i = czero
                         zl3i = czero
@@ -3630,7 +3630,7 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii,  &
                 gi22 = gi22 + e1*c6i + e2*c7i + e3*c8i
 
             end do  ! end of Gauss integration
-
+!--------/---------/---------/---------/---------/---------/---------/--
 ! Taking into account the "factor":
 ! factor=1 or 2 depending on ncheck==0 or ncheck==1
 
@@ -3646,12 +3646,12 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii,  &
 !After performing surface integrals, forming the Q-matrices
 !by eqs 12-17 of Ru2012
 
-            if (n1/=n2) then
+            if (n1/=n2) then               !off-diagonal elements
                 zq11(n1, n2) = ci*A(n1)*A(n2)*(znf**2 - cone)*&
                         (n1*(n1 + 1)*zl2 - n2*(n2 + 1)*zl1)/((n1*(n1 + 1) - n2*(n2 + 1))*znf)
                 zq22(n1, n2) = ci*A(n1)*A(n2)*(znf**2 - cone)*&
                         (zl3 + znf*n1*(n1 + 1)*(zl2 - zl1)/(n1*(n1 + 1) - n2*(n2 + 1)))/znf
-            else                !diagonal elements
+            else                           !diagonal elements
                 zq11(n1, n2) = -ci*A(n1)*A(n2)*(-znf*zl1 + zl3 + (zl2 - zl4)/znf)
                 zq22(n1, n2) = -ci*A(n1)*A(n2)*(-zl1 + zl2 - zl4 + zl3/znf)
             end if
@@ -3662,6 +3662,7 @@ subroutine tmatr_leru(m, ngauss, x, w, an, ann, s, ss, ppi, pir, pii,  &
 ! todo: a switch can be implemented here to run the code
 ! either by following Ru et al integration or
 ! following the original MTL path
+!--------/---------/---------/---------/---------/---------/---------/--
 ! Original part continues here
 
             an12 = ann(n1, n2)*factor
@@ -3818,6 +3819,7 @@ subroutine tt(nmax)
 !Select Gaussian elimination:
 !mpar%ichoice == 1 .... lapack routines for the matrix inversion
 !mpar%ichoice == 2 ...  Pendry's zger and zsur are used
+!Assigned on on l. 763 in axspart*
 
     if (mpar%ichoice==2) then       ! gaussian elimination; nag library not used
 
