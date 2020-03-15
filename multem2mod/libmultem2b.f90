@@ -1213,12 +1213,12 @@ contains
                 kk = kk + 1
             end do
         end do
-        !
-        ! the summation proceeds in steps of 8*n1 lattice points
-        ! as before, but this time excluding the origin  point
-        ! r=the current lattice vector in the sum
-        ! ar=mod(r)
-        !
+
+! the summation proceeds in steps of 8*n1 lattice points
+! as before, but this time excluding the origin  point
+! r=the current lattice vector in the sum
+! ar=mod(r)
+
         n1 = 0
         do
             n1 = n1 + 1
@@ -1241,13 +1241,13 @@ contains
                     end do
                     ad = ak(1) * r(1) + ak(2) * r(2)
                     sd = exp(-ad * ci)
-                    !
-                    ! for each lattice vector the integral 'u' is obtained
-                    ! from the recurrence relation in l suggested by kambe
-                    ! u1 and u2 are the  initial terms of this recurrence,
-                    ! for l#-1 and l=0, and they are evaluated in terms of
-                    ! the complex error function cerf
-                    !
+
+! for each lattice vector the integral 'u' is obtained
+! from the recurrence relation in l suggested by kambe
+! u1 and u2 are the  initial terms of this recurrence,
+! for l#-1 and l=0, and they are evaluated in terms of
+! the complex error function cerf
+
                     kant = 0.5_dp * ar * kappa
                     knsq = kant * kant
                     z = ci * kant / rta
@@ -1261,12 +1261,12 @@ contains
                     xpa = exp(a)
                     u1 = aa * xpa
                     u2 = ab * xpa / kant
-                    !
-                    ! the contribution to dlm2 from a particular lattice
-                    ! vector  is  accumulated into  the elements of  dlm
-                    ! this procedure includes the term (kant**l) and the
-                    ! recurrence for the integral 'u'
-                    !
+
+! the contribution to dlm2 from a particular lattice
+! vector is accumulated into the elements of  dlm
+! this procedure includes the term (kant**l) and the
+! recurrence for the integral 'u'
+
                     kk = 1
                     al = -0.5_dp
                     cp = rta
@@ -1294,14 +1294,14 @@ contains
                     end do
                 end do
             end do
-            !
-            ! After each step of the summation a test on the
-            ! convergence of the elements of dlm is made.
-            !  The measure of convergence is taken to be the usual vector norm
-            !                   \sum_I |DLM(I))|**2
-            !  The measure of convergence is controlled by parameters QP and QT
-            !  The summation is enforced to run over at least IENF shells
-            !
+
+! After each step of the summation a test on the
+! convergence of the elements of dlm is made.
+!  The measure of convergence is taken to be the usual vector norm
+!                   \sum_I |DLM(I))|**2
+!  The measure of convergence is controlled by parameters QP and QT
+!  The summation is enforced to run over at least IENF shells
+
             test2 = 0.0_dp
             do i = 1, nndlm
                 dnorm = abs(dlm(i))
@@ -1325,24 +1325,24 @@ contains
             write(16, 46) n1
             46    format(//3x, 'dlm2,s converged by n1=', i2)
         end if
-    !--------/---------/---------/---------/---------/---------/---------/--
-    !                         DLM3 term
-    !--------/---------/---------/---------/---------/---------/---------/--
-    !  the term dlm3 has a non-zero contribution  only
-    !  when l=m=0.it is evaluated here in terms of the
-    !  complex error function cerf
-    !
+!--------/---------/---------/---------/---------/---------/---------/--
+!                         DLM3 term
+!--------/---------/---------/---------/---------/---------/---------/--
+!  the term dlm3 has a non-zero contribution  only
+!  when l=m=0.it is evaluated here in terms of the
+!  complex error function cerf
+
         xpa = exp(-alpha)
         rtai = 1.0_dp / (rtpi * rta)
         acc = kappa * (ci * (xpa - cerf(rta)) - rtai) / xpa
         ap = -0.5_dp / rtpi
         dlm(1) = dlm(1) + ap * acc
 
-    !--------/---------/---------/---------/---------/---------/---------/--
-    !                          RESCALING
-    !  finally the elements of dlm are multiplied by the
-    !  factor (-1.0_dp)**((m+|m|)/2)
-    !
+!--------/---------/---------/---------/---------/---------/---------/--
+!                          RESCALING
+!  finally the elements of dlm are multiplied by the
+!  factor (-1.0_dp)**((m+|m|)/2)
+
         do l = 2, ll2, 2
             n = l * l / 2 + 1
             do m = 2, l, 2
@@ -1352,12 +1352,12 @@ contains
         end do
         !     write(16,251) dlm
         ! 251 format(15h0dlm1+dlm2+dlm3,//45(2e13.5,/))
-        !--------/---------/---------/---------/---------/---------/---------/--
-        ! summation over the clebsch-gordon type coefficients
-        ! elm proceeds, first for  xodd, and then  for xeven.
-        ! this gives the kambe elements  a(l2,m2;l3,m3) which
-        ! give the elements  x(l3,m3;l2,m2) of xodd and xeven
-        !
+!--------/---------/---------/---------/---------/---------/---------/--
+! summation over the clebsch-gordon type coefficients
+! elm proceeds, first for  xodd, and then  for xeven.
+! this gives the kambe elements  a(l2,m2;l3,m3) which
+! give the elements  x(l3,m3;l2,m2) of xodd and xeven
+
         k = 1
         ii = 0
         48  ll = lmax + ii
@@ -1407,22 +1407,22 @@ contains
     end subroutine
     !=======================================================================
     subroutine setup(lmax, xeven, xodd, te, th, xxmat1, xxmat2)
-        ! ------------------------------------------------------------------
-        ! this subroutine constructs the secular matrix
-        ! ------------------------------------------------------------------
-        ! ..  scalar arguments ..
-        integer lmax
-        ! ..  array arguments ..
-        complex(dp) xeven(:, :), xodd(:, :)
-        complex(dp) xxmat2(:, :)
-        complex(dp) te(:), th(:), xxmat1(:, :)
-        ! ..  local scalars ..
-        integer ia, la, ma, lmtot, ltt, lmax1, ib, lb, mb, i, lmxod, iaod, iaev, ibod
-        integer ibev
-        real(dp)  c0, signus, up, c, b1, b2, b3, u1, u2, a, down
-        real(dp)  alpha1, alpha2, beta1, beta2
-        complex(dp) omega1, omega2, z1, z2, z3
-        !     ------------------------------------------------------------------
+! ------------------------------------------------------------------
+! this subroutine constructs the secular matrix
+! ------------------------------------------------------------------
+! ..  scalar arguments ..
+integer lmax
+! ..  array arguments ..
+complex(dp) xeven(:, :), xodd(:, :)
+complex(dp) xxmat2(:, :)
+complex(dp) te(:), th(:), xxmat1(:, :)
+! ..  local scalars ..
+integer ia, la, ma, lmtot, ltt, lmax1, ib, lb, mb, i, lmxod, iaod, iaev, ibod
+integer ibev
+real(dp)  c0, signus, up, c, b1, b2, b3, u1, u2, a, down
+real(dp)  alpha1, alpha2, beta1, beta2
+complex(dp) omega1, omega2, z1, z2, z3
+!     ------------------------------------------------------------------
         lmax1 = lmax + 1
         lmtot = lmax1 * lmax1 - 1
         lmxod = (lmax * lmax1) / 2
@@ -1525,13 +1525,13 @@ contains
     !=======================================================================
     subroutine plw(kappa, gk, lmax, ae, ah)
 
-        !     ------------------------------------------------------------------
-        !     this routine calculates the expansion coefficients 'ae,ah' of an
-        !     incident plane electromagnetic wave of wave vector  'kappa' with
-        !     components parallel to the surface equal to   '(gk(1),gk(2))'.
-        !     ------------------------------------------------------------------
-        ! ..  scalar arguments  ..
-        !
+!     ------------------------------------------------------------------
+!     this routine calculates the expansion coefficients 'ae,ah' of an
+!     incident plane electromagnetic wave of wave vector  'kappa' with
+!     components parallel to the surface equal to   '(gk(1),gk(2))'.
+!     ------------------------------------------------------------------
+! ..  scalar arguments  ..
+
         integer    lmax
         complex(dp) kappa
         !
