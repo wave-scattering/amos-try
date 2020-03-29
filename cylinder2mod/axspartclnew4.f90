@@ -1,94 +1,93 @@
 program axspartcl1
-    ! warning in module axspartcl in file axspartcl.f: variables set but never used:
-    !   rmf set at line 257 file axspartcl.f
-    !    xs set at line 682 file axspartcl.f
-    !
-    !  if changing lmx, one has to adjust npn1 in ampldr to the same value
-    !                   npng1 is only within the ampldr
-    ! extinction for a single homogeneous sphere of radius 300nm  (300.001/300)
-    ! host dielectric constant= (1.00000000000000,0.000000000000000e+000)
-    ! sphere diel. constant= (2.10250000000000,0.000000000000000e+000)
-    ! for lambda_0=1000nm is sg_tot=1.21460719430552
-    ! qsca=   2.15779683977996
-    ! qext=  -2.15779683977996
-    !         fac=lam**2/(2.d0*p**2*rev**2)     !=2/xs**2
-    ! relates effciences to normalized cross sections. for the setting above:
-    !         fac=0,56289546467965428579933035116515
-    ! s11=0.32957d+03 + i*0.17171d+03
-    ! s12=0.00000d+00 + i*0.00000d+00
-    ! s21=0.00000d+00 + i*0.00000d+00
-    ! s22=0.32957d+03 + i*0.17171d+03
-    ! for unpolarized light, extinction cross section is
-    ! [(2.140) and (2.159) of {mtl}]:
-    !
-    !         c_{ext}= \fr{2\pi}{k_1} \mb{im } (s_{11}+_{22})
-    !
-    ! homogeneous particle
-    ! particle parameters:
-    ! radius =   300.000333332963
-    ! particle diel. constant= (2.10250000000000,0.000000000000000e+000)
-    ! background dielectric constant zeps0= (1.00000000000000,0.000000000000000e+000)
-    !
-    ! ==========================
-    !      room for improvement:
-    !            1) it would be more resonable to replace rev by the
-    !               size parameter k*rev
-    !            2)
-    !            3)
-    !            4)
-    !--------/---------/---------/---------/---------/---------/---------/--
-    !  this routines calculates the single particle scattering properties
-    !  (including coated particles)
-    !
-    !                    make -f mkaxspsc
-    !
-    ! k_l length in units (2*pi/a=) pi:    xkl= 0.8660254037844386d0
-    !
-    ! outputs the total elastic scattering cross section tcs
-    !
-    ! parameters:
-    !
-    ! partial wave expansion is used, which is badly convergent
-    ! for large size parameters $x > 100$. in numerical applications, the
-    ! series is to be cut off after
-    !          lmax (lmx parameter here) \approx x+4x^{1/3}+2$.
-    ! in the case of lmx=50 this means that x  <=  35.
-    ! if one wants to observe ripples, the cutoff for a given x has to
-    ! be even larger
-    !
-    !  alpha and beta - euler angles (in degrees) specifying the orientation
-    !            of the scattering particle relative to the laboratory reference
-    !            frame (refs. 6 and 7).
-    !  thet0 - zenith angle of the incident beam in degrees
-    !  thet - zenith angle of the scattered beam in degrees    !with respect to
-    !  phi0 - azimuth angle of the incident beam in degrees    !the laboratory frame!!!
-    !  phi - azimuth angle of the scattered beam in degrees
-    !
-    !  ichoice=1 if nag library is available, otherwise ichoice=2
-    !
-    !  ncheck  -  .eq.0  then  ngss=2*ngauss, factor=1d0
-    !             .eq.1  then  ngss = ngauss, factor=2d0: theta=pi/2 is mirror
-    !                          symmetry plane as in the case of chebysh. particle,
-    !                          ellipsoid, and cylinder
-    !
-    !  naxsm   -  .eq.0 : gauss abscissas do not have +/- theta symmetry
-    !             .eq.1 : gauss abscissas have +/- theta symmetry
-    !
-    !  ndgs - controlling the number nd=ndgs*nmax of division points in
-    !  computing integrals over the particle surface (ref. 5).
-    !  for compact particles, the
-    !  recommended value is 2. for highly aspherical particles larger
-    !  values (3, 4,...) may be necessary to obtain convergence.
-    !  the code does not check convergence over this parameter.
-    !  therefore, control comparisons of results obtained with
-    !  different ndgs-values are recommended.
-    !
-    !
-    !  computation can be speed up if one sets mpar%yncheck=0
-    !  however, then the check of gauss integrations
-    !  convergence is not performed.
-    !---------------------------------------------------------------------
-
+! warning in module axspartcl in file axspartcl.f: variables set but never used:
+!   rmf set at line 257 file axspartcl.f
+!    xs set at line 682 file axspartcl.f
+!
+!  if changing lmx, one has to adjust npn1 in ampldr to the same value
+!                   npng1 is only within the ampldr
+! extinction for a single homogeneous sphere of radius 300nm  (300.001/300)
+! host dielectric constant= (1.00000000000000,0.000000000000000e+000)
+! sphere diel. constant= (2.10250000000000,0.000000000000000e+000)
+! for lambda_0=1000nm is sg_tot=1.21460719430552
+! qsca=   2.15779683977996
+! qext=  -2.15779683977996
+!         fac=lam**2/(2.d0*p**2*rev**2)     !=2/xs**2
+! relates effciences to normalized cross sections. for the setting above:
+!         fac=0,56289546467965428579933035116515
+! s11=0.32957d+03 + i*0.17171d+03
+! s12=0.00000d+00 + i*0.00000d+00
+! s21=0.00000d+00 + i*0.00000d+00
+! s22=0.32957d+03 + i*0.17171d+03
+! for unpolarized light, extinction cross section is
+! [(2.140) and (2.159) of {mtl}]:
+!
+!         c_{ext}= \fr{2\pi}{k_1} \mb{im } (s_{11}+_{22})
+!
+! homogeneous particle
+! particle parameters:
+! radius =   300.000333332963
+! particle diel. constant= (2.10250000000000,0.000000000000000e+000)
+! background dielectric constant zeps0= (1.00000000000000,0.000000000000000e+000)
+!
+! ==========================
+!      room for improvement:
+!            1) it would be more resonable to replace rev by the
+!               size parameter k*rev
+!            2)
+!            3)
+!            4)
+!--------/---------/---------/---------/---------/---------/---------/--
+!  this routines calculates the single particle scattering properties
+!  (including coated particles)
+!
+!                    make -f mkaxspsc
+!
+! k_l length in units (2*pi/a=) pi:    xkl= 0.8660254037844386d0
+!
+! outputs the total elastic scattering cross section tcs
+!
+! parameters:
+!
+! partial wave expansion is used, which is badly convergent
+! for large size parameters $x > 100$. in numerical applications, the
+! series is to be cut off after
+!          lmax (lmx parameter here) \approx x+4x^{1/3}+2$.
+! in the case of lmx=50 this means that x  <=  35.
+! if one wants to observe ripples, the cutoff for a given x has to
+! be even larger
+!
+!  alpha and beta - euler angles (in degrees) specifying the orientation
+!            of the scattering particle relative to the laboratory reference
+!            frame (refs. 6 and 7).
+!  thet0 - zenith angle of the incident beam in degrees
+!  thet - zenith angle of the scattered beam in degrees    !with respect to
+!  phi0 - azimuth angle of the incident beam in degrees    !the laboratory frame!!!
+!  phi - azimuth angle of the scattered beam in degrees
+!
+!  ichoice=1 if nag library is available, otherwise ichoice=2
+!
+!  ncheck  -  .eq.0  then  ngss=2*ngauss, factor=1d0
+!             .eq.1  then  ngss = ngauss, factor=2d0: theta=pi/2 is mirror
+!                          symmetry plane as in the case of chebysh. particle,
+!                          ellipsoid, and cylinder
+!
+!  naxsm   -  .eq.0 : gauss abscissas do not have +/- theta symmetry
+!             .eq.1 : gauss abscissas have +/- theta symmetry
+!
+!  ndgs - controlling the number nd=ndgs*nmax of division points in
+!  computing integrals over the particle surface (ref. 5).
+!  for compact particles, the
+!  recommended value is 2. for highly aspherical particles larger
+!  values (3, 4,...) may be necessary to obtain convergence.
+!  the code does not check convergence over this parameter.
+!  therefore, control comparisons of results obtained with
+!  different ndgs-values are recommended.
+!
+!
+!  computation can be speed up if one sets mpar%yncheck=0
+!  however, then the check of gauss integrations
+!  convergence is not performed.
+!---------------------------------------------------------------------
     use libcylinder
     implicit none
     integer lcs, ilcs, ikl, ieps, istep, ide, ndefp, itter
@@ -247,9 +246,9 @@ program axspartcl1
     common /cylpar/ rsnm, hlength
     common /epsgg/ global_eps_r, global_eps_i
     !--------/---------/---------/---------/---------/---------/---------/--
-    !     !---------------------------------------------------------------
-    !     !     read config
-    !     !---------------------------------------------------------------
+    !---------------------------------------------------------------
+    !     read config
+    !---------------------------------------------------------------
 
     call cli_parse
     call ini_parse
@@ -692,14 +691,14 @@ program axspartcl1
         phi0 = 0.d0
         thetv = thet0
     end if
-    !
-    !--------/---------/---------/---------/---------/---------/---------/--
-    !thet0=56.d0
-    !thet=65.d0
-    !phi0=114.d0
-    !phi=128.d0
-    !
-    ! test setup:
+
+!--------/---------/---------/---------/---------/---------/---------/--
+!thet0=56.d0
+!thet=65.d0
+!phi0=114.d0
+!phi=128.d0
+!
+! test setup:
 
     if ((thet0 > 180.).or.(thet > 180.)) then
         write(6, *)'theta angles has to be smaller than 180'
@@ -723,18 +722,18 @@ program axspartcl1
         end if
     end if
 
-    !--------/---------/---------/---------/---------/---------/---------/--
-    !  controlling the number nd=ndgs*nmax of division points in
-    !  computing integrals over the particle surface (ref. 5).
-    !  for compact particles, the
-    !  recommended value is 2. for highly aspherical particles larger
-    !  values (3, 4,...) may be necessary to obtain convergence.
-    !  the code does not check convergence over this parameter.
-    !  therefore, control comparisons of results obtained with
-    !  different ndgs-values are recommended.
-    !
-    !  check that ndgs*lamxd does not exceed npng1 value in subroutines
-    !  for a current values of lmaxd=50 and npng1=800 then ndgs <=  16!!!
+!--------/---------/---------/---------/---------/---------/---------/--
+!  controlling the number nd=ndgs*nmax of division points in
+!  computing integrals over the particle surface (ref. 5).
+!  for compact particles, the
+!  recommended value is 2. for highly aspherical particles larger
+!  values (3, 4,...) may be necessary to obtain convergence.
+!  the code does not check convergence over this parameter.
+!  therefore, control comparisons of results obtained with
+!  different ndgs-values are recommended.
+!
+!  check that ndgs*lamxd does not exceed npng1 value in subroutines
+!  for a current values of lmaxd=50 and npng1=800 then ndgs <=  16!!!
 
     if ((np == -4).or.(np == -5)) then
         ndgs = 16
