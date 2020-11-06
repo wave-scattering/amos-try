@@ -49,6 +49,7 @@ add_subdirectory(FiNeR)
 #add_subdirectory(multem2orig)
 #add_subdirectory(cylinder2mod)
 add_subdirectory(mishchenko_dp_fixed_particles)
+add_subdirectory(quadpack)
 set(common "-std=f2008")
 
 #set(CMAKE_BUILD_TYPE Debug
@@ -66,5 +67,5 @@ set(CMAKE_Fortran_FLAGS_RELEASE "${common} -O3 -march=native -ffast-math -funrol
 
 add_subdirectory(multem2mod)
 add_subdirectory(read-nk)
-add_subdirectory(quadpack)
+
 add_subdirectory(cylinder2mod)
