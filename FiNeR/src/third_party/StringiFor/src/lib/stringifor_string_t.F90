@@ -3,6 +3,7 @@ module stringifor_string_t
 !< StringiFor, definition of `string` type.
 use, intrinsic :: iso_fortran_env, only : iostat_eor
 use befor64, only : b64_decode, b64_encode
+use face, only : colorize
 use penf, only : I1P, I2P, I4P, I8P, R4P, R8P, R16P, str
 
 implicit none
@@ -13,13 +14,14 @@ save
 public :: adjustl, adjustr, count, index, len_trim, repeat, scan, trim, verify
 ! expose StingiFor objects
 public :: CK
+public :: glob
+public :: strjoin
 public :: string
 
 integer, parameter :: CK = selected_char_kind('DEFAULT') !< Default character kind.
 
 type :: string
   !< OOP designed string class.
-  private
   character(kind=CK, len=:), allocatable :: raw !< Raw data.
   contains
     ! public methods
@@ -44,6 +46,8 @@ type :: string
     procedure, pass(self) :: camelcase        !< Return a string with all words capitalized without spaces.
     procedure, pass(self) :: capitalize       !< Return a string with its first character capitalized and the rest lowercased.
     procedure, pass(self) :: chars            !< Return the raw characters data.
+    generic               :: colorize => &
+                             colorize_str     !< Colorize and stylize strings.
     procedure, pass(self) :: decode           !< Decode string.
     procedure, pass(self) :: encode           !< Encode string.
     procedure, pass(self) :: escape           !< Escape backslashes (or custom escape character).
@@ -59,6 +63,12 @@ type :: string
     generic               :: join =>       &
                              join_strings, &
                              join_characters  !< Return a string that is a join of an array of strings or characters.
+    generic               :: strjoin =>   &
+                             strjoin_strings, &
+                             strjoin_characters, &
+                             strjoin_strings_array, &
+                             strjoin_characters_array  !< Return a string that is a join of an array of strings or characters;
+                                                       !< Return join 1D string array of an 2D array of strings or characters in columns or rows.
     procedure, pass(self) :: lower            !< Return a string with all lowercase characters.
     procedure, pass(self) :: partition        !< Split string at separator and return the 3 parts (before, the separator and after).
     procedure, pass(self) :: read_file        !< Read a file a single string stream.
@@ -77,12 +87,16 @@ type :: string
     procedure, pass(self) :: tempname         !< Return a safe temporary name suitable for temporary file or directories.
     generic               :: to_number =>   &
                              to_integer_I1P,&
+#ifndef _NVF
                              to_integer_I2P,&
+#endif
                              to_integer_I4P,&
                              to_integer_I8P,&
-                             to_real_R4P,   &
+#if defined _R16P
+                             to_real_R16P,  &
+#endif
                              to_real_R8P,   &
-                             to_real_R16P     !< Cast string to number.
+                             to_real_R4P      !< Cast string to number.
     procedure, pass(self) :: unescape         !< Unescape double backslashes (or custom escaped character).
     procedure, pass(self) :: unique           !< Reduce to one (unique) multiple occurrences of a substring into a string.
     procedure, pass(self) :: upper            !< Return a string with all uppercase characters.
@@ -106,9 +120,11 @@ type :: string
                                 string_assign_integer_I2P, &
                                 string_assign_integer_I4P, &
                                 string_assign_integer_I8P, &
-                                string_assign_real_R4P,    &
+#if defined _R16P
+                                string_assign_real_R16P,   &
+#endif
                                 string_assign_real_R8P,    &
-                                string_assign_real_R16P             !< Assignment operator overloading.
+                                string_assign_real_R4P              !< Assignment operator overloading.
     generic :: operator(//) => string_concat_string,    &
                                string_concat_character, &
                                character_concat_string              !< Concatenation operator overloading.
@@ -149,14 +165,21 @@ type :: string
     procedure, private, pass(self) :: sverify_string_string    !< Verify replacement.
     procedure, private, pass(self) :: sverify_string_character !< Verify replacement.
     ! auxiliary methods
+    procedure, private, pass(self) :: colorize_str     !< Colorize and stylize strings.
     procedure, private, pass(self) :: glob_character   !< Glob search (character output).
     procedure, private, pass(self) :: glob_string      !< Glob search (string output).
     procedure, private, pass(self) :: insert_string    !< Insert substring into string at a specified position.
     procedure, private, pass(self) :: insert_character !< Insert substring into string at a specified position.
     procedure, private, pass(self) :: join_strings     !< Return join string of an array of strings.
     procedure, private, pass(self) :: join_characters  !< Return join string of an array of characters.
+    procedure, private, nopass ::     strjoin_strings  !< Return join string of an array of strings.
+    procedure, private, nopass ::     strjoin_characters        !< Return join string of an array of strings.
+    procedure, private, nopass ::     strjoin_strings_array     !< Return join 1D string array of an 2D array of strings in columns or rows.
+    procedure, private, nopass ::     strjoin_characters_array  !< Return join 1D string array of an 2D array of characters in columns or rows.
     procedure, private, pass(self) :: to_integer_I1P   !< Cast string to integer.
+#ifndef _NVF
     procedure, private, pass(self) :: to_integer_I2P   !< Cast string to integer.
+#endif
     procedure, private, pass(self) :: to_integer_I4P   !< Cast string to integer.
     procedure, private, pass(self) :: to_integer_I8P   !< Cast string to integer.
     procedure, private, pass(self) :: to_real_R4P      !< Cast string to real.
@@ -218,11 +241,55 @@ character(kind=CK, len=1),  parameter :: TAB            = achar(9)              
 character(kind=CK, len=1),  parameter :: UIX_DIR_SEP    = char(47)                     !< Unix/Linux directories separator (/).
 character(kind=CK, len=1),  parameter :: BACKSLASH      = char(92)                     !< Backslash character.
 
-! overloading string name
-interface string
-  !< Builtin adjustl overloading.
-  module procedure string_
-endinterface string
+interface glob
+  !< Overloading glob procedure.
+  !<```fortran
+  !< type(string)                  :: astring
+  !< character(len=:), allocatable :: alist_chr(:)
+  !< type(string),     allocatable :: alist_str(:)
+  !< integer, parameter            :: Nf=5
+  !< character(14)                 :: files(1:Nf)
+  !< integer                       :: file_unit
+  !< integer                       :: f
+  !< integer                       :: ff
+  !< logical                       :: test_passed
+  !< do f=1, Nf
+  !<    files(f) = astring%tempname(prefix='foo-')
+  !<    open(newunit=file_unit, file=files(f))
+  !<    write(file_unit, *)f
+  !<    close(unit=file_unit)
+  !< enddo
+  !< call glob(self=astring, pattern='foo-*', list=alist_chr)
+  !< call glob(self=astring, pattern='foo-*', list=alist_str)
+  !< do f=1, Nf
+  !<    open(newunit=file_unit, file=files(f))
+  !<    close(unit=file_unit, status='delete')
+  !< enddo
+  !< test_passed = .false.
+  !< outer_chr: do f=1, size(alist_chr, dim=1)
+  !<    do ff=1, Nf
+  !<       test_passed = alist_chr(f) == files(ff)
+  !<       if (test_passed) cycle outer_chr
+  !<    enddo
+  !< enddo outer_chr
+  !< if (test_passed) then
+  !<    test_passed = .false.
+  !<    outer_str: do f=1, size(alist_str, dim=1)
+  !<       do ff=1, Nf
+  !<          test_passed = alist_str(f) == files(ff)
+  !<          if (test_passed) cycle outer_str
+  !<       enddo
+  !<    enddo outer_str
+  !< endif
+  !< print '(L1)', test_passed
+  !<```
+  !=> T <<<
+  module procedure glob_character, glob_string
+endinterface glob
+
+interface strjoin
+  module procedure strjoin_strings, strjoin_characters, strjoin_strings_array, strjoin_characters_array
+endinterface strjoin
 
 ! builtin overloading
 interface adjustl
@@ -614,8 +681,16 @@ contains
    class(string), intent(in) :: self     !< String to be repeated.
    integer,       intent(in) :: ncopies  !< Number of string copies.
    type(string)              :: repeated !< Repeated string.
+#ifdef _NVF
+   character(9999)           :: nvf_bug  !< Work around for NVFortran bug.
+#endif
 
+#ifdef _NVF
+   nvf_bug = self%raw
+   repeated%raw = repeat(string=trim(nvf_bug), ncopies=ncopies)
+#else
    repeated%raw = repeat(string=self%raw, ncopies=ncopies)
+#endif
    endfunction srepeat_string_string
 
    elemental function srepeat_character_string(rstring, ncopies) result(repeated)
@@ -889,6 +964,24 @@ contains
      raw = ''
    endif
    endfunction chars
+
+   pure function colorize_str(self, color_fg, color_bg, style) result(colorized)
+   !< Colorize and stylize strings, DEFAULT kind.
+   !<
+   !<```fortran
+   !< type(string) :: astring
+   !< astring = 'say all Hello WorLD!'
+   !< print '(L1)', astring%colorize(color_fg='red')=='[31msay all Hello WorLD![0m'
+   !<```
+   !=> T <<<
+   class(string),    intent(in)           :: self      !< The string.
+   character(len=*), intent(in), optional :: color_fg  !< Foreground color definition.
+   character(len=*), intent(in), optional :: color_bg  !< Background color definition.
+   character(len=*), intent(in), optional :: style     !< Style definition.
+   character(len=:), allocatable          :: colorized !< Colorized string.
+
+   colorized = colorize(string=self%chars(), color_fg=color_fg, color_bg=color_bg, style=style)
+   endfunction colorize_str
 
    elemental function decode(self, codec) result(decoded)
    !< Return a string decoded accordingly the codec.
@@ -1341,6 +1434,317 @@ contains
       join%raw = join%raw(len(sep_)+1:len(join%raw))
    endif
    endfunction join_characters
+
+   pure function strjoin_strings(array, sep) result(join)
+   !< Return a string that is a join of an array of strings.
+   !<
+   !< The join-separator is set equals to a null string '' if custom separator isn't specified.
+   !<
+   !<```fortran
+   !< type(string)     :: strings(3)
+   !< logical          :: test_passed(5)
+   !< strings(1) = 'one'
+   !< strings(2) = 'two'
+   !< strings(3) = 'three'
+   !< test_passed(1) = (strjoin(array=strings)//''==strings(1)//strings(2)//strings(3))
+   !< test_passed(2) = (strjoin(array=strings, sep='-')//''==strings(1)//'-'//strings(2)//'-'//strings(3))
+   !< call strings(1)%free
+   !< strings(2) = 'two'
+   !< strings(3) = 'three'
+   !< test_passed(3) = (strjoin(array=strings, sep='-')//''==strings(2)//'-'//strings(3))
+   !< strings(1) = 'one'
+   !< strings(2) = 'two'
+   !< call strings(3)%free
+   !< test_passed(4) = (strjoin(array=strings, sep='-')//''==strings(1)//'-'//strings(2))
+   !< strings(1) = 'one'
+   !< call strings(2)%free
+   !< strings(3) = 'three'
+   !< test_passed(5) = (strjoin(array=strings, sep='-')//''==strings(1)//'-'//strings(3))
+   !< print '(L1)', all(test_passed)
+   !<```
+   !=> T <<<
+   class(string),             intent(in)           :: array(1:) !< Array to be joined.
+   character(kind=CK, len=*), intent(in), optional :: sep       !< Separator.
+   type(string)                                    :: join      !< The join of array.
+   character(kind=CK, len=:), allocatable          :: sep_      !< Separator, default value.
+   integer                                         :: a         !< Counter.
+
+   sep_ = ''
+   if (present(sep)) sep_ = sep
+   join = ''
+   do a=2, size(array, dim=1)
+      if (allocated(array(a)%raw))join%raw = join%raw//sep_//array(a)%raw
+   enddo
+   if (allocated(array(1)%raw)) then
+      join%raw = array(1)%raw//join%raw
+   else
+      join%raw = join%raw(len(sep_)+1:len(join%raw))
+   endif
+   endfunction strjoin_strings
+
+  pure function strjoin_characters(array, sep, is_trim) result(join)
+   !< Return a string that is a join of an array of characters.
+   !<
+   !< The join-separator is set equals to a null string '' if custom separator isn't specified.
+   !< The trim function is applied to array items if optional logical is_trim variable isn't set to .false.
+   !<
+   !<```fortran
+   !< character(5) :: characters(3)
+   !< logical      :: test_passed(13)
+   !< characters(1) = 'one'
+   !< characters(2) = 'two'
+   !< characters(3) = 'three'
+   !< test_passed(1) = (strjoin(array=characters)//''==trim(characters(1))//trim(characters(2))//trim(characters(3)))
+   !< test_passed(2) = (strjoin(array=characters, sep='-')//''==trim(characters(1))//'-'//trim(characters(2))//'-'//trim(characters(3)))
+   !< test_passed(3) = ( strjoin(array=characters, is_trim=.false.)//''==characters(1)//characters(2)//characters(3))
+   !< test_passed(4) = ( strjoin(array=characters, sep='-', is_trim=.false.)//''==characters(1)//'-'//characters(2)//'-'//characters(3))
+   !< characters(1) = ''
+   !< characters(2) = 'two'
+   !< characters(3) = 'three'
+   !< test_passed(5) = (strjoin(array=characters)//''==trim(characters(2))//trim(characters(3)))
+   !< characters(1) = 'one'
+   !< characters(2) = 'two'
+   !< characters(3) = ''
+   !< test_passed(6) = (strjoin(array=characters)//''==trim(characters(1))//trim(characters(2)))
+   !< characters(1) = 'one'
+   !< characters(2) = ''
+   !< characters(3) = 'three'
+   !< test_passed(7) = (strjoin(array=characters)//''==trim(characters(1))//trim(characters(3)))
+   !< characters(1) = ''
+   !< characters(2) = 'two'
+   !< characters(3) = 'three'
+   !< test_passed(8) = (strjoin(array=characters, sep='-')//''==trim(characters(2))//'-'//trim(characters(3)))
+   !< characters(1) = 'one'
+   !< characters(2) = 'two'
+   !< characters(3) = ''
+   !< test_passed(9) = (strjoin(array=characters, sep='-')//''==trim(characters(1))//'-'//trim(characters(2)))
+   !< characters(1) = 'one'
+   !< characters(2) = ''
+   !< characters(3) = 'three'
+   !< test_passed(10) = (strjoin(array=characters, sep='-')//''==trim(characters(1))//'-'//trim(characters(3)))
+   !< characters(1) = ''
+   !< characters(2) = 'two'
+   !< characters(3) = 'three'
+   !< test_passed(11) = (strjoin(array=characters, sep='-', is_trim=.false.)//''==characters(2)//'-'//characters(3))
+   !< characters(1) = 'one'
+   !< characters(2) = 'two'
+   !< characters(3) = ''
+   !< test_passed(12) = (strjoin(array=characters, sep='-', is_trim=.false.)//''==characters(1)//'-'//characters(2))
+   !< characters(1) = 'one'
+   !< characters(2) = ''
+   !< characters(3) = 'three'
+   !< test_passed(13) = (strjoin(array=characters, sep='-', is_trim=.false.)//''==characters(1)//'-'//characters(3))
+   !< print '(L1)', all(test_passed)
+   !<```
+   !=> T <<<
+   character(kind=CK, len=*), intent(in)           :: array(1:) !< Array to be joined.
+   character(kind=CK, len=*), intent(in), optional :: sep       !< Separator.
+   logical,                   intent(in), optional :: is_trim   !< Flag to setup trim character or not
+   type(string)                                    :: join      !< The join of array.
+   character(kind=CK, len=:), allocatable          :: sep_      !< Separator, default value.
+   logical                                         :: is_trim_  !< Flag to setup trim character or not
+   integer                                         :: a         !< Counter.
+
+   sep_ = ''
+   if (present(sep)) sep_ = sep
+   is_trim_ = .true. ; if (present(is_trim)) is_trim_ = is_trim
+   join = ''
+
+   if (is_trim_) then
+       do a=2, size(array, dim=1)
+          if (trim(array(a))/='') join%raw = join%raw//sep_//trim(array(a))
+       enddo
+       if (trim(array(1))/='') then
+          join%raw = trim(array(1))//join%raw
+       else
+          join%raw = join%raw(len(sep_)+1:len(join%raw))
+       endif
+   else
+       do a=2, size(array, dim=1)
+          if (array(a)/='') join%raw = join%raw//sep_//array(a)
+       enddo
+       if (array(1)/='') then
+          join%raw = array(1)//join%raw
+       else
+          join%raw = join%raw(len(sep_)+1:len(join%raw))
+       endif
+   endif
+   endfunction strjoin_characters
+
+   pure function strjoin_strings_array(array, sep, is_col) result(join)
+   !< Return a string that is a join of columns or rows of an array of strings.
+   !<
+   !< The join-separator is set equals to a null string '' if custom separator isn't specified.
+   !< The is_col is setup the direction of join: within default columns (.true.) or rows(.false.).
+   !<
+   !<```fortran
+   !< type(string), allocatable :: strings_arr(:, :)
+   !< logical                   :: test_passed(5)
+   !<
+   !< strings_arr = reshape( source = &
+   !<                        [string('one'), string('two'), string('three'),  &
+   !<                         string('ONE'), string('TWO'), string('THREE')], &
+   !<                        shape = [3, 2] )
+   !<
+   !< test_passed(1) = all( strjoin(array=strings_arr) == &
+   !<                       reshape([string('onetwothree'), string('ONETWOTHREE')], &
+   !<                       shape = [2]) )
+   !<
+   !< test_passed(2) = all( strjoin(array=strings_arr, sep='_') == &
+   !<                       reshape([string('one_two_three'), string('ONE_TWO_THREE')], &
+   !<                       shape = [2]) )
+   !<
+   !<  test_passed(3) = all( strjoin(array=strings_arr, is_col=.false.) == &
+   !<                        reshape([string('oneONE'), string('twoTWO'), string('threeTHREE')], &
+   !<                        shape = [3]) )
+   !<
+   !<  test_passed(4) = all( strjoin(array=strings_arr, sep='_', is_col=.false.) == &
+   !<                        reshape([string('one_ONE'), string('two_TWO'), string('three_THREE')], &
+   !<                        shape = [3]) )
+   !<
+   !< call strings_arr(2, 1)%free
+   !< test_passed(5) = all( strjoin(array=strings_arr, sep='_', is_col=.false.) == &
+   !<                  reshape([string('one_ONE'), string('TWO'), string('three_THREE')], &
+   !<                  shape = [3]) )
+   !<
+   !< print '(L1)', all(test_passed)
+   !<```
+   !=> T <<<
+   class(string),             intent(in)           :: array(1:, 1:) !< Array to be joined.
+   character(kind=CK, len=*), intent(in), optional :: sep  !< Separator.
+   logical,                   intent(in), optional :: is_col  !< Direction: 'columns' if .true. or 'rows' if .false.
+   type(string),              allocatable          :: join(:)       !< The join of array.
+   type(string),              allocatable          :: slice(:)      !< The column or row slice of array
+   character(kind=CK, len=:), allocatable          :: sep_          !< Separator, default value.
+   logical                                         :: is_col_       !< Direction, default value.
+   integer                                         :: a, join_size, slice_size  !< Counter, sizes of join vector and of slice of array
+
+   sep_    = ''     ; if (present(sep)) sep_ = sep
+   is_col_ = .true. ; if (present(is_col)) is_col_ = is_col
+
+   if (is_col_) then
+       join_size  = size(array, dim=2)
+       slice_size = size(array, dim=1)
+
+       if (.not.allocated(join))  allocate(join(join_size))
+       if (.not.allocated(slice)) allocate(slice(slice_size))
+       do a = 1, join_size
+           slice(:) = array(:, a)
+           join(a)  = strjoin_strings(slice, sep_)
+       end do
+   else
+       join_size  = size(array, dim=1)
+       slice_size = size(array, dim=2)
+
+       if (.not.allocated(join))  allocate(join(join_size))
+       if (.not.allocated(slice)) allocate(slice(slice_size))
+       do a = 1, join_size
+           slice(:) = array(a, :)
+           join(a)  = strjoin_strings(slice, sep_)
+       end do
+   endif
+   endfunction strjoin_strings_array
+
+  pure function strjoin_characters_array(array, sep, is_trim, is_col) result(join)
+   !< Return a string that is a join of columns or rows of an array of characters.
+   !<
+   !< The join-separator is set equals to a null string '' if custom separator isn't specified.
+   !< The trim function is applied to array items if optional logical is_trim variable isn't set to .false.
+   !< The is_col is setup the direction of join: within default columns (.true.) or rows(.false.).
+   !<
+   !<```fortran
+   !< character(len=10)         :: chars_arr(3, 2)
+   !< logical                   :: test_passed(9)
+   !< chars_arr(:, 1) = ['one       ', 'two       ', 'three     ']
+   !< chars_arr(:, 2) = ['ONE       ', 'TWO       ', 'THREE     ']
+   !<
+   !< test_passed(1) = all( strjoin(array=chars_arr) == &
+   !<                       reshape([string('onetwothree'), string('ONETWOTHREE')], &
+   !<                       shape = [2]) )
+   !<
+   !< test_passed(2) = all( strjoin(array=chars_arr, is_trim=.false.) ==  &
+   !<                       reshape([string('one       two       three     '),  &
+   !<                                string('ONE       TWO       THREE     ')], &
+   !<                       shape = [2]) )
+   !<
+   !< test_passed(3) = all( strjoin(array=chars_arr, sep='_') == &
+   !<                       reshape([string('one_two_three'), string('ONE_TWO_THREE')], &
+   !<                       shape = [2]) )
+   !<
+   !< test_passed(4) = all( strjoin(array=chars_arr, sep='_', is_trim=.false.) ==  &
+   !<                       reshape([string('one       _two       _three     '),  &
+   !<                                string('ONE       _TWO       _THREE     ')], &
+   !<                       shape = [2]) )
+   !<
+   !< test_passed(5) = all( strjoin(array=chars_arr, is_col=.false.) == &
+   !<                       reshape([string('oneONE'), string('twoTWO'), string('threeTHREE')], &
+   !<                       shape = [3]) )
+   !<
+   !< test_passed(6) = all( strjoin(array=chars_arr, is_trim=.false., is_col=.false.) ==  &
+   !<                       reshape([string('one       ONE       '),  &
+   !<                                string('two       TWO       '),  &
+   !<                                string('three     THREE     ')], &
+   !<                       shape = [3]) )
+   !<
+   !< test_passed(7) = all( strjoin(array=chars_arr, sep='_', is_col=.false.) == &
+   !<                       reshape([string('one_ONE'), string('two_TWO'), string('three_THREE')], &
+   !<                       shape = [3]) )
+   !<
+   !< test_passed(8) = all( strjoin(array=chars_arr, sep='_', is_trim=.false., is_col=.false.) ==  &
+   !<                       reshape([string('one       _ONE       '),  &
+   !<                                string('two       _TWO       '),  &
+   !<                                string('three     _THREE     ')], &
+   !<                       shape = [3]) )
+   !<
+   !< chars_arr(2,1) = ''
+   !< test_passed(9) = all( strjoin(array=chars_arr, sep='_', is_col=.false.) ==  &
+   !<                       reshape([string('one_ONE'),  &
+   !<                                string('TWO'),  &
+   !<                                string('three_THREE')], &
+   !<                       shape = [3]) )
+   !<
+   !< print '(L1)', all(test_passed)
+   !<```
+   !=> T <<<
+   character(kind=CK, len=*), intent(in)           :: array(1:, 1:) !< Array to be joined.
+   character(kind=CK, len=*), intent(in), optional :: sep       !< Separator.
+   logical,                   intent(in), optional :: is_trim   !< Flag to setup trim character or not
+   logical,                   intent(in), optional :: is_col    !< Direction: 'columns' if .true. or 'rows' if .false.
+   type(string),              allocatable          :: join(:)   !< The join of array.
+   character(kind=CK, len=:), allocatable          :: slice(:)  !< The column or row slice of array
+   character(kind=CK, len=:), allocatable          :: sep_      !< Separator, default value.
+   logical                                         :: is_trim_  !< Flag to setup trim character or not
+   logical                                         :: is_col_   !< Direction, default value.
+   integer                                         :: a, join_size, slice_size  !< Counter, sizes of join vector and of slice of array
+   integer                                         :: item_len  !< Length of array item (all items of character array have equal lengths)
+
+   item_len = len(array(1,1)) !< all items of character array have equal lengths
+   sep_     = ''     ; if (present(sep)) sep_ = sep
+   is_trim_ = .true. ; if (present(is_trim)) is_trim_ = is_trim
+   is_col_  = .true. ; if (present(is_col)) is_col_ = is_col
+
+   if (is_col_) then
+       join_size  = size(array, dim=2)
+       slice_size = size(array, dim=1)
+
+       if (.not.allocated(join))  allocate(join(join_size))
+       if (.not.allocated(slice)) allocate(character(len=item_len) :: slice(slice_size))
+       do a = 1, join_size
+           slice(:) = array(:, a)
+           join(a)  = strjoin_characters(slice, sep_, is_trim_)
+       end do
+   else
+       join_size  = size(array, dim=1)
+       slice_size = size(array, dim=2)
+
+       if (.not.allocated(join))  allocate(join(join_size))
+       if (.not.allocated(slice)) allocate(character(len=item_len) :: slice(slice_size))
+       do a = 1, join_size
+           slice(:) = array(a, :)
+           join(a)  = strjoin_characters(slice, sep_, is_trim_)
+       end do
+   endif
+   endfunction strjoin_characters_array
 
    elemental function lower(self)
    !< Return a string with all lowercase characters.
@@ -2228,6 +2632,7 @@ contains
    endif
    endfunction to_integer_I1P
 
+#ifndef _NVF
    elemental function to_integer_I2P(self, kind) result(to_number)
    !< Cast string to integer (I2P).
    !<
@@ -2250,6 +2655,7 @@ contains
      if (self%is_integer()) read(self%raw, *) to_number
    endif
    endfunction to_integer_I2P
+#endif
 
    elemental function to_integer_I4P(self, kind) result(to_number)
    !< Cast string to integer (I4P).
@@ -2425,14 +2831,23 @@ contains
    character(kind=CK, len=*), intent(in), optional :: substring  !< Substring which multiple occurences must be reduced to one.
    character(kind=CK, len=:), allocatable          :: substring_ !< Substring, default value.
    type(string)                                    :: uniq       !< String parsed.
+#ifdef _NVF
+   character(9999)                                 :: nvf_bug  !< Work around for NVFortran bug.
+#endif
 
    if (allocated(self%raw)) then
      substring_ = SPACE ; if (present(substring)) substring_ = substring
 
      uniq = self
      do
+#ifdef _NVF
+       nvf_bug = substring_
+       if (.not.uniq%index(repeat(trim(nvf_bug), 2))>0) exit
+       uniq = uniq%replace(old=repeat(trim(nvf_bug), 2), new=substring_)
+#else
        if (.not.uniq%index(repeat(substring_, 2))>0) exit
        uniq = uniq%replace(old=repeat(substring_, 2), new=substring_)
+#endif
      enddo
    endif
    endfunction unique
@@ -3018,7 +3433,7 @@ contains
    ! private methods
 
    ! assignments
-   elemental subroutine string_assign_string(lhs, rhs)
+   pure subroutine string_assign_string(lhs, rhs)
    !< Assignment operator from string input.
    !<
    !<```fortran
@@ -3037,7 +3452,7 @@ contains
    if (allocated(rhs%raw)) lhs%raw = rhs%raw
    endsubroutine string_assign_string
 
-   elemental subroutine string_assign_character(lhs, rhs)
+   pure subroutine string_assign_character(lhs, rhs)
    !< Assignment operator from character input.
    !<
    !<```fortran
@@ -3054,7 +3469,7 @@ contains
    lhs%raw = rhs
    endsubroutine string_assign_character
 
-   elemental subroutine string_assign_integer_I1P(lhs, rhs)
+   pure subroutine string_assign_integer_I1P(lhs, rhs)
    !< Assignment operator from integer input.
    !<
    !<```fortran
@@ -3072,7 +3487,7 @@ contains
    lhs%raw = trim(str(rhs))
    endsubroutine string_assign_integer_I1P
 
-   elemental subroutine string_assign_integer_I2P(lhs, rhs)
+   pure subroutine string_assign_integer_I2P(lhs, rhs)
    !< Assignment operator from integer input.
    !<
    !<```fortran
@@ -3090,7 +3505,7 @@ contains
    lhs%raw = trim(str(rhs))
    endsubroutine string_assign_integer_I2P
 
-   elemental subroutine string_assign_integer_I4P(lhs, rhs)
+   pure subroutine string_assign_integer_I4P(lhs, rhs)
    !< Assignment operator from integer input.
    !<
    !<```fortran
@@ -3108,7 +3523,7 @@ contains
    lhs%raw = trim(str(rhs))
    endsubroutine string_assign_integer_I4P
 
-   elemental subroutine string_assign_integer_I8P(lhs, rhs)
+   pure subroutine string_assign_integer_I8P(lhs, rhs)
    !< Assignment operator from integer input.
    !<
    !<```fortran
@@ -3126,7 +3541,7 @@ contains
    lhs%raw = trim(str(rhs))
    endsubroutine string_assign_integer_I8P
 
-   elemental subroutine string_assign_real_R4P(lhs, rhs)
+   pure subroutine string_assign_real_R4P(lhs, rhs)
    !< Assignment operator from real input.
    !<
    !<```fortran
@@ -3144,7 +3559,7 @@ contains
    lhs%raw = trim(str(rhs))
    endsubroutine string_assign_real_R4P
 
-   elemental subroutine string_assign_real_R8P(lhs, rhs)
+   pure subroutine string_assign_real_R8P(lhs, rhs)
    !< Assignment operator from real input.
    !<
    !<```fortran
@@ -3162,7 +3577,7 @@ contains
    lhs%raw = trim(str(rhs))
    endsubroutine string_assign_real_R8P
 
-   elemental subroutine string_assign_real_R16P(lhs, rhs)
+   pure subroutine string_assign_real_R16P(lhs, rhs)
    !< Assignment operator from real input.
    !<
    !<```fortran

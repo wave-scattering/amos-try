@@ -23,9 +23,9 @@ def create_input(npts,ak1, ak2, zinf, zsup, polar, lmax, r_ratio):
            'Give information for the "NCOMP" components \n'
            '\n'
            '     IT  = 2\n'
-           '     MUMED =   1.00000000   0.00000000     EPSMED=   1.00000000   0.00000000\n'
+           '     MUMED =   1.00000000   0.00000000     EPSMED=   2.10250000   0.00000000\n'
            '   NPLAN = 1  NLAYER = 1\n'
-           '       S =   '+'%10.8f'%(r_ratio)+'     MUSPH =   1.00000000   0.00000000     EPSSPH=  15.00000000   0.00000000\n'
+           '       S =   '+'%10.8f'%(r_ratio)+'     MUSPH =   1.00000000   0.00000000     EPSSPH=  15.0000000   0.00000000\n'
            'xyzDL 0.0  0.0  0.0\n'
            'xyzDR 0.0  0.0  1.0\n'
            '     MUEMBL=   1.00000000   0.00000000    EPSEMBL=   1.00000000   0.00000000\n'
@@ -62,6 +62,7 @@ if __name__ == "__main__":
     npts = 504
     lmax=7
     r_ratio = 0.47050000
+    # r_ratio = 0.21052632
     # from_k = 3.7128
     # to_k = 3.7129
     plot_factor = 1#/3.666*1.75x`
@@ -72,8 +73,11 @@ if __name__ == "__main__":
     # from_k = 3.73
     # to_k = 3.741
 
-    from_k = 3.731
-    to_k = 3.735
+    from_k = 1
+    to_k = 10
+
+    # from_k = 1.5789
+    # to_k = 1.5789
 
     # from_k = 3.3
     # to_k = 4.6

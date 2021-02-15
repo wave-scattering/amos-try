@@ -3,11 +3,8 @@ SET (PROJECTNAME "cylinder2mod")
 PROJECT (${PROJECTNAME} Fortran C)
 FIND_PACKAGE(LAPACK REQUIRED)
 
-include_directories(${CMAKE_BINARY_DIR}/amos
-        ${CMAKE_BINARY_DIR}/lapack_wrapper
-        ${CMAKE_BINARY_DIR}/errfun
-        )
-#include_directories(${CMAKE_BINARY_DIR}/errfun
+
+#include_directories(${CMAKE_BINARY_DIR}/errfun::errfun
 #        )
 
 add_library(constants constants.f90)
@@ -16,7 +13,7 @@ add_library(model_parameters model_parameters.f90)
 target_link_libraries(model_parameters constants FiNeR::FiNeR)
 
 add_library(special_functions special_functions.f90)
-target_link_libraries(special_functions constants amos model_parameters)
+target_link_libraries(special_functions constants amos::amos model_parameters)
 
 add_library(cylinder_blas cylinder_blas.f90)
 target_link_libraries(cylinder_blas constants model_parameters)
@@ -52,9 +49,9 @@ target_link_libraries(${PROJECTNAME}
         model_parameters
         libcylinder
         lib_adaptive_integration
-        errfun
-        amos
-        dense_solve
+        errfun::errfun
+        amos::amos
+        dense_solve::dense_solve
         ${BLAS_LIBRARIES}
         ${LAPACK_LIBRARIES}
         )

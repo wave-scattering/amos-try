@@ -1,24 +1,31 @@
 program volatile_doctest
 use stringifor_string_t
  type(string) :: astring
- type(string) :: strings(3)
- logical      :: test_passed(5)
- strings(1) = 'one'
- strings(2) = 'two'
- strings(3) = 'three'
- test_passed(1) = (astring%join(array=strings)//''==strings(1)//strings(2)//strings(3))
- test_passed(2) = (astring%join(array=strings, sep='-')//''==strings(1)//'-'//strings(2)//'-'//strings(3))
- call strings(1)%free
- strings(2) = 'two'
- strings(3) = 'three'
- test_passed(3) = (astring%join(array=strings, sep='-')//''==strings(2)//'-'//strings(3))
- strings(1) = 'one'
- strings(2) = 'two'
- call strings(3)%free
- test_passed(4) = (astring%join(array=strings, sep='-')//''==strings(1)//'-'//strings(2))
- strings(1) = 'one'
- call strings(2)%free
- strings(3) = 'three'
- test_passed(5) = (astring%join(array=strings, sep='-')//''==strings(1)//'-'//strings(3))
- print '(L1)', all(test_passed)
+ type(string), allocatable :: alist_str(:)
+ integer, parameter :: Nf=5
+ character(14) :: files(1:Nf)
+ integer :: file_unit
+ integer :: f
+ integer :: ff
+ logical :: test_passed
+
+ do f=1, Nf
+ files(f) = astring%tempname(prefix='foo-')
+ open(newunit=file_unit, file=files(f))
+ write(file_unit, *)f
+ close(unit=file_unit)
+ enddo
+ call astring%glob(pattern='foo-*', list=alist_str)
+ do f=1, Nf
+ open(newunit=file_unit, file=files(f))
+ close(unit=file_unit, status='delete')
+ enddo
+ test_passed = .false.
+ outer_str: do f=1, size(alist_str, dim=1)
+ do ff=1, Nf
+ test_passed = alist_str(f) == files(ff)
+ if (test_passed) cycle outer_str
+ enddo
+ enddo outer_str
+ print '(L1)', test_passed
 endprogram volatile_doctest
