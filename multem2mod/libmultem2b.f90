@@ -629,6 +629,8 @@ contains
                 xxmat2((lmax + 1)**2 - 1, (lmax + 1)**2 - 1)
         complex(dp) dlme(2, (lmax + 1)**2), dlmh(2, (lmax + 1)**2)
         !     ------------------------------------------------------------------
+        bmel1 = czero
+        bmel2 = czero
         igkmax = 2 * igmax
         lmax1 = lmax + 1
         lmtot = lmax1 * lmax1 - 1
@@ -660,6 +662,9 @@ contains
                 iod = 0
                 do l = 1, lmax
                     do m = -l, l
+                        if (m /= 0) then
+                            cycle
+                        end if
                         ii = ii + 1
                         if(mod((l + m), 2)==0)  then
                             iev = iev + 1
@@ -1422,6 +1427,7 @@ integer ibev
 real(dp)  c0, signus, up, c, b1, b2, b3, u1, u2, a, down
 real(dp)  alpha1, alpha2, beta1, beta2
 complex(dp) omega1, omega2, z1, z2, z3
+integer is_z_oriented
 !     ------------------------------------------------------------------
         lmax1 = lmax + 1
         lmtot = lmax1 * lmax1 - 1
@@ -1430,8 +1436,16 @@ complex(dp) omega1, omega2, z1, z2, z3
         signus = 1.0_dp
         iaod = 0
         iaev = lmxod
+
+!set xmatt1 xmatt2 to czeros
+        xxmat1 = czero
+        xxmat2 = czero
         do la = 1, lmax
             do ma = -la, la
+                if (ma /= 0) then
+                    cycle
+                end if
+!                if is_z_oriented and ma /=0 then cycle
                 if(mod((la + ma), 2)==0) then
                     iaev = iaev + 1
                     ia = iaev
@@ -1455,6 +1469,11 @@ complex(dp) omega1, omega2, z1, z2, z3
                 ibev = lmxod
                 do lb = 1, lmax
                     do mb = -lb, lb
+                        if (mb /= 0) then
+                            cycle
+                        end if
+                        !                if is_z_oriented and mb /=0 then cycle
+
                         if(mod((lb + mb), 2)==0) then
                             ibev = ibev + 1
                             ib = ibev
@@ -2633,8 +2652,8 @@ complex(dp) omega1, omega2, z1, z2, z3
         integer :: multipole_selector
         integer, allocatable :: multipole_order(:), multipole_type(:)
         !-----------------------------------------------------------------------
-        multipole_order = (/ 1, 2, 2 /)
-        multipole_type = (/  1, 0, 1/)
+        multipole_order = (/ 1 /)
+        multipole_type = (/  0/)
 !        multipole_order = (/ -1 /)
 !        multipole_type = (/  -1/)
         lmax1 = size(TE)
