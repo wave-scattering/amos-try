@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.16.3)
 
 # apt install libblas-dev liblapack-dev
 SET (PROJECTNAME "top-besj")
@@ -43,7 +43,8 @@ endif ()
 add_subdirectory(amos)
 #add_subdirectory(try-zbesj)
 add_subdirectory(lapack_wrapper)
-add_subdirectory(errfun)
+#add_subdirectory(errfun)
+add_subdirectory(errfun_MIT)
 #add_subdirectory(errfun_test)
 add_subdirectory(FiNeR)
 #add_subdirectory(multem2orig)
