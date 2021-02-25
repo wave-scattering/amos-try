@@ -11,6 +11,9 @@ module libmultem2b
     complex(dp), parameter, public :: cone = (1.0_dp, 0.0_dp)
     complex(dp), parameter, public :: ctwo = (2.0_dp, 0.0_dp)
     real(dp), parameter, public :: pi = 4.0_dp * ATAN(1.0_dp)
+    integer, dimension(1), parameter :: multipole_order = (/-1/), multipole_type = (/-1/)
+    logical, parameter :: is_z_oriented = .false.
+
     public main_evaluate
 contains
     !=======================================================================
@@ -662,7 +665,7 @@ contains
                 iod = 0
                 do l = 1, lmax
                     do m = -l, l
-                        if (m /= 0) then
+                        if (is_z_oriented .and. m /= 0) then
                             cycle
                         end if
                         ii = ii + 1
@@ -1427,7 +1430,6 @@ integer ibev
 real(dp)  c0, signus, up, c, b1, b2, b3, u1, u2, a, down
 real(dp)  alpha1, alpha2, beta1, beta2
 complex(dp) omega1, omega2, z1, z2, z3
-integer is_z_oriented
 !     ------------------------------------------------------------------
         lmax1 = lmax + 1
         lmtot = lmax1 * lmax1 - 1
@@ -1442,10 +1444,9 @@ integer is_z_oriented
         xxmat2 = czero
         do la = 1, lmax
             do ma = -la, la
-                if (ma /= 0) then
+                if (is_z_oriented .and. ma /= 0) then
                     cycle
                 end if
-!                if is_z_oriented and ma /=0 then cycle
                 if(mod((la + ma), 2)==0) then
                     iaev = iaev + 1
                     ia = iaev
@@ -1469,11 +1470,9 @@ integer is_z_oriented
                 ibev = lmxod
                 do lb = 1, lmax
                     do mb = -lb, lb
-                        if (mb /= 0) then
+                        if (is_z_oriented .and. mb /= 0) then
                             cycle
                         end if
-                        !                if is_z_oriented and mb /=0 then cycle
-
                         if(mod((lb + mb), 2)==0) then
                             ibev = ibev + 1
                             ib = ibev
@@ -2650,10 +2649,10 @@ integer is_z_oriented
         complex(dp) :: C1, C2, C3, C4, C5, C6, AN, AJ, BN, BJ, ARG, ARGM, XISQ, XISQM, AR
         complex(dp), allocatable :: J(:), Y(:), H(:), JM(:), YM(:), HM(:)
         integer :: multipole_selector
-        integer, allocatable :: multipole_order(:), multipole_type(:)
+!        integer, allocatable :: multipole_order(:), multipole_type(:)
         !-----------------------------------------------------------------------
-        multipole_order = (/ 1 /)
-        multipole_type = (/  0/)
+!        multipole_order = (/ 1 /)
+!        multipole_type = (/  0/)
 !        multipole_order = (/ -1 /)
 !        multipole_type = (/  -1/)
         lmax1 = size(TE)

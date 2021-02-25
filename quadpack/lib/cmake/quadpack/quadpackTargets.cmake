@@ -48,11 +48,11 @@ set_target_properties(quadpack::quadpack PROPERTIES
   INTERFACE_INCLUDE_DIRECTORIES "/home/artyom/CLionProjects/amos-try/quadpack/modules"
 )
 
-# Import target "quadpack::quadpack" for configuration "Release"
-set_property(TARGET quadpack::quadpack APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+# Import target "quadpack::quadpack" for configuration "Debug"
+set_property(TARGET quadpack::quadpack APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
 set_target_properties(quadpack::quadpack PROPERTIES
-  IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "Fortran"
-  IMPORTED_LOCATION_RELEASE "/home/artyom/CLionProjects/amos-try/quadpack/lib/libquadpack.a"
+  IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "Fortran"
+  IMPORTED_LOCATION_DEBUG "/home/artyom/CLionProjects/amos-try/quadpack/lib/libquadpack.a"
   )
 
 # This file does not depend on other imported targets which have

@@ -48,11 +48,11 @@ set_target_properties(fortran_tester::fortran_tester PROPERTIES
   INTERFACE_INCLUDE_DIRECTORIES "/home/artyom/CLionProjects/amos-try/FiNeR/src/third_party/fortran_tester/modules"
 )
 
-# Import target "fortran_tester::fortran_tester" for configuration "Release"
-set_property(TARGET fortran_tester::fortran_tester APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+# Import target "fortran_tester::fortran_tester" for configuration "Debug"
+set_property(TARGET fortran_tester::fortran_tester APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
 set_target_properties(fortran_tester::fortran_tester PROPERTIES
-  IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "Fortran"
-  IMPORTED_LOCATION_RELEASE "/home/artyom/CLionProjects/amos-try/FiNeR/src/third_party/fortran_tester/libfortran_tester.a"
+  IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "Fortran"
+  IMPORTED_LOCATION_DEBUG "/home/artyom/CLionProjects/amos-try/FiNeR/src/third_party/fortran_tester/libfortran_tester.a"
   )
 
 # This file does not depend on other imported targets which have

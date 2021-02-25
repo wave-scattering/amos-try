@@ -48,11 +48,11 @@ set_target_properties(errfun::errfun PROPERTIES
   INTERFACE_INCLUDE_DIRECTORIES "/home/artyom/CLionProjects/amos-try/erf_MIT/modules"
 )
 
-# Import target "errfun::errfun" for configuration "Release"
-set_property(TARGET errfun::errfun APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+# Import target "errfun::errfun" for configuration "Debug"
+set_property(TARGET errfun::errfun APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
 set_target_properties(errfun::errfun PROPERTIES
-  IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "C;Fortran"
-  IMPORTED_LOCATION_RELEASE "/home/artyom/CLionProjects/amos-try/erf_MIT/lib/liberrfun.a"
+  IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "C;Fortran"
+  IMPORTED_LOCATION_DEBUG "/home/artyom/CLionProjects/amos-try/erf_MIT/lib/liberrfun.a"
   )
 
 # This file does not depend on other imported targets which have

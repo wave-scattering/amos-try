@@ -49,11 +49,11 @@ set_target_properties(dense_solve::dense_solve PROPERTIES
   INTERFACE_LINK_LIBRARIES "/usr/lib/x86_64-linux-gnu/libblas.so;/usr/lib/x86_64-linux-gnu/liblapack.so;/usr/lib/x86_64-linux-gnu/libblas.so"
 )
 
-# Import target "dense_solve::dense_solve" for configuration "Release"
-set_property(TARGET dense_solve::dense_solve APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+# Import target "dense_solve::dense_solve" for configuration "Debug"
+set_property(TARGET dense_solve::dense_solve APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
 set_target_properties(dense_solve::dense_solve PROPERTIES
-  IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "Fortran"
-  IMPORTED_LOCATION_RELEASE "/home/artyom/CLionProjects/amos-try/lapack_wrapper/lib/libdense_solve.a"
+  IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "Fortran"
+  IMPORTED_LOCATION_DEBUG "/home/artyom/CLionProjects/amos-try/lapack_wrapper/lib/libdense_solve.a"
   )
 
 # This file does not depend on other imported targets which have

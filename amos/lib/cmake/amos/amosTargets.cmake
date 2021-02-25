@@ -48,11 +48,11 @@ set_target_properties(amos::amos PROPERTIES
   INTERFACE_INCLUDE_DIRECTORIES "/home/artyom/CLionProjects/amos-try/amos/modules"
 )
 
-# Import target "amos::amos" for configuration "Release"
-set_property(TARGET amos::amos APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+# Import target "amos::amos" for configuration "Debug"
+set_property(TARGET amos::amos APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
 set_target_properties(amos::amos PROPERTIES
-  IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "Fortran"
-  IMPORTED_LOCATION_RELEASE "/home/artyom/CLionProjects/amos-try/amos/lib/libamos.a"
+  IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "Fortran"
+  IMPORTED_LOCATION_DEBUG "/home/artyom/CLionProjects/amos-try/amos/lib/libamos.a"
   )
 
 # This file does not depend on other imported targets which have
