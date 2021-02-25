@@ -1,38 +1,27 @@
 program volatile_doctest
 use stringifor_string_t
- type(string) :: astring
- type(string), allocatable :: strings(:)
- type(string) :: line(3)
- integer :: iostat
- character(len=99) :: iomsg
- integer :: scratch
- integer :: l
- logical :: test_passed(8)
-
- line(1) = ' Hello World!   '
- line(2) = 'How are you?  '
- line(3) = '   All say: "Fine thanks"'
- open(newunit=scratch, status='SCRATCH')
- write(scratch, "(A)") line(1)%chars()
- write(scratch, "(A)") line(2)%chars()
- write(scratch, "(A)") line(3)%chars()
- call astring%read_lines(unit=scratch, iostat=iostat, iomsg=iomsg)
- call astring%split(tokens=strings, sep=new_line('a'))
- test_passed(1) = (size(strings, dim=1)==size(line, dim=1))
- do l=1, size(strings, dim=1)
- test_passed(l+1) = (strings(l)==line(l))
- enddo
- close(scratch)
- open(newunit=scratch, status='SCRATCH', form='UNFORMATTED', access='STREAM')
- write(scratch) line(1)%chars()//new_line('a')
- write(scratch) line(2)%chars()//new_line('a')
- write(scratch) line(3)%chars()//new_line('a')
- call astring%read_lines(unit=scratch, form='unformatted', iostat=iostat, iomsg=iomsg)
- call astring%split(tokens=strings, sep=new_line('a'))
- test_passed(5) = (size(strings, dim=1)==size(line, dim=1))
- do l=1, size(strings, dim=1)
- test_passed(l+5) = (strings(l)==line(l))
- enddo
- close(scratch)
+ type(string)                  :: astring
+ type(string)                  :: anotherstring
+ character(len=:), allocatable :: acharacter
+ integer                       :: istart
+ integer                       :: iend
+ logical                       :: test_passed(5)
+ astring = '<test> <first> hello </first> <first> not the first </first> </test>'
+ anotherstring = astring%search(tag_start='<first>', tag_end='</first>')
+ test_passed(1) = anotherstring//''=='<first> hello </first>'
+ astring = '<test> <a> <a> <a> the nested a </a> </a> </a> </test>'
+ anotherstring = astring%search(tag_start='<a>', tag_end='</a>')
+ test_passed(2) = anotherstring//''=='<a> <a> <a> the nested a </a> </a> </a>'
+ call astring%free
+ anotherstring = '<test> <a> <a> <a> the nested a </a> </a> </a> </test>'
+ astring = astring%search(in_string=anotherstring, tag_start='<a>', tag_end='</a>')
+ test_passed(3) = astring//''=='<a> <a> <a> the nested a </a> </a> </a>'
+ call astring%free
+ acharacter = '<test> <a> <a> <a> the nested a </a> </a> </a> </test>'
+ astring = astring%search(in_character=acharacter, tag_start='<a>', tag_end='</a>')
+ test_passed(4) = astring//''=='<a> <a> <a> the nested a </a> </a> </a>'
+ acharacter = '<test> <first> hello </first> <sec> <sec>not the first</sec> </sec> </test>'
+ astring = astring%search(in_character=acharacter, tag_start='<sec>', tag_end='</sec>', istart=istart, iend=iend)
+ test_passed(5) = astring//''==acharacter(31:67)
  print '(L1)', all(test_passed)
 endprogram volatile_doctest

@@ -8,7 +8,7 @@
 #
 # the config file is generatet in the build and install directories
 
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.10...3.13)
 project(FiNeR VERSION 2.0.3 LANGUAGES Fortran)
 
 # seach path for additional cmake modules
@@ -68,6 +68,9 @@ if((main_project AND BUILD_TESTING) OR BUILD_TESTING_${PROJECT_NAME})
     enable_testing()
     add_subdirectory(src/tests)
 endif()
+
+#enable_testing()
+#add_subdirectory(src/tests)
 
 # generate package config files
 include(GNUInstallDirs)

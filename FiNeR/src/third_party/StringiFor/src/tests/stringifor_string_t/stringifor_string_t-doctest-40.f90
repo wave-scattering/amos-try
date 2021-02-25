@@ -1,29 +1,41 @@
 program volatile_doctest
 use stringifor_string_t
- type(string) :: astring
- character(5) :: characters(3)
- logical :: test_passed(6)
- characters(1) = 'one'
- characters(2) = 'two'
- characters(3) = 'three'
- test_passed(1) = (astring%join(array=characters)//''==characters(1)//characters(2)//characters(3))
- test_passed(2) = (astring%join(array=characters, sep='-')//''==characters(1)//'-'//characters(2)//'-'//characters(3))
- characters(1) = ''
- characters(2) = 'two'
- characters(3) = 'three'
- test_passed(3) = (astring%join(array=characters, sep='-')//''==characters(2)//'-'//characters(3))
- characters(1) = 'one'
- characters(2) = 'two'
- characters(3) = ''
- test_passed(4) = (astring%join(array=characters, sep='-')//''==characters(1)//'-'//characters(2))
- characters(1) = 'one'
- characters(2) = ''
- characters(3) = 'three'
- test_passed(5) = (astring%join(array=characters, sep='-')//''==characters(1)//'-'//characters(3))
- characters(1) = 'one'
- characters(2) = 'two'
- characters(3) = 'three'
- astring = '_'
- test_passed(6) = (astring%join(array=characters)//''==characters(1)//'_'//characters(2)//'_'//characters(3))
+ type(string)              :: astring
+ type(string), allocatable :: strings(:)
+ type(string)              :: line(3)
+ integer                   :: iostat
+ character(len=99)         :: iomsg
+ integer                   :: scratch
+ integer                   :: l
+ logical                   :: test_passed(9)
+ line(1) = ' Hello World!   '
+ line(2) = 'How are you?  '
+ line(3) = '   All say: "Fine thanks"'
+ open(newunit=scratch, file='read_file_test.tmp')
+ write(scratch, "(A)") line(1)%chars()
+ write(scratch, "(A)") line(2)%chars()
+ write(scratch, "(A)") line(3)%chars()
+ close(scratch)
+ call astring%read_file(file='read_file_test.tmp', iostat=iostat, iomsg=iomsg)
+ call astring%split(tokens=strings, sep=new_line('a'))
+ test_passed(1) = (size(strings, dim=1)==size(line, dim=1))
+ do l=1, size(strings, dim=1)
+   test_passed(l+1) = (strings(l)==line(l))
+ enddo
+ open(newunit=scratch, file='read_file_test.tmp', form='UNFORMATTED', access='STREAM')
+ write(scratch) line(1)%chars()//new_line('a')
+ write(scratch) line(2)%chars()//new_line('a')
+ write(scratch) line(3)%chars()//new_line('a')
+ close(scratch)
+ call astring%read_file(file='read_file_test.tmp', form='unformatted', iostat=iostat, iomsg=iomsg)
+ call astring%split(tokens=strings, sep=new_line('a'))
+ test_passed(5) = (size(strings, dim=1)==size(line, dim=1))
+ do l=1, size(strings, dim=1)
+   test_passed(l+5) = (strings(l)==line(l))
+ enddo
+ open(newunit=scratch, file='read_file_test.tmp', form='UNFORMATTED', access='STREAM')
+ close(scratch, status='DELETE')
+ call astring%read_file(file='read_file_test.tmp', iostat=iostat)
+ test_passed(9) = (iostat/=0)
  print '(L1)', all(test_passed)
 endprogram volatile_doctest

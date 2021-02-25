@@ -1,14 +1,9 @@
 program volatile_doctest
 use stringifor_string_t
- type(string) :: astring
- logical :: test_passed(4)
- astring = '   Hello World  !    '
- test_passed(1) = astring%count(substring=' ')==10
- astring = 'Hello World  !    '
- test_passed(2) = astring%count(substring=' ', ignore_isolated=.true.)==6
- astring = '    Hello World  !'
- test_passed(3) = astring%count(substring=' ', ignore_isolated=.true.)==6
- astring = '   Hello World  !    '
- test_passed(4) = astring%count(substring=' ', ignore_isolated=.true.)==8
+ type(string) :: string1
+ logical      :: test_passed(2)
+ string1 = 'Hello World Hello!'
+ test_passed(1) = string1%index(substring='llo')==index(string='Hello World Hello!', substring='llo')
+ test_passed(2) = string1%index(substring='llo', back=.true.)==index(string='Hello World Hello!', substring='llo', back=.true.)
  print '(L1)', all(test_passed)
 endprogram volatile_doctest

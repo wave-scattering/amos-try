@@ -29,12 +29,15 @@ A KISS pure Fortran library providing  astrings (class) manipulator for modern (
 
 #### Compiler Support
 
-[![Compiler](https://img.shields.io/badge/GNU-v9.2.0+-brightgreen.svg)]()
-[![Compiler](https://img.shields.io/badge/Intel-v19.0.4+-brightgreen.svg)]()
+[![Compiler](https://img.shields.io/badge/GNU-v5.3.0+-orange.svg)]()
+[![Compiler](https://img.shields.io/badge/Intel-v16.x+-brightgreen.svg)]()
 [![Compiler](https://img.shields.io/badge/IBM%20XL-not%20tested-yellow.svg)]()
 [![Compiler](https://img.shields.io/badge/g95-not%20tested-yellow.svg)]()
 [![Compiler](https://img.shields.io/badge/NAG-not%20tested-yellow.svg)]()
 [![Compiler](https://img.shields.io/badge/PGI-not%20tested-yellow.svg)]()
+
+##### GNU partial support
+> GNU gfortran does not support user-defined-type-IO, thus some class features are disabled if GNU is used.
 
 ---
 
@@ -83,7 +86,7 @@ type(string) :: astring
 
 astring = 'Hello World'
 print "(A)", astring%chars() ! "chars" method returns a standard character variable
-print "(DT)", astring        ! defined IO (in gfortran is available for GNU GCC >= 7.1)
+print "(DT)", astring        ! defined IO is not enabled with GNU gfortran
 print "(A)", astring//''     ! on-the-fly conversion to standard character by means of concatenation
 ```
 
@@ -111,7 +114,7 @@ print "(A)", 'After sep:  "'//strings(3)//'"' ! print "rld"
 strings(1) = 'one'
 strings(2) = 'two'
 strings(3) = 'three'
-print "(A)", astring%join(strings)//''          ! print "oneHello WorldtwoHello Worldthree"
+print "(A)", astring%join(strings)//''          ! print "onetwothree"
 print "(A)", astring%join(strings, sep='-')//'' ! print "one-two-three"
 
 astring = ' a StraNgE caSe var'
@@ -155,7 +158,7 @@ astring = '/bar/foo.tar.bz2'
 print "(A)", astring%basedir()//''                       ! print "/bar"
 print "(A)", astring%basename()//''                      ! print "foo.tar.bz2"
 print "(A)", astring%basename(extension='.tar')//''      ! print "foo"
-print "(A)", astring%basename(strip_last_extension=.true.)//'' ! print "foo.tar"
+print "(A)", astring%basename(last_extension=.true.)//'' ! print "foo.tar"
 
 ! XML like tag parsing
 astring = '<test> <first> hello </first> <first> not the first </first> </test>'
@@ -205,7 +208,8 @@ enddo
 print "(A)", 'A markdown-formatted table'
 print "(A)", ''
 print "(A)", '|'//csv%join(array=cells(:, 1), sep='|')//'|'
-print "(A)", '|'//repeat('----|', size(columns)) ! printing separators
+columns = '----' ! re-use columns for printing separators
+print "(A)", '|'//csv%join(array=columns, sep='|')//'|'
 do r=2, rows_number
   print "(A)", '|'//csv%join(array=cells(:, r), sep='|')//'|'
 enddo
@@ -266,11 +270,8 @@ StringiFor home is at [https://github.com/szaghi/StringiFor](https://github.com/
 
 Currently StringiFor depends on:
 
-+ [FACE](https://github.com/szaghi/FACE)
 + [PENF](https://github.com/szaghi/PENF)
 + [BeFoR64](https://github.com/szaghi/BeFoR64)
-
-> The third party libraries are necessary for building StringiFor. StringiFor is constantly made up-to-date with third party libraries master branch or their latest release.
 
 If you download a release of StringiFor manually (without git) you must download manually the above dependencies and place them into `src/third_party` sub-directory of the project root-tree.
 
@@ -280,22 +281,22 @@ Go to [Top](#top)
 
 StringiFor is a modern Fortran project thus a modern Fortran compiler is need to compile the project. In the following table the support for some widely-used Fortran compilers is summarized.
 
-| Compiler Vendor Support                                                    | Notes        |
-|----------------------------------------------------------------------------|--------------|
-|[![Compiler](https://img.shields.io/badge/GNU-v9.2.0+-brightgreen.svg)]()   | full support |
-|[![Compiler](https://img.shields.io/badge/Intel-v19.0.4+-brightgreen.svg)]()| full support |
-|[![Compiler](https://img.shields.io/badge/IBM%20XL-vx.y-yellow.svg)]()      | not tested   |
-|[![Compiler](https://img.shields.io/badge/g95-vx.y-yellow.svg)]()           | not tested   |
-|[![Compiler](https://img.shields.io/badge/NAG-vx.y-yellow.svg)]()           | not tested   |
-|[![Compiler](https://img.shields.io/badge/PGI-vx.y-yellow.svg)]()           | not tested   |
+| Compiler Vendor Support                                                  | Notes                       |
+|--------------------------------------------------------------------------|-----------------------------|
+|[![Compiler](https://img.shields.io/badge/GNU-v5.3.0+-orange.svg)]()      | does not support defined IO |
+|[![Compiler](https://img.shields.io/badge/Intel-v16.x+-brightgreen.svg)]()| full support                |
+|[![Compiler](https://img.shields.io/badge/IBM%20XL-vx.y-yellow.svg)]()    | not tested                  |
+|[![Compiler](https://img.shields.io/badge/g95-vx.y-yellow.svg)]()         | not tested                  |
+|[![Compiler](https://img.shields.io/badge/NAG-vx.y-yellow.svg)]()         | not tested                  |
+|[![Compiler](https://img.shields.io/badge/PGI-vx.y-yellow.svg)]()         | not tested                  |
 
 The library is modular, namely it exploits Fortran modules. As a consequence, there is compilation-cascade hierarchy to build the library. To correctly build the library the following approaches are supported
 
 + [Build by means of FoBiS](#build-by-means-of-fobis): full support;
-+ [Build by means of GNU Make](#build-by-means-of-gnu-make): support for GNU Make is not provided, a Makefile is provided, but it is likely outdated and could not work as expected. Help for maintaining GNU Make support is strongly welcome, feel free to join this progect.
-+ [Build by means of CMake](#build-by-means-of-fobis): support for CMake is not provide, some CMake support is provided by great users, but it could be outdated. Help for maintaining CMake support is strongly welcome, feel free to join this progect.
++ [Build by means of GNU Make](#build-by-means-of-gnu-make): support only static-linked library building (not shared) for both Intel Fortran and GNU gfortran;
++ [Build by means of CMake](#build-by-means-of-fobis): to be implemented.
 
-The FoBiS building support is the most complete and the only one officially supported by the author, as it is the one used for the developing StringiFor.
+The FoBiS building support is the most complete, as it is the one used for the developing StringiFor.
 
 ### Build by means of FoBiS
 

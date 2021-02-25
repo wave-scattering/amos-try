@@ -18,7 +18,6 @@ public :: ACTION_STORE_FALSE
 public :: ACTION_PRINT_HELP
 public :: ACTION_PRINT_VERS
 public :: ARGS_SEP
-public :: ERROR_UNKNOWN
 
 type, extends(object) :: command_line_argument
   !< Command Line Argument (CLA) class.
@@ -52,7 +51,7 @@ type, extends(object) :: command_line_argument
                          get_cla, &
                          get_cla_list                    !< Get CLA value(s).
     generic,   public :: get_varying =>                &
-#if defined _R16P
+#ifdef _R16P_SUPPORTED
                          get_cla_list_varying_R16P,    &
 #endif
                          get_cla_list_varying_R8P,     &
@@ -97,7 +96,7 @@ endtype command_line_argument
 
 ! parameters
 character(len=*), parameter :: ACTION_STORE       = 'STORE'         !< Store value (if invoked a value must be passed).
-character(len=*), parameter :: ACTION_STORE_STAR  = 'STORE*'        !< Store value or revert on default if invoked alone.
+character(len=*), parameter :: ACTION_STORE_STAR  = 'STORE*'        !< Store value or revert on default is invoked alone.
 character(len=*), parameter :: ACTION_STORE_TRUE  = 'STORE_TRUE'    !< Store .true. without the necessity of a value.
 character(len=*), parameter :: ACTION_STORE_FALSE = 'STORE_FALSE'   !< Store .false. without the necessity of a value.
 character(len=*), parameter :: ACTION_PRINT_HELP  = 'PRINT_HELP'    !< Print help message.
@@ -359,51 +358,22 @@ contains
   endif
   endfunction usage
 
-  function signature(self, bash_completion, plain)
+  function signature(self, bash_completion)
   !< Get signature.
   class(command_line_argument), intent(in) :: self             !< CLA data.
-  logical, optional,            intent(in) :: bash_completion  !< Return the signature for bash completion.
-  logical, optional,            intent(in) :: plain            !< Return the signature as plain switches list.
-  logical                                  :: plain_           !< Return the signature as plain switches list, local var.
-  logical                                  :: bash_completion_ !< Return the signature for bash completion, local variable.
+  logical, optional,            intent(in) :: bash_completion  !< Return the signatura for bash completion.
+  logical                                  :: bash_completion_ !< Return the signatura for bash completion, local variable.
   character(len=:), allocatable            :: signature        !< Signature.
   integer(I4P)                             :: nargs            !< Number of arguments consumed by CLA.
   integer(I4P)                             :: a                !< Counter.
 
   bash_completion_ = .false. ; if (present(bash_completion)) bash_completion_ = bash_completion
-  plain_ = .false. ; if (present(plain)) plain_ = plain
   if (.not.self%is_hidden) then
     if (bash_completion_) then
-      if (.not.self%is_positional) then
-        if (plain_) then
-          if (trim(adjustl(self%switch))/=trim(adjustl(self%switch_ab))) then
-            signature = ' '//trim(adjustl(self%switch))//' '//trim(adjustl(self%switch_ab))
-          else
-            signature = ' '//trim(adjustl(self%switch))
-          endif
-        else
-          signature = new_line('a')//'    if [ "$prev" == "'//self%switch//'" ] || [ "$prev" == "'//self%switch_ab//'" ] ; then'
-          if (self%has_choices()) then
-             signature = signature//new_line('a')//'       COMPREPLY=( $( compgen -W "'//choices(self%choices)//'" -- $cur ) )'
-          elseif ((self%act==action_store).or.(self%act==action_store_star)) then
-             signature = signature//new_line('a')//'       COMPREPLY=( )'
-          endif
-          signature = signature//new_line('a')//'       return 0'
-          signature = signature//new_line('a')//'    fi'
-        endif
-        ! if (trim(adjustl(self%switch))/=trim(adjustl(self%switch_ab))) then
-          ! if (plain_) then
-          !   signature = ' "'//trim(adjustl(self%switch))//'" "'//trim(adjustl(self%switch_ab))//'"'
-          ! else
-            ! signature = ' '//trim(adjustl(self%switch))//' '//trim(adjustl(self%switch_ab))
-          ! endif
-        ! else
-          ! if (plain_) then
-          !   signature = ' "'//trim(adjustl(self%switch))//'"'
-          ! else
-            ! signature = ' '//trim(adjustl(self%switch))
-          ! endif
-        ! endif
+      if (trim(adjustl(self%switch))/=trim(adjustl(self%switch_ab))) then
+        signature = ' '//trim(adjustl(self%switch))//' '//trim(adjustl(self%switch_ab))
+      else
+        signature = ' '//trim(adjustl(self%switch))
       endif
     else
       if (self%act==action_store) then
@@ -430,6 +400,7 @@ contains
             signature = ' ['//trim(adjustl(self%switch))//signature//']'
           endif
         else
+          if (bash_completion_) return
           if (self%is_required) then
             signature = ' value'
           else
@@ -449,18 +420,6 @@ contains
   else
     signature = ''
   endif
-  contains
-    pure function choices(choices_c)
-    !< Return space-separated choices list from a comma-separated one.
-    character(len=*), intent(in)  :: choices_c !< Comma-separated list of choices.
-    character(len=len(choices_c)) :: choices   !< Space-separated list of choices.
-    integer(I4P)                  :: c         !< Counter.
-
-    choices = choices_c
-    do c=1, len(choices)
-      if (choices(c:c)==',') choices(c:c) = ' '
-    enddo
-    endfunction choices
   endfunction signature
 
   pure function has_choices(self)
@@ -704,7 +663,7 @@ contains
   tmp = self%choices
   call tokenize(strin=tmp, delimiter=',', toks=toks, Nt=Nc)
   select type(val)
-#if defined _R16P
+#ifdef _R16P_SUPPORTED
   type is(real(R16P))
     val_str = str(n=val)
     do c=1, Nc
@@ -827,7 +786,7 @@ contains
   character(*), optional,       intent(in)    :: pref   !< Prefixing string.
 
   select type(val)
-#if defined _R16P
+#ifdef _R16P_SUPPORTED
   type is(real(R16P))
     val = cton(pref=pref, error=self%error, str=trim(adjustl(buffer)), knd=1._R16P)
 #endif
@@ -917,7 +876,7 @@ contains
 
   call tokenize(strin=buffer, delimiter=args_sep, toks=vals, Nt=Nv)
   select type(val)
-#if defined _R16P
+#ifdef _R16P_SUPPORTED
   type is(real(R16P))
     do v=1, Nv
       val(v) = cton(pref=pref,error=self%error,str=trim(adjustl(vals(v))),knd=1._R16P)

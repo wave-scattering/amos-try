@@ -1,8 +1,8 @@
 program volatile_doctest
 use stringifor_string_t
  type(string) :: astring
- logical :: test_passed(1)
+ logical      :: test_passed(1)
  astring = 'the Quick Brown fox Jumps over the Lazy Dog.'
- test_passed(1) = astring%snakecase()//''=='the_quick_brown_fox_jumps_over_the_lazy_dog.'
+ test_passed(1) = astring%startcase()//''=='The Quick Brown Fox Jumps Over The Lazy Dog.'
  print '(L1)', all(test_passed)
 endprogram volatile_doctest

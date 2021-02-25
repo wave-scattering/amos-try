@@ -91,12 +91,12 @@ Besides this README file the FiNeR documentation is contained into its own [wiki
 ### A Taste of FiNeR
 Let us assume our goal is to parse a config file. It is as simple as
 ```fortran
-use finer
+USE Lib_INI_IO
 ...
-type(file_ini)                :: fini     !< INI file handler.
-character(len=:), allocatable :: source   ! Testing string.
-real(R4P), allocatable        :: array(:) ! Array option.
-integer(I4P)                  :: error    ! Error code.
+type(Type_File_INI)::           fini     ! INI File.
+character(len=:), allocatable:: source   ! Testing string.
+real(R4P), allocatable::        array(:) ! Array option.
+integer(I4P)::                  error    ! Error code.
 ...
 source='[section-1]'//new_line('A')//    &
        'option-1 = one'//new_line('A')// &
@@ -116,9 +116,9 @@ endif
 ```
 And what about the generation of an INI file? It is simple as parsing an old one:
 ```fortran
-use finer
+USE Lib_INI_IO
 ...
-type(file_ini) :: fini !< INI file handler.
+type(Type_File_INI):: fini ! INI File.
 ...
 call fini%add(section='sec-foo')
 call fini%add(section='sec-foo',option='bar',val=-32.1_R8P)
