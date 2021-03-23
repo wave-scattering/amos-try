@@ -83,6 +83,7 @@ def eval(i):
     # print(d)
     # C_all[i,:] = d[:, 1]
     data_arr[i,:] = d[:,1]
+    # np.savetxt(data_file, d[:,1])
 
 if __name__ == "__main__":
     plt.figure(figsize=(11,6))
@@ -107,9 +108,13 @@ if __name__ == "__main__":
     # fi = 0
 
     #-------------------------------- input file for Zarina Sadrieva(2019) ---------------------------------
+    # from_theta_deg = np.arcsin(0.3)/np.pi*180
+    # to_theta_deg = np.arcsin(0.32)/np.pi*180
+    # step_theta = np.arcsin(0.0001)/np.pi*180
     from_theta_deg = np.arcsin(0.0)/np.pi*180
-    to_theta_deg = np.arcsin(0.8)/np.pi*180
-    step_theta = np.arcsin(0.01)/np.pi*180
+    to_theta_deg = np.arcsin(0.4)/np.pi*180
+    step_theta = np.arcsin(0.003)/np.pi*180
+
     lambda_incident = 750
     a = 475
     s = 100
@@ -119,24 +124,24 @@ if __name__ == "__main__":
     from_sin_theta = np.sin(np.pi * from_theta_deg/180)
     to_sin_theta = np.sin(np.pi * to_theta_deg/180)
     npts = 2
-    lmax= 7
+    lmax= 3
     polar='S' # S or P
     theta = np.arange(from_theta_deg, to_theta_deg, step_theta)
     kpts = len(theta)
     fi = 0
     #
     data_arr = np.empty((kpts, 4))
+
     for i in range(kpts):
         print(i+1, 'of', kpts)
         eval(i)
-
     # print(data_arr)
 
     data_arr = data_arr.transpose()
     x = np.linspace(from_sin_theta, to_sin_theta, kpts)
-    # plt.plot(x, data_arr[1], label='trans', lw=0.4)
+    plt.plot(x, data_arr[1], label='trans lmax=%i'%lmax, lw=1.0)
     plt.plot(x, data_arr[2], label='refl', lw=1.0)
-    # plt.plot(x, (data_arr[1]+data_arr[2]-1)*1e5, label='(trans+refl-1)*1e5', lw=0.4)
+    plt.plot(x, (data_arr[1]+data_arr[2]-1)*1e1, label='(trans+refl-1)*1e1', lw=0.4)
     # plt.ylim(-0.01,1.01)
     plt.legend()
     plt.tight_layout()

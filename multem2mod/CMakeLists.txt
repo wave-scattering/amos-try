@@ -13,7 +13,7 @@ PROJECT (${PROJECTNAME} Fortran)
 #INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIR})
 
 
-SET (CMAKE_Fortran_FLAGS "-O3 -cpp -mtune=native -fopenmp")
+#SET (CMAKE_Fortran_FLAGS "-O3 -cpp -mtune=native -fopenmp")
 
 add_library(multem_blas multem_blas.f90)
 target_link_libraries(multem_blas dense_solve::dense_solve)
@@ -23,17 +23,24 @@ target_link_libraries(libmultem2b amos::amos multem_blas errfun::errfun)
 
 
 ADD_EXECUTABLE(${PROJECTNAME} "multem_mod.f90"
+
         )
+#ADD_EXECUTABLE(${PROJECTNAME} "tmtrx_test.f90"
+#
+#        )
+
 target_link_libraries(${PROJECTNAME} #${BLAS_LIBRARIES}
         dense_solve::dense_solve libmultem2b multem_blas
         errfun::errfun
         #${LAPACK_LIBRARIES} #${HDF5_Fortran_LIBRARIES}
         )
-add_custom_command(
-        TARGET ${PROJECTNAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-#        ${CMAKE_SOURCE_DIR}/multem2mod/input2_band.txt
-        ${CMAKE_SOURCE_DIR}/multem2mod/input_inoue.txt
-        ${CMAKE_CURRENT_BINARY_DIR}/fort.10)
+#add_custom_command(
+#        TARGET ${PROJECTNAME} POST_BUILD
+#        COMMAND ${CMAKE_COMMAND} -E copy
+##        ${CMAKE_SOURCE_DIR}/multem2mod/input2_band.txt
+#        ${CMAKE_SOURCE_DIR}/multem2mod/input_inoue.txt
+##        ${CMAKE_SOURCE_DIR}/multem2mod/fort.10
+#
+#        ${CMAKE_CURRENT_BINARY_DIR}/fort.10)
 
 

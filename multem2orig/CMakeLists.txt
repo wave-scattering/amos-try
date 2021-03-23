@@ -13,7 +13,9 @@ ENABLE_LANGUAGE(C)
 #INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIR})
 
 
-SET (CMAKE_Fortran_FLAGS "-O3 -cpp -mtune=native -fopenmp")
+#SET (CMAKE_Fortran_FLAGS "-O3 -cpp -mtune=native -fopenmp")
+#set(CMAKE_Fortran_FLAGS   " -g -fbounds-check -fcheck-array-temporaries -fbacktrace")
+set(CMAKE_Fortran_FLAGS   " -g -fcheck-array-temporaries -fbacktrace")
 
 ADD_EXECUTABLE(${PROJECTNAME} "multem_mod.f")
 
@@ -28,5 +30,7 @@ add_custom_command(
         COMMAND ${CMAKE_COMMAND} -E copy
         #        ${CMAKE_SOURCE_DIR}/multem2mod/input2_band.txt
         ${CMAKE_SOURCE_DIR}/multem2mod/input_inoue.txt
+#        ${CMAKE_SOURCE_DIR}/multem2mod/fort.10
+
         ${CMAKE_CURRENT_BINARY_DIR}/fort.10)
 

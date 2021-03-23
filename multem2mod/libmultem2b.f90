@@ -12,6 +12,8 @@ module libmultem2b
     complex(dp), parameter, public :: ctwo = (2.0_dp, 0.0_dp)
     real(dp), parameter, public :: pi = 4.0_dp * ATAN(1.0_dp)
     integer, dimension(1), parameter :: multipole_order = (/-1/), multipole_type = (/-1/)
+!    integer, dimension(1), parameter :: multipole_order = (/1/), multipole_type = (/1/)
+    !    integer, dimension(2), parameter :: multipole_order = (/1, 1/), multipole_type = (/0, 1/)
     logical, parameter :: is_z_oriented = .false.
 
     public main_evaluate
@@ -1444,9 +1446,9 @@ complex(dp) omega1, omega2, z1, z2, z3
         xxmat2 = czero
         do la = 1, lmax
             do ma = -la, la
-                if (is_z_oriented .and. ma /= 0) then
-                    cycle
-                end if
+!                if (is_z_oriented .and. ma /= 0) then
+!                    cycle
+!                end if
                 if(mod((la + ma), 2)==0) then
                     iaev = iaev + 1
                     ia = iaev
@@ -1470,9 +1472,9 @@ complex(dp) omega1, omega2, z1, z2, z3
                 ibev = lmxod
                 do lb = 1, lmax
                     do mb = -lb, lb
-                        if (is_z_oriented .and. mb /= 0) then
-                            cycle
-                        end if
+!                        if (is_z_oriented .and. mb /= 0) then
+!                            cycle
+!                        end if
                         if(mod((lb + mb), 2)==0) then
                             ibev = ibev + 1
                             ib = ibev
@@ -1485,6 +1487,9 @@ complex(dp) omega1, omega2, z1, z2, z3
                         alpha2 = sqrt(dble((lb - mb) * (lb + mb + 1))) / 2.0_dp
                         beta2 = sqrt(dble((lb + mb) * (lb - mb + 1))) / 2.0_dp
                         ltt = la + ma + lb + mb
+                        if (is_z_oriented .and. (ma /= 0 .or. mb /=0) ) then
+                            cycle
+                        end if
                         if(mod(ltt, 2)/=0)           then
                             if(mod((la + ma), 2)==0)       then
                                 z1 = ceven(lb, mb + 1, la - 1, ma + 1, xeven)
@@ -2651,15 +2656,17 @@ complex(dp) omega1, omega2, z1, z2, z3
         integer :: multipole_selector
 !        integer, allocatable :: multipole_order(:), multipole_type(:)
         !-----------------------------------------------------------------------
-!        multipole_order = (/ 1 /)
-!        multipole_type = (/  0/)
+!        multipole_order = (/ 1, 1, 2, 2 /)
+!        multipole_type = (/ 1, 0, 1, 0/)
+!        multipole_order = (/ 1, 1/)
+!        multipole_type = (/ 1, 0/)
 !        multipole_order = (/ -1 /)
 !        multipole_type = (/  -1/)
         lmax1 = size(TE)
-        if (size(TH) < lmax1) then
-            print *, 'Error. TE and TH vectors have different sizes'
-            stop
-        end if
+!        if (size(TH) < lmax1) then
+!            print *, 'Error. TE and TH vectors have different sizes'
+!            stop
+!        end if
         multipole_selector = size(multipole_type)
         !multipole_type == -1, 0, 1 only
         !multipole_order /=0?depends on indices lmax, >-1, <=lmax same on indices
@@ -2680,7 +2687,7 @@ complex(dp) omega1, omega2, z1, z2, z3
         do  L1 = 1, LMAX1
 
             do s = 1, multipole_selector
-                if (L1 /= multipole_order(s) .and. multipole_order(s) /= -1) then
+                if  (L1 /= multipole_order(s)+1 .and. multipole_order(s) /= -1)  then
                     cycle
                 end if
 
