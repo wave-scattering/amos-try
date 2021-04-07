@@ -14,22 +14,23 @@ def create_input(npts,ak1, ak2, zinf, zsup, polar, lmax, r_ratio):
            '           ********INPUT FILE FOR TRANSMISSION*********\n'
            '           ********************************************\n'
            '   KTYPE = 2   KSCAN = 1   KEMB  = 0    LMAX ='+'%2i'%(lmax)+'   NCOMP = 1   NUNIT = 1\n'
-                                                                         ' ALPHA =    1.000000  BETA =    1.000000   FAB =   60.000000  RMAX =   20.000000\n'
-                                                                         '  NP ='+'%4i'%(npts)+'  ZINF =  '+
+           ' ALPHA =    1.000000  BETA =    1.000000   FAB =   60.000000  RMAX =   20.000000\n'
+           '  NP ='+'%4i'%(npts)+'  ZINF =  '+
            '%11.8f'%(zinf)
            +'  ZSUP =  '+'%12.9f'%(zsup)+'\n'
-                                         '  THETA/AK(1) =  '+'%11.8f'%(ak1)+'     FI/AK(2) =  '+'%11.8f'%(ak2)+'   POLAR ='+polar+'     FEIN =   0.00\n'
-                                                                                                                                  '\n'
-                                                                                                                                  'Give information for the "NCOMP" components \n'
-                                                                                                                                  '\n'
-                                                                                                                                  '     IT  = 2\n'
-                                                                                                                                  '     MUMED =   1.00000000   0.00000000     EPSMED=   1.00000000   0.00000000\n'
-                                                                                                                                  '   NPLAN = 1  NLAYER = 1\n'
-                                                                                                                                  '       S =   '+'%10.8f'%(r_ratio)+'     MUSPH =   1.00000000   0.00000000     EPSSPH=  15.00000000   0.00000000\n'
-                                                                                                                                                                     'xyzDL 0.0  0.0  0.0\n'
-                                                                                                                                                                     'xyzDR 0.0  0.0  1.0\n'
-                                                                                                                                                                     '     MUEMBL=   1.00000000   0.00000000    EPSEMBL=   1.00000000   0.00000000\n'
-                                                                                                                                                                     '     MUEMBR=   1.00000000   0.00000000    EPSEMBR=   1.00000000   0.00000000\n')
+           '  THETA/AK(1) =  '+'%11.8f'%(ak1)+'     FI/AK(2) =  '+'%11.8f'%(ak2)+'   POLAR ='+polar+'     FEIN =   0.00\n'
+           '\n'
+           'Give information for the "NCOMP" components \n'
+           '\n'
+           '     IT  = 2\n'
+           '     MUMED =   1.00000000   0.00000000     EPSMED=   1.00000000   0.00000000\n'
+           '   NPLAN = 1  NLAYER = 1\n'
+           '       S =   '+'%10.8f'%(r_ratio)+'     MUSPH =   1.00000000   0.00000000     EPSSPH=  15.00000000   0.00000000\n'
+           'xyzDL 0.0  0.0  0.0\n'
+           'xyzDR 0.0  0.0  1.0\n'
+           '     MUEMBL=   1.00000000   0.00000000    EPSEMBL=   1.00000000   0.00000000\n'
+           '     MUEMBR=   1.00000000   0.00000000    EPSEMBR=   1.00000000   0.00000000\n')
+
     with open('fort.10','w') as f:
         print(str, file=f)
 
@@ -43,11 +44,11 @@ def get_shared_array(length, width, depth):
 
 def eval(i):
     create_input(npts, ak1[i], ak2[i],zinf, zsup, polar,lmax, r_ratio)
-    if os.path.isfile('multem2'):
+    if os.path.isfile('multem2orig'):
         my_env = os.environ.copy()
         my_env["OMP_NUM_THREADS"] = "1"
         print("Running multem...")
-        subprocess.run(['./multem2'],
+        subprocess.run(['./multem2orig'],
                        stdout=subprocess.DEVNULL,
                        env=my_env)
         print("Done.")
@@ -59,8 +60,8 @@ def eval(i):
 
 if __name__ == "__main__":
     plt.figure(figsize=(11,6))
-    npts = 1404
-    lmax=10
+    npts = 504
+    lmax=7
     r_ratio = 0.47050000
     # from_k = 3.7128
     # to_k = 3.7129
@@ -69,11 +70,11 @@ if __name__ == "__main__":
     #to_k = 2.25/plot_factor
 
     # # As in article
-    from_k = 3.73
-    to_k = 3.741
+    # from_k = 3.73
+    # to_k = 3.741
 
-    # from_k = 3.731
-    # to_k = 3.735
+    from_k = 3.731
+    to_k = 3.735
 
     # from_k = 3.3
     # to_k = 4.6

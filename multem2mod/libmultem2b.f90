@@ -3,6 +3,7 @@ module libmultem2b
     use multem_blas
     use amos
     use errfun
+    use multipole_regime_parameters
 
     implicit none
     integer, parameter, public :: dp = kind(0.0D0)
@@ -11,10 +12,10 @@ module libmultem2b
     complex(dp), parameter, public :: cone = (1.0_dp, 0.0_dp)
     complex(dp), parameter, public :: ctwo = (2.0_dp, 0.0_dp)
     real(dp), parameter, public :: pi = 4.0_dp * ATAN(1.0_dp)
-    integer, dimension(1), parameter :: multipole_order = (/-1/), multipole_type = (/-1/)
-!    integer, dimension(1), parameter :: multipole_order = (/1/), multipole_type = (/1/)
-    !    integer, dimension(2), parameter :: multipole_order = (/1, 1/), multipole_type = (/0, 1/)
-    logical, parameter :: is_z_oriented = .false.
+!    integer, dimension(1), parameter :: multipole_order = (/2/), multipole_type = (/0/)
+!    integer, dimension(2), parameter :: multipole_order = (/1, 2/), multipole_type = (/1, 0/)
+!    integer, dimension(3), parameter :: multipole_order = (/1, 1, 2/), multipole_type = (/0, 1, 0/)
+!    logical, parameter :: is_z_oriented = .false.
 
     public main_evaluate
 contains
@@ -101,13 +102,14 @@ contains
             nunit, icomp, kemb, ipl, alpha, rmax, zinf, zsup, fab, alphap, theta, &
             fi, fein, d2, d1, polar, &
             it, nlayer, nplan, dl, dr, s, al, d, aq, eps2, eps3, mu1, mu2, mu3, &
-            eps1, musph, epssph)
+            eps1, musph, epssph, s_type, s_ord, s_m, type, order, m_numb)
         integer   igd, nelmd, ncompd, npland
         integer, allocatable ::    nt1(:), nt2(:)
         real(dp), allocatable ::   vecmod(:)
 
         integer      lmax, i, igkmax, igk1, igk2, igmax, ktype, kscan, ncomp, ig1
         integer      n, np, ig0, nunit, icomp, kemb, iu, ipl, ilayer, ierr
+        integer      s_type, s_ord, s_m, type, order, m_numb
         real(dp)     alpha, emach, epsilon
         real(dp)     a0, ra0, rmax, akxy
         real(dp)     zval, zstep, zinf, zsup, fab, alphap, theta, fi, fein
@@ -279,13 +281,13 @@ contains
                 rap = s(1, 1) * kappa0 / 2.d0 / pi
                 call pcslab(lmax, igmax, rap, eps1(1), epssph(1, 1), mu1(1), musph(1, 1), &
                         kappa, ak, dl(1, 1, 1), dr(1, 1, 1), g, elm, a0, emach, &
-                        qil, qiil, qiiil, qivl, ar1, ar2)
+                        qil, qiil, qiiil, qivl, ar1, ar2, type, order, s_m, m_numb)
                 if(nplan(1)>=2) then
                     do ipl = 2, nplan(1)
                         rap = s(1, ipl) * kappa0 / 2.d0 / pi
                         call pcslab(lmax, igmax, rap, eps1(1), epssph(1, ipl), mu1(1), &
                                 musph(1, ipl), kappa, ak, dl(1, 1, ipl), dr(1, 1, ipl), &
-                                g, elm, a0, emach, qir, qiir, qiiir, qivr, ar1, ar2)
+                                g, elm, a0, emach, qir, qiir, qiiir, qivr, ar1, ar2, type, order, s_m, m_numb)
                         call pair(igkmax, qil, qiil, qiiil, qivl, qir, qiir, qiiir, qivr)
                     end do
                 endif
@@ -319,7 +321,7 @@ contains
                         call pcslab(lmax, igmax, rap, eps1(icomp), epssph(icomp, 1), mu1(icomp)&
                                 , musph(icomp, 1), kappa, ak, dl(1, icomp, 1), &
                                 dr(1, icomp, 1), g, elm, a0, emach, qir, qiir, qiiir, qivr, &
-                                ar1, ar2)
+                                ar1, ar2, type, order, s_m, m_numb)
                         if(nplan(icomp)>=2) then
                             do igk1 = 1, igkmax
                                 do igk2 = 1, igkmax
@@ -334,7 +336,7 @@ contains
                                 call pcslab(lmax, igmax, rap, eps1(icomp), epssph(icomp, ipl), &
                                         mu1(icomp), musph(icomp, ipl), kappa, ak, &
                                         dl(1, icomp, ipl), dr(1, icomp, ipl), g, elm, a0, emach, &
-                                        qir, qiir, qiiir, qivr, ar1, ar2)
+                                        qir, qiir, qiiir, qivr, ar1, ar2, type, order, s_m, m_numb)
                                 call pair(igkmax, wil, wiil, wiiil, wivl, qir, qiir, qiiir, qivr)
                             end do
                             do igk1 = 1, igkmax
@@ -592,7 +594,7 @@ contains
     end subroutine
     !=======================================================================
     subroutine pcslab(lmax, igmax, rap, epsmed, epssph, mumed, musph, kappa, &
-            ak, dl, dr, g, elm, a0, emach, qi, qii, qiii, qiv, ar1, ar2)
+            ak, dl, dr, g, elm, a0, emach, qi, qii, qiii, qiv, ar1, ar2, type, order, s_m, m_numb)
 
         !     ------------------------------------------------------------------
         !     this subroutine computes the transmission/reflection matrices for
@@ -601,6 +603,7 @@ contains
         ! ..  scalar arguments ..
         !
         integer    lmax, igmax
+        integer    type, order, s_m, m_numb
         real(dp)     a0, emach
         complex(dp) epsmed, epssph, mumed, musph, kappa, rap
 
@@ -634,8 +637,8 @@ contains
                 xxmat2((lmax + 1)**2 - 1, (lmax + 1)**2 - 1)
         complex(dp) dlme(2, (lmax + 1)**2), dlmh(2, (lmax + 1)**2)
         !     ------------------------------------------------------------------
-        bmel1 = czero
-        bmel2 = czero
+!        bmel1 = czero
+!        bmel2 = czero
         igkmax = 2 * igmax
         lmax1 = lmax + 1
         lmtot = lmax1 * lmax1 - 1
@@ -646,10 +649,10 @@ contains
             gkk(3, ig1) = sqrt(kappa * kappa - gkk(1, ig1) * gkk(1, ig1) - &
                     gkk(2, ig1) * gkk(2, ig1))
         end do
-        call tmtrx(rap, epssph, epsmed, mumed, musph, te, th)
+        call tmtrx(rap, epssph, epsmed, mumed, musph, type, order,  te, th)
         ndend = get_dlm_prefactor_size(lmax)
         call xmat(xodd, xeven, lmax, kappa, ak, elm, emach, ar1, ar2, ndend)
-        call setup(lmax, xeven, xodd, te, th, xxmat1, xxmat2)
+        call setup(lmax, xeven, xodd, te, th, s_m, m_numb, xxmat1, xxmat2)
         call zgetrf_wrap (xxmat1, int1)
         call zgetrf_wrap (xxmat2, int2)
         isign2 = 1
@@ -667,18 +670,39 @@ contains
                 iod = 0
                 do l = 1, lmax
                     do m = -l, l
-                        if (is_z_oriented .and. m /= 0) then
-                            cycle
-                        end if
+!                        if (is_z_oriented .and. m /= 0) then
+!                            cycle
+!                        end if
                         ii = ii + 1
+
+!                        if(mod((l + m), 2)==0)  then
+!                            iev = iev + 1
+!                            bmel1(iev) = th(l + 1) * ah(k2, ii + 1)
+!                            bmel2(iev) = te(l + 1) * ae(k2, ii + 1)
+!                        else
+!                            iod = iod + 1
+!                            bmel1(iod) = te(l + 1) * ae(k2, ii + 1)
+!                            bmel2(iod) = th(l + 1) * ah(k2, ii + 1)
+!                        end if
+
                         if(mod((l + m), 2)==0)  then
                             iev = iev + 1
-                            bmel1(iev) = th(l + 1) * ah(k2, ii + 1)
-                            bmel2(iev) = te(l + 1) * ae(k2, ii + 1)
+                            if (s_m == 1 .and. m /= m_numb) then
+                                bmel1(iev) = czero
+                                bmel2(iev) = czero
+                            else
+                                bmel1(iev) = th(l + 1) * ah(k2, ii + 1)
+                                bmel2(iev) = te(l + 1) * ae(k2, ii + 1)
+                            end if
                         else
                             iod = iod + 1
-                            bmel1(iod) = te(l + 1) * ae(k2, ii + 1)
-                            bmel2(iod) = th(l + 1) * ah(k2, ii + 1)
+                            if (s_m == 1 .and. m /= m_numb) then
+                                bmel1(iod) = czero
+                                bmel2(iod) = czero
+                            else
+                                bmel1(iod) = te(l + 1) * ae(k2, ii + 1)
+                                bmel2(iod) = th(l + 1) * ah(k2, ii + 1)
+                            end if
                         end if
                     end do
                 end do
@@ -1416,12 +1440,12 @@ contains
         return
     end subroutine
     !=======================================================================
-    subroutine setup(lmax, xeven, xodd, te, th, xxmat1, xxmat2)
+    subroutine setup(lmax, xeven, xodd, te, th, s_m, m_numb, xxmat1, xxmat2)
 ! ------------------------------------------------------------------
 ! this subroutine constructs the secular matrix
 ! ------------------------------------------------------------------
 ! ..  scalar arguments ..
-integer lmax
+integer lmax, s_m, m_numb
 ! ..  array arguments ..
 complex(dp) xeven(:, :), xodd(:, :)
 complex(dp) xxmat2(:, :)
@@ -1442,8 +1466,8 @@ complex(dp) omega1, omega2, z1, z2, z3
         iaev = lmxod
 
 !set xmatt1 xmatt2 to czeros
-        xxmat1 = czero
-        xxmat2 = czero
+!        xxmat1 = czero
+!        xxmat2 = czero
         do la = 1, lmax
             do ma = -la, la
 !                if (is_z_oriented .and. ma /= 0) then
@@ -1487,9 +1511,9 @@ complex(dp) omega1, omega2, z1, z2, z3
                         alpha2 = sqrt(dble((lb - mb) * (lb + mb + 1))) / 2.0_dp
                         beta2 = sqrt(dble((lb + mb) * (lb - mb + 1))) / 2.0_dp
                         ltt = la + ma + lb + mb
-                        if (is_z_oriented .and. (ma /= 0 .or. mb /=0) ) then
-                            cycle
-                        end if
+!                        if (is_z_oriented .and. (ma /= 0 .or. mb /=0) ) then
+!                            cycle
+!                        end if
                         if(mod(ltt, 2)/=0)           then
                             if(mod((la + ma), 2)==0)       then
                                 z1 = ceven(lb, mb + 1, la - 1, ma + 1, xeven)
@@ -1535,6 +1559,12 @@ complex(dp) omega1, omega2, z1, z2, z3
                                 xxmat2(ia, ib) = -th(la + 1) * omega1
                             end if
                         end if
+
+                        if (s_m == 1 .and. (ma /= m_numb .or. mb /= m_numb) ) then
+                            xxmat1(ia, ib) = czero
+                            xxmat2(ia, ib) = czero
+                        end if
+
                     end do
                 end do
             end do
@@ -2630,7 +2660,7 @@ complex(dp) omega1, omega2, z1, z2, z3
         H = BJ + ci * Y
     end subroutine
     !=======================================================================
-    subroutine tmtrx(rap, epssph, epsmed, mumed, musph, TE, TH)
+    subroutine tmtrx(rap, epssph, epsmed, mumed, musph, type, order, TE, TH)
         !     ------------------------------------------------------------------
         !     THIS SUBROUTINE  CALCULATES  THE  T-MATRIX FOR THE SCATTERING
         !     OF ELECTROMAGNETIC  FIELD  OF  WAVE-LENGHT LAMDA  BY A SINGLE
@@ -2640,6 +2670,7 @@ complex(dp) omega1, omega2, z1, z2, z3
         !     LMAX   : MAXIMUM ANGULAR MOMENTUM from TE(0..LMAX) and TH
         !     ------------------------------------------------------------------
         complex(dp), intent(in) :: EPSSPH, EPSMED, MUSPH, MUMED, RAP
+        integer,     intent(in) :: type, order
         complex(dp), intent(out) :: TE(:), TH(:)
         !        ! multipole_order: -1 for all orders of the multipoles
         !        !-----------------------------------------------------------------------
@@ -2653,7 +2684,7 @@ complex(dp) omega1, omega2, z1, z2, z3
         INTEGER :: l1, lmax, lmax1, b_size, s
         complex(dp) :: C1, C2, C3, C4, C5, C6, AN, AJ, BN, BJ, ARG, ARGM, XISQ, XISQM, AR
         complex(dp), allocatable :: J(:), Y(:), H(:), JM(:), YM(:), HM(:)
-        integer :: multipole_selector
+!        integer :: multipole_selector
 !        integer, allocatable :: multipole_order(:), multipole_type(:)
         !-----------------------------------------------------------------------
 !        multipole_order = (/ 1, 1, 2, 2 /)
@@ -2667,7 +2698,7 @@ complex(dp) omega1, omega2, z1, z2, z3
 !            print *, 'Error. TE and TH vectors have different sizes'
 !            stop
 !        end if
-        multipole_selector = size(multipole_type)
+!        multipole_selector = size(multipole_type)
         !multipole_type == -1, 0, 1 only
         !multipole_order /=0?depends on indices lmax, >-1, <=lmax same on indices
         ! to evaluate TE(0..lmax) we need one more oder in Bessel functions
@@ -2686,24 +2717,40 @@ complex(dp) omega1, omega2, z1, z2, z3
         TH = czero
         do  L1 = 1, LMAX1
 
-            do s = 1, multipole_selector
-                if  (L1 /= multipole_order(s)+1 .and. multipole_order(s) /= -1)  then
-                    cycle
-                end if
+!            do s = 1, multipole_selector
+!                if  (L1 /= multipole_order(s)+1 .and. multipole_order(s) /= -1)  then
+!                    cycle
+!                end if
 
 
-                if (multipole_type(s) == 0 .or. multipole_type(s) == -1) then
-                    an = C1 * L1 * JM(L1) * Y(L1) + C2 * JM(L1 + 1) * Y(L1) + C3 * JM(L1) * Y(L1 + 1)
-                    aj = C1 * L1 * JM(L1) * J(L1) + C2 * JM(L1 + 1) * J(L1) + C3 * JM(L1) * J(L1 + 1)
-                    TE(L1) = -aj / (aj + ci * an)
-                end if
+!                if (multipole_type(s) == 0 .or. multipole_type(s) == -1) then
+!                    an = C1 * L1 * JM(L1) * Y(L1) + C2 * JM(L1 + 1) * Y(L1) + C3 * JM(L1) * Y(L1 + 1)
+!                    aj = C1 * L1 * JM(L1) * J(L1) + C2 * JM(L1 + 1) * J(L1) + C3 * JM(L1) * J(L1 + 1)
+!                    TE(L1) = -aj / (aj + ci * an)
+!                end if
+!
+!                if (multipole_type(s) == 1 .or. multipole_type(s) == -1) then
+!                    bn = C4 * L1 * JM(L1) * Y(L1) + C5 * JM(L1 + 1) * Y(L1) + C6 * JM(L1) * Y(L1 + 1)
+!                    bj = C4 * L1 * JM(L1) * J(L1) + C5 * JM(L1 + 1) * J(L1) + C6 * JM(L1) * J(L1 + 1)
+!                    TH(L1) = -bj / (bj + ci * bn)
+!                end if
+!            end do
 
-                if (multipole_type(s) == 1 .or. multipole_type(s) == -1) then
-                    bn = C4 * L1 * JM(L1) * Y(L1) + C5 * JM(L1 + 1) * Y(L1) + C6 * JM(L1) * Y(L1 + 1)
-                    bj = C4 * L1 * JM(L1) * J(L1) + C5 * JM(L1 + 1) * J(L1) + C6 * JM(L1) * J(L1 + 1)
-                    TH(L1) = -bj / (bj + ci * bn)
-                end if
-            end do
+            if (L1 /= order + 1 .and. order /= -1) then
+                cycle
+            end if
+
+            if (type == 0 .or. type == -1) then
+                an = C1 * L1 * JM(L1) * Y(L1) + C2 * JM(L1 + 1) * Y(L1) + C3 * JM(L1) * Y(L1 + 1)
+                aj = C1 * L1 * JM(L1) * J(L1) + C2 * JM(L1 + 1) * J(L1) + C3 * JM(L1) * J(L1 + 1)
+                TE(L1) = -aj / (aj + ci * an)
+            end if
+
+            if (type == 1 .or. type == -1) then
+                bn = C4 * L1 * JM(L1) * Y(L1) + C5 * JM(L1 + 1) * Y(L1) + C6 * JM(L1) * Y(L1 + 1)
+                bj = C4 * L1 * JM(L1) * J(L1) + C5 * JM(L1 + 1) * J(L1) + C6 * JM(L1) * J(L1 + 1)
+                TH(L1) = -bj / (bj + ci * bn)
+            end if
 
 
             !            an = C1 * L1 * JM(L1) * Y(L1) + C2 * JM(L1 + 1) * Y(L1) + C3 * JM(L1) * Y(L1 + 1)

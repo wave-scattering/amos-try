@@ -15,8 +15,11 @@ PROJECT (${PROJECTNAME} Fortran)
 
 #SET (CMAKE_Fortran_FLAGS "-O3 -cpp -mtune=native -fopenmp")
 
+add_library(multipole_regime_parameters multipole_regime_parameters.f90)
+target_link_libraries(multipole_regime_parameters FiNeR::FiNeR)
 add_library(multem_blas multem_blas.f90)
-target_link_libraries(multem_blas dense_solve::dense_solve)
+target_link_libraries(multem_blas dense_solve::dense_solve multipole_regime_parameters)
+
 
 add_library(libmultem2b libmultem2b.f90)
 target_link_libraries(libmultem2b amos::amos multem_blas errfun::errfun)
@@ -34,13 +37,15 @@ target_link_libraries(${PROJECTNAME} #${BLAS_LIBRARIES}
         errfun::errfun
         #${LAPACK_LIBRARIES} #${HDF5_Fortran_LIBRARIES}
         )
-#add_custom_command(
-#        TARGET ${PROJECTNAME} POST_BUILD
-#        COMMAND ${CMAKE_COMMAND} -E copy
-##        ${CMAKE_SOURCE_DIR}/multem2mod/input2_band.txt
+add_custom_command(
+        TARGET ${PROJECTNAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+#        ${CMAKE_SOURCE_DIR}/multem2mod/input2_band.txt
 #        ${CMAKE_SOURCE_DIR}/multem2mod/input_inoue.txt
-##        ${CMAKE_SOURCE_DIR}/multem2mod/fort.10
-#
-#        ${CMAKE_CURRENT_BINARY_DIR}/fort.10)
+#        ${CMAKE_SOURCE_DIR}/multem2mod/fort.10
+        ${CMAKE_SOURCE_DIR}/multem2mod/multipole_regime_parameters.ini
+        ${CMAKE_CURRENT_BINARY_DIR}/multipole_regime_parameters.ini
+       # ${CMAKE_CURRENT_BINARY_DIR}/fort.10
+)
 
 

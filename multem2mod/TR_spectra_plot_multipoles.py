@@ -26,7 +26,9 @@ def create_input(npts, theta, fi, zinf, zsup, polar, lmax, r_ratio):
             '     IT  = 2\n'
             '     MUMED =   1.00000000   0.00000000     EPSMED=   2.10250000   0.00000000\n'
             '   NPLAN = 1  NLAYER = 1\n'
-                                                                                #AU nk at lambda 0.7560 = 0.14 4.542
+                                                                                #AU at 0.7560 um eps = -20.1480000  1.24700000 
+                                                                                #AU at 0.9 um eps = -32.7190000    1.99550000
+                                                                                #AU at 0.65 um eps = -12.9530000   1.12090000
             '       S =   '+'%10.8f'%(r_ratio)+'     MUSPH =   1.00000000   0.00000000     EPSSPH=  -20.1480000   1.24700000\n'
             'xyzDL 0.0  0.0  0.0\n'
             'xyzDR 0.0  0.0  1.0\n'
@@ -112,8 +114,9 @@ if __name__ == "__main__":
     # to_theta_deg = np.arcsin(0.32)/np.pi*180
     # step_theta = np.arcsin(0.0001)/np.pi*180
     from_theta_deg = np.arcsin(0.0)/np.pi*180
-    to_theta_deg = np.arcsin(0.4)/np.pi*180
-    step_theta = np.arcsin(0.003)/np.pi*180
+    to_theta_deg = np.arcsin(1.0)/np.pi*180
+    n_theta = 100
+    step_theta = (to_theta_deg-from_theta_deg)/n_theta
 
     lambda_incident = 750
     a = 475
@@ -124,7 +127,7 @@ if __name__ == "__main__":
     from_sin_theta = np.sin(np.pi * from_theta_deg/180)
     to_sin_theta = np.sin(np.pi * to_theta_deg/180)
     npts = 2
-    lmax= 3
+    lmax= 7
     polar='S' # S or P
     theta = np.arange(from_theta_deg, to_theta_deg, step_theta)
     kpts = len(theta)
@@ -139,9 +142,9 @@ if __name__ == "__main__":
 
     data_arr = data_arr.transpose()
     x = np.linspace(from_sin_theta, to_sin_theta, kpts)
-    plt.plot(x, data_arr[1], label='trans lmax=%i'%lmax, lw=1.0)
-    plt.plot(x, data_arr[2], label='refl', lw=1.0)
-    plt.plot(x, (data_arr[1]+data_arr[2]-1)*1e1, label='(trans+refl-1)*1e1', lw=0.4)
+    # plt.plot(x, data_arr[1], label='trans lmax=%i'%lmax, lw=1.0)
+    plt.plot(x, data_arr[2], label='refl', lw=2.0)
+    # plt.plot(x, (data_arr[1]+data_arr[2]-1)*1e1, label='(trans+refl-1)*1e1', lw=0.4)
     # plt.ylim(-0.01,1.01)
     plt.legend()
     plt.tight_layout()
