@@ -2923,6 +2923,28 @@ integer, allocatable :: multipole_type(:), multipole_order(:), m_projection(:), 
         return
     end function
     !=======================================================================
+    function get_multipole_combination(lmax, multipole_type, multipole_order, m_projection) result(multipole_combination)
+        ! TODO add documentation
+        integer :: lmax, multipole_type(:), multipole_order(:), m_projection(:)
+        integer :: multipole_combination_size, i, type, order, m
+        integer, allocatable :: multipole_combination(:, :)
+
+        multipole_combination_size = 0
+
+        do i = 0, lmax-1
+            multipole_combination_size = multipole_combination_size + 2*(2*(lmax-i)+1)
+        end do
+
+        allocate(multipole_combination(3, multipole_combination_size))
+        !        do type = 0, 1
+        !            do order = 1, lmax
+        !                multipole_combination =
+        !            end do
+        !        end do
+        multipole_combination(1:3, 1:multipole_combination_size) = 1
+
+    end function get_multipole_combination
+    !=======================================================================
     subroutine sphrm4(ylm, ct, st, cf, lmax)
         !     -----------------------------------------------------------------
         !     given  ct=cos(theta),  st=sin(theta),  and cf=exp(i*fi), this
@@ -3074,8 +3096,8 @@ integer, allocatable :: multipole_type(:), multipole_order(:), m_projection(:), 
 !        integer :: multipole_selector
         integer, allocatable :: multipole_type(:), multipole_order(:)
         !-----------------------------------------------------------------------
-        multipole_order = (/ 1 /)
-        multipole_type = (/ -1/)
+!        multipole_order = (/ 1 /)
+!        multipole_type = (/ -1/)
 !        multipole_order = (/ -1 /)
 !        multipole_type = (/  -1/)
         lmax1 = size(TE)
@@ -3097,17 +3119,7 @@ integer, allocatable :: multipole_type(:), multipole_order(:), m_projection(:), 
         call bessel(J, Y, H, arg);  call bessel(JM, YM, HM, argm)
         c1 = epssph - epsmed;   c2 = epsmed * argm;   c3 = -epssph * arg
         c4 = musph - mumed;   c5 = mumed * argm;   c6 = -musph * arg
-        !set all TE TH to czero
-        TE = czero
-        TH = czero
 
-!        call cli_parse
-!        call ini_parse
-
-        ! add check
-!        multipole_type = mrp%multipole_type
-!        multipole_order = mrp%multipole_order
-!        multipole_selector = size(multipole_order)
 
         do  L1 = 1, LMAX1
 
@@ -3160,5 +3172,7 @@ integer, allocatable :: multipole_type(:), multipole_order(:), m_projection(:), 
         end do
         return
     end subroutine
+
+
 
 end module
