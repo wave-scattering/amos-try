@@ -48,11 +48,11 @@ set_target_properties(readnk::readnk PROPERTIES
   INTERFACE_INCLUDE_DIRECTORIES "/home/artyom/CLionProjects/amos-try/read-nk/modules"
 )
 
-# Import target "readnk::readnk" for configuration "Release"
-set_property(TARGET readnk::readnk APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+# Import target "readnk::readnk" for configuration "Debug"
+set_property(TARGET readnk::readnk APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
 set_target_properties(readnk::readnk PROPERTIES
-  IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "Fortran"
-  IMPORTED_LOCATION_RELEASE "/home/artyom/CLionProjects/amos-try/read-nk/lib/libreadnk.a"
+  IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "Fortran"
+  IMPORTED_LOCATION_DEBUG "/home/artyom/CLionProjects/amos-try/read-nk/lib/libreadnk.a"
   )
 
 # This file does not depend on other imported targets which have
