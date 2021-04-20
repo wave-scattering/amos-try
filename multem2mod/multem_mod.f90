@@ -98,7 +98,6 @@ program multem
     integer, parameter :: ncompd = 8, npland = 4
     integer       lmax, i, ktype, kscan, ncomp
     integer       np, nunit, icomp, kemb,  ipl
-    integer       s_type, s_ord, s_m, type, order, m_numb
     real(dp)      alpha, rmax
     real(dp)      zinf, zsup, fab, alphap, theta, fi, fein
     complex(dp)   muembl, epsembl, muembr, epsembr, d2, d1
@@ -116,6 +115,10 @@ program multem
     data text1/'homogeneous plate', 'photonic crystal'/
     !     ------------------------------------------------------------------
     !
+    ! read from .ini file
+    call cli_parse
+    call ini_parse
+    ! read from fort.10 file
     read(10, 200) ktype, kscan, kemb, lmax, ncomp, nunit
     if(ktype<=0.or.ktype>=4) stop 'illegal input value of ktype'
     if(kscan<=0.or.kscan>=3) stop 'illegal input value of kscan'
@@ -210,30 +213,11 @@ program multem
         read(10, *) dummy, (al(i), i = 1, 3)
     endif
 
-    call cli_parse
-    call ini_parse
-
-    s_type = mrp%s_type
-    type = mrp%type
-    order = mrp%order
-    m_numb = mrp%m_numb
-    if (s_type == 0) then
-        type = -1
-    end if
-    s_ord = mrp%s_ord
-    if (s_ord == 0) then
-        order = -1
-    end if
-    s_m = mrp%s_m
-    if (s_m == 0) then
-        m_numb = -10
-    end if
-
     call main_evaluate(ncompd, npland, lmax, i, ktype, kscan, ncomp, np,&
             nunit, icomp, kemb,  ipl, alpha, rmax, zinf, zsup, fab, alphap, theta,&
             fi, fein, d2, d1, polar, &
             it, nlayer, nplan, dl, dr, s, al, d, aq, eps2, eps3, mu1, mu2, mu3,&
-            eps1, musph, epssph, s_type, s_ord, s_m, type, order, m_numb)
+            eps1, musph, epssph)
     stop
     200 format(///, 6(10x, i2))
     201 format(6(10x, i2))
