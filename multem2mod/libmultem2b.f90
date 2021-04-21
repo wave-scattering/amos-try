@@ -2926,27 +2926,61 @@ integer, allocatable :: multipole_type(:), multipole_order(:), m_projection(:), 
     function get_multipole_combination(lmax, multipole_type, multipole_order, m_projection) result(multipole_combination)
         ! TODO add documentation
         integer :: lmax, multipole_type(:), multipole_order(:), m_projection(:)
-        integer :: multipole_combination_size, i, m_type, m_order, m_proj
-        integer, allocatable :: multipole_combination(:, :)
+        integer :: all_multipole_combination_size, user_multipole_combination_size, multipole_combination_size, &
+                   i, j, m_type, m_order, m_proj, test_int, s
+        integer, allocatable :: all_multipole_combination(:, :), user_multipole_combination(:, :), multipole_combination(:, :), &
+                multipole_combination_t(:, :)
+        logical, allocatable :: overlap(:, :)
 
-        multipole_combination_size = 0
+        all_multipole_combination_size = 0
 
         do i = 0, lmax-1
-            multipole_combination_size = multipole_combination_size + 2*(2*(lmax-i)+1)
+            all_multipole_combination_size = all_multipole_combination_size + 2*(2*(lmax-i)+1)
         end do
 
-        allocate(multipole_combination(3, multipole_combination_size))
+        allocate(all_multipole_combination(3, all_multipole_combination_size))
 
         i = 1
         do m_type = 0, 1
             do m_order = 1, lmax
                 do m_proj = -m_order, m_order
-                    multipole_combination(:, i) = [m_type, m_order, m_proj]
+                    all_multipole_combination(:, i) = [m_type, m_order, m_proj]
                     i = i + 1
                 end do
             end do
         end do
 
+        !TODO check - all sizes must be the same
+        user_multipole_combination_size = size(multipole_type)
+        allocate(user_multipole_combination(3, user_multipole_combination_size))
+
+
+        do i = 1, user_multipole_combination_size
+            user_multipole_combination(:, i) = [multipole_type(i), multipole_order(i), m_projection(i)]
+        end do
+
+        multipole_combination_size = all_multipole_combination_size - user_multipole_combination_size
+        allocate(multipole_combination(3, multipole_combination_size))
+
+        allocate(overlap(user_multipole_combination_size, all_multipole_combination_size))
+
+        do i = 1, all_multipole_combination_size
+            do j = 1, user_multipole_combination_size
+                if ( all(all_multipole_combination(:, i) == user_multipole_combination(:, j)) ) then
+                    overlap(j, i) = .true.
+                else
+                    overlap(j, i) = .false.
+                end if
+            end do
+        end do
+
+        j = 1
+        do i = 1, all_multipole_combination_size
+            if (all(overlap(:, i) .eqv. .false., 1)) then
+               multipole_combination(:, j) = all_multipole_combination(:, i)
+               j = j + 1
+            end if
+        end do
 
     end function get_multipole_combination
     !=======================================================================
