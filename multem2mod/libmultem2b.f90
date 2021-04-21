@@ -2926,7 +2926,7 @@ integer, allocatable :: multipole_type(:), multipole_order(:), m_projection(:), 
     function get_multipole_combination(lmax, multipole_type, multipole_order, m_projection) result(multipole_combination)
         ! TODO add documentation
         integer :: lmax, multipole_type(:), multipole_order(:), m_projection(:)
-        integer :: multipole_combination_size, i, type, order, m
+        integer :: multipole_combination_size, i, m_type, m_order, m_proj
         integer, allocatable :: multipole_combination(:, :)
 
         multipole_combination_size = 0
@@ -2936,12 +2936,17 @@ integer, allocatable :: multipole_type(:), multipole_order(:), m_projection(:), 
         end do
 
         allocate(multipole_combination(3, multipole_combination_size))
-        !        do type = 0, 1
-        !            do order = 1, lmax
-        !                multipole_combination =
-        !            end do
-        !        end do
-        multipole_combination(1:3, 1:multipole_combination_size) = 1
+
+        i = 1
+        do m_type = 0, 1
+            do m_order = 1, lmax
+                do m_proj = -m_order, m_order
+                    multipole_combination(:, i) = [m_type, m_order, m_proj]
+                    i = i + 1
+                end do
+            end do
+        end do
+
 
     end function get_multipole_combination
     !=======================================================================
