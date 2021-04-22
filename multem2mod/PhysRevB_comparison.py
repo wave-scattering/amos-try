@@ -188,7 +188,7 @@ if __name__ == "__main__":
         npts = 2
         polar='S' # S or P
 
-        lmax= 1
+        lmax = 2
 
 
         is_multipole_type_selected = '0'
@@ -203,7 +203,7 @@ if __name__ == "__main__":
 
         ax1.plot(x, data_arr[:, 2], 'b--', label='lmax = 1', lw = 2.0)
 
-        lmax= 7
+        lmax = 2
 
         is_multipole_type_selected = '1'
         is_multipole_order_selected = '1'

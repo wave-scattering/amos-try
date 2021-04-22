@@ -114,7 +114,6 @@ program multem
 
     data text1/'homogeneous plate', 'photonic crystal'/
 
-    integer :: is_multipole_type_selected, is_multipole_order_selected, is_m_projection_selected
     integer, allocatable ::  multipole_type(:), multipole_order(:), m_projection(:), multipole_combination(:, :)
     !     ------------------------------------------------------------------
     !
@@ -122,13 +121,13 @@ program multem
     call cli_parse
     call ini_parse
 
-    is_multipole_type_selected = mrp%is_multipole_type_selected
+!    is_multipole_type_selected = mrp%is_multipole_type_selected
     multipole_type = mrp%multipole_type
 
-    is_multipole_order_selected = mrp%is_multipole_order_selected
+!    is_multipole_order_selected = mrp%is_multipole_order_selected
     multipole_order = mrp%multipole_order
 
-    is_m_projection_selected = mrp%is_m_projection_selected
+!    is_m_projection_selected = mrp%is_m_projection_selected
     m_projection = mrp%m_projection
 
 
@@ -235,7 +234,7 @@ program multem
             nunit, icomp, kemb,  ipl, alpha, rmax, zinf, zsup, fab, alphap, theta,&
             fi, fein, d2, d1, polar, &
             it, nlayer, nplan, dl, dr, s, al, d, aq, eps2, eps3, mu1, mu2, mu3,&
-            eps1, musph, epssph)
+            eps1, musph, epssph, multipole_combination)
     stop
     200 format(///, 6(10x, i2))
     201 format(6(10x, i2))
