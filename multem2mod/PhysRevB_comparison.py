@@ -157,6 +157,7 @@ if __name__ == "__main__":
 #------------------------------------- plot figure 7 from PhysRevB ----------------------------------------------------------------------
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize = (10, 8))
+    # plt.figure(figsize=(5,10))
 
     lmax= 2
 
@@ -171,6 +172,8 @@ if __name__ == "__main__":
         fi = 0
         from_sin_theta = 0.0
         to_sin_theta = 0.4
+        # from_sin_theta = 0.4
+        # to_sin_theta = 0.8
         n_theta = 100
         theta = np.linspace(from_sin_theta, to_sin_theta, n_theta)
         kpts = len(theta)
@@ -180,30 +183,23 @@ if __name__ == "__main__":
         a = 475.0
         s = 100.0
         r_ratio = s/a
+
         lambda_incident = 750
-        zinf = lambda_incident/a
-        zsup = (lambda_incident+0.01)/a
         epssph_re = -20.1480000
         epssph_im = 1.24700000
+
+        # lambda_incident = 900
+        # epssph_re = -32.7190000
+        # epssph_im = 1.99550000
+
+        zinf = lambda_incident/a
+        zsup = (lambda_incident+0.01)/a
+
         npts = 2
         polar='S' # S or P
 
-        lmax = 2
+        # lmax = 1
 
-
-        is_multipole_type_selected = '0'
-        is_multipole_order_selected = '0'
-        is_m_projection_selected = '0'
-        type = '-1'
-        order = '1'
-        m = '0'
-
-        for i in range(kpts):
-            eval(i, zinf, zsup, epssph_re, epssph_im, rmax)
-
-        ax1.plot(x, data_arr[:, 2], 'b--', label='lmax = 1', lw = 2.0)
-
-        lmax = 2
 
         is_multipole_type_selected = '1'
         is_multipole_order_selected = '1'
@@ -212,12 +208,30 @@ if __name__ == "__main__":
         order = '1 1'
         m = '-1 1'
 
+        for i in range(kpts):
+            eval(i, zinf, zsup, epssph_re, epssph_im, rmax)
+
+        ax1.plot(x, data_arr[:, 2], 'r--', label='ps', lw = 2.0)
+        # plt.plot(x, data_arr[:, 2], 'r--', label='ps', lw = 2.0)
+
+
+        # lmax = 7
+
+        is_multipole_type_selected = '1'
+        is_multipole_order_selected = '1'
+        is_m_projection_selected = '1'
+        type =  '0 0 1'
+        order = '1 1 1'
+        m =     '-1 1 0'
+
         # TODO check if is_m_proj_selected = 0 and rest are 1
 
         for i in range(kpts):
             eval(i, zinf, zsup, epssph_re, epssph_im, rmax)
 
-        ax1.plot(x, data_arr[:, 2], 'r', label='Ps', lw = 2.0)
+        ax1.plot(x, data_arr[:, 2], 'r', label='ps +mz', lw = 2.0)
+        # plt.plot(x, data_arr[:, 2], 'r', label='ps + mz', lw = 2.0)
+
 
 #------------ plot config ----------------------------------------------------------------------------------------------
         ax1.set_title(f'{lambda_incident} nm')
@@ -225,54 +239,64 @@ if __name__ == "__main__":
         ax1.set_xlabel(r'sin$\theta$')
         ax1.set_ylim(-0.01, 1.01)
         ax1.legend()
+        # plt.title(f'RMAX = {rmax}, {lambda_incident} nm')
+        # plt.ylabel('R')
+        # plt.xlabel(r'sin$\theta$')
+        # plt.ylim(-0.01, 1.01)
+        # plt.legend()
 
 
 # -------- second plot --------------------------------------------------------------------------------------------------
 
-        # from_sin_theta = 0.4
-        # to_sin_theta = 0.8
-        # n_theta = 1000
-        # theta = np.linspace(from_sin_theta, to_sin_theta, n_theta)
-        # kpts = len(theta)
-        # x = np.linspace(from_sin_theta, to_sin_theta, kpts)
-        #
-        # lambda_incident = 900
-        # zinf = lambda_incident/a
-        # zsup = (lambda_incident+0.01)/a
-        # epssph_re = -32.7190000
-        # epssph_im = 1.99550000
-        # a = 475.0
-        # s = 100.0
-        # r_ratio = s/a
-        # npts = 2
-        # polar='S' # S or P
-        #
-        # type = 0
-        # order = 1
-        # s_m = 1
-        # m = 0
-        #
-        # for i in range(kpts):
-        #     eval(i, zinf, zsup, epssph_re, epssph_im, rmax)
-        #
-        # ax2.plot(x, data_arr[:, 2], 'r--', label='Ps', lw = 2.0)
-        #
-        # type = -1
-        # order = -1
-        # s_m = 0
-        # m = 0
-        #
-        # for i in range(kpts):
-        #     eval(i, zinf, zsup, epssph_re, epssph_im, rmax)
-        #
-        # ax2.plot(x, data_arr[:, 2], 'r', label='all multipoles', lw = 2.0)
+        from_sin_theta = 0.4
+        to_sin_theta = 0.8
+        n_theta = 100
+        theta = np.linspace(from_sin_theta, to_sin_theta, n_theta)
+        kpts = len(theta)
+        x = np.linspace(from_sin_theta, to_sin_theta, kpts)
+
+        lambda_incident = 900
+        zinf = lambda_incident/a
+        zsup = (lambda_incident+0.01)/a
+        epssph_re = -32.7190000
+        epssph_im = 1.99550000
+        a = 475.0
+        s = 100.0
+        r_ratio = s/a
+        npts = 2
+        polar='S' # S or P
+
+        is_multipole_type_selected = '1'
+        is_multipole_order_selected = '1'
+        is_m_projection_selected = '1'
+        type = '0 0'
+        order = '1 1'
+        m = '-1 1'
+
+        for i in range(kpts):
+            eval(i, zinf, zsup, epssph_re, epssph_im, rmax)
+
+        ax2.plot(x, data_arr[:, 2], 'r--', label='ps', lw = 2.0)
+
+
+        is_multipole_type_selected = '1'
+        is_multipole_order_selected = '1'
+        is_m_projection_selected = '1'
+        type =  '0 0 1'
+        order = '1 1 1'
+        m =     '-1 1 0'
+
+        for i in range(kpts):
+            eval(i, zinf, zsup, epssph_re, epssph_im, rmax)
+
+        ax2.plot(x, data_arr[:, 2], 'r', label='ps + mz', lw = 2.0)
 
 #------------ plot config ----------------------------------------------------------------------------------------------
-        # ax2.set_title(f'{lambda_incident} nm')
-        # ax2.set_xlabel(r'sin$\theta$')
-        # ax2.set_ylim(-0.01, 1.01)
-        # ax2.legend()
-        # plt.tight_layout()
+        ax2.set_title(f'{lambda_incident} nm')
+        ax2.set_xlabel(r'sin$\theta$')
+        ax2.set_ylim(-0.01, 1.01)
+        ax2.legend()
+        plt.tight_layout()
 
 # ----------- plot saving -----------------------------------------------------------------------------------------------
 #         folder_name = 'figure7_PhysRevB'

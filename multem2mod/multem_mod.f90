@@ -115,6 +115,7 @@ program multem
     data text1/'homogeneous plate', 'photonic crystal'/
 
     integer, allocatable ::  multipole_type(:), multipole_order(:), m_projection(:), multipole_combination(:, :)
+    integer :: is_multipole_type_selected
     !     ------------------------------------------------------------------
     !
     ! read from .ini file
@@ -226,6 +227,12 @@ program multem
     else
         read(10, *) dummy, (al(i), i = 1, 3)
     endif
+
+    !TODO check when we need to calculate mulripole_combination
+    is_multipole_type_selected = mrp%is_multipole_type_selected
+!    is_multipole_order_selected = mrp%is_multipole_order_selected
+!    is_m_projection_selected = mrp%is_m_projection_selected
+
 
     multipole_combination = get_multipole_combination(lmax, multipole_type, multipole_order, m_projection)
 
