@@ -636,16 +636,9 @@ contains
         complex(dp) xxmat1((lmax + 1)**2 - 1, (lmax + 1)**2 - 1), &
                 xxmat2((lmax + 1)**2 - 1, (lmax + 1)**2 - 1)
         complex(dp) dlme(2, (lmax + 1)**2), dlmh(2, (lmax + 1)**2)
-        integer :: is_multipole_type_selected, is_multipole_order_selected, is_m_projection_selected, s, multipole_type_selector, &
-                m_projection_selector, multipole_order_selector, type_to_zero, order_to_zero, m_to_zero
-!        integer, allocatable :: multipole_type(:), multipole_order(:), m_projection(:), available_m_projections(:), &
-!                                not_allowed_m_projections(:), available_multipole_types(:), not_allowed_multipole_types(:), &
-!                                available_multipole_orders(:), not_allowed_multipole_orders(:)
-        !     ------------------------------------------------------------------
-
-        is_multipole_type_selected = mrp%is_multipole_type_selected
-        is_multipole_order_selected = mrp%is_multipole_order_selected
-        is_m_projection_selected = mrp%is_m_projection_selected
+        integer ::  s, multipole_type_selector, m_projection_selector, multipole_order_selector, &
+                    type_to_zero, order_to_zero, m_to_zero
+!     --------------------------------------------------------------------------------------------------
 
         igkmax = 2 * igmax
         lmax1 = lmax + 1
@@ -725,94 +718,6 @@ contains
 
                     end do
                 end do
-!                if (is_multipole_type_selected == 1 .or. is_multipole_order_selected == 1 .or. is_m_projection_selected == 1) then
-!                        iev = lmxod
-!                        iod = 0
-!                        do l = 1, lmax
-!                                do m = -l, l
-!                                    if(mod((l + m), 2)==0)  then
-!                                        iev = iev + 1
-!
-!                                        do s = 1, size(multipole_combination, 2)
-!                                            if (l == multipole_combination(2, s)) then
-!                                                bmel1(iev) = czero
-!                                                bmel2(iev) = czero
-!                                            end if
-!
-!
-!
-!                                            if (m == multipole_combination(3, s)) then
-!                                                bmel1(iev) = czero
-!                                                bmel2(iev) = czero
-!                                            end if
-!
-!
-!                                            if (multipole_combination(1, s) == 0) bmel1(iev) = czero
-!                                            if (multipole_combination(1, s) == 1) bmel2(iev) = czero
-!
-!                                         end do
-!
-!                                    else
-!                                        iod = iod + 1
-!
-!                                        do s = 1, size(multipole_combination, 2)
-!                                            if (l == multipole_combination(2, s)) then
-!                                                bmel1(iev) = czero
-!                                                bmel2(iev) = czero
-!                                            end if
-!
-!
-!                                            if (m == multipole_combination(3, s)) then
-!                                                bmel1(iev) = czero
-!                                                bmel2(iev) = czero
-!                                            end if
-!
-!
-!                                            if (multipole_combination(1, s) == 0) bmel2(iod) = czero
-!                                            if (multipole_combination(1, s) == 1) bmel1(iod) = czero
-!                                        end do
-!                                    end if
-!                                end do
-!                        end do
-!                end if
-
-!                if (is_multipole_type_selected == 1 .or. is_multipole_order_selected == 1 .or. is_m_projection_selected == 1) then
-!                    iev = lmxod
-!                    iod = 0
-!                    do l = 1, lmax
-!                        do m = -l, l
-!                            if(mod((l + m), 2)==0)  then
-!                                iev = iev + 1
-!
-!                                do s = 1, size(multipole_combination, 2)
-!                                    if (multipole_combination(1, s) == 0) then
-!                                        bmel1(iev) = czero
-!
-!                                        if (l == multipole_combination(2, s)+1 .and. m == multipole_combination(3, s)) then
-!                                            bmel2(iev) = czero
-!                                        end if
-!
-!                                    end if
-!                                end do
-!
-!                            else
-!                                iod = iod + 1
-!
-!                                do s = 1, size(multipole_combination, 2)
-!                                    if (multipole_combination(1, s) == 0) then
-!                                        bmel2(iod) = czero
-!
-!                                        if (l == multipole_combination(2, s)+1 .and. m == multipole_combination(3, s)) then
-!                                            bmel1(iod) = czero
-!                                        end if
-!
-!                                    end if
-!
-!                                end do
-!                            end if
-!                        end do
-!                    end do
-!                end if
 
 
                 call zgetrs_wrap(xxmat1, bmel1, int1)
@@ -1565,82 +1470,9 @@ integer ibev
 real(dp)  c0, signus, up, c, b1, b2, b3, u1, u2, a, down
 real(dp)  alpha1, alpha2, beta1, beta2
 complex(dp) omega1, omega2, z1, z2, z3
-integer :: is_multipole_type_selected, is_multipole_order_selected, is_m_projection_selected, s, multipole_type_selector, &
-        m_projection_selector, multipole_order_selector, type_to_zero, order_to_zero, m_to_zero
-
+integer :: s, multipole_type_selector, m_projection_selector, multipole_order_selector, &
+           type_to_zero, order_to_zero, m_to_zero
 !     ------------------------------------------------------------------
-
-
-        is_multipole_type_selected = mrp%is_multipole_type_selected
-        is_multipole_order_selected = mrp%is_multipole_order_selected
-        is_m_projection_selected = mrp%is_m_projection_selected
-
-
-
-
-!        ! TODO auto fill -lmax, lmax
-!        !        if (maxval(multipole_order) == -1) then
-!        !            lmax_m = lmax
-!        !        else
-!        !            lmax_m = maxval(multipole_order)
-!        !        end if
-!        !        do m = -lmax_m, lmax_m
-!        !            available_m_projections = [available_m_projections, m]
-!        !        end do
-!
-!        !        m projection handler
-!        if (is_m_projection_selected == 1) then
-!            if (maxval(multipole_order) == 1) available_m_projections = [-1, 0, 1]
-!            if (maxval(multipole_order) == 2) available_m_projections = [-2, -1, 0, 1, 2]
-!            if (maxval(multipole_order) == -1) available_m_projections = [-7, -6, -5, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7]
-!
-!            allocate(not_allowed_m_projections(1:1))
-!
-!            do s = 1, size(available_m_projections)
-!                if (.not. any(available_m_projections(s) == m_projection)) then
-!                    not_allowed_m_projections = [not_allowed_m_projections, available_m_projections(s)]
-!                end if
-!            end do
-!
-!            m_projection_selector = size(not_allowed_m_projections)
-!        end if
-!
-!        !multipole type handler
-!        if (is_multipole_type_selected == 1) then
-!            available_multipole_types = [0, 1]
-!
-!            allocate(not_allowed_multipole_types(1:1))
-!
-!            do s = 1, size(available_multipole_types)
-!                if (.not. any(available_multipole_types(s) == multipole_type)) then
-!                    not_allowed_multipole_types = [not_allowed_multipole_types, available_multipole_types(s)]
-!                end if
-!            end do
-!
-!            multipole_type_selector = size(not_allowed_multipole_types)
-!        end if
-!
-!        !multipole order handler
-!        ! TODO auto fill
-!        if (is_multipole_order_selected == 1) then
-!            !            allocate(available_multipole_orders(1:1))
-!            !
-!            !            do s = 1, lmax
-!            !                available_multipole_orders = [available_multipole_orders, s]
-!            !            end do
-!            available_multipole_orders = [1, 2, 3, 4, 5, 6, 7]
-!
-!            allocate(not_allowed_multipole_orders(1:1))
-!
-!            do s = 1, size(available_multipole_orders)
-!                if (.not. any(available_multipole_orders(s) == multipole_order)) then
-!                    not_allowed_multipole_orders = [not_allowed_multipole_orders, available_multipole_orders(s)]
-!                end if
-!            end do
-!
-!            multipole_order_selector = size(not_allowed_multipole_orders)
-!        end if
-
 
         lmax1 = lmax + 1
         lmtot = lmax1 * lmax1 - 1
@@ -1738,193 +1570,80 @@ integer :: is_multipole_type_selected, is_multipole_order_selected, is_m_project
         end do
 
 
-!do s = 1, size(multipole_combination, 2)
-!    type_to_zero = multipole_combination(1, s)
-!    order_to_zero = multipole_combination(2, s)
-!    m_to_zero = multipole_combination(3, s)
-!    if(order_to_zero /= l) cycle
-!    if(m_to_zero /= m) cycle
-!    if (type_to_zero == 0) bmel2(iev) = czero
-!    if (type_to_zero == 1) bmel1(iev) = czero
-!end do
 
-iaod = 0
-iaev = lmxod
+        iaod = 0
+        iaev = lmxod
 
-do la = 1, lmax
-    do ma = -la, la
-        if(mod((la + ma), 2)==0) then
-            iaev = iaev + 1
-            ia = iaev
-        else
-            iaod = iaod + 1
-            ia = iaod
-        end if
-        ibod = 0
-        ibev = lmxod
-        do lb = 1, lmax
-            do mb = -lb, lb
-                if(mod((lb + mb), 2)==0) then
-                    ibev = ibev + 1
-                    ib = ibev
+        do la = 1, lmax
+            do ma = -la, la
+                if(mod((la + ma), 2)==0) then
+                    iaev = iaev + 1
+                    ia = iaev
                 else
-                    ibod = ibod + 1
-                    ib = ibod
+                    iaod = iaod + 1
+                    ia = iaod
                 end if
-                ltt = la + ma + lb + mb
-                if(mod(ltt, 2)/=0)           then
-                    if(mod((la + ma), 2)==0)       then
-                        do s = 1, size(multipole_combination, 2)
-                            type_to_zero = multipole_combination(1, s)
-                            order_to_zero = multipole_combination(2, s)
-                            m_to_zero = multipole_combination(3, s)
-                            if(order_to_zero /= la) cycle
-                            if(m_to_zero /= ma) cycle
-                            if (type_to_zero == 0) xxmat2(ia, ib) = czero
-                            if (type_to_zero == 1) xxmat1(ia, ib) = czero
-                        end do
-!                        xxmat1(ia, ib) = -th(la + 1) * omega2
-!                        xxmat2(ia, ib) = te(la + 1) * omega2
-                    else
-                        do s = 1, size(multipole_combination, 2)
-                            type_to_zero = multipole_combination(1, s)
-                            order_to_zero = multipole_combination(2, s)
-                            m_to_zero = multipole_combination(3, s)
-                            if(order_to_zero /= la) cycle
-                            if(m_to_zero /= ma) cycle
-                            if (type_to_zero == 0) xxmat1(ia, ib) = czero
-                            if (type_to_zero == 1) xxmat2(ia, ib) = czero
-                        end do
-!                        xxmat1(ia, ib) = te(la + 1) * omega2
-!                        xxmat2(ia, ib) = -th(la + 1) * omega2
-                    end if
-                else
-                    if(mod((la + ma), 2)==0)       then
-                        do s = 1, size(multipole_combination, 2)
-                            type_to_zero = multipole_combination(1, s)
-                            order_to_zero = multipole_combination(2, s)
-                            m_to_zero = multipole_combination(3, s)
-                            if(order_to_zero /= la) cycle
-                            if(m_to_zero /= ma) cycle
-                            if (type_to_zero == 0) xxmat2(ia, ib) = czero
-                            if (type_to_zero == 1) xxmat1(ia, ib) = czero
-                        end do
-!                        xxmat1(ia, ib) = -th(la + 1) * omega1
-!                        xxmat2(ia, ib) = -te(la + 1) * omega1
-                    else
-                        do s = 1, size(multipole_combination, 2)
-                            type_to_zero = multipole_combination(1, s)
-                            order_to_zero = multipole_combination(2, s)
-                            m_to_zero = multipole_combination(3, s)
-                            if(order_to_zero /= la) cycle
-                            if(m_to_zero /= ma) cycle
-                            if (type_to_zero == 0) xxmat1(ia, ib) = czero
-                            if (type_to_zero == 1) xxmat2(ia, ib) = czero
-                        end do
-!                        xxmat1(ia, ib) = -te(la + 1) * omega1
-!                        xxmat2(ia, ib) = -th(la + 1) * omega1
-                    end if
-                end if
+                ibod = 0
+                ibev = lmxod
+                do lb = 1, lmax
+                    do mb = -lb, lb
+                        if(mod((lb + mb), 2)==0) then
+                            ibev = ibev + 1
+                            ib = ibev
+                        else
+                            ibod = ibod + 1
+                            ib = ibod
+                        end if
+                        ltt = la + ma + lb + mb
+                        if(mod(ltt, 2)/=0)           then
+                            if(mod((la + ma), 2)==0)       then
+                                do s = 1, size(multipole_combination, 2)
+                                    type_to_zero = multipole_combination(1, s)
+                                    order_to_zero = multipole_combination(2, s)
+                                    m_to_zero = multipole_combination(3, s)
+                                    if(order_to_zero /= la) cycle
+                                    if(m_to_zero /= ma) cycle
+                                    if (type_to_zero == 0) xxmat2(ia, ib) = czero
+                                    if (type_to_zero == 1) xxmat1(ia, ib) = czero
+                                end do
+                            else
+                                do s = 1, size(multipole_combination, 2)
+                                    type_to_zero = multipole_combination(1, s)
+                                    order_to_zero = multipole_combination(2, s)
+                                    m_to_zero = multipole_combination(3, s)
+                                    if(order_to_zero /= la) cycle
+                                    if(m_to_zero /= ma) cycle
+                                    if (type_to_zero == 0) xxmat1(ia, ib) = czero
+                                    if (type_to_zero == 1) xxmat2(ia, ib) = czero
+                                end do
+                            end if
+                        else
+                            if(mod((la + ma), 2)==0)       then
+                                do s = 1, size(multipole_combination, 2)
+                                    type_to_zero = multipole_combination(1, s)
+                                    order_to_zero = multipole_combination(2, s)
+                                    m_to_zero = multipole_combination(3, s)
+                                    if(order_to_zero /= la) cycle
+                                    if(m_to_zero /= ma) cycle
+                                    if (type_to_zero == 0) xxmat2(ia, ib) = czero
+                                    if (type_to_zero == 1) xxmat1(ia, ib) = czero
+                                end do
+                            else
+                                do s = 1, size(multipole_combination, 2)
+                                    type_to_zero = multipole_combination(1, s)
+                                    order_to_zero = multipole_combination(2, s)
+                                    m_to_zero = multipole_combination(3, s)
+                                    if(order_to_zero /= la) cycle
+                                    if(m_to_zero /= ma) cycle
+                                    if (type_to_zero == 0) xxmat1(ia, ib) = czero
+                                    if (type_to_zero == 1) xxmat2(ia, ib) = czero
+                                end do
+                            end if
+                        end if
+                    end do
+                end do
             end do
         end do
-    end do
-end do
-!        if (is_multipole_type_selected == 1 .or. is_multipole_order_selected == 1 .or. is_m_projection_selected == 1) then
-!                iaod = 0
-!                iaev = lmxod
-!                do la = 1, lmax
-!                    do ma = -la, la
-!                        if(mod((la + ma), 2)==0) then
-!                            iaev = iaev + 1
-!                            ia = iaev
-!                        else
-!                            iaod = iaod + 1
-!                            ia = iaod
-!                        end if
-!                        ibod = 0
-!                        ibev = lmxod
-!                        do lb = 1, lmax
-!                            do mb = -lb, lb
-!                                if(mod((lb + mb), 2)==0) then
-!                                    ibev = ibev + 1
-!                                    ib = ibev
-!                                else
-!                                    ibod = ibod + 1
-!                                    ib = ibod
-!                                end if
-!                                ltt = la + ma + lb + mb
-!                                if(mod(ltt, 2)/=0)           then
-!                                    if(mod((la + ma), 2)==0)       then
-!
-!                                        do s = 1, size(multipole_combination, 2)
-!
-!                                            if (multipole_combination(1, s) == 0) then
-!                                                xxmat1(ia, ib) = czero
-!
-!                                                if (    la == multipole_combination(2, s)+1 .and. &
-!                                                        mb == multipole_combination(3, s)) then
-!                                                    xxmat2(ia, ib) = czero
-!                                                end if
-!
-!                                            end if
-!
-!                                        end do
-!
-!                                    else
-!
-!                                        do s = 1, size(multipole_combination, 2)
-!                                            if (multipole_combination(1, s) == 0) then
-!                                                xxmat2(ia, ib) = czero
-!
-!                                                if (    la == multipole_combination(2, s)+1 .and. &
-!                                                        mb == multipole_combination(3, s)) then
-!                                                    xxmat1(ia, ib) = czero
-!                                                end if
-!
-!                                            end if
-!
-!                                        end do
-!
-!                                    end if
-!                                else
-!                                    if(mod((la + ma), 2)==0)       then
-!
-!                                        do s = 1, size(multipole_combination, 2)
-!
-!                                            if (multipole_combination(1, s) == 0) then
-!                                                xxmat1(ia, ib) = czero
-!
-!                                                if (    la == multipole_combination(2, s)+1 .and. &
-!                                                        mb == multipole_combination(3, s)) then
-!                                                    xxmat2(ia, ib) = czero
-!                                                end if
-!
-!                                            end if
-!
-!                                        end do
-!
-!                                    else
-!
-!                                        do s = 1, size(multipole_combination, 2)
-!                                            if (multipole_combination(1, s) == 0) then
-!                                                xxmat2(ia, ib) = czero
-!
-!                                                if (    la == multipole_combination(2, s)+1 .and. &
-!                                                        mb == multipole_combination(3, s)) then
-!                                                    xxmat1(ia, ib) = czero
-!                                                end if
-!
-!                                            end if
-!
-!                                        end do
-!
-!                                    end if
-!                                end if
-!                            end do
-!                        end do
-!                    end do
-!                end do
-!        end if
 
 
         do i = 1, lmtot
@@ -2887,7 +2606,8 @@ end do
     end function
     !=======================================================================
     function get_multipole_combination(lmax, multipole_type, multipole_order, m_projection) result(multipole_combination)
-        ! TODO add documentation
+        ! function generate multipole combination of type, order and m projection that is needed to set to zero
+        ! in subroutines pcslab and setup
         integer :: lmax, multipole_type(:), multipole_order(:), m_projection(:)
         integer :: all_multipole_combination_size, user_multipole_combination_size, multipole_combination_size, &
                    i, j, m_type, m_order, m_proj, test_int, s
@@ -3095,22 +2815,9 @@ end do
         INTEGER :: l1, lmax, lmax1, b_size
         complex(dp) :: C1, C2, C3, C4, C5, C6, AN, AJ, BN, BJ, ARG, ARGM, XISQ, XISQM, AR
         complex(dp), allocatable :: J(:), Y(:), H(:), JM(:), YM(:), HM(:)
-!        integer :: multipole_selector
         integer, allocatable :: multipole_type(:), multipole_order(:)
         !-----------------------------------------------------------------------
-!        multipole_order = (/ 1 /)
-!        multipole_type = (/ -1/)
-!        multipole_order = (/ -1 /)
-!        multipole_type = (/  -1/)
         lmax1 = size(TE)
-!        if (size(TH) < lmax1) then
-!            print *, 'Error. TE and TH vectors have different sizes'
-!            stop
-!        end if
-!        multipole_selector = size(multipole_type)
-        !multipole_type == -1, 0, 1 only
-        !multipole_order /=0?depends on indices lmax, >-1, <=lmax same on indices
-        ! to evaluate TE(0..lmax) we need one more oder in Bessel functions
         b_size = lmax1 + 1
         allocate(J (1:b_size)); allocate(Y (1:b_size)); allocate(H (1:b_size))
         allocate(JM(1:b_size)); allocate(YM(1:b_size)); allocate(HM(1:b_size))
@@ -3122,59 +2829,17 @@ end do
         c1 = epssph - epsmed;   c2 = epsmed * argm;   c3 = -epssph * arg
         c4 = musph - mumed;   c5 = mumed * argm;   c6 = -musph * arg
 
-
         do  L1 = 1, LMAX1
 
-
-!                if  (L1 /= multipole_order(1)+1 .and. multipole_order(1) /= -1)  then
-!                    cycle
-!                end if
-!
-!                if (multipole_type(1) == 0 .or. multipole_type(1) == -1) then
-!                    an = C1 * L1 * JM(L1) * Y(L1) + C2 * JM(L1 + 1) * Y(L1) + C3 * JM(L1) * Y(L1 + 1)
-!                    aj = C1 * L1 * JM(L1) * J(L1) + C2 * JM(L1 + 1) * J(L1) + C3 * JM(L1) * J(L1 + 1)
-!                    TE(L1) = -aj / (aj + ci * an)
-!                end if
-!
-!                if (multipole_type(1) == 1 .or. multipole_type(1) == -1) then
-!                    bn = C4 * L1 * JM(L1) * Y(L1) + C5 * JM(L1 + 1) * Y(L1) + C6 * JM(L1) * Y(L1 + 1)
-!                    bj = C4 * L1 * JM(L1) * J(L1) + C5 * JM(L1 + 1) * J(L1) + C6 * JM(L1) * J(L1 + 1)
-!                    TH(L1) = -bj / (bj + ci * bn)
-!                end if
-
-
-!            end do
-
-!            if (L1 /= order + 1 .and. order /= -1) then
-!                cycle
-!            end if
-!
-!            if (type == 0 .or. type == -1) then
-!                an = C1 * L1 * JM(L1) * Y(L1) + C2 * JM(L1 + 1) * Y(L1) + C3 * JM(L1) * Y(L1 + 1)
-!                aj = C1 * L1 * JM(L1) * J(L1) + C2 * JM(L1 + 1) * J(L1) + C3 * JM(L1) * J(L1 + 1)
-!                TE(L1) = -aj / (aj + ci * an)
-!            end if
-!
-!            if (type == 1 .or. type == -1) then
-!                bn = C4 * L1 * JM(L1) * Y(L1) + C5 * JM(L1 + 1) * Y(L1) + C6 * JM(L1) * Y(L1 + 1)
-!                bj = C4 * L1 * JM(L1) * J(L1) + C5 * JM(L1 + 1) * J(L1) + C6 * JM(L1) * J(L1 + 1)
-!                TH(L1) = -bj / (bj + ci * bn)
-!            end if
-
-
-                        an = C1 * L1 * JM(L1) * Y(L1) + C2 * JM(L1 + 1) * Y(L1) + C3 * JM(L1) * Y(L1 + 1)
-                        aj = C1 * L1 * JM(L1) * J(L1) + C2 * JM(L1 + 1) * J(L1) + C3 * JM(L1) * J(L1 + 1)
-                        bn = C4 * L1 * JM(L1) * Y(L1) + C5 * JM(L1 + 1) * Y(L1) + C6 * JM(L1) * Y(L1 + 1)
-                        bj = C4 * L1 * JM(L1) * J(L1) + C5 * JM(L1 + 1) * J(L1) + C6 * JM(L1) * J(L1 + 1)
-                        TE(L1) = -aj / (aj + ci * an)
-                        TH(L1) = -bj / (bj + ci * bn)
-
-
+            an = C1 * L1 * JM(L1) * Y(L1) + C2 * JM(L1 + 1) * Y(L1) + C3 * JM(L1) * Y(L1 + 1)
+            aj = C1 * L1 * JM(L1) * J(L1) + C2 * JM(L1 + 1) * J(L1) + C3 * JM(L1) * J(L1 + 1)
+            bn = C4 * L1 * JM(L1) * Y(L1) + C5 * JM(L1 + 1) * Y(L1) + C6 * JM(L1) * Y(L1 + 1)
+            bj = C4 * L1 * JM(L1) * J(L1) + C5 * JM(L1 + 1) * J(L1) + C6 * JM(L1) * J(L1 + 1)
+            TE(L1) = -aj / (aj + ci * an)
+            TH(L1) = -bj / (bj + ci * bn)
 
         end do
         return
     end subroutine
-
-
 
 end module

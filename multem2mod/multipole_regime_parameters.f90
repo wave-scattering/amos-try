@@ -1,5 +1,4 @@
 module multipole_regime_parameters
-!    use penf, only : i4p
     use flap, only : command_line_interface
     use finer, only : file_ini
 
@@ -23,11 +22,9 @@ module multipole_regime_parameters
     subroutine ini_parse()
 
         integer :: error, num
-!        character :: char
         write(6, *) 'reading config from file: ', ini_config_file_name
         call fini%load(filename = ini_config_file_name)
 
-        !TODO add check selectors
         call fini%get(section_name = 'selectors', option_name = 'is_multipole_type_selected', val = num, error = error)
         mrp%is_multipole_type_selected = 0
         if ( error==0 .and. (num == 0 .or. num == 1) ) mrp%is_multipole_type_selected = num
@@ -44,23 +41,14 @@ module multipole_regime_parameters
         call fini%get(section_name = 'regime', option_name = 'multipole_type', val = array, error = error)
         if (error==0) mrp%multipole_type = array
         deallocate(array)
-!        if (mrp%s_type == 0) mrp%multipole_type = (/ -1/)
 
         allocate(array(1:fini%count_values(section_name='regime', option_name='multipole_order')))
         call fini%get(section_name = 'regime', option_name = 'multipole_order', val = array, error = error)
         if (error==0) mrp%multipole_order = array
         deallocate(array)
-!        if (mrp%s_ord == 0) mrp%multipole_order = (/ -1/)
-
-        !        allocate(array(1:fini%count_values(section_name='regime', option_name='m_projections')))
-!        call fini%get(section_name = 'regime', option_name = 'm_projections', val = array, error = error)
-!        mrp%m_numb = (/ 0/)
-!        if (error==0) mrp%m_numb = array
-!        deallocate(array)
 
         allocate(array(1:fini%count_values(section_name='regime', option_name='m_projection')))
         call fini%get(section_name = 'regime', option_name = 'm_projection', val = array, error = error)
-!        mrp%m_numb = (/ 0 /)
         if (error==0) mrp%m_projection = array
         deallocate(array)
 
@@ -88,7 +76,5 @@ module multipole_regime_parameters
 
             call cli%get(switch = '--ini', val = ini_config_file_name)
         endsubroutine cli_parse
-
-
 
 end module multipole_regime_parameters
