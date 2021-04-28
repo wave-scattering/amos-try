@@ -2,7 +2,7 @@ module libmultem2b
     use dense_solve
     use multem_blas
     use amos
-    use errfun, only : wpop
+    use errfun
 
     implicit none
     integer, parameter, public :: dp = kind(0.0D0)
@@ -1990,8 +1990,9 @@ complex(dp) omega1, omega2, z1, z2, z3
         !     cerf,given complex argument z,provides the complex error function:
         !     w(z)=exp(-z**2)*(1.0-erf(-i*z))
         complex(dp), intent(in) :: z
+        real(dp) :: relerr = 1e-16_dp
 !        cerf = exp(-z**2) * (1.0 - erf_pop(-ci * z))
-         cerf = wpop(z)
+        cerf = faddeeva_w(z, relerr)
         return
     end function
     !=======================================================================
