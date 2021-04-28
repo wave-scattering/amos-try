@@ -4,6 +4,13 @@ cmake_install.cmake
 CMakeFiles
 Makefile
 
+Testing/
+
+erf_MIT/lib/
+amos/lib
+lapack_wrapper/lib
+quadpack/lib
+
 FiNeR/lib/
 FiNeR/src/third_party/BeFoR64/lib/
 FiNeR/src/third_party/FACE/lib/
