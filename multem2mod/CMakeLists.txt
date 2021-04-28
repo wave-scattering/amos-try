@@ -17,13 +17,12 @@ PROJECT (${PROJECTNAME} Fortran)
 
 include_directories(${CMAKE_BINARY_DIR}/amos
         ${CMAKE_BINARY_DIR}/lapack_wrapper
-        ${CMAKE_BINARY_DIR}/errfun
         )
 add_library(multem_blas multem_blas.f90)
 target_link_libraries(multem_blas dense_solve)
 
 add_library(libmultem2b libmultem2b.f90)
-target_link_libraries(libmultem2b amos dense_solve multem_blas errfun)
+target_link_libraries(libmultem2b amos dense_solve multem_blas errfun::errfun)
 
 
 ADD_EXECUTABLE(${PROJECTNAME} "multem_mod.f90"
