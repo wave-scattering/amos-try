@@ -113,6 +113,17 @@ program multem
     complex(dp) musph(ncompd, npland), epssph(ncompd, npland)
 
     data text1/'homogeneous plate', 'photonic crystal'/
+
+    integer, allocatable ::  multipole_type(:), multipole_order(:), m_projection(:), multipole_combination(:, :)
+    !     ------------------------------------------------------------------
+    !
+    ! read from .ini file
+    call cli_parse
+    call ini_parse
+
+    multipole_type = mrp%multipole_type
+    multipole_order = mrp%multipole_order
+    m_projection = mrp%m_projection
     !     ------------------------------------------------------------------
     !
     read(10, 200) ktype, kscan, kemb, lmax, ncomp, nunit
@@ -208,11 +219,14 @@ program multem
     else
         read(10, *) dummy, (al(i), i = 1, 3)
     endif
+
+    multipole_combination = get_multipole_combination(lmax, multipole_type, multipole_order, m_projection)
+
     call main_evaluate(ncompd, npland, lmax, i, ktype, kscan, ncomp, np,&
             nunit, icomp, kemb,  ipl, alpha, rmax, zinf, zsup, fab, alphap, theta,&
             fi, fein, d2, d1, polar, &
             it, nlayer, nplan, dl, dr, s, al, d, aq, eps2, eps3, mu1, mu2, mu3,&
-            eps1, musph, epssph)
+            eps1, musph, epssph, multipole_combination)
     stop
     200 format(///, 6(10x, i2))
     201 format(6(10x, i2))
