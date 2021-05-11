@@ -18,11 +18,16 @@ PROJECT (${PROJECTNAME} Fortran)
 include_directories(${CMAKE_BINARY_DIR}/amos
         ${CMAKE_BINARY_DIR}/lapack_wrapper
         )
+
+
 add_library(multem_blas multem_blas.f90)
 target_link_libraries(multem_blas dense_solve)
 
+add_library(multipole_regime_parameters multipole_regime_parameters.f90)
+target_link_libraries(multipole_regime_parameters FiNeR::FiNeR)
+
 add_library(libmultem2b libmultem2b.f90)
-target_link_libraries(libmultem2b amos dense_solve multem_blas errfun::errfun)
+target_link_libraries(libmultem2b amos dense_solve multem_blas errfun::errfun multipole_regime_parameters)
 
 
 ADD_EXECUTABLE(${PROJECTNAME} "multem_mod.f90"
