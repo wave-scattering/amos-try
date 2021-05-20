@@ -2707,7 +2707,7 @@ integer :: s, multipole_type_selector, m_projection_selector, multipole_order_se
 
         selectors = [is_multipole_type_selected, is_multipole_order_selected, is_m_projection_selected]
         if (all(selectors == 0)) then
-            multipole_combination = all_multipole_combination
+            allocate(multipole_combination(3,0))
             return
         end if
 !        non_zero_elements = 0
