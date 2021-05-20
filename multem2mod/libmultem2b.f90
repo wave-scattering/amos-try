@@ -2675,16 +2675,16 @@ integer :: s, multipole_type_selector, m_projection_selector, multipole_order_se
         return
     end subroutine
     !=======================================================================
-    function get_multipole_combination(lmax, multipole_type, multipole_order, m_projection) result(multipole_combination)
+    function get_multipole_combination(lmax, multipole_type, multipole_order, m_projection, is_multipole_type_selected,&
+            is_multipole_order_selected, is_m_projection_selected) result(multipole_combination)
         !     -----------------------------------------------------------------
         !     function generate multipole combination of type, order and m projection
         !     that is needed to set to zero in subroutines pcslab and setup
         !     -----------------------------------------------------------------
-        integer :: lmax, multipole_type(:), multipole_order(:), m_projection(:)
-        integer :: all_multipole_combination_size, user_multipole_combination_size, multipole_combination_size, &
-                i, j, m_type, m_order, m_proj, test_int, s
-        integer, allocatable :: all_multipole_combination(:, :), user_multipole_combination(:, :), multipole_combination(:, :), &
-                multipole_combination_t(:, :)
+        integer :: lmax, multipole_type(:), multipole_order(:), m_projection(:), is_multipole_type_selected, non_zero_selector(1), &
+                is_multipole_order_selected, is_m_projection_selected, selectors(3), all_multipole_combination_size, &
+                user_multipole_combination_size, multipole_combination_size, i, j, m_type, m_order, m_proj, test_int, s
+        integer, allocatable :: all_multipole_combination(:, :), user_multipole_combination(:, :), multipole_combination(:, :)
         logical, allocatable :: overlap(:, :)
 
         all_multipole_combination_size = 0
@@ -2704,6 +2704,67 @@ integer :: s, multipole_type_selector, m_projection_selector, multipole_order_se
                 end do
             end do
         end do
+
+        selectors = [is_multipole_type_selected, is_multipole_order_selected, is_m_projection_selected]
+        if (all(selectors == 0)) then
+            multipole_combination = all_multipole_combination
+            return
+        end if
+!        non_zero_elements = 0
+!        do i = 1, size(selectors)
+!            if(selectors(i) /= 0) non_zero_elements = non_zero_elements + 1
+!        end do
+!        if(non_zero_elements /= 0)) then
+!            select case(non_zero_elements)
+!            case(1)
+!                du smth
+!            case(2)
+!                du another
+!            case(3)
+!
+!            end select
+!        non_zero_selector = findloc(selectors, value = 1)
+!
+!        select case (non_zero_selector(1))
+!            case(1)
+!                user_multipole_combination_size = size(multipole_type)
+!            case(2)
+!                user_multipole_combination_size = size(multipole_order)
+!            case(3)
+!                user_multipole_combination_size = size(m_projection)
+!            case default
+!                user_multipole_combination_size = all_multipole_combination_size
+!        end select
+
+!        allocate(user_multipole_combination(3, all_multipole_combination_size))
+!
+!        do i = 1, user_multipole_combination_size
+!            if (is_multipole_type_selected == 0) then
+!                if (mod(i, 2) /= 0) then
+!                    user_multipole_combination(1, i) = 0
+!                else
+!                    user_multipole_combination(1, i) = 1
+!                end if
+!            else
+!                user_multipole_combination(1, i) = multipole_type(i)
+!            end if
+!            user_multipole_combination(2, i) = multipole_order(i)
+!            user_multipole_combination(3, i) = m_projection(i)
+!        end do
+
+!        if (is_multipole_type_selected == 0) then
+!            user_multipole_combination(1, 1:user_multipole_combination_size/2) = 0
+!            user_multipole_combination(1, user_multipole_combination_size/2:user_multipole_combination_size) = 1
+!        else
+!            do i = 1, user_multipole_combination_size
+!                user_multipole_combination(1, i) = multipole_type(i)
+!            end do
+!        end if
+!
+!        do i = 1, user_multipole_combination_size
+!            user_multipole_combination(2, i) = multipole_order(i)
+!            user_multipole_combination(3, i) = m_projection(i)
+!        end do
 
         user_multipole_combination_size = size(multipole_type)
         allocate(user_multipole_combination(3, user_multipole_combination_size))
