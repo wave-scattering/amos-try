@@ -65,27 +65,29 @@ def eval(i, npts, zinf):
     return d
 
 
-lmax = 3
+is_fano_fit_data_needed = 1
+
+lmax = 5
 rmax = 5
-a = 250
+a = 350
 s = 100
 r_ratio = s/a
 polar='S' # S or P
-from_y = 0.1
-to_y = 1.5
+from_y = 0.64
+to_y = 0.65
 zinf = from_y*2*np.pi
 zsup = to_y*2*np.pi
 npts = 1000
-epssph_re = 20.0
+epssph_re = 50.0
 epssph_im = 0.0
 is_multipole_type_selected = '1'
 is_multipole_order_selected = '1'
 is_m_projection_selected = '1'
 type = '1'
-order = '3'
+order = '5'
 m = '0'
 angle_param2 = 0
-kpts = 50
+kpts = 5
 data = np.empty((kpts, 4, npts))
 R = np.empty((kpts, npts))
 ktype = 2
@@ -101,41 +103,29 @@ if ktype == 1:
         R[i,:] = eval(i, npts, zinf)[2,:]
 
 if ktype == 2:
-    from_angle_param1 = 0.001/2
-    to_angle_param1 = (1.0 - 0.001)/2
+    from_angle_param1 = 0.08/2
+    to_angle_param1 = (0.1 - 0.000)/2
     angle_param1 = np.linspace(from_angle_param1, to_angle_param1, kpts)
-    # /2/np.pi*a
-    x = angle_param1*a/np.pi
+    x = angle_param1*2
 
+#TODO this works bad, needed to fix
     for i in range(kpts):
         print(i+1, 'of', kpts)
         delta_z = (zsup - zinf)/npts
-        # ------ triangle draw ------
-        # kx = ak1[i]*a/np.pi
-        # print('kx=', ak1[i])
-
-
-
         kx_max = zinf/a
-        # print('kx_max=', kx_max)
         if (angle_param1[i]*2*np.pi/a - kx_max >= 1e-7):
-            # print('test')
             current_zinf = angle_param1[i]*2*np.pi + 0.001
             print('new y =', current_zinf/2/np.pi)
-            # current_npts = m.ceil((zsup - current_zinf)/delta_z)
             current_npts = int((zsup - current_zinf)/delta_z)
             nan_till = npts-current_npts
             R[i, 0:nan_till] = np.nan
             d = eval(i, current_npts, current_zinf)
             R[i, nan_till:] = d[2, :]
-            # R[i,nan_till:] = eval(i, current_npts, current_zinf)[2,:]
 
         else:
             R[i,:] = eval(i, npts, zinf)[2,:]
 
-
-
-R[R<1e-5] = 1e-5
+R[R<1e-10] = 1e-10
 
 fig = plt.figure(figsize = (10,10))
 plt.rcParams['font.size'] = '14'
@@ -151,3 +141,52 @@ sign_ax1 = ('d=%i'%(a)+'npts%i'%(npts)+'__pol_'+polar+'_epssph%f'%(epssph_re))
 plt.title(sign_ax1)
 plt.gca().invert_yaxis()
 plt.show()
+
+if is_fano_fit_data_needed:
+    dots_needed = int(npts*0.02)
+    while True:
+        for i in range(kpts):
+            print(i+1, 'of', kpts)
+            d = eval(i, npts, zinf)
+            R[i, :] = d[2, :]
+
+        const_x = 9e-2
+        index_const_theta = np.abs(x - const_x).argmin()
+        R_slice = R[index_const_theta, :]
+        y = np.linspace(from_y, to_y, npts)
+        index_Rmax = np.where(R_slice == np.amax(R_slice))
+        num_of_dots = len(np.where(R_slice >= 0.3)[0])
+        if (num_of_dots/npts >= 0.02):
+            break
+
+        print(num_of_dots, 'dots from', dots_needed, 'needed')
+        w_c = float(y[index_Rmax])
+        print('wc=', w_c)
+        delta_w = 0.1*(y[-1]-y[0])
+        from_y = w_c - 0.1*delta_w
+        to_y = w_c + 0.1*delta_w
+        zinf = from_y*2*np.pi
+        zsup = to_y*2*np.pi
+
+
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize = (10,10))
+    plt.rcParams['font.size'] = '14'
+    im = ax1.imshow(R.T, extent = (np.amin(x), np.amax(x), to_y, from_y), cmap=cm.hot, norm=LogNorm(), aspect='auto')#, interpolation = 'nearest')
+    # TODO fix it
+    # cb = plt.colorbar(im)
+    # cb.set_label('reflectance')
+    #------------------------
+    ax1.set_ylabel(r'${\omega d / 2\pi c }$')
+    # ax1.set_xlabel(r'${k_x d/\pi}$')
+    ax1.set_xlabel(r'${\theta}$')
+    # ax1.set_xticks(np.arange(min(x)-0.001, max(x)+0.01, 0.1))
+    sign_ax1 = ('d=%i'%(a)+'npts%i'%(npts)+'__pol_'+polar+'_epssph%f'%(epssph_re))
+    ax1.set_title(sign_ax1)
+    ax1.invert_yaxis()
+    ax2.plot(y, R_slice)
+    sign_ax2 = ('theta=%f'%(const_x))
+    ax2.set_title(sign_ax2)
+    plt.show()
+
+    sign_jpg = sign_ax1 + sign_ax2
+    sign_txt = const_x
