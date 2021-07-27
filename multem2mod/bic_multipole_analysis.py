@@ -79,7 +79,7 @@ def save_result(regime, folder_name, filename, data):
 
 
 is_fano_fit_data_needed = 1
-is_save_needed = 1
+is_save_needed = 0
 
 lmax = 5
 rmax = 5
@@ -117,7 +117,7 @@ if ktype == 1:
         R[i,:] = eval(i, npts, zinf)[2,:]
 
 if ktype == 2:
-    from_angle_param1 = 1e-3/2
+    from_angle_param1 = 7.5e-3/2
     to_angle_param1 = (1e-2 - 0.000)/2
     angle_param1 = np.linspace(from_angle_param1, to_angle_param1, kpts)
     x = angle_param1*2
@@ -156,10 +156,17 @@ plt.title(sign_ax1)
 plt.gca().invert_yaxis()
 plt.show()
 
+
 if is_fano_fit_data_needed:
     th = 0.05
     dots_needed = int(npts*th)
+    j = 1
+    spectra_optimization_counter = 0
     while True:
+        spectra_optimization_counter += 1
+        if spectra_optimization_counter > 20:
+            is_save_needed = 0
+            break
         for i in range(kpts):
             print(i+1, 'of', kpts)
             d = eval(i, npts, zinf)
@@ -169,21 +176,72 @@ if is_fano_fit_data_needed:
         index_const_theta = np.abs(x - const_x).argmin()
         R_slice = R[index_const_theta, :]
         y = np.linspace(from_y, to_y, npts)
-        index_Rmax = np.where(R_slice == np.amax(R_slice))
+        index_Rmax = np.where(R_slice == np.amax(R_slice))[0]
+        # print('index=', index_Rmax)
+        # print(y[index_Rmax])
+        # print(len(y[index_Rmax]))
+
+    #TODO DRY and j counter
+        if (len(y[index_Rmax]) > 1):
+            from_y = w_c - 2*j*delta_w
+            to_y = w_c + 2*j*delta_w
+            zinf = from_y*2*np.pi
+            zsup = to_y*2*np.pi
+            j += 1
+            continue
+        j = 1
         num_of_dots = len(np.where(R_slice >= 0.3)[0])
         if (num_of_dots/npts >= th):
-            print('spectra data for fano fit are ready')
-            break
+            #TODO DRY
+            if (index_Rmax <= int(len(y)*0.3)):
+                adj_val = 0.5*(to_y - from_y)
+                print(adj_val)
+                from_y -= adj_val
+                print(from_y)
+                to_y -= adj_val
+                print(to_y)
+                zinf = from_y*2*np.pi
+                zsup = to_y*2*np.pi
+                continue
+            elif (index_Rmax >= int(len(y)*0.7)):
+                adj_val = 0.5*(to_y - from_y)
+                from_y += adj_val
+                to_y += adj_val
+                zinf = from_y*2*np.pi
+                zsup = to_y*2*np.pi
+                continue
+            else:
+                print('spectra data for fano fit are ready')
+                break
 
         print(num_of_dots, 'dots from', dots_needed, 'needed')
         w_c = float(y[index_Rmax])
-        print('wc=', w_c)
+        # print('wc =', w_c)
         delta_w = 0.1*(y[-1]-y[0])
-        from_y = w_c - 0.1*delta_w
-        to_y = w_c + 0.1*delta_w
+        from_y = w_c - 0.5*delta_w
+        to_y = w_c + 0.5*delta_w
         zinf = from_y*2*np.pi
         zsup = to_y*2*np.pi
 
+
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize = (10,10))
+        plt.rcParams['font.size'] = '14'
+        im = ax1.imshow(R.T, extent = (np.amin(x), np.amax(x), to_y, from_y), cmap=cm.hot, norm=LogNorm(), aspect='auto')#, interpolation = 'nearest')
+        # TODO fix it
+        # cb = plt.colorbar(im)
+        # cb.set_label('reflectance')
+        #------------------------
+        ax1.set_ylabel(r'${\omega d / 2\pi c }$')
+        # ax1.set_xlabel(r'${k_x d/\pi}$')
+        ax1.set_xlabel(r'${\theta}$')
+        # ax1.set_xticks(np.arange(min(x)-0.001, max(x)+0.01, 0.1))
+        sign_ax1 = ('d=%i'%(a)+'npts%i'%(npts)+'__pol_'+polar+'_epssph%f'%(epssph_re))
+        ax1.set_title(sign_ax1)
+        ax1.invert_yaxis()
+        ax2.plot(y, R_slice)
+        sign_ax2 = ('theta=%f'%(const_x))
+        ax2.set_title(sign_ax2)
+        plt.show()
 
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize = (10,10))
     plt.rcParams['font.size'] = '14'
@@ -213,4 +271,4 @@ if is_fano_fit_data_needed:
         spectra_w_param = np.array(list(zip(y, R_slice)))
         # np.savetxt('M103spectra/103,k='+str(const_x)+'.txt', spectra_w_param, delimiter = ',')
         # save_result('jpg', 'M103figures', sign_jpg)
-        save_result('txt', 'M105spectra', filename , spectra_w_param)
+        save_result('txt', 'M105spectra', filename, spectra_w_param)
