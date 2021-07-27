@@ -65,7 +65,21 @@ def eval(i, npts, zinf):
     return d
 
 
+def save_result(regime, folder_name, filename, data):
+    if not (os.path.exists(folder_name)):
+        os.makedirs(folder_name)
+
+    # if regime == 'jpg':
+    #     plt.savefig(folder_name+'/'+filename+'.png')
+
+    if regime == 'txt':
+        # np.savetxt('M103spectra/103,k='+sign+'.txt', spectra_w, delimiter = ',')
+        np.savetxt(folder_name+'/'+filename, data, delimiter = ',')
+    print('results were saved')
+
+
 is_fano_fit_data_needed = 1
+is_save_needed = 1
 
 lmax = 5
 rmax = 5
@@ -73,8 +87,8 @@ a = 350
 s = 100
 r_ratio = s/a
 polar='S' # S or P
-from_y = 0.64
-to_y = 0.65
+from_y = 0.643
+to_y = 0.644
 zinf = from_y*2*np.pi
 zsup = to_y*2*np.pi
 npts = 1000
@@ -87,7 +101,7 @@ type = '1'
 order = '5'
 m = '0'
 angle_param2 = 0
-kpts = 5
+kpts = 3
 data = np.empty((kpts, 4, npts))
 R = np.empty((kpts, npts))
 ktype = 2
@@ -103,8 +117,8 @@ if ktype == 1:
         R[i,:] = eval(i, npts, zinf)[2,:]
 
 if ktype == 2:
-    from_angle_param1 = 0.08/2
-    to_angle_param1 = (0.1 - 0.000)/2
+    from_angle_param1 = 1e-3/2
+    to_angle_param1 = (1e-2 - 0.000)/2
     angle_param1 = np.linspace(from_angle_param1, to_angle_param1, kpts)
     x = angle_param1*2
 
@@ -143,20 +157,22 @@ plt.gca().invert_yaxis()
 plt.show()
 
 if is_fano_fit_data_needed:
-    dots_needed = int(npts*0.02)
+    th = 0.05
+    dots_needed = int(npts*th)
     while True:
         for i in range(kpts):
             print(i+1, 'of', kpts)
             d = eval(i, npts, zinf)
             R[i, :] = d[2, :]
 
-        const_x = 9e-2
+        const_x = np.median(x)
         index_const_theta = np.abs(x - const_x).argmin()
         R_slice = R[index_const_theta, :]
         y = np.linspace(from_y, to_y, npts)
         index_Rmax = np.where(R_slice == np.amax(R_slice))
         num_of_dots = len(np.where(R_slice >= 0.3)[0])
-        if (num_of_dots/npts >= 0.02):
+        if (num_of_dots/npts >= th):
+            print('spectra data for fano fit are ready')
             break
 
         print(num_of_dots, 'dots from', dots_needed, 'needed')
@@ -190,3 +206,11 @@ if is_fano_fit_data_needed:
 
     sign_jpg = sign_ax1 + sign_ax2
     sign_txt = const_x
+
+    filename = '105,k='+str(const_x)+'.txt'
+
+    if is_save_needed:
+        spectra_w_param = np.array(list(zip(y, R_slice)))
+        # np.savetxt('M103spectra/103,k='+str(const_x)+'.txt', spectra_w_param, delimiter = ',')
+        # save_result('jpg', 'M103figures', sign_jpg)
+        save_result('txt', 'M105spectra', filename , spectra_w_param)
