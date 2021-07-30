@@ -87,31 +87,48 @@ a = 350
 s = 100
 r_ratio = s/a
 polar='S' # S or P
-from_y = 0.63
-to_y = 0.65
-zinf = from_y*2*np.pi
-zsup = to_y*2*np.pi
+# from_y = 0.5
+# to_y = 0.55
+# zinf = from_y*2*np.pi
+# zsup = to_y*2*np.pi
 npts = 1000
 epssph_re = 50.0
-epssph_im = 0.0
+epssph_im = 0.000000
 is_multipole_type_selected = '1'
 is_multipole_order_selected = '1'
 is_m_projection_selected = '1'
 type = '1'
 order = '5'
-m = '0'
+m = '5'
 angle_param2 = 0
-kpts = 3
+kpts = 5
 data = np.empty((kpts, 4, npts))
 R = np.empty((kpts, npts))
 ktype = 2
 
-k_values = np.linspace(1e-2, 7e-2, 6)
+k_values = np.linspace(3.0e-1, 3.1e-1, 2)
+show = 0
+
+k = 0
+r = 0
 
 for k_value in k_values:
+    k += 1
+    print(k, 'is calculating from', len(k_values))
     is_save_needed = 1
-    from_y = 0.63
-    to_y = 0.65
+
+    #M1X3
+    # from_y = 0.45
+    # to_y = 0.46
+
+    #M1X5
+    # from_y = 0.643124949
+    # to_y =   0.64312495559
+    from_y = 0.6431249633
+    to_y =   0.643124985
+    delta_w = to_y - from_y
+    # from_y = 0.6431249725660459
+    # to_y =   0.6431249725660465
     zinf = from_y*2*np.pi
     zsup = to_y*2*np.pi
     #TODO DRY
@@ -126,13 +143,14 @@ for k_value in k_values:
             R[i,:] = eval(i, npts, zinf)[2,:]
 
     if ktype == 2:
-        # from_angle_param1 = 7.5e-3/2
-        # to_angle_param1 = (1e-2 - 0.000)/2
+        # from_angle_param1 = 1.5e-1/2
+        # to_angle_param1 = (2.2e-1 - 0.000)/2
         delta_ap = k_value/kpts
         from_angle_param1 = (k_value - delta_ap)/2
         to_angle_param1 = (k_value + delta_ap)/2
         angle_param1 = np.linspace(from_angle_param1, to_angle_param1, kpts)
         x = angle_param1*2
+
 
     #TODO this works bad, needed to fix
         for i in range(kpts):
@@ -166,21 +184,23 @@ for k_value in k_values:
     sign_ax1 = ('d=%i'%(a)+'npts%i'%(npts)+'__pol_'+polar+'_epssph%f'%(epssph_re))
     plt.title(sign_ax1)
     plt.gca().invert_yaxis()
-    plt.show()
+    if show:
+        plt.show()
 
 
     if is_fano_fit_data_needed:
-        th = 0.05
+        th = 0.009
         dots_needed = int(npts*th)
         j = 1
         spectra_optimization_counter = 0
         while True:
-            spectra_optimization_counter += 1
-            if spectra_optimization_counter > 15:
-                is_save_needed = 0
-                print('cant optimize')
-                plt.close()
-                break
+            # spectra_optimization_counter += 1
+            print('counter', spectra_optimization_counter)
+            # if (spectra_optimization_counter > 20 or delta_w < 1e-16):
+            #     is_save_needed = 0
+            #     print('cant optimize')
+            #     plt.close()
+            #     break
             for i in range(kpts):
                 print(i+1, 'of', kpts)
                 d = eval(i, npts, zinf)
@@ -191,31 +211,55 @@ for k_value in k_values:
             R_slice = R[index_const_theta, :]
             y = np.linspace(from_y, to_y, npts)
             index_Rmax = np.where(R_slice == np.amax(R_slice))[0]
-
-        #TODO DRY and j counter
+            if (len(y[index_Rmax]) == 1):
+                print(R_slice[index_Rmax])
+            else:
+                print('overflow')
+        #TODO DRY and j counter and w_c is not defined yet and len
             if (len(y[index_Rmax]) > 1):
-                from_y = w_c - 2*j*delta_w
-                to_y = w_c + 2*j*delta_w
+                # from_y = w_c - 1.9**j*delta_w
+                # print(from_y)
+                # to_y = w_c + 1.9**j*delta_w
+                # print(to_y)
+                # zinf = from_y*2*np.pi
+                # zsup = to_y*2*np.pi
+                j += 1
+                # from_y += 2*spectra_optimization_counter*delta_w
+                # to_y -= 2*spectra_optimization_counter*delta_w
+                # from_y += 0.01*(20-spectra_optimization_counter)*delta_w
+                # to_y -= 0.01*(20-spectra_optimization_counter)*delta_w
+                # from_y += 4*factor**spectra_optimization_counter*delta_w
+                # to_y -= 4*factor**spectra_optimization_counter*delta_w
+                from_y = w_c - 1.6*j*factor*delta_w
+                to_y = w_c + 1.6*j*factor*delta_w
+                print(from_y)
+                print(to_y)
                 zinf = from_y*2*np.pi
                 zsup = to_y*2*np.pi
-                j += 1
+                if (spectra_optimization_counter > 20 or delta_w < 1e-17):
+                    is_save_needed = 0
+                    print('cant optimize')
+                    plt.close()
+                    break
                 continue
             j = 1
-            num_of_dots = len(np.where(R_slice >= 0.3)[0])
+            spectra_optimization_counter += 1
+            num_of_dots = len(np.where(R_slice >= 0.2)[0])
             if (num_of_dots/npts >= th):
-                #TODO DRY
-                if (index_Rmax <= int(len(y)*0.3)):
-                    adj_val = 0.5*(to_y - from_y)
-                    print(adj_val)
+                #TODO DRY and low and high correction
+                if (index_Rmax <= int(len(y)*0.05)):
+                    adj_val = 1.5*factor*delta_w
+                    print('too low')
                     from_y -= adj_val
-                    print(from_y)
+                    # print(from_y)
                     to_y -= adj_val
-                    print(to_y)
+                    # print(to_y)
                     zinf = from_y*2*np.pi
                     zsup = to_y*2*np.pi
                     continue
-                elif (index_Rmax >= int(len(y)*0.7)):
-                    adj_val = 0.5*(to_y - from_y)
+                elif (index_Rmax >= int(len(y)*0.95)):
+                    adj_val = 1.5*factor*delta_w
+                    print('too high')
                     from_y += adj_val
                     to_y += adj_val
                     zinf = from_y*2*np.pi
@@ -223,13 +267,33 @@ for k_value in k_values:
                     continue
                 else:
                     print('spectra data for fano fit are ready')
+                    r += 1
                     break
 
             print(num_of_dots, 'dots from', dots_needed, 'needed')
             w_c = float(y[index_Rmax])
-            delta_w = 0.1*(y[-1]-y[0])
-            from_y = w_c - 0.5*delta_w
-            to_y = w_c + 0.5*delta_w
+
+            if delta_w > 1e-9:
+                delta_w = 0.7**spectra_optimization_counter*abs(y[-1]-y[0])
+            else:
+                # delta_w = 0.9**spectra_optimization_counter*abs(y[-1]-y[0])
+                delta_w = (3.1-0.05*spectra_optimization_counter)*1e-10
+            #TODO binary search base on overflow
+            #0.8 for 103 105
+            # print('range', y[-1]-y[0])
+        #TODO figure out the space of break
+            if (spectra_optimization_counter > 20 or delta_w < 1e-19):
+                is_save_needed = 0
+                print('cant optimize')
+                plt.close()
+                break
+            #-------------------
+            print('delta_w = ', delta_w)
+            factor = 1
+            from_y = w_c - factor*delta_w
+            print(from_y)
+            to_y = w_c + factor*delta_w
+            print(to_y)
             zinf = from_y*2*np.pi
             zsup = to_y*2*np.pi
 
@@ -251,8 +315,9 @@ for k_value in k_values:
             ax2.plot(y, R_slice)
             sign_ax2 = ('theta=%f'%(const_x))
             ax2.set_title(sign_ax2)
-            # plt.show()
-            plt.close()
+            if show:
+                plt.show()
+            # plt.close()
 
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize = (10,10))
         plt.rcParams['font.size'] = '14'
@@ -276,9 +341,10 @@ for k_value in k_values:
         # sign_jpg = sign_ax1 + sign_ax2
         # sign_txt = const_x
 
-        txt_filename = '105,k='+str(const_x)
+        txt_filename = '155,k='+str(const_x)
 
+        print('fitted:', r)
         if is_save_needed:
             spectra_w_param = np.array(list(zip(y, R_slice)))
-            save_result('jpg', 'M105figures', str(const_x), data=None)
-            save_result('txt', 'M105spectra', txt_filename, spectra_w_param)
+            save_result('jpg', 'M155figures', str(const_x), data=None)
+            save_result('txt', 'M155spectra', txt_filename, spectra_w_param)
