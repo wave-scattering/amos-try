@@ -91,7 +91,7 @@ polar='S' # S or P
 # to_y = 0.55
 # zinf = from_y*2*np.pi
 # zsup = to_y*2*np.pi
-npts = 1000
+npts = 500
 epssph_re = 50.0
 epssph_im = 0.000000
 is_multipole_type_selected = '1'
@@ -101,13 +101,13 @@ type = '1'
 order = '5'
 m = '5'
 angle_param2 = 0
-kpts = 5
+kpts = 3
 data = np.empty((kpts, 4, npts))
 R = np.empty((kpts, npts))
 ktype = 2
 
-k_values = np.linspace(3.0e-1, 3.1e-1, 2)
-show = 0
+k_values = np.linspace(4.0e-1, 3.1e-1, 2)
+show = 1
 
 k = 0
 r = 0
@@ -115,18 +115,26 @@ r = 0
 for k_value in k_values:
     k += 1
     print(k, 'is calculating from', len(k_values))
-    is_save_needed = 1
+    is_save_needed = 0
 
     #M1X3
     # from_y = 0.45
     # to_y = 0.46
 
     #M1X5
-    # from_y = 0.643124949
-    # to_y =   0.64312495559
-    from_y = 0.6431249633
-    to_y =   0.643124985
+    #0.3 didnt calculate
+    # from_y = 0.64312496407
+    # to_y =   0.643124965
+    #0.5 calculated
+    # from_y = 0.643124985
+    # to_y =   0.6431249875
+    #0.45 calculated
+    # from_y = 0.643124981
+    # to_y =   0.6431249832
+    from_y = 0.643124975221
+    to_y =   0.643124978
     delta_w = to_y - from_y
+    print(delta_w)
     # from_y = 0.6431249725660459
     # to_y =   0.6431249725660465
     zinf = from_y*2*np.pi
@@ -145,7 +153,7 @@ for k_value in k_values:
     if ktype == 2:
         # from_angle_param1 = 1.5e-1/2
         # to_angle_param1 = (2.2e-1 - 0.000)/2
-        delta_ap = k_value/kpts
+        delta_ap = k_value/(100*kpts)
         from_angle_param1 = (k_value - delta_ap)/2
         to_angle_param1 = (k_value + delta_ap)/2
         angle_param1 = np.linspace(from_angle_param1, to_angle_param1, kpts)
@@ -169,11 +177,12 @@ for k_value in k_values:
             else:
                 R[i,:] = eval(i, npts, zinf)[2,:]
 
-    R[R<1e-10] = 1e-10
+    num = 1e-5
+    R[R<num] = num
 
     fig = plt.figure(figsize = (10,10))
     plt.rcParams['font.size'] = '14'
-    im = plt.imshow(R.T, extent = (np.amin(x), np.amax(x), to_y, from_y), cmap=cm.hot, norm=LogNorm(), aspect='auto')#, interpolation = 'nearest')
+    im = plt.imshow(R.T, extent = (np.amin(x), np.amax(x), to_y, from_y), cmap=cm.hot, norm=LogNorm(), aspect='auto', interpolation = 'none')
     cb = plt.colorbar(im)
     cb.set_label('reflectance')
     #------------------------
@@ -189,7 +198,7 @@ for k_value in k_values:
 
 
     if is_fano_fit_data_needed:
-        th = 0.009
+        th = 0.1
         dots_needed = int(npts*th)
         j = 1
         spectra_optimization_counter = 0
@@ -244,7 +253,7 @@ for k_value in k_values:
                 continue
             j = 1
             spectra_optimization_counter += 1
-            num_of_dots = len(np.where(R_slice >= 0.2)[0])
+            num_of_dots = len(np.where(R_slice >= R_slice[index_Rmax]*0.01)[0])
             if (num_of_dots/npts >= th):
                 #TODO DRY and low and high correction
                 if (index_Rmax <= int(len(y)*0.05)):
@@ -312,7 +321,7 @@ for k_value in k_values:
             sign_ax1 = ('d=%i'%(a)+'npts%i'%(npts)+'__pol_'+polar+'_epssph%f'%(epssph_re))
             ax1.set_title(sign_ax1)
             ax1.invert_yaxis()
-            ax2.plot(y, R_slice)
+            ax2.plot(y, R_slice, '-o')
             sign_ax2 = ('theta=%f'%(const_x))
             ax2.set_title(sign_ax2)
             if show:
