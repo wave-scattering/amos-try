@@ -85,7 +85,7 @@ def save_result(regime, folder_name, filename, data):
 
 is_fano_fit_data_needed = 1
 
-lmax = 3
+lmax = 5
 a = 350
 rmax = 1
 s = 100
@@ -103,7 +103,7 @@ is_multipole_type_selected = '1'
 is_multipole_order_selected = '1'
 is_m_projection_selected = '1'
 type = '1'
-order = '3'
+order = '5'
 m = '0'
 angle_param2 = 0
 kpts = 3
@@ -111,9 +111,9 @@ data = np.empty((kpts, 4, npts))
 R = np.empty((kpts, npts))
 ktype = 2
 
-k_values = np.linspace(1.0e-3, 2, 1)
-k_values = np.logspace(-10, -2, num=30, endpoint=True, base=2)
-# print(k_values)
+
+k_values = np.logspace(-7, -3, num = 10, endpoint=True, base=2)
+# k_values = [1.55e-3, 1.14e-2, 1.339e-2, 1.563e-2]
 # k_values = [0.1/8, 0.1/4, 0.1/2, 0.1]
 # theta_values = np.linspace(30, 50, 5)
 show = 0
@@ -139,8 +139,8 @@ for k_value in k_values:
     # from_y = 0.4520912
     # to_y =   0.4520984
 
-    from_y = 0.45
-    to_y = 0.46
+    # from_y = 0.45
+    # to_y = 0.46
 
     #M1X4 lossless
     # from_y = 0.5488589
@@ -151,8 +151,8 @@ for k_value in k_values:
     # to_y = 0.549
 
     #M1X5
-    # from_y = 0.64
-    # to_y = 0.65
+    from_y = 0.64
+    to_y = 0.65
     # from_y =   0.64312495663242
     # to_y =     0.64312495663351
     #example for 1e-16 delta
@@ -257,34 +257,45 @@ for k_value in k_values:
         index_angle_param1 = np.abs(x - const_x).argmin()
 
         expected_R_max = 1.0
-        th = 1e-5
+        th = 0.05
         while True:
             delta = to_y - from_y
-            print('delta = ',delta)
+            # print('delta = ',delta)
             y = np.linspace(from_y, to_y, npts)
             R_slice = R[index_angle_param1, :]
             index_R_max = np.where(R_slice == np.amax(R_slice))[0]
-            print(R_slice[index_R_max])
-            if (expected_R_max - R_slice[index_R_max] > 0.6):
-                print('1')
+            # print(R_slice[index_R_max])
+            if (expected_R_max - R_slice[index_R_max] > 0.99*expected_R_max):
+                # print('1')
                 from_y = float(y[index_R_max-1])
-                print(from_y)
+                # print(from_y)
                 to_y = float(y[index_R_max+1])
-                print(to_y)
+                # print(to_y)
                 for i in range(kpts):
                     print(i+1, 'of', kpts)
                     R[i,:] = eval(i)[2,:]
             else:
-                print('2')
+                # print('2')
+                min_non_zero_elements = 4
+                max_non_zero_elements = 6
                 non_zero_elements = np.where(R_slice > th*expected_R_max)[0]
-                print(non_zero_elements)
+                while (not min_non_zero_elements <= len(non_zero_elements) <= max_non_zero_elements):
+                    if (min_non_zero_elements > len(non_zero_elements)):
+                        th -= 0.01*th
+                    else:
+                        th += 0.01*th
+                    # print('th = ', th)
+                    non_zero_elements = np.where(R_slice > th*expected_R_max)[0]
+                    # print(len(non_zero_elements))
                 from_y = y[non_zero_elements[0]]
-                print(from_y)
+                # print(from_y)
                 to_y = y[non_zero_elements[-1]]
-                print(to_y)
+                # print(to_y)
                 for i in range(kpts):
                     print(i+1, 'of', kpts)
                     R[i,:] = eval(i)[2,:]
+                # print(len(non_zero_elements))
+
                 break
             # if (expected_R_max - R_slice[index_R_max] > 0.1):
                 # print('2')
@@ -298,6 +309,26 @@ for k_value in k_values:
                 #     print(i+1, 'of', kpts)
                 #     R[i,:] = eval(i)[2,:]
             #plot
+            fig, (ax1, ax2) = plt.subplots(2, 1, figsize = (10,10))
+            plt.rcParams['font.size'] = '14'
+            im = ax1.imshow(R.T, extent = (np.amin(x), np.amax(x), to_y, from_y), cmap=cm.hot, norm=LogNorm(), aspect='auto')#, interpolation = 'nearest')
+            # TODO fix it
+            # cb = plt.colorbar(im)
+            # cb.set_label('reflectance')
+            #------------------------
+            ax1.set_ylabel(r'${\omega d / 2\pi c }$')
+            ax1.set_xlabel(r'${k_x d/\pi}$')
+            # ax1.set_xlabel(r'${\theta}$')
+            # ax1.set_xticks(np.arange(min(x)-0.001, max(x)+0.01, 0.1))
+            sign_ax1 = ('d=%i'%(a)+'npts%i'%(npts)+'__pol_'+polar+'_epssph%f'%(epssph_re))
+            ax1.set_title(sign_ax1)
+            ax1.invert_yaxis()
+            ax2.plot(y, R_slice, '-o')
+            sign_ax2 = ('theta=%f'%(const_x))
+            ax2.set_title(sign_ax2)
+            if show:
+                plt.show()
+
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize = (10,10))
         plt.rcParams['font.size'] = '14'
         im = ax1.imshow(R.T, extent = (np.amin(x), np.amax(x), to_y, from_y), cmap=cm.hot, norm=LogNorm(), aspect='auto')#, interpolation = 'nearest')
@@ -326,8 +357,8 @@ for k_value in k_values:
             d = a*1e-9
             w = y*2*np.pi*c/d
             spectra_w_param = np.array(list(zip(w, R_slice)))
-            save_result('jpg', 'M103figures_for_debug', str(const_x), data=None)
-            save_result('txt', 'M103spectra_for_debug', txt_filename, spectra_w_param)
+            save_result('jpg', 'M105figures', str(const_x), data=None)
+            save_result('txt', 'M105spectra', txt_filename, spectra_w_param)
 
             #if spectra is good:
                 # break
