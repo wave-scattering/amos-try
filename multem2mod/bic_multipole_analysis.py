@@ -17,8 +17,8 @@ def create_input(npts, ak1, ak2, zinf, zsup, polar, lmax, r_ratio, rmax, epssph_
                   '   KTYPE ='+'%2i'%(ktype)+'   KSCAN = 1   KEMB  = 0    LMAX ='+'%2i'%(lmax)+'   NCOMP = 1   NUNIT = 1\n'
                   ' ALPHA =    1.000000  BETA =    1.000000   FAB =   90.000000  RMAX ='+'%11.6f'%(rmax)+'\n'
                   '  NP ='+'%4i'%(npts)+'  ZINF ='+
-                  '%12.11f'%(zinf)+'  ZSUP ='+'%14.13f'%(zsup)+'\n'
-                  '  THETA/AK(1) ='+'%13.10f'%(ak1)+'     FI/AK(2) =  '+'%11.8f'%(ak2)+'   POLAR ='+polar+'     FEIN =   0.00\n'
+                  '%19.15f'%(zinf)+'  ZSUP ='+'%19.15f'%(zsup)+'\n'
+                  '  THETA/AK(1) ='+'%19.15f'%(ak1)+'     FI/AK(2) ='+'%19.15f'%(ak2)+'   POLAR ='+polar+'     FEIN =   0.00\n'
                   '\n'
                   'Give information for the "NCOMP" components \n'
                   '\n'
@@ -65,30 +65,43 @@ def eval(ap1, ap2, from_y, to_y, npts):
     return d
 
 #TODO use kpts_ap2 for r = f(kx,ky)
-def calc_R_map(ap1_start, ap1_end, kpts_ap1, ap2_start, ap2_end, kpts_ap2, from_y, to_y, npts, R_min):
+def calc_R_map(ap1_start, ap1_end, kpts_ap1, ap2_start, ap2_end, kpts_ap2, from_y, to_y, npts, R_min, regime):
+    #regime: 'theta_scan' or 'phi_scan'
+    #TODO autocheck for ap1 and ap2 size in case of regime
+    #TODO dry for if regime
         ap1 = np.linspace(ap1_start, ap1_end, kpts_ap1)
-        x = ap1
-        y = np.linspace(from_y, to_y, npts)
         ap2 = np.linspace(ap2_start, ap2_end, kpts_ap2)
-        R = np.empty((kpts_ap1, npts))
-        for i in range(kpts_ap1):
-            print(i+1, 'of', kpts_ap1)
-            # R[i,:] = eval(ap1[i], ap2, npts)[2,:]
-            R[i,:] = eval(ap1[i], 0, from_y, to_y, npts)[2,:]
-            # print(ap1[i])
-        R[R<R_min] = R_min
+
+        if regime == 'theta_scan':
+            x = ap1
+            y = np.linspace(from_y, to_y, npts)
+            R = np.empty((kpts_ap1, npts))
+        if regime == 'phi_scan':
+            x = ap2
+            y = np.linspace(from_y, to_y, npts)
+            R = np.empty((kpts_ap2, npts))
+
+        if regime == 'theta_scan':
+            for i in range(kpts_ap1):
+                print(i+1, 'of', kpts_ap1)
+                R[i,:] = eval(ap1[i], ap2, from_y, to_y, npts)[2,:]
+                R[R<R_min] = R_min
+
+        if regime == 'phi_scan':
+            for i in range(kpts_ap2):
+                print(i+1, 'of', kpts_ap2)
+                R[i,:] = eval(ap1, ap2[i], from_y, to_y, npts)[2,:]
+                R[R<R_min] = R_min
+
+
+        if regime == 'freq_scan':
+            x = np.linspace(from_y, to_y, npts)
+            R = eval(ap1, ap2, from_y, to_y, npts)[2,:]
+            R[R<R_min] = R_min
+            y = R
+
 
         return x, y, R
-
-
-# def get_x_values_at_20percent_level(x, y):
-#     amp = 1
-#     idx = np.where(y >= 0.1*amp)
-#     print('thats them: ', idx)
-#     from_x, to_x = x[idx[0][0]], x[idx[0][-1]]
-#     print(from_x)
-#     print(to_x)
-#     return from_x, to_x
 
 
 def get_half_width_half_maxima_and_x0(x, y):
@@ -103,47 +116,37 @@ def get_half_width_half_maxima_and_x0(x, y):
 
     return hwhm, x0
 
+def q_factor_estimate(hwhm, x0, q_factor_limit):
+    is_enough_spectra = 0
+    q = x0/(2*hwhm)
+    if (q >= q_factor_limit):
+        is_enough_spectra = 1
 
-def find_spectrum(k_value, expected_amp, x, th):
+    return is_enough_spectra
+
+
+#TODO DRY
+def find_spectrum(k_value, x, th):
     from_x = x[0]
     to_x = x[-1]
-    # while True :
-    #     y = eval(k_value, 0, from_x, to_x, npts)[2,:]
-    #     x = np.linspace(from_x, to_x, npts)
-    #     idx_max_value = np.argmax(y)
-    #     if (expected_amp - y[idx_max_value] > 0.1*expected_amp):
-    #         # show_spectrum((10,10), x, y, k_value)
-    #         from_x = float(x[idx_max_value-1])
-    #         to_x = float(x[idx_max_value+1])
-    #     else:
-    #         delta = to_x - from_x
-    #         hwhm, x0 = get_half_width_half_maxima_and_x0(x, y, expected_amp)
-    #         hwhm_factor = 2
-    #         from_x = x0 - hwhm_factor*hwhm
-    #         to_x = x0 + hwhm_factor*hwhm
-    #         # show_spectrum((10,10), x, y, k_value)
-    #         # print(int(hwhm/delta*100), 'of', th)
-    #         if (hwhm/delta*100 >= th):
-    #             y = eval(k_value, 0, from_x, to_x, npts)[2,:]
-    #             x = np.linspace(from_x, to_x, npts)
-    #             # show_spectrum((10,10), x, y, k_value)
-    #             break
-
     while True:
         y = eval(k_value, 0, from_x, to_x, npts)[2,:]
         x = np.linspace(from_x, to_x, npts)
         x_range = to_x - from_x
+        show_spectrum((10,10), x, y, 'theta=20')
         hwhm, x0 = get_half_width_half_maxima_and_x0(x, y)
         hwhm_factor = 2
         from_x = x0 - hwhm_factor*hwhm
         to_x = x0 + hwhm_factor*hwhm
-        # show_spectrum((10,10), x, y, k_value)
-        # print(int(hwhm/x_range*100), 'of', th)
         if (hwhm/x_range*100 >= th): break
     y = eval(k_value, 0, from_x, to_x, npts)[2,:]
     x = np.linspace(from_x, to_x, npts)
+    hwhm, x0 = get_half_width_half_maxima_and_x0(x, y)
+    is_enough_spectra = q_factor_estimate(hwhm, x0, 1e11)
+    # show_spectrum((10,10), x, y, k_value)
+    Q = x0/hwhm
 
-    return x, y
+    return x, y, is_enough_spectra, Q
 
 
 def show_spectrum(figsize, x, y, sign):
@@ -151,8 +154,12 @@ def show_spectrum(figsize, x, y, sign):
     plt.plot(x, y, 'r', lw=0.5)
     plt.scatter(x, y)
     plt.title(sign)
-    # plt.show()
-    save_result('jpg', 'M133figures', str(sign), data=None)
+    #only for example
+    plt.xlabel(r'${\omega d / 2\pi c }$')
+    plt.ylabel('reflectance')
+    plt.show()
+
+    # save_result('jpg', 'M144figures', str(sign), data=None)
     plt.clf(); plt.close()
 
 
@@ -165,12 +172,11 @@ def show_R_map(figsize, x, y, R, ktype):
     if ktype == 1: plt.xlabel(r'${\theta}$')
     if ktype == 2: plt.xlabel(r'${k_x d/\pi}$')
     # ax1.set_xticks(np.arange(min(x)-0.001, max(x)+0.01, 0.1))
-    # sign_ax1 = ('d=%i'%(a)+'npts%i'%(npts)+'__pol_'+polar+'_epssph%f'%(epssph_re))
-# plt.title(sign_ax1)
+    sign_ax1 = ('d=%i'%(a)+'npts%i'%(npts)+'__pol_'+polar+'_epssph%f'%(epssph_re)+'_l_'+order+'_m_'+m)
+    plt.title(sign_ax1)
     plt.gca().invert_yaxis()
     plt.show()
-    plt.clf(); plt.close()
-
+    # plt.clf(); plt.close()
 
 
 def save_result(regime, folder_name, filename, data):
@@ -182,40 +188,52 @@ def save_result(regime, folder_name, filename, data):
         plt.close()
 
     if regime == 'txt':
-        # np.savetxt('M103spectra/103,k='+sign+'.txt', spectra_w, delimiter = ',')
         np.savetxt(folder_name+'/'+filename+'.txt', data, delimiter = ',')
     print('results were saved')
 
-figsize = (10,10)
+
+def multi_loadtxt(dir, filelist):
+    output = ()
+    for fname in filelist:
+        out = np.loadtxt(dir+"/"+fname)
+        output += (out,)
+    return output
+
+# figsize = (10,10)
 plt.rcParams['font.size'] = '14'
 is_fit_data_needed = 1
-is_save_needed = 1
+is_save_needed = 0
 lmax = 5
-a = 350
+# a = 400
+a = 400
 rmax = 7
 s = 100
 r_ratio = s/a
 polar='S' # S or P
+# epssph_re = 250.0
 epssph_re = 50.0
 epssph_im = 0.0000
+
 is_multipole_type_selected = '1'
 is_multipole_order_selected = '1'
 is_m_projection_selected = '1'
-type = '1'
-order = '3'
-m = '3'
-ktype = 2
+type =   '1'
+order =  '3'
+m =      '0'
+
+ktype = 1
 R_min = 1e-20
 
-
-k_values = np.logspace(-7, -5, num = 10, endpoint=True, base=2)
+# k_values = np.logspace(40, -9, num = 1, endpoint=True, base=2)
+k_values = np.linspace(40, 1, 1)
+# k_values = k_values/2
 show = 1
 
 k = 0
 
-for k_value in k_values:
-    k += 1
-    print(k, 'is calculating from', len(k_values))
+# for k_value in k_values:
+    # k += 1
+    # print(k, 'is calculating from', len(k_values))
     # print(k, 'is calculating from', len(theta_values))
 
     #M133
@@ -241,29 +259,145 @@ for k_value in k_values:
     # to_y = 0.549
 
     #M1X5
-    kpts_ap1 = 3
-    delta_ap = k_value/(100*kpts_ap1)
-    from_angle_param1 = (k_value - delta_ap)/2; to_angle_param1 = (k_value + delta_ap)/2
-    from_y = 0.45; to_y = 0.46; npts = 100
-    # from_angle_param1 = 0; to_angle_param1 = (1 - 0.001)/2;
-    from_angle_param2 = 0; to_angle_param2 = 0; kpts_ap2 = 0
-    # x, y, R = calc_R_map(from_angle_param1, to_angle_param1, kpts_ap1, from_angle_param2, to_angle_param2, kpts_ap2, from_y, to_y, npts, R_min)
-    # if show:
-    #     show_R_map(figsize, x, y, R, ktype)
+    # a_values = np.linspace(400, 400, 1)
+    # for a in a_values:
+    #     r_ratio = s/a
+    #     # delta_ap = k_value/(100*kpts_ap1)
+    #     # from_angle_param1 = (k_value - delta_ap)/2; to_angle_param1 = (k_value + delta_ap)/2
+    #     from_y = 0.516; to_y = 0.518; npts = 100
+    #     from_angle_param1 = 30; to_angle_param1 = 90.1; kpts_ap1 = 1
+    #     from_angle_param2 = 0; to_angle_param2 = 90.1; kpts_ap2 = 1
+    #     regime = 'freq_scan'
+    #     x, y, R = calc_R_map(from_angle_param1, to_angle_param1, kpts_ap1, from_angle_param2, to_angle_param2, kpts_ap2, from_y, to_y, npts, R_min, regime)
+    # #     if show:
+    # #         show_R_map(figsize, x, y, R, ktype)
+    # # plt.show()
+    #     show_spectrum(figsize, x, y, 'test')
+    #     # save_result('txt', 'rest maps', 'x', x)
+    #     # save_result('txt', 'rest maps', 'y', y)
+    #     # save_result('txt', 'rest maps', 'R', R.T)
 
 
-    if is_fit_data_needed:
-        th = 25
-        x = np.linspace(from_y, to_y, npts)
-        x, y = find_spectrum(k_value, 1.0, x, th)
-        if show:
-            show_spectrum(figsize, x, y, k_value)
+# q_factors = []
+# d_val = []
+# from_angle_param1 = 40
+# a_values = np.arange(250, 370, 1)
+# from_y = 0.3; to_y = 0.5; npts = 300
+# for a in a_values:
+#     r_ratio = s/a
+#     show = 0
+#     # if is_fit_data_needed:
+#     #         th = 25
+#     #         x = np.linspace(from_y, to_y, npts)
+#     #         x, y, is_enough_spectra, Q = find_spectrum(from_angle_param1, x, th)
+#     #         q_factors.append(Q)
+#     #         d_val.append(a)
+#     #         if is_enough_spectra:
+#     #             print('q is more than expected')
+#     #             # break
+#     #         if show:
+#     #             show_spectrum(figsize, x, y, 'd_'+str(a)+'theta_'+str(k_value)+'_Q_'+str(Q))
+#
+# i = 1
+# # a_values = np.arange(371, 450, 1)
+# a_values = np.arange(465, 480, 0.05)
+# from_y = 0.47; to_y = 0.6; npts = 300
+# for a in a_values:
+#     print(i, 'is calculating from', len(a_values))
+#     i = i + 1
+#     r_ratio = s/a
+#     if is_fit_data_needed:
+#         th = 25
+#         x = np.linspace(from_y, to_y, npts)
+#         x, y, is_enough_spectra, Q = find_spectrum(from_angle_param1, x, th)
+#         q_factors.append(Q)
+#         d_val.append(a)
+#         if is_enough_spectra:
+#             print('q is more than expected')
+#             # break
+#         # if show:
+#             # show_spectrum(figsize, x, y, 'd_'+str(a)+'theta_'+str(k_value)+'_Q_'+str(Q))
 
-        if is_save_needed:
-            c = 3e8
-            d = a*1e-9
-            x = x*2*np.pi*c/d
-            spectra_data = np.array(list(zip(x, y)))
-            # save_result('jpg', 'M105figures_2', str(k_value), data=None)
-            save_result('txt', 'M133spectra', '103,k='+str(k_value), spectra_data)
 
+# a_values = np.arange(451, 500, 1)
+# from_y = 0.55; to_y = 0.7; npts = 300
+# for a in a_values:
+#     r_ratio = s/a
+#     if is_fit_data_needed:
+#         th = 25
+#         x = np.linspace(from_y, to_y, npts)
+#         x, y, is_enough_spectra, Q = find_spectrum(from_angle_param1, x, th)
+#         q_factors.append(Q)
+#         d_val.append(a)
+#         if is_enough_spectra:
+#             print('q is more than expected')
+#             # break
+#         if show:
+#             show_spectrum(figsize, x, y, 'd_'+str(a)+'theta_'+str(k_value)+'_Q_'+str(Q))
+
+# save_result('txt', '40_detailed', 'q', q_factors)
+# save_result('txt', '40_detailed', 'd', d_val)
+# plt.plot(d_val, q_factors)
+# plt.show()
+
+
+# plt.rcParams.update({
+#     "font.family": "sans-serif",
+#     "font.size": 14})
+
+# fig, axs = plt.subplots(2, 2, figsize=(18,12))
+# fig.tight_layout(pad=2, w_pad=0.5, h_pad=5)
+# dirs = ['15', '30', '40', '50', '65']
+# for dir in dirs:
+#     x, y = multi_loadtxt(dir, ("d.txt", "q.txt"))
+#     axs[0,0].plot(x, y, label=dir+' deg.', lw=2, alpha=1)
+#     axs[0,0].set_yscale('log')
+#     axs[0,0].legend()
+#     axs[0,0].set_ylabel('Q factor')
+#     axs[0,0].set_xlabel('d, nm')
+#
+#
+# x, y = multi_loadtxt('40_detailed', ("d.txt", "q.txt"))
+# axs[1,0].plot(x, y, color='red', lw=1, alpha=1)
+# axs[1,0].set_yscale('log')
+#
+# x, y = multi_loadtxt('50_detailed', ("d.txt", "q.txt"))
+# axs[0,1].plot(x, y, color='red', lw=1, alpha=1)
+# axs[0,1].set_yscale('log')
+#
+# x, y = multi_loadtxt('65_detailed', ("d.txt", "q.txt"))
+# axs[1,1].plot(x, y, color='red', lw=1, alpha=1)
+# axs[1,1].set_yscale('log')
+#
+#
+# plt.show()
+
+
+    # if is_save_needed:
+    #     c = 3e8
+    #     d = a*1e-9
+    #     x = x*2*np.pi*c/d
+    #     spectra_data = np.array(list(zip(x, y)))
+    #     # save_result('jpg', 'M105figures_2', str(k_value), data=None)
+    #     save_result('txt', 'M105spectra', '103,k='+str(2*k_value), spectra_data)
+
+
+
+#exmples for progress report
+R_min = 1e-10
+from_y = 0.5; to_y = 0.6; npts = 300
+from_angle_param1 = 0; to_angle_param1 = 90.1; kpts_ap1 = 100
+from_angle_param2 = 0; to_angle_param2 = 0; kpts_ap2 = 1
+regime = 'theta_scan'
+# x, y, R = calc_R_map(from_angle_param1, to_angle_param1, kpts_ap1, from_angle_param2, to_angle_param2, kpts_ap2, from_y, to_y, npts, R_min, regime)
+# show_R_map((10,10), x, y, R, ktype)
+if is_fit_data_needed:
+    theta = 20
+    th = 25
+    x = np.linspace(from_y, to_y, npts)
+    x, y, is_enough_spectra, Q = find_spectrum(theta, x, th)
+    # if is_enough_spectra:
+        # print('q is more than expected')
+        # break
+    if show:
+        show_spectrum((10,10), x, y, 'theta='+str(theta))

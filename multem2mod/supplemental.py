@@ -185,6 +185,17 @@ def multi_loadtxt(dir, filelist):
     return output
 
 
+def binary_data_processing(data, criterion, min_value, max_value):
+    data = np.array(data)
+    for i in range(np.size(data)):
+        if (data[i] <= criterion):
+            data[i] = min_value
+        else:
+            data[i] = max_value
+
+    return data
+
+
 #q factor at off-gamma point for M103
 #collecting spectra
 
@@ -214,8 +225,8 @@ def multi_loadtxt(dir, filelist):
 # # x, y, R = calc_R_map(ap1_start, ap1_end, npts_ap1, ap2_start, ap2_end, npts_ap2, from_y, to_y, npts_y, R_min)
 # # show_R_map(figsize, x, y, R, ktype)
 #
-# # ap1_values = np.linspace(0.808683, 0.80885, 4)
-# ap1_values = [0.808822, 0.8088809, 0.808935]
+# # ap1_values = np.linspace(0.8, 0.82, 50)
+# ap1_values = [0.808722]
 # for ap1 in ap1_values:
 #     if ktype == 2: ap1 = ap1/2
 #     th = 25
@@ -272,7 +283,7 @@ def multi_loadtxt(dir, filelist):
 
 #q factor at gamma point for M144 at gamma-m valley
 #collecting spectra
-# lmax = 3
+# lmax = 4
 # a = 400
 # rmax = 7
 # s = 100
@@ -286,19 +297,17 @@ def multi_loadtxt(dir, filelist):
 # type =   '1'
 # order =  '4'
 # m =      '4'
-# ktype = 2
 #
-# # ap1_start = 0; ap1_end = 89.99; npts_ap1 = 30
+# # ktype = 1
+# # ap1_start = 0; ap1_end = 89.99; npts_ap1 = 10
 # # ap2_start = 45; ap2_end = 45; npts_ap2 = 1
-# ap1_start = 0; ap1_end = 0.45 - 0.000; npts_ap1 = 10
-# ap2_start = 0; ap2_end = 0.0; npts_ap2 = 1
-# from_y = 0.5; to_y = 0.55; npts_y = 500
-# R_min = 1e-15
-# figsize = (10,10)
+# from_y = 0.5; to_y = 0.7; npts_y = 500
+# # R_min = 1e-15
+# # figsize = (10,10)
 # # x, y, R = calc_R_map(ap1_start, ap1_end, npts_ap1, ap2_start, ap2_end, npts_ap2, from_y, to_y, npts_y, R_min)
 # # show_R_map(figsize, x, y, R, ktype)
-#
-# ap_values = np.logspace(-4, -7, base=2, num=15, endpoint=True)
+# ktype = 2
+# ap_values = np.logspace(-1.5, -4, base=2, num=15, endpoint=True)
 # for ap1 in ap_values:
 #     if ktype == 2: ap1 = ap1/2
 #     #for gamma-m valley kx and ky should be equal
@@ -343,16 +352,15 @@ def multi_loadtxt(dir, filelist):
 # #
 # ap1_start = 0; ap1_end = 0.5 - 0.001; npts_ap1 = 50
 # ap2_start = 0; ap2_end = 0; npts_ap2 = 1
-# from_y = 0.433; to_y = 0.45; npts_y = 300
+# from_y = 0.433; to_y = 0.434; npts_y = 300
 # R_min = 1e-15
 # figsize = (10,10)
 # # x, y, R = calc_R_map(ap1_start, ap1_end, npts_ap1, ap2_start, ap2_end, npts_ap2, from_y, to_y, npts_y, R_min)
 # # show_R_map(figsize, x, y, R, ktype)
 #
 # # ap1_values = np.logspace(-4, -12, num = 20, endpoint=True, base=2) #gamma
-# # ap1_values = np.linspace(0.774, 0.776, 20) #off-gamma
-# ap1_values = np.linspace(0.78, 0.83, 15)
-#
+# # ap1_values = np.linspace(0.75, 0.8, 50) #off-gamma
+# ap1_values = [0.775]
 # for ap1 in ap1_values:
 #     if ktype == 2: ap1 = ap1/2
 #     th = 25
@@ -368,7 +376,7 @@ def multi_loadtxt(dir, filelist):
 #     x = x*2*np.pi*c/d
 #     spectra_data = np.array(list(zip(x, y)))
 #     # save_result('txt', 'N103spectra_gamma', '103,k='+str(ap1), spectra_data)
-#     save_result('txt', 'N103spectra_4', '103,k='+str(ap1), spectra_data)
+#     save_result('txt', 'N103spectra', '103,k='+str(ap1), spectra_data)
 #     plt.plot(x, y, 'r', lw=0.5)
 #     plt.scatter(x, y)
 #     save_result('jpg', 'gamma_pictures', '103,k='+str(ap1), '')
@@ -381,30 +389,31 @@ plt.rcParams.update({
 plt.rcParams['ps.useafm'] = True
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 plt.rcParams['pdf.fonttype'] = 42
-
-dir = 'supplemental_material/M103_qfactor_gamma'
+#
+main_dir = 'supplemental_material'
+dir = 'M144_gamma_x_valley'
 fig,ax = plt.subplots(figsize=(10,10))
-x, y = multi_loadtxt(dir, ("RLns-fano.txt", "Q0s-fano.txt"))
-
+x, y = multi_loadtxt(main_dir+'/'+dir, ("RLns-fano.txt", "Q0s-fano.txt"))
 log_x, log_y = np.log(x), np.log(y)
 curve_fit = np.polyfit(log_x, log_y, 1)
 q_fitted = curve_fit[0]*log_x + curve_fit[1]
 q_fitted = np.exp(q_fitted)
+# plt.title(curve_fit[0])
 ax.plot(x, q_fitted, color='red', lw=1, alpha=0.5)
 ax.plot(x, y, marker='o', linestyle='None', mfc='None', mec='black', mew=2, ms=8)
 ax.set_xscale('log')
 ax.set_yscale('log')
 ax.tick_params(which='both', direction='in')
 ax.legend(['approximation', 'simulation'], loc=3)
+ax.set_ylim([1e8, 1e11])
+# ax.set_xlim([0.12, 0.4])
 ax.xaxis.set_major_formatter(ScalarFormatter())
 ax.xaxis.set_minor_formatter(NullFormatter())
 ax.xaxis.set_ticklabels([])
 ax.yaxis.set_ticklabels([])
 # plt.show()
-# plt.savefig('/home/ashalev/Desktop/'+dir+'.png')
-plt.savefig('/home/ashalev/Desktop/M103_gamma.eps', format='eps')
+plt.savefig('/home/ashalev/Pictures/'+dir+'.eps')
 plt.close()
-
 #-----------------------------------------------------------------------------------------------------------------------
 
 
@@ -417,10 +426,8 @@ plt.close()
 # rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 # plt.rcParams['pdf.fonttype'] = 42
 # fig,ax = plt.subplots(figsize=(10,10))
-# main_folder1 = 'supplemental_material/M103_qfactor_all_band'
-# main_folder2 = 'supplemental_material/M103spectra_off_gamma'
-# main_folder3 = 'supplemental_material/M103_off_gamma_old'
-# x1, y1 = multi_loadtxt(main_folder3, ("RLns-fano.txt", "Q0s-fano.txt"))
+# dir = 'supplemental_material/M103_off_gamma'
+# x1, y1 = multi_loadtxt(dir, ("RLns-fano.txt", "Q0s-fano.txt"))
 # # x2, y2 = multi_loadtxt(main_folder2, ("RLns-fano.txt", "Q0s-fano.txt"))
 # # x = np.concatenate((x1, x2), axis=0)
 # # y = np.concatenate((y1, y2), axis=0)
@@ -438,7 +445,7 @@ plt.close()
 # ax.tick_params(which='both', direction='in')
 # #off gamma
 # t = np.linspace(0.00001,1,10000)
-# ax.plot(t*(0.452*2),(15e-7*np.abs(1e8*2/(3*t - 15*t* (1 - t**2))))**2,  color='red', lw=1, alpha=0.5)
+# ax.plot(t*(0.4521*2),(13e-7*np.abs(1e8*2/(3*t - 15*t* (1 - t**2))))**2,  color='red', lw=1, alpha=0.5)
 # ax.set_xlim([0.8, 0.82])
 # ax.legend(['numerical data', 'formula'], loc=3)
 # ax.xaxis.set_major_formatter(ScalarFormatter())
@@ -456,40 +463,24 @@ plt.close()
 #-----------------------------------------------------------------------------------------------------------------------
 
 
-# supplm.material figure #TODO fill
-# N103 all band
-# plt.rcParams.update({
-#     "font.family": "sans-serif",
-#     "font.size": 14})
-# plt.rcParams['ps.useafm'] = True
-# rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-# plt.rcParams['pdf.fonttype'] = 42
+# supplm.material figure 3
 # fig,ax = plt.subplots(figsize=(10,10))
-# main_folder1 = 'supplemental_material/M103_qfactor_all_band'
-# main_folder2 = 'supplemental_material/M103spectra_off_gamma'
-# main_folder3 = 'supplemental_material/N103_qfactor_all_band'
-# x1, y1 = multi_loadtxt(main_folder3, ("RLns-fano.txt", "Q0s-fano.txt"))
-# # x2, y2 = multi_loadtxt(main_folder2, ("RLns-fano.txt", "Q0s-fano.txt"))
-# # x = np.concatenate((x1, x2), axis=0)
-# # y = np.concatenate((y1, y2), axis=0)
-# # idx = x.argsort()
-# # x = x[idx]
-# # y = y[idx]
-# # save_result('txt', 'test', 'RLns-fano', x)
-# # save_result('txt', 'test', 'Q0s-fano', y)
-# # ax.plot(x1, y1, color='black', linestyle='--', lw=2, alpha=1)
-# ax.plot(x1, y1, marker='o', linestyle='None', mfc='None', mec='black', mew=2, ms=8)
-#
-#
-# # t = np.linspace(0.0001169,1,1000)
-# # ax.plot(t*(0.433*2),(90e1*(np.abs(2/(3*t - 15*t* (1 - t**2)))))**2, color='red', lw=2)
+# N103 all band ---------------------------------------------------------------------------------------------
+# dir = 'supplemental_material/N103_qfactor_all_band'
+# x, y = multi_loadtxt(dir, ("RLns-fano.txt", "Q0s-fano.txt"))
+# ax.plot(x, y, color='black', linestyle='--', lw=2, alpha=1)
+# t = np.linspace(0.0001169,1,1000)
+# ax.plot(t*(0.433*2),(90e1*(np.abs(2/(3*t - 15*t* (1 - t**2)))))**2, color='red', lw=2)
 # ax.tick_params(which='both', direction='in')
-# #off gamma
+# N103 off gamma ----------------------------------------------------------------------------------------------
+# dir = 'supplemental_material/N103_off_gamma'
+# x, y = multi_loadtxt(dir, ("RLns-fano.txt", "Q0s-fano.txt"))
 # t = np.linspace(0.00001,1,10000)
+# ax.plot(x, y, marker='o', linestyle='None', mfc='None', mec='black', mew=2, ms=8)
 # ax.plot(t*(0.4333*2),(65e-7*np.abs(1e8*2/(3*t - 15*t* (1 - t**2))))**2,  color='red', lw=1, alpha=0.5)
 # ax.set_xlim([0.75, 0.8])
-# # ax.set_ylim([1e4, 1e12])
 # ax.legend(['numerical data', 'formula'], loc=3)
+#--------------------------------------------------------------------------------------------------------------
 # ax.xaxis.set_major_formatter(ScalarFormatter())
 # ax.xaxis.set_minor_formatter(NullFormatter())
 # ax.yaxis.set_major_formatter(ScalarFormatter())
@@ -502,3 +493,38 @@ plt.close()
 # plt.close()
 
 
+#--------------------------------------------------------------------------------------------------------------
+# polarization maps. what figure?
+# main_dir = 'supplemental_material/polarization_maps'
+# dir = 'N103'
+# kx, ky= multi_loadtxt(main_dir+'/'+dir, ("kx.txt", "ky.txt"))
+# fig,ax = plt.subplots(figsize=(10,10))
+# if dir == 'N103':
+#     F2, F3 = multi_loadtxt(main_dir+'/'+dir, ("F_2.csv", "F_3.csv"))
+#     Cx, Cy = multi_loadtxt(main_dir+'/'+dir, ("Cx.csv", "Cy.csv"))
+# if dir == 'M103':
+#     theta = np.arcsin(np.sqrt(kx**2 + ky**2))
+#     phi = np.angle(kx+1j*ky)
+#     F2, F3 = multi_loadtxt(main_dir+'/'+dir, ("F_2.csv", "F_3.csv"))
+#     Cx = F2*np.cos(theta)*np.cos(phi) - F3*np.sin(phi)
+#     Cy = F2*np.cos(theta)*np.sin(phi) + F3*np.cos(phi)
+#
+# step = 1
+# amp = np.sqrt(Cx**2 + Cy**2)
+# Cx, Cy = Cx/amp, Cy/amp
+# amp = binary_data_processing(F3, 0, -1, 1)
+# ax.quiver(kx[::step], ky[::step], Cx[::step], Cy[::step], amp[::step], cmap='rainbow', width=0.004, pivot="mid", headwidth=3.0, headlength=3.0, headaxislength=2)
+#
+# ax.xaxis.set_major_formatter(ScalarFormatter())
+# ax.xaxis.set_minor_formatter(NullFormatter())
+# ax.yaxis.set_major_formatter(ScalarFormatter())
+# ax.yaxis.set_minor_formatter(NullFormatter())
+# ax.xaxis.set_ticklabels([])
+# ax.yaxis.set_ticklabels([])
+#
+# # plt.show()
+#
+# plt.savefig('/home/ashalev/Pictures/'+dir+'.eps', format='eps')
+# plt.close()
+
+#--------------------------------------------------------------------------------------------------------------
