@@ -7,12 +7,13 @@ from matplotlib.colors import LogNorm
 import math as m
 from matplotlib import rc
 from matplotlib.ticker import ScalarFormatter, NullFormatter
+from matplotlib.ticker import FormatStrFormatter
+import matplotlib.ticker as mticker
 
 
 def create_input(npts, ak1, ak2, zinf, zsup, polar, lmax, r_ratio, rmax, epssph_re, epssph_im, type, order,
                  is_multipole_type_selected, is_multipole_order_selected, is_m_projection_selected):
 
-    #-------------------------------- input file for Sylvia Swiecicki(2017) ---------------------------------
 
     str_fort10 = ('           ********************************************\n'
                   '           ********INPUT FILE FOR TRANSMISSION*********\n'
@@ -216,17 +217,17 @@ def binary_data_processing(data, criterion, min_value, max_value):
 # ktype = 2
 #
 #
-# ap1_start = 0.4; ap1_end = 0.42 + 0.001; npts_ap1 = 30
+# ap1_start = 0.0; ap1_end = 0.42 + 0.001; npts_ap1 = 30
 # ap2_start = 0; ap2_end = 0; npts_ap2 = 1
-# from_y = 0.4521; to_y = 0.45212; npts_y = 300
+# from_y = 0.45; to_y = 0.455; npts_y = 300
 # R_min = 1e-15
 # #calculation of map of reflectance
 # figsize = (10,10)
 # # x, y, R = calc_R_map(ap1_start, ap1_end, npts_ap1, ap2_start, ap2_end, npts_ap2, from_y, to_y, npts_y, R_min)
 # # show_R_map(figsize, x, y, R, ktype)
 #
-# # ap1_values = np.linspace(0.8, 0.82, 50)
-# ap1_values = [0.808722]
+# ap1_values = np.linspace(0.05, 0.8, 30)
+# # ap1_values = [0.808722]
 # for ap1 in ap1_values:
 #     if ktype == 2: ap1 = ap1/2
 #     th = 25
@@ -242,7 +243,7 @@ def binary_data_processing(data, criterion, min_value, max_value):
 #     d = a*1e-9
 #     x = x*2*np.pi*c/d
 #     spectra_data = np.array(list(zip(x, y)))
-#     save_result('txt', 'M103spectra_off_gamma', '103,k='+str(ap1), spectra_data)
+#     save_result('txt', 'M103spectra', '103,k='+str(ap1), spectra_data)
 #     plt.plot(x, y, 'r', lw=0.5)
 #     plt.scatter(x, y)
 #     save_result('jpg', 'off_gamma_pictures_test', '103,k='+str(ap1), '')
@@ -383,37 +384,37 @@ def binary_data_processing(data, criterion, min_value, max_value):
 
 #-----------------------------------------------------------------------------------------------------------------------
 #q factor vs kx visualisation
-plt.rcParams.update({
-    "font.family": "sans-serif",
-    "font.size": 14})
-plt.rcParams['ps.useafm'] = True
-rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-plt.rcParams['pdf.fonttype'] = 42
-#
-main_dir = 'supplemental_material'
-dir = 'M144_gamma_x_valley'
-fig,ax = plt.subplots(figsize=(10,10))
-x, y = multi_loadtxt(main_dir+'/'+dir, ("RLns-fano.txt", "Q0s-fano.txt"))
-log_x, log_y = np.log(x), np.log(y)
-curve_fit = np.polyfit(log_x, log_y, 1)
-q_fitted = curve_fit[0]*log_x + curve_fit[1]
-q_fitted = np.exp(q_fitted)
-# plt.title(curve_fit[0])
-ax.plot(x, q_fitted, color='red', lw=1, alpha=0.5)
-ax.plot(x, y, marker='o', linestyle='None', mfc='None', mec='black', mew=2, ms=8)
-ax.set_xscale('log')
-ax.set_yscale('log')
-ax.tick_params(which='both', direction='in')
-ax.legend(['approximation', 'simulation'], loc=3)
-ax.set_ylim([1e8, 1e11])
-# ax.set_xlim([0.12, 0.4])
-ax.xaxis.set_major_formatter(ScalarFormatter())
-ax.xaxis.set_minor_formatter(NullFormatter())
-ax.xaxis.set_ticklabels([])
-ax.yaxis.set_ticklabels([])
-# plt.show()
-plt.savefig('/home/ashalev/Pictures/'+dir+'.eps')
-plt.close()
+# plt.rcParams.update({
+#     "font.family": "sans-serif",
+#     "font.size": 14})
+# plt.rcParams['ps.useafm'] = True
+# rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+# plt.rcParams['pdf.fonttype'] = 42
+# #
+# main_dir = 'supplemental_material'
+# dir = 'M144_gamma_x_valley'
+# fig,ax = plt.subplots(figsize=(10,10))
+# x, y = multi_loadtxt(main_dir+'/'+dir, ("RLns-fano.txt", "Q0s-fano.txt"))
+# log_x, log_y = np.log(x), np.log(y)
+# curve_fit = np.polyfit(log_x, log_y, 1)
+# q_fitted = curve_fit[0]*log_x + curve_fit[1]
+# q_fitted = np.exp(q_fitted)
+# # plt.title(curve_fit[0])
+# ax.plot(x, q_fitted, color='red', lw=1, alpha=0.5)
+# ax.plot(x, y, marker='o', linestyle='None', mfc='None', mec='black', mew=2, ms=8)
+# ax.set_xscale('log')
+# ax.set_yscale('log')
+# ax.tick_params(which='both', direction='in')
+# ax.legend(['approximation', 'simulation'], loc=3)
+# ax.set_ylim([1e8, 1e11])
+# # ax.set_xlim([0.12, 0.4])
+# ax.xaxis.set_major_formatter(ScalarFormatter())
+# ax.xaxis.set_minor_formatter(NullFormatter())
+# ax.xaxis.set_ticklabels([])
+# ax.yaxis.set_ticklabels([])
+# # plt.show()
+# plt.savefig('/home/ashalev/Pictures/'+dir+'.eps')
+# plt.close()
 #-----------------------------------------------------------------------------------------------------------------------
 
 
@@ -528,3 +529,208 @@ plt.close()
 # plt.close()
 
 #--------------------------------------------------------------------------------------------------------------
+
+
+#figure 2
+
+
+# def plot_qfactor_all_range(dir, figsize, is_analytics_needed, is_subplot):
+#     fig, ax = plt.subplots(figsize=figsize)
+#     x, y = multi_loadtxt(dir, ("RLns-fano.txt", "Q0s-fano.txt"))
+#     ax.plot(x, y, color='black', linestyle='--', lw=3, alpha=1)
+#     if is_analytics_needed:
+#         t = np.linspace(0.00001169,1,10000)
+#         #M103
+#         # ax.plot(t*(0.452*2),(19e1*(np.abs(2/(3*t - 15*t*(1 - t**2)))))**2, color='red', lw=2)
+#         #N103
+#         ax.plot(t*(0.433*2),(90e1*(np.abs(2/(3*t - 15*t* (1 - t**2)))))**2, color='red', lw=2)
+#     ax.set_yscale('log')
+#     ax.tick_params(which='both', direction='in', length=5, width=1)
+#     # ax.legend(['simulation', 'analytics'], loc=9)
+#     ax.set_ylim([1e5, 2e11])
+#     # ax.set_ylabel(r'${Q}$')
+#     # ax.set_xlabel(r'${k_x d/\pi}$')
+#     ax.yaxis.set_ticks(np.logspace(5, 11, 4))
+#     ax.xaxis.set_ticks(np.arange(0.0, 1.0+0.1, 0.2))
+#
+#     ax.xaxis.set_major_formatter(ScalarFormatter())
+#     ax.xaxis.set_minor_formatter(NullFormatter())
+#     ax.yaxis.set_major_formatter(ScalarFormatter())
+#     ax.yaxis.set_minor_formatter(NullFormatter())
+#     ax.xaxis.set_ticklabels([])
+#     ax.yaxis.set_ticklabels([])
+#
+#     # plt.show()
+#
+# def plot_qfactor_gamma_point(dir, figsize, is_subplot):
+#     fig, ax = plt.subplots(figsize=figsize)
+#     x, y = multi_loadtxt(dir, ("RLns-fano.txt", "Q0s-fano.txt"))
+#     log_x, log_y = np.log(x), np.log(y)
+#     curve_fit = np.polyfit(log_x, log_y, 1)
+#     xx = np.linspace(np.min(x)-0.1*(np.max(x) - np.min(x)), np.max(x)+0.1*(np.max(x) - np.min(x)), 1000)
+#     log_xx = np.log(xx)
+#     q_fitted = curve_fit[0]*log_xx + curve_fit[1]
+#     q_fitted = np.exp(q_fitted)
+#     ax.plot(xx, q_fitted, color='red', lw=2, alpha=1)
+#     ax.plot(x, y, marker='o', linestyle='None', mfc='none', mec='black', mew=2, ms=8)
+#     ax.set_ylim([1e7, 2e11])
+#     ax.set_xlim([3e-4, 4e-2])
+#     # ax.set_ylabel('Q')
+#     # ax.set_xlabel(r'${k_x d/\pi}$')
+#     # ax.legend(['simulation', 'analytics'], loc=3)
+#     ax.set_xscale('log')
+#     ax.set_yscale('log')
+#     ax.tick_params(which='both', direction='in', length=5, width=1)
+#     ax.xaxis.set_major_formatter(ScalarFormatter())
+#     ax.xaxis.set_minor_formatter(NullFormatter())
+#     ax.yaxis.set_major_formatter(ScalarFormatter())
+#     ax.yaxis.set_minor_formatter(NullFormatter())
+#     ax.xaxis.set_ticklabels([])
+#     ax.yaxis.set_ticklabels([])
+#     # plt.show()
+#
+#
+# def plot_qfactor_offgamma_point(dir, figsize, is_subplot):
+#     fig, ax = plt.subplots(figsize=figsize)
+#     x, y = multi_loadtxt(dir, ("RLns-fano.txt", "Q0s-fano.txt"))
+#
+#     t = np.linspace(0.01,1,30000)
+#     #M103
+#     # ax.plot(t*(0.4521*2),(13e-7*np.abs(1e8*2/(3*t - 15*t* (1 - t**2))))**2,  color='red', lw=2, alpha=1)
+#     #N103
+#     ax.plot(t*(0.4333*2),(65e-7*np.abs(1e8*2/(3*t - 15*t* (1 - t**2))))**2,  color='red', lw=2, alpha=1)
+#     ax.plot(x, y, marker='o', linestyle='None', mfc='none', mec='black', mew=2, ms=8)
+#     # ax.set_xlim([0.8, 0.82])
+#     ax.set_xlim([0.75, 0.8])
+#     ax.set_xscale('log')
+#     ax.set_yscale('log')
+#     # ax.legend(['simulation', 'analytics'], loc=1)
+#
+#     ax.set_ylim([5e5, 2e12])
+#     # ax.yaxis.set_ticks(np.logspace(3, 11, 5))
+#     ax.tick_params(which='both', direction='in', length=5, width=1)
+#     # plt.show()
+#     ax.yaxis.set_ticks(np.logspace(6, 12, 4))
+#
+#     ax.xaxis.set_major_locator(mticker.FixedLocator([0.75, 0.76, 0.77, 0.78, 0.79, 0.8]))
+#     ax.xaxis.set_major_formatter(ScalarFormatter())
+#     ax.xaxis.set_minor_formatter(NullFormatter())
+#     ax.xaxis.set_ticklabels([])
+#     ax.yaxis.set_ticklabels([])
+#
+#
+#
+# def multipole_custom_plot(x1, y1, x2, y2, ax=None, first_plt_kwargs={}, second_plt_kwargs={}):
+#     if ax == None:
+#         ax = plt.gca()
+#     ax.plot(x1, y1, **first_plt_kwargs)   #plot numerical data
+#     ax.plot(x2, y2, **second_plt_kwargs)  #plot analytics
+#     return (ax)
+#
+# plt.rcParams.update({
+#     "font.family": "sans-serif",
+#     "font.size": 20})
+
+#------------------------------------------------------------------------------------
+# #supl Fig. 2a
+# fig, axs = plt.subplots(1, 3, figsize=(15.65,8.65))
+# #numerical data
+# dir = 'supplemental_material/M103_qfactor_all_band'
+# x1, y1 = multi_loadtxt(dir, ("RLns-fano.txt", "Q0s-fano.txt"))
+# num_data_plt_params = {'color':'black', 'linestyle':'--', 'linewidth': 3}
+# #analytics
+# t = np.linspace(0.00001169,1,10000)
+# x2, y2 = t*(0.452*2), (19e1*(np.abs(2/(3*t - 15*t*(1 - t**2)))))**2
+# analytics_plt_params = {'color':'red', 'lw':2}
+#
+# multipole_custom_plot(x1, y1, x2, y2, ax=axs[0], first_plt_kwargs=num_data_plt_params, second_plt_kwargs=analytics_plt_params)
+# #TODO hide all ax settings in function
+# axs[0].set_yscale('log')
+# axs[0].tick_params(which='both', direction='in', length=5, width=1)
+# axs[0].legend(['simulation', 'analytics'], loc=3)
+# axs[0].set_ylim([1e3, 2e11])
+# axs[0].set_ylabel(r'${Q}$')
+# axs[0].set_xlabel(r'${k_x d/\pi}$')
+# axs[0].yaxis.set_ticks(np.logspace(3, 11, 5))
+# axs[0].xaxis.set_ticks(np.arange(0.0, 1.0+0.1, 0.2))
+# plt.show()
+#------------------------------------------------------------------------------------
+
+#---- fig2 suppl -----------------------------------------------------------
+# dir = 'supplemental_material/M103_qfactor_all_band'
+# figsize = (10,10)
+# is_analytics_needed = True
+# is_subplot = False
+# # plot_qfactor_all_range(dir, figsize, is_analytics_needed, is_subplot)
+# dir = 'supplemental_material/M103_qfactor_gamma'
+# # plot_qfactor_gamma_point(dir, figsize, is_subplot)
+# dir = 'supplemental_material/M103_qfactor_offgamma'
+# plot_qfactor_offgamma_point(dir, figsize, is_subplot)
+#
+#
+#
+# fn = 'M103qfactor_offgamma_wo_legend'
+# plt.savefig('/home/ashalev/Pictures/'+fn+'.eps', format='eps')
+# # plt.savefig('/home/ashalev/Pictures/'+fn+'.png', format='png')
+# plt.close()
+# plt.show()
+# plt.close()
+#------------------------------------------------------------------------------------
+
+#----------- N103 ------------------------
+# dir = 'supplemental_material/N103_qfactor_all_band'
+# figsize = (10,10)
+# is_analytics_needed = True
+# is_subplot = False
+# plot_qfactor_all_range(dir, figsize, is_analytics_needed, is_subplot)
+
+
+# dir = 'supplemental_material/N103_qfactor_gamma'
+# figsize = (10,10)
+# is_subplot = False
+# # plot_qfactor_gamma_point(dir, figsize, is_subplot)
+# #
+# dir = 'supplemental_material/N103_qfactor_offgamma'
+# figsize = (10,10)
+# is_subplot = False
+# plot_qfactor_offgamma_point(dir, figsize, is_subplot)
+#
+# fn = 'N103qfactor_offgamma_wo_legend'
+# plt.savefig('/home/ashalev/Pictures/'+fn+'.eps', format='eps')
+# # plt.savefig('/home/ashalev/Pictures/'+fn+'.png', format='png')
+# plt.close()
+# # plt.show()
+
+
+
+
+# plot_qfactor_offgamma_point(dir)
+# construct_plots(nrows, ncols)
+
+
+
+#fig 3 main paper
+lmax = 5
+a = 400
+rmax = 16
+s = 100
+r_ratio = s/a
+polar='S' # S or P
+epssph_re = 220.0
+epssph_im = 0.0000
+is_multipole_type_selected = '1'
+is_multipole_order_selected = '1'
+is_m_projection_selected = '1'
+type =   '1'
+order =  '5'
+m =      '0'
+ktype = 1
+
+ap1_start = 0; ap1_end = 90.1; npts_ap1 = 100
+# ap1_start = 0; ap1_end = (1. - 0.001)/2; npts_ap1 = 100
+ap2_start = 0.0; ap2_end = ap2_start; npts_ap2 = 1
+from_y = 0.495; to_y = 0.51; npts_y = 100
+R_min = 1e-15
+figsize = (10,10)
+x, y, R = calc_R_map(ap1_start, ap1_end, npts_ap1, ap2_start, ap2_end, npts_ap2, from_y, to_y, npts_y, R_min)
+show_R_map(figsize, x, y, R, ktype)
