@@ -11,52 +11,51 @@ import os
 import subprocess
 
 
-def create_input(npts, theta, fi, zinf, zsup, polar, lmax, r_ratio, rmax, epssph_re, epssph_im, type, order,
+def create_input(npts, ak1, ak2, zinf, zsup, polar, lmax, r_ratio, rmax, epssph_re, epssph_im, type, order,
                  is_multipole_type_selected, is_multipole_order_selected, is_m_projection_selected):
 
-    #-------------------------------- input file for Sylvia Swiecicki(2017) ---------------------------------
 
     str_fort10 = ('           ********************************************\n'
                   '           ********INPUT FILE FOR TRANSMISSION*********\n'
                   '           ********************************************\n'
-                  '   KTYPE = 1   KSCAN = 2   KEMB  = 0    LMAX ='+'%2i'%(lmax)+'   NCOMP = 1   NUNIT = 1\n'
+                  '   KTYPE ='+'%2i'%(ktype)+'   KSCAN = 2   KEMB  = 0    LMAX ='+'%2i'%(lmax)+'   NCOMP = 1   NUNIT = 1\n'
                   ' ALPHA =    1.000000  BETA =    1.000000   FAB =   60.000000  RMAX ='+'%11.6f'%(rmax)+'\n'
-                  '  NP ='+'%4i'%(npts)+'  ZINF =  '+
-                  '%11.8f'%(zinf)+'  ZSUP =  '+'%12.9f'%(zsup)+'\n'
-                  '  THETA/AK(1) =  '+'%11.8f'%(theta)+'     FI/AK(2) =  '+'%11.8f'%(fi)+'   POLAR ='+polar+'     FEIN =   0.00\n'
+                  '  NP ='+'%4i'%(npts)+'  ZINF ='+
+                  '%19.15f'%(zinf)+'  ZSUP ='+'%19.15f'%(zsup)+'\n'
+                  '  THETA/AK(1) ='+'%19.15f'%(ak1)+'     FI/AK(2) ='+'%19.15f'%(ak2)+'   POLAR ='+polar+'     FEIN =   0.00\n'
                   '\n'
                   'Give information for the "NCOMP" components \n'
                   '\n'
                   '     IT  = 2\n'
                   '     MUMED =   1.00000000   0.00000000     EPSMED=   2.10250000   0.00000000\n'
                   '   NPLAN = 1  NLAYER = 1\n'
-                  '       S =   '+'%10.8f'%(r_ratio)+'     MUSPH =   1.00000000   0.00000000     EPSSPH=  '+'%11.8f'%(epssph_re)+'   '+'%11.8f'%(epssph_im)+'\n'
+                  '       S =   '+'%10.8f'%(r_ratio)+'     MUSPH =   1.00000000   0.00000000     EPSSPH=  '+'%11.6f'%(epssph_re)+'   '+'%11.8f'%(epssph_im)+'\n'
                   'xyzDL 0.0  0.0  0.0\n'
                   'xyzDR 0.0  0.0  1.0\n'
-                  '     MUEMBL=   1.00000000   0.00000000    EPSEMBL=   2.10250000   0.00000000\n'
-                  '     MUEMBR=   1.00000000   0.00000000    EPSEMBR=   2.10250000   0.00000000\n')
-
+                  '     MUEMBL=   1.00000000   0.00000000    EPSEMBL=   1.00000000   0.00000000\n'
+                  '     MUEMBR=   1.00000000   0.00000000    EPSEMBR=   1.00000000   0.00000000\n')
 
     with open('fort.10','w') as f:
         print(str_fort10, file=f)
 
-
     str_ini = ('[selectors]\n'
-               'is_multipole_type_selected = '+'%s'%(is_multipole_type_selected)+'\n'
-               'is_multipole_order_selected = '+'%s'%(is_multipole_order_selected)+'\n'
-               'is_m_projection_selected = '+'%s'%(is_m_projection_selected)+'\n'
-               '\n'
-               '[regime]\n'
-               'multipole_type = '+'%s'%(type)+'\n'
-               'multipole_order = '+'%s'%(order)+'\n'
-               'm_projection = '+'%s'%(m)+'\n')
+    'is_multipole_type_selected = '+'%s'%(is_multipole_type_selected)+'\n'
+    'is_multipole_order_selected = '+'%s'%(is_multipole_order_selected)+'\n'
+    'is_m_projection_selected = '+'%s'%(is_m_projection_selected)+'\n'
+    '\n'
+    '[regime]\n'
+    'multipole_type = '+'%s'%(type)+'\n'
+    'multipole_order = '+'%s'%(order)+'\n'
+    'm_projection = '+'%s'%(m)+'\n')
 
     with open('multipole_regime_parameters.ini','w') as f:
         print(str_ini, file=f)
 
 
 def eval(i, zinf, zsup, epssph_re, epssph_im, rmax):
-    create_input(npts, np.arcsin(theta[i])/np.pi*180, fi, zinf, zsup, polar, lmax, r_ratio, rmax, epssph_re, epssph_im,
+    # create_input(npts, np.arcsin(theta[i])/np.pi*180, fi, zinf, zsup, polar, lmax, r_ratio, rmax, epssph_re, epssph_im,
+    #              type, order, is_multipole_type_selected, is_multipole_order_selected, is_m_projection_selected)
+    create_input(npts, theta[i], fi, zinf, zsup, polar, lmax, r_ratio, rmax, epssph_re, epssph_im,
                  type, order, is_multipole_type_selected, is_multipole_order_selected, is_m_projection_selected)
     if os.path.isfile('multem2'):
         my_env = os.environ.copy()
@@ -71,101 +70,32 @@ def eval(i, zinf, zsup, epssph_re, epssph_im, rmax):
     data_arr[i,:] = d[:,1]
 
 
-def plot_figure_4(lambda_incident_arr, epssph_re_arr, epssph_im_arr, rmax_arr):
-    plt.figure(figsize=(11,6))
-    data_arr_for_several_calc = np.empty((len(lambda_incident_arr), kpts, 4))
-    x = np.linspace(from_sin_theta, to_sin_theta, kpts)
-    folder_name = 'figure4_PhysRevB'
-    if not (os.path.exists(folder_name)):
-        os.makedirs(folder_name)
-
-    for rmax in rmax_arr:
-        print('RMAX = ', rmax,'is calculating...')
-        for n in range(len(lambda_incident_arr)):
-            lambda_incident = lambda_incident_arr[n]
-            zinf = lambda_incident/a
-            zsup = (lambda_incident+0.01)/a
-            epssph_re = epssph_re_arr[n]
-            epssph_im = epssph_im_arr[n]
-
-            for i in range(kpts):
-                print('sin(theta)=',theta[i])
-                eval(i, zinf, zsup, epssph_re, epssph_im, rmax)
-
-            data_arr_for_several_calc[n, :, :] = data_arr
-            plt.plot(x, data_arr_for_several_calc[n, :, 2] + n, label='refl lambda=%i'%lambda_incident, lw = 2.0)
-            plt.title('Rmax=%f,'%rmax)
-            plt.ylim(-0.01, 3.01)
-            plt.legend()
-            plt.tight_layout()
-
-        file_name = f'rmax{rmax}.png'
-        plt.savefig(folder_name+'/'+file_name)
-        plt.clf()
-        # plt.show()
-
-    print('Calculation has finished')
-
-
 if __name__ == "__main__":
 
-#-------------------------------- plot figure 4 from PhysRevB ----------------------------------------------------------
-    # plt.figure(figsize=(11,6))
-    #
-    # fi = 0
-    # from_sin_theta = 0.0
-    # to_sin_theta = 0.99
-    # n_theta = 1000
-    # theta = np.linspace(from_sin_theta, to_sin_theta, n_theta)
-    # kpts = len(theta)
-    #
-    # a = 475.0
-    # s = 100.0
-    # r_ratio = s/a
-    # npts = 2
-    # lmax= 2
-    # polar='S' # S or P
-    #
-    # type = -1
-    # order = -1
-    # s_m = 0
-    # m = 1
-    #
-    # data_arr = np.empty((kpts, 4))
-    #
-    # rmax_arr = np.linspace(1.0, 1.0, 1)
-    # lambda_incident_arr = [650, 750, 900]
-    # epssph_re_arr = [-12.9530000, -20.1480000, -32.7190000]
-    # epssph_im_arr = [1.12090000, 1.24700000, 1.99550000]
-    #
-    # plot_figure_4(lambda_incident_arr, epssph_re_arr, epssph_im_arr, rmax_arr)
+#plot figure 7 from PhysRevB
 
-
-#------------------------------------- plot figure 7 from PhysRevB ----------------------------------------------------------------------
-
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize = (8, 10))
-    lmax = 7
+    fig, ax1= plt.subplots(1, 1, figsize = (8, 10))
+    ktype = 1
+    lmax = 3
     rmax_arr = np.linspace(5.0, 20.0, 1)
 
     for rmax in rmax_arr:
         print('RMAX = ', rmax,'is calculating...')
         fig.suptitle(f'RMAX = {rmax}')
 
-# -------- figure 7 a --------------------------------------------------------------------------------------------------
-
+#  figure 7 a
         fi = 0
         from_sin_theta = 0.0
         to_sin_theta = 0.4
         n_theta = 100
-        theta = np.linspace(from_sin_theta, to_sin_theta, n_theta)
-        kpts = len(theta)
+        sin_theta = np.linspace(from_sin_theta, to_sin_theta, n_theta)
+        x = sin_theta
+        theta = np.arcsin(sin_theta)*180/np.pi
+        kpts = n_theta
         data_arr = np.empty((kpts, 4))
-        x = np.linspace(from_sin_theta, to_sin_theta, kpts)
-
         a = 475.0
         s = 100.0
         r_ratio = s/a
-
         lambda_incident = 750
         epssph_re = -20.1480000
         epssph_im = 1.24700000
@@ -174,7 +104,7 @@ if __name__ == "__main__":
         npts = 2
         polar='S' # S or P
 
-#------------- ps --------------------------
+# ps multipole
         is_multipole_type_selected = '1'
         is_multipole_order_selected = '1'
         is_m_projection_selected = '1'
@@ -187,233 +117,29 @@ if __name__ == "__main__":
 
         ax1.plot(x, data_arr[:, 2], 'r--', label='ps', lw = 2.0)
 
-#----------------- ps + mz + qks ------------
+# ps + mz + qks
         is_multipole_type_selected = '1'
         is_multipole_order_selected = '1'
         is_m_projection_selected = '1'
         type =  '0 0 1 0 0'
         order = '1 1 1 2 2'
         m =     '-1 1 0 -2 2'
-
-        # # ------------- ps --------------------------
-        # is_multipole_type_selected = '1'
-        # is_multipole_order_selected = '1'
-        # is_m_projection_selected = '1'
-        # type = '1'
-        # order = '1'
-        # m = '0'
-
-        # lmax = 1
 
         for i in range(kpts):
             eval(i, zinf, zsup, epssph_re, epssph_im, rmax)
 
         ax1.plot(x, data_arr[:, 2], 'r', label='ps+mz+qks', lw = 2.0)
 
-#------------ plot config ----------------------------------------------------------------------------------------------
+# plot config
         ax1.set_title(f'{lambda_incident} nm')
         ax1.set_ylabel('R')
         ax1.set_xlabel(r'sin$\theta$')
         ax1.set_ylim(-0.01, 1.01)
         ax1.legend()
 
-        print('1 plot is ready')
-
- # -------- figure 7 b --------------------------------------------------------------------------------------------------
-
-        from_sin_theta = 0.4
-        to_sin_theta = 0.8
-        n_theta = 100
-        theta = np.linspace(from_sin_theta, to_sin_theta, n_theta)
-        kpts = len(theta)
-        x = np.linspace(from_sin_theta, to_sin_theta, kpts)
-
-        lambda_incident = 900
-        zinf = lambda_incident/a
-        zsup = (lambda_incident+0.01)/a
-        epssph_re = -32.7190000
-        epssph_im = 1.99550000
-        a = 475.0
-        s = 100.0
-        r_ratio = s/a
-        npts = 2
-        polar='S' # S or P
-
-
-#--------------- ps -------------------------
-        is_multipole_type_selected = '1'
-        is_multipole_order_selected = '1'
-        is_m_projection_selected = '1'
-        type = '0 0'
-        order = '1 1'
-        m = '-1 1'
-
-        for i in range(kpts):
-            eval(i, zinf, zsup, epssph_re, epssph_im, rmax)
-
-        # ax2 = fig1.add_subplot(122)
-        ax2.plot(x, data_arr[:, 2], 'r--', label='ps', lw = 2.0)
-
-
-#----------------- ps + mz + qks ------------
-        is_multipole_type_selected = '1'
-        is_multipole_order_selected = '1'
-        is_m_projection_selected = '1'
-        type =  '0 0 1 0 0'
-        order = '1 1 1 2 2'
-        m =     '-1 1 0 -2 2'
-
-        for i in range(kpts):
-            eval(i, zinf, zsup, epssph_re, epssph_im, rmax)
-
-        ax2.plot(x, data_arr[:, 2], 'r', label='ps+mz+qks', lw = 2.0)
-
-#------------ plot config ----------------------------------------------------------------------------------------------
-        ax2.set_title(f'{lambda_incident} nm')
-        ax2.set_xlabel(r'sin$\theta$')
-        ax2.set_ylim(-0.01, 1.01)
-        ax2.legend()
-        plt.tight_layout()
-
-        print('2 plot is ready')
-
-# ----------- plot saving -----------------------------------------------------------------------------------------------
-#         folder_name = 'figure7_PhysRevB'
-#         if not (os.path.exists(folder_name)):
-#             os.makedirs(folder_name)
-#         file_name = f'rmax{rmax}.png'
-#         plt.savefig(folder_name+'/'+file_name)
-
-
-
         plt.show()
-        ax1.clear()
-        ax2.clear()
-#------------------------------------- plot figure 8 from PhysRevB ----------------------------------------------------------------------
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize = (10, 15))
-
-    for rmax in rmax_arr:
-        print('RMAX = ', rmax,'is calculating...')
-        fig.suptitle(f'RMAX = {rmax}')
-
-# -------- figure 8 a --------------------------------------------------------------------------------------------------
-        fi = 0
-        from_sin_theta = 0.08
-        to_sin_theta = 0.12
-        n_theta = 100
-        theta = np.linspace(from_sin_theta, to_sin_theta, n_theta)
-        kpts = len(theta)
-        data_arr = np.empty((kpts, 4))
-        x = np.linspace(from_sin_theta, to_sin_theta, kpts)
-
-        a = 475.0
-        s = 100.0
-        r_ratio = s/a
-
-        lambda_incident = 650
-        epssph_re = -12.9530000
-        epssph_im = 1.12090000
-        zinf = lambda_incident/a
-        zsup = (lambda_incident+0.01)/a
-        npts = 2
-        polar='S' # S or P
-
-        #------------- qsz --------------------------
-        is_multipole_type_selected = '1'
-        is_multipole_order_selected = '1'
-        is_m_projection_selected = '1'
-        type = '0 0'
-        order = '2 2'
-        m = '-1 1'
-
-        for i in range(kpts):
-            eval(i, zinf, zsup, epssph_re, epssph_im, rmax)
-
-        ax1.plot(x, data_arr[:, 2], 'g--', label='qsz', lw = 2.0)
-
-        #----------------- qsz + mk ------------
-        is_multipole_type_selected = '1'
-        is_multipole_order_selected = '1'
-        is_m_projection_selected = '1'
-        type =  '0 0 1 1'
-        order = '2 2 1 1'
-        m =     '-1 1 1 -1'
-
-        for i in range(kpts):
-            eval(i, zinf, zsup, epssph_re, epssph_im, rmax)
-
-        ax1.plot(x, data_arr[:, 2], 'g', label='mk + qks', lw = 2.0)
 
 
-        #------------ plot config ----------------------------------------------------------------------------------------------
-        ax1.set_title(f'{lambda_incident} nm')
-        ax1.set_ylabel('R')
-        ax1.set_xlabel(r'sin$\theta$')
-        ax1.set_ylim(-0.01, 0.71)
-        ax1.legend()
-
-
-        print('3 plot is ready')
-
-# -------- figure 8 b --------------------------------------------------------------------------------------------------
-
-        from_sin_theta = 0.307
-        to_sin_theta = 0.313
-        n_theta = 100
-        theta = np.linspace(from_sin_theta, to_sin_theta, n_theta)
-        kpts = len(theta)
-        x = np.linspace(from_sin_theta, to_sin_theta, kpts)
-
-        lambda_incident = 750
-        epssph_re = -20.1480000
-        epssph_im = 1.24700000
-        zinf = lambda_incident/a
-        zsup = (lambda_incident+0.01)/a
-        a = 475.0
-        s = 100.0
-        r_ratio = s/a
-        npts = 2
-        polar='S' # S or P
-
-
-        #------------- qsz --------------------------
-        is_multipole_type_selected = '1'
-        is_multipole_order_selected = '1'
-        is_m_projection_selected = '1'
-        type = '0 0'
-        order = '2 2'
-        m = '-1 1'
-
-        for i in range(kpts):
-            eval(i, zinf, zsup, epssph_re, epssph_im, rmax)
-
-        ax2.plot(x, data_arr[:, 2], 'g--', label='qsz', lw = 2.0)
-
-        #----------------- qsz + mk ------------
-        is_multipole_type_selected = '1'
-        is_multipole_order_selected = '1'
-        is_m_projection_selected = '1'
-        type =  '0 0 1 1'
-        order = '2 2 1 1'
-        m =     '-1 1 1 -1'
-
-        for i in range(kpts):
-            eval(i, zinf, zsup, epssph_re, epssph_im, rmax)
-
-        ax2.plot(x, data_arr[:, 2], 'g', label='mk + qsz', lw = 2.0)
-
-        #------------ plot config ----------------------------------------------------------------------------------------------
-        ax2.set_title(f'{lambda_incident} nm')
-        ax2.set_xlabel(r'sin$\theta$')
-        ax2.set_ylim(-0.01, 0.71)
-        ax2.legend()
-        plt.tight_layout()
-
-        print('4 plot is ready')
-
-        plt.show()
-        ax1.clear()
-        ax2.clear()
 
 
 
