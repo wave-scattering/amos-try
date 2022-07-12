@@ -53,8 +53,6 @@ def create_input(npts, ak1, ak2, zinf, zsup, polar, lmax, r_ratio, rmax, epssph_
 
 
 def eval(i, zinf, zsup, epssph_re, epssph_im, rmax):
-    # create_input(npts, np.arcsin(theta[i])/np.pi*180, fi, zinf, zsup, polar, lmax, r_ratio, rmax, epssph_re, epssph_im,
-    #              type, order, is_multipole_type_selected, is_multipole_order_selected, is_m_projection_selected)
     create_input(npts, theta[i], fi, zinf, zsup, polar, lmax, r_ratio, rmax, epssph_re, epssph_im,
                  type, order, is_multipole_type_selected, is_multipole_order_selected, is_m_projection_selected)
     if os.path.isfile('multem2'):
@@ -68,6 +66,7 @@ def eval(i, zinf, zsup, epssph_re, epssph_im, rmax):
     #FREQUENCY   TRANSMITTANCE  Reflectance   Absorbance
     d = np.loadtxt('fort.8').T
     data_arr[i,:] = d[:,1]
+    print(data_arr[i,:])
 
 
 if __name__ == "__main__":
