@@ -22,7 +22,7 @@ try-zbesj/besj-f77
 try-zbesj/besj-f90
 *~
 multem2mod/multem2
-multem2mod/multipole_expansion_verification/multem2
+multem2mod/examples/multipole_expansion_verification/multem2
 cmake-build-debug
 multem2orig/multem2orig
 

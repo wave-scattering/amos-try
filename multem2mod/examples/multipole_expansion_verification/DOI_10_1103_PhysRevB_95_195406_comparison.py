@@ -35,7 +35,7 @@ def create_input(npts, ak1, ak2, zinf, zsup, polar, lmax, r_ratio, rmax, epssph_
                   '     MUEMBL=   1.00000000   0.00000000    EPSEMBL=   1.00000000   0.00000000\n'
                   '     MUEMBR=   1.00000000   0.00000000    EPSEMBR=   1.00000000   0.00000000\n')
 
-    with open('fort.10','w') as f:
+    with open('fort.10', 'w') as f:
         print(str_fort10, file=f)
 
     str_ini = ('[selectors]\n'
@@ -48,7 +48,7 @@ def create_input(npts, ak1, ak2, zinf, zsup, polar, lmax, r_ratio, rmax, epssph_
     'multipole_order = '+'%s'%(order)+'\n'
     'm_projection = '+'%s'%(m)+'\n')
 
-    with open('multipole_regime_parameters.ini','w') as f:
+    with open('multipole_regime_parameters.ini', 'w') as f:
         print(str_ini, file=f)
 
 
@@ -66,7 +66,6 @@ def eval(i, zinf, zsup, epssph_re, epssph_im, rmax):
     #FREQUENCY   TRANSMITTANCE  Reflectance   Absorbance
     d = np.loadtxt('fort.8').T
     data_arr[i,:] = d[:,1]
-    print(data_arr[i,:])
 
 
 if __name__ == "__main__":
