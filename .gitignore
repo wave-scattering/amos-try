@@ -53,3 +53,4 @@ build
 *.so
 *f2pywrappers.f
 *.pyc
+*.ini
