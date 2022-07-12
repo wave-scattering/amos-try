@@ -4,6 +4,8 @@ cmake_install.cmake
 CMakeFiles
 Makefile
 
+Testing
+
 FiNeR/lib/
 FiNeR/src/third_party/BeFoR64/lib/
 FiNeR/src/third_party/FACE/lib/
@@ -20,8 +22,19 @@ try-zbesj/besj-f77
 try-zbesj/besj-f90
 *~
 multem2mod/multem2
+multem2mod/examples/multipole_expansion_verification/multem2
 cmake-build-debug
 multem2orig/multem2orig
+
+errfun_MIT/lib
+
+mishchenko_dp_fixed_particles/ampl
+
+quadpack/lib
+quadpack/src/tests/quadpack_test
+
+read-nk/lib
+read-nk/src/tests/readnk_test
 
 test
 *.zip
@@ -41,3 +54,4 @@ build
 *.so
 *f2pywrappers.f
 *.pyc
+*.ini

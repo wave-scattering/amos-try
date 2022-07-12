@@ -113,6 +113,21 @@ program multem
     complex(dp) musph(ncompd, npland), epssph(ncompd, npland)
 
     data text1/'homogeneous plate', 'photonic crystal'/
+
+    integer, allocatable ::  multipole_type(:), multipole_order(:), m_projection(:), multipole_combination(:, :)
+    integer :: is_multipole_type_selected, is_multipole_order_selected, is_m_projection_selected
+    !     ------------------------------------------------------------------
+    !
+    ! read from .ini file
+    call cli_parse
+    call ini_parse
+
+    is_multipole_type_selected = mrp%is_multipole_type_selected
+    is_multipole_order_selected = mrp%is_multipole_order_selected
+    is_m_projection_selected = mrp%is_m_projection_selected
+    multipole_type = mrp%multipole_type
+    multipole_order = mrp%multipole_order
+    m_projection = mrp%m_projection
     !     ------------------------------------------------------------------
     !
     read(10, 200) ktype, kscan, kemb, lmax, ncomp, nunit
@@ -208,17 +223,21 @@ program multem
     else
         read(10, *) dummy, (al(i), i = 1, 3)
     endif
+
+    multipole_combination = get_multipole_combination(lmax, multipole_type, multipole_order, m_projection,&
+                            is_multipole_type_selected, is_multipole_order_selected, is_m_projection_selected)
+
     call main_evaluate(ncompd, npland, lmax, i, ktype, kscan, ncomp, np,&
             nunit, icomp, kemb,  ipl, alpha, rmax, zinf, zsup, fab, alphap, theta,&
             fi, fein, d2, d1, polar, &
             it, nlayer, nplan, dl, dr, s, al, d, aq, eps2, eps3, mu1, mu2, mu3,&
-            eps1, musph, epssph)
+            eps1, musph, epssph, multipole_combination)
     stop
     200 format(///, 6(10x, i2))
     201 format(6(10x, i2))
     202 format(4(8x, f12.6))
-    203 format(6x, i4, 2(8x, f13.8))
-    204 format(2(15x, f13.8), 10x, a2, 10x, f7.2///)
+    203 format(6x, i4, 2(8x, f19.15))
+    204 format(2(15x, f19.15), 10x, a2, 10x, f7.2///)
     205 format(2(12x, 2f13.8))
     206 format(10x, f13.8, 2(12x, 2f13.8))
     207 format(3x, 'k_parallel=', 2f12.6, 5x, a2, 'polarization')

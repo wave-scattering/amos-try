@@ -3,6 +3,7 @@ module libmultem2b
     use multem_blas
     use amos
     use errfun
+    use multipole_regime_parameters
 
     implicit none
     integer, parameter, public :: dp = kind(0.0D0)
@@ -96,9 +97,9 @@ contains
             nunit, icomp, kemb, ipl, alpha, rmax, zinf, zsup, fab, alphap, theta, &
             fi, fein, d2, d1, polar, &
             it, nlayer, nplan, dl, dr, s, al, d, aq, eps2, eps3, mu1, mu2, mu3, &
-            eps1, musph, epssph)
+            eps1, musph, epssph, multipole_combination)
         integer   igd, nelmd, ncompd, npland
-        integer, allocatable ::    nt1(:), nt2(:)
+        integer, allocatable ::    nt1(:), nt2(:), multipole_combination(:, :)
         real(dp), allocatable ::   vecmod(:)
 
         integer      lmax, i, igkmax, igk1, igk2, igmax, ktype, kscan, ncomp, ig1
@@ -274,13 +275,13 @@ contains
                 rap = s(1, 1) * kappa0 / 2.d0 / pi
                 call pcslab(lmax, igmax, rap, eps1(1), epssph(1, 1), mu1(1), musph(1, 1), &
                         kappa, ak, dl(1, 1, 1), dr(1, 1, 1), g, elm, a0, emach, &
-                        qil, qiil, qiiil, qivl, ar1, ar2)
+                        qil, qiil, qiiil, qivl, ar1, ar2, multipole_combination)
                 if(nplan(1)>=2) then
                     do ipl = 2, nplan(1)
                         rap = s(1, ipl) * kappa0 / 2.d0 / pi
                         call pcslab(lmax, igmax, rap, eps1(1), epssph(1, ipl), mu1(1), &
                                 musph(1, ipl), kappa, ak, dl(1, 1, ipl), dr(1, 1, ipl), &
-                                g, elm, a0, emach, qir, qiir, qiiir, qivr, ar1, ar2)
+                                g, elm, a0, emach, qir, qiir, qiiir, qivr, ar1, ar2, multipole_combination)
                         call pair(igkmax, qil, qiil, qiiil, qivl, qir, qiir, qiiir, qivr)
                     end do
                 endif
@@ -314,7 +315,7 @@ contains
                         call pcslab(lmax, igmax, rap, eps1(icomp), epssph(icomp, 1), mu1(icomp)&
                                 , musph(icomp, 1), kappa, ak, dl(1, icomp, 1), &
                                 dr(1, icomp, 1), g, elm, a0, emach, qir, qiir, qiiir, qivr, &
-                                ar1, ar2)
+                                ar1, ar2, multipole_combination)
                         if(nplan(icomp)>=2) then
                             do igk1 = 1, igkmax
                                 do igk2 = 1, igkmax
@@ -329,7 +330,7 @@ contains
                                 call pcslab(lmax, igmax, rap, eps1(icomp), epssph(icomp, ipl), &
                                         mu1(icomp), musph(icomp, ipl), kappa, ak, &
                                         dl(1, icomp, ipl), dr(1, icomp, ipl), g, elm, a0, emach, &
-                                        qir, qiir, qiiir, qivr, ar1, ar2)
+                                        qir, qiir, qiiir, qivr, ar1, ar2, multipole_combination)
                                 call pair(igkmax, wil, wiil, wiiil, wivl, qir, qiir, qiiir, qivr)
                             end do
                             do igk1 = 1, igkmax
@@ -587,7 +588,7 @@ contains
     end subroutine
     !=======================================================================
     subroutine pcslab(lmax, igmax, rap, epsmed, epssph, mumed, musph, kappa, &
-            ak, dl, dr, g, elm, a0, emach, qi, qii, qiii, qiv, ar1, ar2)
+            ak, dl, dr, g, elm, a0, emach, qi, qii, qiii, qiv, ar1, ar2, multipole_combination)
 
         !     ------------------------------------------------------------------
         !     this subroutine computes the transmission/reflection matrices for
@@ -606,6 +607,8 @@ contains
         complex(dp) qi(:, :), qii(:, :), qiii(:, :)
         complex(dp) qiv(:, :)
         real(dp)     ar1(2), ar2(2)
+        integer, allocatable :: multipole_combination(:, :)
+
         !
         ! ..  local scalars  ..
         !
@@ -628,6 +631,11 @@ contains
         complex(dp) xxmat1((lmax + 1)**2 - 1, (lmax + 1)**2 - 1), &
                 xxmat2((lmax + 1)**2 - 1, (lmax + 1)**2 - 1)
         complex(dp) dlme(2, (lmax + 1)**2), dlmh(2, (lmax + 1)**2)
+        !
+        ! .. local variables for multipole expansion ..
+        integer ::  s, multipole_type_selector, m_projection_selector, multipole_order_selector, &
+                type_to_zero, order_to_zero, m_to_zero
+        !
         !     ------------------------------------------------------------------
         igkmax = 2 * igmax
         lmax1 = lmax + 1
@@ -642,7 +650,7 @@ contains
         call tmtrx(rap, epssph, epsmed, mumed, musph, te, th)
         ndend = get_dlm_prefactor_size(lmax)
         call xmat(xodd, xeven, lmax, kappa, ak, elm, emach, ar1, ar2, ndend)
-        call setup(lmax, xeven, xodd, te, th, xxmat1, xxmat2)
+        call setup(lmax, xeven, xodd, te, th, xxmat1, xxmat2, multipole_combination)
         call zgetrf_wrap (xxmat1, int1)
         call zgetrf_wrap (xxmat2, int2)
         isign2 = 1
@@ -672,6 +680,40 @@ contains
                         end if
                     end do
                 end do
+
+                ! .. multipole expansion block ..
+                iev = lmxod
+                iod = 0
+                do l = 1, lmax
+                    do m = -l, l
+                        ii = ii + 1
+                        if(mod((l + m), 2)==0)  then
+                            iev = iev + 1
+                            do s = 1, size(multipole_combination, 2)
+                                type_to_zero = multipole_combination(1, s)
+                                order_to_zero = multipole_combination(2, s)
+                                m_to_zero = multipole_combination(3, s)
+                                if(order_to_zero /= l) cycle
+                                if(m_to_zero /= m) cycle
+                                if (type_to_zero == 0) bmel2(iev) = czero
+                                if (type_to_zero == 1) bmel1(iev) = czero
+                            end do
+                        else
+                            iod = iod + 1
+                            do s = 1, size(multipole_combination, 2)
+                                type_to_zero = multipole_combination(1, s)
+                                order_to_zero = multipole_combination(2, s)
+                                m_to_zero = multipole_combination(3, s)
+                                if(order_to_zero /= l) cycle
+                                if(m_to_zero /= m) cycle
+                                if (type_to_zero == 0) bmel1(iod) = czero
+                                if (type_to_zero == 1) bmel2(iod) = czero
+                            end do
+                        end if
+
+                    end do
+                end do
+                !     ------------------------------------------------------------------
 
                 call zgetrs_wrap(xxmat1, bmel1, int1)
                 call zgetrs_wrap(xxmat2, bmel2, int2)
@@ -1406,7 +1448,7 @@ contains
         return
     end subroutine
     !=======================================================================
-    subroutine setup(lmax, xeven, xodd, te, th, xxmat1, xxmat2)
+    subroutine setup(lmax, xeven, xodd, te, th, xxmat1, xxmat2, multipole_combination)
 ! ------------------------------------------------------------------
 ! this subroutine constructs the secular matrix
 ! ------------------------------------------------------------------
@@ -1416,12 +1458,16 @@ integer lmax
 complex(dp) xeven(:, :), xodd(:, :)
 complex(dp) xxmat2(:, :)
 complex(dp) te(:), th(:), xxmat1(:, :)
+integer multipole_combination(:, :)
 ! ..  local scalars ..
 integer ia, la, ma, lmtot, ltt, lmax1, ib, lb, mb, i, lmxod, iaod, iaev, ibod
 integer ibev
 real(dp)  c0, signus, up, c, b1, b2, b3, u1, u2, a, down
 real(dp)  alpha1, alpha2, beta1, beta2
 complex(dp) omega1, omega2, z1, z2, z3
+! .. local variables for multipole expansion
+integer :: s, multipole_type_selector, m_projection_selector, multipole_order_selector, &
+        type_to_zero, order_to_zero, m_to_zero
 !     ------------------------------------------------------------------
         lmax1 = lmax + 1
         lmtot = lmax1 * lmax1 - 1
@@ -1516,6 +1562,83 @@ complex(dp) omega1, omega2, z1, z2, z3
                 end do
             end do
         end do
+
+        ! .. multipole expansion block
+        iaod = 0
+        iaev = lmxod
+        do la = 1, lmax
+            do ma = -la, la
+                if(mod((la + ma), 2)==0) then
+                    iaev = iaev + 1
+                    ia = iaev
+                else
+                    iaod = iaod + 1
+                    ia = iaod
+                end if
+                ibod = 0
+                ibev = lmxod
+                do lb = 1, lmax
+                    do mb = -lb, lb
+                        if(mod((lb + mb), 2)==0) then
+                            ibev = ibev + 1
+                            ib = ibev
+                        else
+                            ibod = ibod + 1
+                            ib = ibod
+                        end if
+                        ltt = la + ma + lb + mb
+                        if(mod(ltt, 2)/=0)           then
+                            if(mod((la + ma), 2)==0)       then
+                                do s = 1, size(multipole_combination, 2)
+                                    type_to_zero = multipole_combination(1, s)
+                                    order_to_zero = multipole_combination(2, s)
+                                    m_to_zero = multipole_combination(3, s)
+                                    if(order_to_zero /= la) cycle
+                                    if(m_to_zero /= ma) cycle
+                                    if (type_to_zero == 0) xxmat2(ia, ib) = czero
+                                    if (type_to_zero == 1) xxmat1(ia, ib) = czero
+                                end do
+                            else
+                                do s = 1, size(multipole_combination, 2)
+                                    type_to_zero = multipole_combination(1, s)
+                                    order_to_zero = multipole_combination(2, s)
+                                    m_to_zero = multipole_combination(3, s)
+                                    if(order_to_zero /= la) cycle
+                                    if(m_to_zero /= ma) cycle
+                                    if (type_to_zero == 0) xxmat1(ia, ib) = czero
+                                    if (type_to_zero == 1) xxmat2(ia, ib) = czero
+                                end do
+                            end if
+                        else
+                            if(mod((la + ma), 2)==0)       then
+                                do s = 1, size(multipole_combination, 2)
+                                    type_to_zero = multipole_combination(1, s)
+                                    order_to_zero = multipole_combination(2, s)
+                                    m_to_zero = multipole_combination(3, s)
+                                    if(order_to_zero /= la) cycle
+                                    if(m_to_zero /= ma) cycle
+                                    if (type_to_zero == 0) xxmat2(ia, ib) = czero
+                                    if (type_to_zero == 1) xxmat1(ia, ib) = czero
+                                end do
+                            else
+                                do s = 1, size(multipole_combination, 2)
+                                    type_to_zero = multipole_combination(1, s)
+                                    order_to_zero = multipole_combination(2, s)
+                                    m_to_zero = multipole_combination(3, s)
+                                    if(order_to_zero /= la) cycle
+                                    if(m_to_zero /= ma) cycle
+                                    if (type_to_zero == 0) xxmat1(ia, ib) = czero
+                                    if (type_to_zero == 1) xxmat2(ia, ib) = czero
+                                end do
+                            end if
+                        end if
+                    end do
+                end do
+            end do
+        end do
+        !     ------------------------------------------------------------------
+
+
         do i = 1, lmtot
             xxmat1(i, i) = cone + xxmat1(i, i)
             xxmat2(i, i) = cone + xxmat2(i, i)
@@ -2551,6 +2674,128 @@ complex(dp) omega1, omega2, z1, z2, z3
         end do
         return
     end subroutine
+    !=======================================================================
+    function get_multipole_combination(lmax, multipole_type, multipole_order, m_projection, is_multipole_type_selected,&
+            is_multipole_order_selected, is_m_projection_selected) result(multipole_combination)
+        !     -----------------------------------------------------------------
+        !     function generate multipole combination of type, order and m projection
+        !     that is needed to set to zero in subroutines pcslab and setup
+        !     -----------------------------------------------------------------
+        integer :: lmax, multipole_type(:), multipole_order(:), m_projection(:), is_multipole_type_selected, non_zero_selector(1), &
+                is_multipole_order_selected, is_m_projection_selected, selectors(3), all_multipole_combination_size, &
+                user_multipole_combination_size, multipole_combination_size, i, j, m_type, m_order, m_proj, test_int, s
+        integer, allocatable :: all_multipole_combination(:, :), user_multipole_combination(:, :), multipole_combination(:, :)
+        logical, allocatable :: overlap(:, :)
+
+        all_multipole_combination_size = 0
+
+        do i = 0, lmax-1
+            all_multipole_combination_size = all_multipole_combination_size + 2*(2*(lmax-i)+1)
+        end do
+
+        allocate(all_multipole_combination(3, all_multipole_combination_size))
+
+        i = 1
+        do m_type = 0, 1
+            do m_order = 1, lmax
+                do m_proj = -m_order, m_order
+                    all_multipole_combination(:, i) = [m_type, m_order, m_proj]
+                    i = i + 1
+                end do
+            end do
+        end do
+
+        selectors = [is_multipole_type_selected, is_multipole_order_selected, is_m_projection_selected]
+        if (all(selectors == 0)) then
+            allocate(multipole_combination(3,0))
+            return
+        end if
+!        non_zero_elements = 0
+!        do i = 1, size(selectors)
+!            if(selectors(i) /= 0) non_zero_elements = non_zero_elements + 1
+!        end do
+!        if(non_zero_elements /= 0)) then
+!            select case(non_zero_elements)
+!            case(1)
+!                du smth
+!            case(2)
+!                du another
+!            case(3)
+!
+!            end select
+!        non_zero_selector = findloc(selectors, value = 1)
+!
+!        select case (non_zero_selector(1))
+!            case(1)
+!                user_multipole_combination_size = size(multipole_type)
+!            case(2)
+!                user_multipole_combination_size = size(multipole_order)
+!            case(3)
+!                user_multipole_combination_size = size(m_projection)
+!            case default
+!                user_multipole_combination_size = all_multipole_combination_size
+!        end select
+
+!        allocate(user_multipole_combination(3, all_multipole_combination_size))
+!
+!        do i = 1, user_multipole_combination_size
+!            if (is_multipole_type_selected == 0) then
+!                if (mod(i, 2) /= 0) then
+!                    user_multipole_combination(1, i) = 0
+!                else
+!                    user_multipole_combination(1, i) = 1
+!                end if
+!            else
+!                user_multipole_combination(1, i) = multipole_type(i)
+!            end if
+!            user_multipole_combination(2, i) = multipole_order(i)
+!            user_multipole_combination(3, i) = m_projection(i)
+!        end do
+
+!        if (is_multipole_type_selected == 0) then
+!            user_multipole_combination(1, 1:user_multipole_combination_size/2) = 0
+!            user_multipole_combination(1, user_multipole_combination_size/2:user_multipole_combination_size) = 1
+!        else
+!            do i = 1, user_multipole_combination_size
+!                user_multipole_combination(1, i) = multipole_type(i)
+!            end do
+!        end if
+!
+!        do i = 1, user_multipole_combination_size
+!            user_multipole_combination(2, i) = multipole_order(i)
+!            user_multipole_combination(3, i) = m_projection(i)
+!        end do
+
+        user_multipole_combination_size = size(multipole_type)
+        allocate(user_multipole_combination(3, user_multipole_combination_size))
+
+        do i = 1, user_multipole_combination_size
+            user_multipole_combination(:, i) = [multipole_type(i), multipole_order(i), m_projection(i)]
+        end do
+
+        multipole_combination_size = all_multipole_combination_size - user_multipole_combination_size
+        allocate(multipole_combination(3, multipole_combination_size))
+
+        allocate(overlap(user_multipole_combination_size, all_multipole_combination_size))
+        do i = 1, all_multipole_combination_size
+            do j = 1, user_multipole_combination_size
+                if ( all(all_multipole_combination(:, i) == user_multipole_combination(:, j)) ) then
+                    overlap(j, i) = .true.
+                else
+                    overlap(j, i) = .false.
+                end if
+            end do
+        end do
+
+        j = 1
+        do i = 1, all_multipole_combination_size
+            if (all(overlap(:, i) .eqv. .false., 1)) then
+                multipole_combination(:, j) = all_multipole_combination(:, i)
+                j = j + 1
+            end if
+        end do
+
+    end function get_multipole_combination
     !=======================================================================
     subroutine bessel(BJ, Y, H, arg)
         !     ------------------------------------------------------------------
